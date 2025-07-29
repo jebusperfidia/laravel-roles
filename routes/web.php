@@ -8,13 +8,24 @@ use App\Livewire\Users\UserIndex;
 use App\Livewire\Users\UserCreate;
 use App\Livewire\Users\UserEdit;
 
-Route::get('/', function () {
+/* Route::get('/', function () {
     return view('welcome');
+})->name('home'); */
+
+/* Redireccionamiento al login, evitando el acceso a welcome */
+Route::get('/', function () {
+    return redirect()->route('login');
 })->name('home');
 
-Route::view('dashboard', 'dashboard')
+
+/* Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+    ->name('dashboard'); */
+
+/* Envio a las rutas al dashboard principal */
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
@@ -26,7 +37,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/profile', Profile::class)->name('settings.profile');
     Route::get('settings/password', Password::class)->name('settings.password');
-    Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
+    /* Route::get('settings/appearance', Appearance::class)->name('settings.appearance'); */
 });
 
 require __DIR__.'/auth.php';

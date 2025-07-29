@@ -16,6 +16,24 @@
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Inicio') }}</flux:navlist.item>
                     <flux:navlist.item icon="users" :href="route('user.index')" :current="request()->routeIs('user.index')" wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
                 </flux:navlist.group>
+                 <flux:navlist.group heading="Avaluos" expandable :expanded="false">
+                    <flux:navlist.item icon="plus" href="#">Nuevo avalúo</flux:navlist.item>
+                    <flux:navlist.item icon="document-duplicate" href="#">Duplicar avalúos</flux:navlist.item>
+                    <flux:navlist.item icon="archive-box" href="#">Avalúos archivados</flux:navlist.item>
+                    <flux:navlist.item icon="presentation-chart-bar" href="#">Fichas de mercado</flux:navlist.item>
+                </flux:navlist.group>
+                <flux:navlist.group class="grid">
+                    <flux:navlist.item icon="book-open" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Informacion general') }}</flux:navlist.item>
+                    <flux:navlist.item icon="map-pin" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Localización del inmueble') }}</flux:navlist.item>
+                    <flux:navlist.item icon="map" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Avaluos cercanos') }}</flux:navlist.item>
+                    <flux:navlist.item icon="clipboard-document-check" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Decl, adv y justificaciones') }}</flux:navlist.item>
+                    <flux:navlist.item icon="table-cells" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Características urbanas') }}</flux:navlist.item>
+                    <flux:navlist.item icon="archive-box" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Equipamento urbano') }}</flux:navlist.item>
+                    <flux:navlist.item icon="building-office-2" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Terreno') }}</flux:navlist.item>
+                    <flux:navlist.item icon="document-text" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Descripción inmueble') }}</flux:navlist.item>
+                    <flux:navlist.item icon="camera" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Reporte fotográfico') }}</flux:navlist.item>
+                    <flux:navlist.item icon="printer" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Impresión PDF') }}</flux:navlist.item>
+                </flux:navlist.group>
             </flux:navlist>
 
             <flux:spacer />
@@ -61,7 +79,7 @@
                     <flux:menu.separator />
 
                     <flux:menu.radio.group>
-                        <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
+                        <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ ('Ajustes') }}</flux:menu.item>
                     </flux:menu.radio.group>
 
                     <flux:menu.separator />
@@ -69,7 +87,7 @@
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf
                         <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
-                            {{ __('Log Out') }}
+                            {{ ('Cerrar sesión') }}
                         </flux:menu.item>
                     </form>
                 </flux:menu>
