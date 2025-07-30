@@ -16,7 +16,12 @@
                 Crear usuario
             </a>
             <div class="overflow-x-auto mt-4">
+                    <flux:input class="p-4" placeholder="Buscar elemento" wire:model.live="search"/>
+                @if ($users->count())
                 <table class="w-full text-sm text-left text-gray-700">
+                   {{--  @if (!$users)
+                        <h4>No se encontraron datos que mostrar</h4>
+                     @else --}}
                     <thead class="text-xs uppercase bg-gray-50 text-gray-700">
                     <tr>
                         <th scope="col" class="px-6 py-3">#</th>
@@ -44,10 +49,16 @@
                         </td>
                     </tr>
                     @endforeach
-                    </tbody>
-                </table>
+                </tbody>
+            </table>
+                <div class="mt-4">
+                {{ $users->links() }}
+                </div>
+                @else
+                <div class="flex items-center justify-center h-40">
+                    <h2>No se encontraron elementos</h2>
+                </div>
+                @endif
             </div>
-
-    </div>
-
+        </div>
 </div>
