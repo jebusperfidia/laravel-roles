@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Users\UserIndex;
 use App\Livewire\Users\UserCreate;
 use App\Livewire\Users\UserEdit;
+use App\Livewire\Index;
 
 /* Route::get('/', function () {
     return view('welcome');
@@ -23,9 +24,11 @@ Route::get('/', function () {
     ->name('dashboard'); */
 
 /* Envio a las rutas al dashboard principal */
-Route::get('/dashboard', function () {
+/* Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard'); */
+
+Route::get('/dashboard', Index::class)->middleware(['auth'])->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
