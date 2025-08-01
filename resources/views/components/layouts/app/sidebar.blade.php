@@ -15,14 +15,18 @@
                 <flux:navlist.group :heading="__('Menu')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Inicio') }}</flux:navlist.item>
                     <flux:navlist.item icon="users" :href="route('user.index')" :current="request()->routeIs('user.index')" wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
+                    <flux:navlist.item icon="plus" :href="route('user.index')" :current="request()->routeIs('user.index')" wire:navigate>{{ __('Nuevo avalúo') }}</flux:navlist.item>
+                    <flux:navlist.item icon="document-duplicate" :href="route('user.index')" :current="request()->routeIs('user.index')" wire:navigate>{{ __('Duplicar avalúo') }}</flux:navlist.item>
+                    <flux:navlist.item icon="archive-box" :href="route('user.index')" :current="request()->routeIs('user.index')" wire:navigate>{{ __('Avalúos archivados') }}</flux:navlist.item>
+                    <flux:navlist.item icon="chart-bar-square" :href="route('user.index')" :current="request()->routeIs('user.index')" wire:navigate>{{ __('Fichas de mercado') }}</flux:navlist.item>
                 </flux:navlist.group>
-                 <flux:navlist.group heading="Avaluos" expandable :expanded="false">
+               {{--   <flux:navlist.group heading="Avaluos" expandable :expanded="false">
                     <flux:navlist.item icon="plus" href="#">Nuevo avalúo</flux:navlist.item>
                     <flux:navlist.item icon="document-duplicate" href="#">Duplicar avalúos</flux:navlist.item>
                     <flux:navlist.item icon="archive-box" href="#">Avalúos archivados</flux:navlist.item>
                     <flux:navlist.item icon="presentation-chart-bar" href="#">Fichas de mercado</flux:navlist.item>
-                </flux:navlist.group>
-                <flux:navlist.group class="grid">
+                </flux:navlist.group> --}}
+                {{-- <flux:navlist.group class="grid">
                     <flux:navlist.item icon="book-open" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Informacion general') }}</flux:navlist.item>
                     <flux:navlist.item icon="map-pin" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Localización del inmueble') }}</flux:navlist.item>
                     <flux:navlist.item icon="map" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Avaluos cercanos') }}</flux:navlist.item>
@@ -33,7 +37,7 @@
                     <flux:navlist.item icon="document-text" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Descripción inmueble') }}</flux:navlist.item>
                     <flux:navlist.item icon="camera" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Reporte fotográfico') }}</flux:navlist.item>
                     <flux:navlist.item icon="printer" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Impresión PDF') }}</flux:navlist.item>
-                </flux:navlist.group>
+                </flux:navlist.group> --}}
             </flux:navlist>
 
             <flux:spacer />
