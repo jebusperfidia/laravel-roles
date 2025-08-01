@@ -15,10 +15,10 @@
                 <flux:navlist.group :heading="__('Menu')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Inicio') }}</flux:navlist.item>
                     <flux:navlist.item icon="users" :href="route('user.index')" :current="request()->routeIs('user.index')" wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
-                    <flux:navlist.item icon="plus" :href="route('user.index')" :current="request()->routeIs('user.index')" wire:navigate>{{ __('Nuevo avalúo') }}</flux:navlist.item>
-                    <flux:navlist.item icon="document-duplicate" :href="route('user.index')" :current="request()->routeIs('user.index')" wire:navigate>{{ __('Duplicar avalúo') }}</flux:navlist.item>
-                    <flux:navlist.item icon="archive-box" :href="route('user.index')" :current="request()->routeIs('user.index')" wire:navigate>{{ __('Avalúos archivados') }}</flux:navlist.item>
-                    <flux:navlist.item icon="chart-bar-square" :href="route('user.index')" :current="request()->routeIs('user.index')" wire:navigate>{{ __('Fichas de mercado') }}</flux:navlist.item>
+                    <flux:navlist.item icon="plus" :href="route('valuation.create')" :current="request()->routeIs('valuation.create')" wire:navigate>{{ __('Nuevo avalúo') }}</flux:navlist.item>
+                    <flux:navlist.item icon="document-duplicate" :href="route('valuation.duplicate')" :current="request()->routeIs('valuation.duplicate')" wire:navigate>{{ __('Duplicar avalúo') }}</flux:navlist.item>
+                    <flux:navlist.item icon="archive-box" :href="route('valuation.archived')" :current="request()->routeIs('valuation.archived')" wire:navigate>{{ __('Avalúos archivados') }}</flux:navlist.item>
+                    <flux:navlist.item icon="chart-bar-square" :href="route('market.data')" :current="request()->routeIs('market.data')" wire:navigate>{{ __('Fichas de mercado') }}</flux:navlist.item>
                 </flux:navlist.group>
                {{--   <flux:navlist.group heading="Avaluos" expandable :expanded="false">
                     <flux:navlist.item icon="plus" href="#">Nuevo avalúo</flux:navlist.item>

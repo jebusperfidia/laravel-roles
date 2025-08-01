@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Markets\MarketData;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -7,7 +8,10 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Users\UserIndex;
 use App\Livewire\Users\UserCreate;
 use App\Livewire\Users\UserEdit;
-use App\Livewire\Index;
+use App\Livewire\Valuations\ValuationArchived;
+use App\Livewire\Valuations\ValuationCreate;
+use App\Livewire\Valuations\ValuationDuplicate;
+use App\Livewire\Valuations\ValuationsIndex;
 
 /* Route::get('/', function () {
     return view('welcome');
@@ -28,15 +32,26 @@ Route::get('/', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard'); */
 
-Route::get('/dashboard', Index::class)->middleware(['auth'])->name('dashboard');
+//Ruta principal, carga la ruta de valuaciones index, con el tablero principal
+Route::get('/dashboard', ValuationsIndex::class)->middleware(['auth'])->name('dashboard');
 
-Route::middleware(['auth'])->group(function () {
+    //Ruta de configuración del perfil de usuario
+    Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
-    //Rutas generadas
+    //Rutas usuario
     Route::get("users", UserIndex::class)->name("user.index");
     Route::get("users/create", UserCreate::class)->name("user.create");
     Route::get("users{id}/edit", UserEdit::class)->name("user.edit");
+
+    //Rutas de avaluos
+    Route::get("valuations/create", ValuationCreate::class)->name("valuation.create");
+    Route::get("valuations/duplicate", ValuationDuplicate::class)->name("valuation.duplicate");
+    Route::get("valuations/archived", ValuationArchived::class)->name("valuation.archived");
+
+    //Rutas de mercado
+    Route::get("markets/data", MarketData::class)->name("market.data");
+
 
     Route::get('settings/profile', Profile::class)->name('settings.profile');
     Route::get('settings/password', Password::class)->name('settings.password');
