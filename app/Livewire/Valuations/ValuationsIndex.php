@@ -6,7 +6,17 @@ use Livewire\Component;
 
 class ValuationsIndex extends Component
 {
+    /* public string $currentView = '';
+
+    public function mount($currentView = null)
+    {
+        $this->currentView = $currentView ?? 'captured';
+    } */
+
+
     public string $currentView = 'captured';
+
+    protected $queryString = ['currentView'];
 
     public function setView($view)
     {

@@ -10,4 +10,8 @@ class ValuationCreate extends Component
     {
         return view('livewire.valuations.valuation-create');
     }
+
+    public function save(){
+        return redirect()->route('dashboard', ['currentView' => 'assigned']);
+    }
 }
