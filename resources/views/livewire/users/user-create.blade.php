@@ -13,7 +13,7 @@
                <flux:input wire:model='email' label="Email"  type="email" placeholder="Email" />
                <flux:input wire:model='password' label="Password"  type="password" placeholder="Password" />
                <flux:input wire:model='confirm_password' label="Confirmar password"  type="password" placeholder="Confirmar Password" />
-                <flux:button type="submit" variant="primary">Guardar usuario</flux:button>
+                <flux:button class="mt-10" type="submit" variant="primary">Guardar usuario</flux:button>
             </form>
            </div>
     </div>
