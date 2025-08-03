@@ -12,6 +12,15 @@
                     <span class="font-medium"> {{ $value }} </span>
                 </div>
             @endsession
+
+            @session('info')
+               <div id="alerta" class="flex items-center p-2 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-red-900 dark:text-red-300 dark:border-red-800" role="alert">
+                    <svg class="flex-shrink-0 w-8 h-8 mr-1 text-red-700 dark:text-red-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
+                    </svg>
+                    <span class="font-medium"> {{ $value }} </span>
+                </div>
+            @endsession
             <a href={{route('user.create')}} class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300">
                 Crear usuario
             </a>

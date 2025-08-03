@@ -16,7 +16,11 @@ class ValuationsIndex extends Component
 
     public string $currentView = 'captured';
 
-    protected $queryString = ['currentView'];
+    /*  protected $queryString = ['currentView']; */
+
+    protected $queryString = [
+        'currentView' => ['except' => [ 'captured','assigned','reviewed','completed']],
+    ];
 
     public function setView($view)
     {

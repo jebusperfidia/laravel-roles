@@ -4,6 +4,8 @@ namespace App\Livewire\Users;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Livewire\Component;
+use Illuminate\Support\Facades\Log;
+
 
 class UserCreate extends Component
 {
@@ -22,12 +24,14 @@ class UserCreate extends Component
             "password" => 'required|same:confirm_password',
         ]);
 
+
         User::create([
             "name" => $this->name,
             "email" => $this->email,
-            "password" => Hash::make($this->password) 
+            "password" => Hash::make($this->password)
         ]);
 
         return to_route("user.index")->with("success", "Usuario creado");
+
     }
 }
