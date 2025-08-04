@@ -1,13 +1,6 @@
-{{-- <div>
-    <h2>Hola, soy los revisados</h2>
-</div>
- --}}
 
 <div>
-    {{-- <flux:heading size="xl" level="1">{{ __('Usuarios') }}</flux:heading>
-    <flux:subheading size="lg" class="mb-6">{{ __('Administra tus usuarios') }}</flux:subheading>
-    <flux:separator variant="subtle" />
- --}}
+
     <div>
         <div class="p-3">
             <h1 class="text-2xl font-bold mb-4">Pendientes de revisión</h1>
@@ -40,17 +33,14 @@
                             <td class="px-6 py-2 text-gray-700">Habitacional</td>
                             <td class="px-6 py-2 text-gray-700">2012</td>
                             <td class="px-6 py-2 text-gray-700">Media</td>
-                             <td class="px-6 py-2 space-x-1">
+                            <td class="px-6 py-2 space-x-1">
                                 <div class="flex items-center gap-2 flex-wrap max-w-[500px]">
-                                    {{-- <button
-                                        class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300">
-                                        Capturar
-                                    </button> --}}
+
                                     <button
                                         class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
                                         Revisar
                                     </button>
-                                    <button
+                                    <button wire:click="$dispatch('openStatusModal')"
                                         class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-slate-300">
                                         Cambiar estatus
                                     </button>
@@ -69,21 +59,18 @@
                             <td class="px-6 py-2 text-gray-700">2005</td>
                             <td class="px-6 py-2 text-gray-700">Alta</td>
                             {{-- <td class="px-6 py-2">
-            <button class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-slate-300">
-              Cambiar estatus
-            </button>
-          </td> --}}
+                            <button class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-slate-300">
+                            Cambiar estatus
+                            </button>
+                            </td> --}}
                             <td class="px-6 py-2 space-x-1">
                                 <div class="flex items-center gap-2 flex-wrap max-w-[500px]">
-                                    {{-- <button
-                                        class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300">
-                                        Capturar
-                                    </button> --}}
+
                                     <button
                                         class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
                                         Revisar
                                     </button>
-                                    <button
+                                    <button wire:click="$dispatch('openStatusModal')"
                                         class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-slate-300">
                                         Cambiar estatus
                                     </button>
@@ -96,4 +83,5 @@
         </div>
 
     </div>
+    <livewire:valuations.status-modal />
 </div>

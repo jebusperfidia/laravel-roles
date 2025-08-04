@@ -414,7 +414,7 @@
                         </thead> --}}
 
 
-              <!-- Acordeón: Estado de México -->
+        <!-- Acordeón: Estado de México -->
         <div class="border border-gray-200 rounded-lg mb-4">
             <button type="button"
                 class="group w-full flex justify-between items-center px-6 py-4 bg-white hover:bg-gray-50 border-b border-gray-200 focus:outline-none transition-colors cursor-pointer"
@@ -463,7 +463,7 @@
                                     title="$2,200,000">$2,200,000</td>
                                 <td class="px-6 py-2 max-w-[140px] truncate whitespace-nowrap overflow-hidden"
                                     title="Rocío Hernández">Rocío Hernández</td>
-                                                {{-- <td class="px-6 py-2">
+                                {{-- <td class="px-6 py-2">
                             <div class="flex flex-col items-center w-full">
                                 <div class="flex justify-center gap-2 mb-2 w-full">
                                 <button class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300">Capturar</button>
@@ -484,7 +484,7 @@
                                             class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
                                             Resumen
                                         </button>
-                                        <button
+                                        <button wire:click="$dispatch('openStatusModal')"
                                             class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-slate-300">
                                             Cambiar estatus
                                         </button>
@@ -557,7 +557,7 @@
                                             class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
                                             Resumen
                                         </button>
-                                        <button
+                                        <button wire:click="$dispatch('openStatusModal')"
                                             class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-slate-300">
                                             Cambiar estatus
                                         </button>
@@ -573,5 +573,5 @@
 
 
     </div>
-
+    <livewire:valuations.status-modal />
 </div>
