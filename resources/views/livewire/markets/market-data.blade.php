@@ -2,8 +2,8 @@
     <h2>Hola soy el módulo de ficha de mercado </h2>
 </div> --}}
 <div>
-    <flux:heading size="xl" level="1">{{ __('Usuarios') }}</flux:heading>
-    <flux:subheading size="lg" class="mb-6">{{ __('Administra tus usuarios') }}</flux:subheading>
+    <flux:heading size="xl" level="1">{{ __('Registros de comparables') }}</flux:heading>
+    <flux:subheading size="lg" class="mb-6">{{ __('Registros para verificar') }}</flux:subheading>
     <flux:separator variant="subtle" />
 
     <div>

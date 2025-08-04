@@ -8,7 +8,7 @@ use App\Models\User;
 class Assigned extends Component
 {
 
-    public $users;
+    public $users, $appraiser, $operator;
 
     public function mount()
     {
@@ -16,7 +16,12 @@ class Assigned extends Component
     }
 
     public function save() {
-        return redirect()->route('dashboard', ['currentView' => 'reviewed'])
+        $this->validate([
+            "appraiser" => 'required',
+            "operator" => 'required'
+        ]);
+
+        return redirect()->route('dashboard', ['currentView' => 'captured'])
             ->with('success', 'Asignación generada con éxito');
     }
 

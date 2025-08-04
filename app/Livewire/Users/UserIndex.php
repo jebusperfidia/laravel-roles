@@ -37,8 +37,8 @@ class UserIndex extends Component
         /* return view('livewire.users.user-index', compact("users")); */
     }
 
-    public function delete($id) {
-        /* dd($id); */
+    /*     public function delete($id) {
+
         $user = User::find($id);
         $user->delete();
 
@@ -54,7 +54,24 @@ class UserIndex extends Component
         }
 
 
-        /* session()->flash("success", "Usuario eliminado con exito"); */
+
         return to_route("user.index")->with("info", "Usuario eliminado con éxito");
+    } */
+    public function delete($id)
+    {
+        $usersBefore = User::where("name", "LIKE", "%{$this->search}%")
+            ->orWhere("email", "LIKE", "%{$this->search}%")
+            ->paginate(2);
+
+        $countBefore = $usersBefore->count();
+        $user = User::find($id);
+        $user?->delete();
+
+        // Si había solo uno, y no estábamos en la primera página, retroceder
+        if ($countBefore === 1 && $usersBefore->currentPage() > 1) {
+            $this->previousPage();
+        }
+
+        session()->flash("info", "Usuario eliminado con éxito");
     }
 }

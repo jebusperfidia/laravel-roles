@@ -6,4 +6,3 @@
             setTimeout(() => alerta.remove(), 500);
         }
     }, 3000); // 3 segundos
-

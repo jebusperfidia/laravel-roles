@@ -264,15 +264,20 @@ text-white transition-transform hover:scale-105 hover:shadow-lg cursor-pointer">
     {{-- <div>{{$currentView}}</div> --}}
     <div class="mt-6">
 
-        @if ($currentView === 'assigned')
-            <livewire:valuations.assigned />
-        @elseif ($currentView === 'captured')
-            <livewire:valuations.captured />
-        @elseif ($currentView === 'reviewed')
-            <livewire:valuations.reviewed />
-        @elseif ($currentView === 'completed')
-            <livewire:valuations.completed />
-        @endif
+        <div wire:loading.flex class="min-h-[300px] flex justify-center items-center">
+            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+        <div wire:loading.remove>
+            @if ($currentView === 'assigned')
+                <livewire:valuations.assigned />
+            @elseif ($currentView === 'captured')
+                <livewire:valuations.captured />
+            @elseif ($currentView === 'reviewed')
+                <livewire:valuations.reviewed />
+            @elseif ($currentView === 'completed')
+                <livewire:valuations.completed />
+            @endif
+        </div>
     </div>
 
 </div>
