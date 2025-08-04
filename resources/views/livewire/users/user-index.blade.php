@@ -33,11 +33,11 @@
         </a>
         <div class="overflow-x-auto mt-4">
             <flux:input class="p-4" placeholder="Buscar elemento" wire:model.live="search" />
-              <div id="loader" class="flex justify-center items-center h-20">
+              {{-- <div id="loader" class="flex justify-center items-center h-20">
             <div class="animate-spin h-6 w-6 border-4 border-blue-600 border-t-transparent rounded-full"></div>
-            </div>
+            </div> --}}
             @if ($users->count())
-            <div wire:loading.remove>
+           {{--  <div wire:loading.remove> --}}
                 <table class="w-full text-sm text-left text-gray-700">
                     {{--  @if (!$users)
                         <h4>No se encontraron datos que mostrar</h4>
@@ -85,7 +85,7 @@
                     <h2>No se encontraron elementos</h2>
                 </div>
             @endif
-            </div>
+            {{-- </div> --}}
         </div>
     </div>
 </div>

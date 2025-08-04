@@ -34,8 +34,8 @@
                     <label for="tipo" class="flux-label text-sm">Seleccione el avalúo hijo o donde se copiará la información</label>
                     <flux:select wire:model="type" class="mt-2  text-gray-800 [&_option]:text-gray-900">
                         <flux:select.option value="casa_habitacion">-- Selecciona una opción --</flux:select.option>
-                        <flux:select.option value="fiscal">Fiscal</flux:select.option>
-                        <flux:select.option value="comercial">Comercial</flux:select.option>
+                        <flux:select.option value="fiscal">AC1313</flux:select.option>
+                        <flux:select.option value="comercial">DB4852</flux:select.option>
                     </flux:select>
                     @error('type')
                    {{--  <p class="text-sm text-red-600">El campo tipo de avalúo es obligatorio.</p> --}}

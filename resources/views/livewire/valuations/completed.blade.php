@@ -478,7 +478,7 @@
                                     <div class="flex items-center gap-2 flex-wrap max-w-[500px]">
                                         <button
                                             class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300">
-                                            Capturar
+                                            PDF
                                         </button>
                                         <button
                                             class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
@@ -551,7 +551,7 @@
                                     <div class="flex items-center gap-2 flex-wrap max-w-[500px]">
                                         <button
                                             class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300">
-                                            Capturar
+                                            PDF
                                         </button>
                                         <button
                                             class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
