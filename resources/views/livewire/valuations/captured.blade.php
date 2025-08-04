@@ -16,9 +16,6 @@
     <div>
         <div class="p-3">
             <h1 class="text-2xl font-bold mb-4">Pendientes de elaboración</h1>
-            {{--  <button class="mb-4 px-4 py-2 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
-                  Create
-              </button> --}}
 
             <div class="overflow-x-auto mt-4">
                 <table class="w-full text-sm text-left text-gray-700">
@@ -56,10 +53,15 @@
                                         class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
                                         Resumen
                                     </button>
-                                    <button
-                                        class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-slate-300">
+
+                                    <button wire:click="$dispatch('openStatusModal')"
+                                        class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700">
                                         Cambiar estatus
                                     </button>
+                                    {{-- <button wire:click="$emit('openStatusModal', '{{ $folioId }}')"
+                                        class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700">
+                                        Cambiar estatus
+                                    </button> --}}
                                 </div>
                             </td>
 
@@ -68,8 +70,8 @@
                     </tbody>
                 </table>
             </div>
-
-
         </div>
     </div>
+    <livewire:valuations.status-modal />
+
 </div>

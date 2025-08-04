@@ -3,7 +3,7 @@
 </div> --}}
 <div>
     <flux:heading size="xl" level="1">{{ __('Registros de comparables') }}</flux:heading>
-    <flux:subheading size="lg" class="mb-6">{{ __('Registros para verificar') }}</flux:subheading>
+    <flux:subheading size="lg" class="mb-6">{{ __('Administra tus usuarios') }}</flux:subheading>
     <flux:separator variant="subtle" />
 
     <div>
