@@ -17,8 +17,9 @@ class UserIndex extends Component
         //creamos una variable para obtener la colección de datos de los usuarios, y generamos la búsqueda de coincidencias para la búsqueda
         $users = User::where("name","LIKE","%{$this->search}%")
         ->orWhere("email", "LIKE", "%{$this->search}%")
+        ->orWhere("type", "LIKE", "%{$this->search}%")
         //Paginamos los elementos por la cantidad indicada
-        ->Paginate(2);
+        ->Paginate(10);
 
         /* //Si eliminamos el último usuario y no hay datos, debe devolvernos a la página 1 para no dejar el componente en blanco
         if ($users->isEmpty() && $users->currentPage() > 1) {
@@ -61,7 +62,8 @@ class UserIndex extends Component
     {
         $usersBefore = User::where("name", "LIKE", "%{$this->search}%")
             ->orWhere("email", "LIKE", "%{$this->search}%")
-            ->paginate(2);
+            ->orWhere("type", "LIKE", "%{$this->search}%")
+            ->paginate(10);
 
         $countBefore = $usersBefore->count();
         $user = User::find($id);

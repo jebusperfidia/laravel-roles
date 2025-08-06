@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class UserCreate extends Component
 {
 
-    public $name, $email, $password, $confirm_password;
+    public $name, $email, $password, $type, $confirmar_password;
 
     public function render()
     {
@@ -21,13 +21,15 @@ class UserCreate extends Component
         $this->validate([
             "name" => 'required',
             "email" => 'required|email|unique:users',
-            "password" => 'required|same:confirm_password',
+            "type" => 'required',
+            "password" => 'required|same:confirmar_password',
         ]);
 
 
         User::create([
             "name" => $this->name,
             "email" => $this->email,
+            "type" => $this->type,
             "password" => Hash::make($this->password)
         ]);
 

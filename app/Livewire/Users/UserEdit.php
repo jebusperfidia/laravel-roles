@@ -9,11 +9,12 @@ use Livewire\Component;
 class UserEdit extends Component
 {
 
-    public $user, $name, $email, $password, $confirm_password;
+    public $user, $name, $email, $type, $password, $confirm_password;
 
     public function mount($id){
         $this->user = User::find($id);
         $this->name = $this->user->name;
+        $this->type = $this->user->type;
         $this->email = $this->user->email;
     }
 
@@ -27,11 +28,13 @@ class UserEdit extends Component
         $this->validate([
             "name" => 'required',
             "email" => 'required|email',
-            "password" => 'same:confirm_password',
+            "type" => 'required',
+            "password" => 'same:confirmar_password',
         ]);
 
         $this->user->name = $this->name;
         $this->user->email = $this->email;
+        $this->user->type = $this->type;
 
         if($this->password) {
             $this->user->password = Hash::make($this->password);

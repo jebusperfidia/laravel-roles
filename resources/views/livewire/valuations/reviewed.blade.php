@@ -40,10 +40,12 @@
                                         class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
                                         Revisar
                                     </button>
+                                    @if (auth()->user()->type === 'Administrador')
                                     <button wire:click="$dispatch('openStatusModal')"
                                         class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-slate-300">
                                         Cambiar estatus
                                     </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -70,10 +72,12 @@
                                         class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
                                         Revisar
                                     </button>
+                                    @if (auth()->user()->type === 'Administrador')
                                     <button wire:click="$dispatch('openStatusModal')"
                                         class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-slate-300">
                                         Cambiar estatus
                                     </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

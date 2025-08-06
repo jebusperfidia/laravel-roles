@@ -53,11 +53,12 @@
                                         class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
                                         Resumen
                                     </button>
-
+                                    @if (auth()->user()->type === 'Administrador')
                                     <button wire:click="$dispatch('openStatusModal')"
                                         class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700">
                                         Cambiar estatus
                                     </button>
+                                    @endif
                                     {{-- <button wire:click="$emit('openStatusModal', '{{ $folioId }}')"
                                         class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700">
                                         Cambiar estatus

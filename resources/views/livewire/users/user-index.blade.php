@@ -36,6 +36,7 @@
               {{-- <div id="loader" class="flex justify-center items-center h-20">
             <div class="animate-spin h-6 w-6 border-4 border-blue-600 border-t-transparent rounded-full"></div>
             </div> --}}
+            {{-- {{dd($users)}} --}}
             @if ($users->count())
            {{--  <div wire:loading.remove> --}}
                 <table class="w-full text-sm text-left text-gray-700">
@@ -47,6 +48,7 @@
                             <th scope="col" class="px-6 py-3">#</th>
                             <th scope="col" class="px-6 py-3">Nombre</th>
                             <th scope="col" class="px-6 py-3">Email</th>
+                            <th scope="col" class="px-6 py-3">Tipo</th>
                             <th scope="col" class="px-6 py-3 w-70">Accciones</th>
                         </tr>
                     </thead>
@@ -57,6 +59,7 @@
                                     <td class="px-6 py-2 font-medium text-gray-900">{{ $user->id }}</td>
                                     <td class="px-6 py-2 text-gray-700">{{ $user->name }}</td>
                                     <td class="px-6 py-2 text-gray-700">{{ $user->email }}</td>
+                                    <td class="px-6 py-2 text-gray-700">{{ $user->type }}</td>
                                     <td class="px-6 py-2 space-x-1">
                                         <a href="{{ route('user.edit', $user->id) }}"
                                             class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">

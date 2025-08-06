@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Users\UserIndex;
 use App\Livewire\Users\UserCreate;
 use App\Livewire\Users\UserEdit;
-use App\Livewire\Valuations\ValuationArchived;
+/* use App\Livewire\Valuations\ValuationArchived; */
 use App\Livewire\Valuations\ValuationCreate;
 use App\Livewire\Valuations\ValuationDuplicate;
 use App\Livewire\Valuations\ValuationsIndex;
@@ -40,14 +40,22 @@ Route::get('/dashboard', ValuationsIndex::class)->middleware(['auth'])->name('da
     Route::redirect('settings', 'settings/profile');
 
     //Rutas usuario
-    Route::get("users", UserIndex::class)->name("user.index");
+    /*    Route::get("users", UserIndex::class)->name("user.index");
     Route::get("users/create", UserCreate::class)->name("user.create");
-    Route::get("users{id}/edit", UserEdit::class)->name("user.edit");
+    Route::get("users{id}/edit", UserEdit::class)->name("user.edit"); */
+
+    // Rutas de usuario (solo para Administrador)
+    Route::middleware(['admin'])->group(function () {
+        Route::get("users", UserIndex::class)->name("user.index");
+        Route::get("users/create", UserCreate::class)->name("user.create");
+        Route::get("users/{id}/edit", UserEdit::class)->name("user.edit");
+    });
+
 
     //Rutas de avaluos
     Route::get("valuations/create", ValuationCreate::class)->name("valuation.create");
     Route::get("valuations/duplicate", ValuationDuplicate::class)->name("valuation.duplicate");
-    Route::get("valuations/archived", ValuationArchived::class)->name("valuation.archived");
+   /*  Route::get("valuations/archived", ValuationArchived::class)->name("valuation.archived"); */
 
     //Rutas de mercado
     Route::get("markets/data", MarketData::class)->name("market.data");
