@@ -226,14 +226,14 @@ text-white transition-transform hover:scale-105 hover:shadow-lg cursor-pointer">
 <div class="mt-4 text-base font-semibold">Terminados</div>
 </button>
 </div> --}}
-
+    {{-- {{dd($unassigned)}} --}}
 
     <div class="flex w-full gap-6 px-4">
         <button wire:click="setView('assigned')"
             class="flex-1 w-1/4 p-6 rounded-xl shadow-md
            bg-gradient-to-br from-blue-700 via-blue-500 to-blue-300
            text-white transition-transform hover:scale-105 hover:shadow-lg cursor-pointer">
-            <div class="text-4xl font-bold">0</div>
+            <div class="text-4xl font-bold">{{$unassigned}}</div>
             <div class="mt-4 text-base font-semibold">Por Asignar</div>
         </button>
 

@@ -3,9 +3,17 @@
 namespace App\Livewire\Valuations;
 
 use Livewire\Component;
+use App\Models\Valuation;
 
 class ValuationsIndex extends Component
 {
+    //Tendremos 4 diferentes estados
+    //0 unassigned
+    //1 capturing
+    //2 reviewing
+    //3 completed
+    public $unassigned, $capturing, $reviewing, $completed;
+
     /* public string $currentView = '';
 
     public function mount($currentView = null)
@@ -29,6 +37,9 @@ class ValuationsIndex extends Component
 
     public function render()
     {
+
+        $this->unassigned = Valuation::where('status', 0)->get()->count();
+
         return view('livewire.valuations.valuations-index');
     }
 }

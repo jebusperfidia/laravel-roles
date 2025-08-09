@@ -3,10 +3,11 @@
 namespace App\Livewire\Valuations;
 
 use Livewire\Component;
+use App\Models\Valuation;
 
 class ValuationCreate extends Component
 {
-    public $type, $folio, $date, $type_inmueble;
+    public $type, $folio, $date, $property_type;
 
     public function render()
     {
@@ -18,13 +19,21 @@ class ValuationCreate extends Component
 
         $this->validate([
             "type" => 'required',
-            /* "folio" => 'required|regex:/^[A-Za-z0-9\-]+$/'|unique:valuations, */
-            "folio" => 'required|regex:/^[A-Za-z0-9\-]+$/',
+            "folio" => 'required|unique:valuations|regex:/^[A-Za-z0-9\-]+$/',
+            /* "folio" => 'required|regex:/^[A-Za-z0-9\-]+$/', */
             "date" => 'required',
-            "type_inmueble" => 'required'
+            "property_type" => 'required'
         ]);
 
-        $this->reset();
+        Valuation::create([
+            "type" => $this->type,
+            "folio" => $this->folio,
+            "date" => $this->date,
+            "property_type" => $this->property_type
+        ]);
+
+
+        /* $this->reset(); */
         /* return redirect()->route('dashboard', ['currentView' => 'assigned']); */
         return redirect()->route('dashboard', ['currentView' => 'assigned'])
             ->with('success', 'Avalúo creado con éxito');
