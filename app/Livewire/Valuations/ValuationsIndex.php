@@ -39,6 +39,9 @@ class ValuationsIndex extends Component
     {
 
         $this->unassigned = Valuation::where('status', 0)->get()->count();
+        $this->capturing = Valuation::where('status', 1)->get()->count();
+        $this->reviewing = Valuation::where('status', 2)->get()->count();
+        $this->completed = Valuation::where('status', 3)->get()->count();
 
         return view('livewire.valuations.valuations-index');
     }

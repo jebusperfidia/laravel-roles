@@ -31,18 +31,14 @@
             class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300">
             Crear usuario
         </a>
-        <div class="overflow-x-auto mt-4">
-            <flux:input class="p-4" placeholder="Buscar elemento" wire:model.live="search" />
-              {{-- <div id="loader" class="flex justify-center items-center h-20">
-            <div class="animate-spin h-6 w-6 border-4 border-blue-600 border-t-transparent rounded-full"></div>
-            </div> --}}
-            {{-- {{dd($users)}} --}}
+        <div class="w-full mt-4">
+
+            {{--  <flux:input class="p-4" placeholder="Buscar elemento" wire:model.live="search" />
+
             @if ($users->count())
-           {{--  <div wire:loading.remove> --}}
+
                 <table class="w-full text-sm text-left text-gray-700">
-                    {{--  @if (!$users)
-                        <h4>No se encontraron datos que mostrar</h4>
-                     @else --}}
+
                     <thead class="text-xs uppercase bg-gray-50 text-gray-700">
                         <tr>
                             <th scope="col" class="px-6 py-3">#</th>
@@ -65,9 +61,7 @@
                                             class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
                                             Editar
                                         </a>
-                                        {{--  <button class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300">
-                                Show
-                            </button> --}}
+
                                         <button wire:click='delete({{ $user->id }})'
                                             wire:confirm='Está seguro de eliminar al usuario?'
                                             class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300">
@@ -80,15 +74,15 @@
                     </tbody>
                 </table>
                 <div class="mt-4">
-                    {{-- {{ $users->links() }} --}}
+
                     {{ $users->links('vendor.pagination.tailwind') }}
                 </div>
             @else
                 <div class="flex items-center justify-center h-40">
                     <h2>No se encontraron elementos</h2>
                 </div>
-            @endif
-            {{-- </div> --}}
+            @endif --}}
+                <livewire:users.user-table/>
         </div>
     </div>
 </div>

@@ -241,7 +241,7 @@ text-white transition-transform hover:scale-105 hover:shadow-lg cursor-pointer">
             class="flex-1 w-1/4 p-6 rounded-xl shadow-md
            bg-gradient-to-br from-emerald-600 via-emerald-400 to-green-300
            text-white transition-transform hover:scale-105 hover:shadow-lg cursor-pointer">
-            <div class="text-4xl font-bold">6</div>
+            <div class="text-4xl font-bold">{{$capturing}}</div>
             <div class="mt-4 text-base font-semibold">En Captura</div>
         </button>
 
@@ -249,7 +249,7 @@ text-white transition-transform hover:scale-105 hover:shadow-lg cursor-pointer">
             class="flex-1 w-1/4 p-6 rounded-xl shadow-md
            bg-gradient-to-br from-red-700 via-red-500 to-red-300
            text-white transition-transform hover:scale-105 hover:shadow-lg cursor-pointer">
-            <div class="text-4xl font-bold">0</div>
+            <div class="text-4xl font-bold">{{$reviewing}}</div>
             <div class="mt-4 text-base font-semibold">En Revisión</div>
         </button>
 
@@ -257,7 +257,7 @@ text-white transition-transform hover:scale-105 hover:shadow-lg cursor-pointer">
             class="flex-1 w-1/4 p-6 rounded-xl shadow-md
            bg-gradient-to-br from-gray-800 via-gray-700 to-gray-600
            text-white transition-transform hover:scale-105 hover:shadow-lg cursor-pointer">
-            <div class="text-4xl font-bold">38</div>
+            <div class="text-4xl font-bold">{{$completed}}</div>
             <div class="mt-4 text-base font-semibold">Terminados</div>
         </button>
     </div>

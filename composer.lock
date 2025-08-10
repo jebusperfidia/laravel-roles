@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "505c057bdfaea28b0dee561f2721c275",
+    "content-hash": "70352649685a4444788c706dcff0f458",
     "packages": [
         {
             "name": "brick/math",
@@ -2794,6 +2794,84 @@
             "time": "2024-07-20T21:41:07+00:00"
         },
         {
+            "name": "power-components/livewire-powergrid",
+            "version": "v6.5.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Power-Components/livewire-powergrid.git",
+                "reference": "077c450626548cd8458eaf3525d997c42f6b4bf5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Power-Components/livewire-powergrid/zipball/077c450626548cd8458eaf3525d997c42f6b4bf5",
+                "reference": "077c450626548cd8458eaf3525d997c42f6b4bf5",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/prompts": "*",
+                "livewire/livewire": "^3.6.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "composer/composer": "^2.7.9",
+                "laradumps/laradumps": "^3.2|^4.0",
+                "larastan/larastan": "^2.0|^3.0",
+                "laravel/pint": "^1.24",
+                "laravel/scout": "^10.11.3",
+                "openspout/openspout": "^4.24.5",
+                "orchestra/testbench": "^9.4|^10.0",
+                "pestphp/pest": "^2.35.1|^3.0"
+            },
+            "suggest": {
+                "openspout/openspout": "Required to export XLS and CSV"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "PowerComponents\\LivewirePowerGrid\\Providers\\PowerGridServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/functions.php"
+                ],
+                "psr-4": {
+                    "PowerComponents\\LivewirePowerGrid\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Luan Freitas",
+                    "email": "luanfreitas10@protonmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "DanSysAnalyst",
+                    "email": "daniel@sysanalyst.eu",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PowerGrid generates Advanced Datatables using Laravel Livewire.",
+            "homepage": "https://github.com/power-components/livewire-powergrid",
+            "support": {
+                "issues": "https://github.com/Power-Components/livewire-powergrid/issues",
+                "source": "https://github.com/Power-Components/livewire-powergrid/tree/v6.5.2"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/luanfreitasdev",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-08-01T16:14:03+00:00"
+        },
+        {
             "name": "psr/clock",
             "version": "1.0.0",
             "source": {
@@ -3327,73 +3405,6 @@
                 "source": "https://github.com/ralouphie/getallheaders/tree/develop"
             },
             "time": "2019-03-08T08:55:37+00:00"
-        },
-        {
-            "name": "ramonrietdijk/livewire-tables",
-            "version": "5.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ramonrietdijk/livewire-tables.git",
-                "reference": "745cc71117765363697ba1714c5a0b6c83971916"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ramonrietdijk/livewire-tables/zipball/745cc71117765363697ba1714c5a0b6c83971916",
-                "reference": "745cc71117765363697ba1714c5a0b6c83971916",
-                "shasum": ""
-            },
-            "require": {
-                "laravel/framework": "^12.0",
-                "livewire/livewire": "^3.0",
-                "php": "^8.3"
-            },
-            "require-dev": {
-                "larastan/larastan": "^3.1",
-                "laravel/pint": "^1.21",
-                "orchestra/testbench": "^10.0",
-                "phpstan/phpstan-strict-rules": "^2.0",
-                "phpunit/phpunit": "^11.5"
-            },
-            "type": "package",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "RamonRietdijk\\LivewireTables\\ServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "RamonRietdijk\\LivewireTables\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Ramon Rietdijk",
-                    "email": "info@ramonrietdijk.nl"
-                }
-            ],
-            "description": "Dynamic tables for models with Laravel Livewire",
-            "keywords": [
-                "laravel",
-                "livewire",
-                "table"
-            ],
-            "support": {
-                "issues": "https://github.com/ramonrietdijk/livewire-tables/issues",
-                "source": "https://github.com/ramonrietdijk/livewire-tables/tree/5.3.0"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/ramonrietdijk",
-                    "type": "github"
-                }
-            ],
-            "time": "2025-07-27T13:42:49+00:00"
         },
         {
             "name": "ramsey/collection",
