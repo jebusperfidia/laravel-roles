@@ -7,7 +7,9 @@ use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
+use Masmerise\Toaster\Toastable;
 use Livewire\Attributes\On;
+use Masmerise\Toaster\Toaster;
 use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
@@ -67,13 +69,6 @@ final class UserTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(),
 
-          /*   Column::make('Created at', 'created_at_formatted', 'created_at')
-                ->sortable(),
-
-            Column::make('Created at', 'created_at')
-                ->sortable()
-                ->searchable(), */
-
             Column::action('Action')
         ];
     }
@@ -96,23 +91,25 @@ final class UserTable extends PowerGridComponent
         /* $this->js('alert(' . $rowId . ')'); */
         $user = User::find($rowId);
         $user?->delete();
-        session()->flash("info", "Usuario eliminado con éxito");
-        // Fuerza una recarga de página y muestra el mensaje
+        /*  session()->flash("info", "Usuario eliminado con éxito");
+        // Fuerza una recarga de página y muestra el mensaje */
+        Toaster::error('Usuario eliminado con éxito');
         $this->dispatch('pg:eventRefresh-' . $this->tableName);
+
     }
 
     public function actions(User $row): array
     {
         return [
             Button::add('edit')
-                ->slot('Edit: '.$row->id)
+                ->slot('Editar')
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
                 /* ->dispatch('edit', ['rowId' => $row->id]), */
                 ->route('user.edit', ['id' => $row->id]),
 
             Button::add('delete')
-                ->slot('Eliminar'.$row->id)
+                ->slot('Eliminar')
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
                 ->attributes([

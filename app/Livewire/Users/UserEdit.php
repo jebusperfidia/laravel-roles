@@ -42,7 +42,7 @@ class UserEdit extends Component
 
         $this->user->save();
 
-        return to_route("user.index")->with("success", "Usuario actualizado con éxito");
+        return to_route("user.index")->success('Usuario editado con éxito');
     }
 }
 

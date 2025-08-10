@@ -4,7 +4,7 @@
     <flux:separator variant="subtle" />
 
     <div>
-        @session('success')
+    {{--     @session('success')
             <div id="alerta"
                 class="flex items-center p-2 mb-4 text-sm text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-green-900 dark:text-green-300 dark:border-green-800"
                 role="alert">
@@ -26,7 +26,8 @@
                 </svg>
                 <span class="font-medium"> {{ $value }} </span>
             </div>
-        @endsession
+        @endsession --}}
+
         <a href={{ route('user.create') }}
             class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300">
             Crear usuario
@@ -83,6 +84,7 @@
                 </div>
             @endif --}}
                 <livewire:users.user-table/>
-        </div>
+
     </div>
 </div>
+

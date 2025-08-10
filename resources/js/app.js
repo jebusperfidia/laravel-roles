@@ -1,6 +1,14 @@
 // resources/js/app.js
-
+//PowerGrid
 import "./../../vendor/power-components/livewire-powergrid/dist/powergrid";
+//Toaster
+import '../../vendor/masmerise/livewire-toaster/resources/js'; //
+
+
+Alpine.plugin(Toaster); // 👈
+
+window.Alpine = Alpine;
+Alpine.start();
 
 setTimeout(() => {
     const alerta = document.getElementById("alerta");

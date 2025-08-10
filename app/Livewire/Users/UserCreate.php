@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
+use Masmerise\Toaster\Toaster;
 
 
 class UserCreate extends Component
@@ -33,7 +34,8 @@ class UserCreate extends Component
             "password" => Hash::make($this->password)
         ]);
 
-        return to_route("user.index")->with("success", "Usuario creado");
+        /* return to_route("user.index")->with("success", "Usuario creado"); */
+        return to_route("user.index")->success('Usuario creado con éxito');
 
     }
 }

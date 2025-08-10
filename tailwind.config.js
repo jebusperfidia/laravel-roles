@@ -5,6 +5,7 @@ module.exports = {
         "./resources/views/**/*.blade.php",
         "./resources/js/**/*.js",
         "./vendor/ramonrietdijk/livewire-tables/resources/views/**/*.blade.php",
+        "./vendor/masmerise/livewire-toaster/resources/views/*.blade.php",
     ],
 
     theme: {
@@ -14,5 +15,6 @@ module.exports = {
     plugins: [
         // Estilos oficiales para la plantilla default de Livewire-Tables
         require("livewire-tables/dist/tailwind"),
+       /*  require("livewire-toaster/plugin"), */
     ],
 };
