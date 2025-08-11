@@ -36,6 +36,6 @@ class ValuationCreate extends Component
         /* $this->reset(); */
         /* return redirect()->route('dashboard', ['currentView' => 'assigned']); */
         return redirect()->route('dashboard', ['currentView' => 'assigned'])
-            ->with('success', 'Avalúo creado con éxito');
+            ->success('Avaluo creado con éxito');
     }
 }

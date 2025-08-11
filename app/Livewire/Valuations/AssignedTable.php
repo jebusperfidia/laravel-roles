@@ -1,28 +1,25 @@
 <?php
 
-namespace App\Livewire\Users;
+namespace App\Livewire\Valuations;
 
-use App\Models\User;
+use App\Models\Valuation;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
-use Masmerise\Toaster\Toastable;
-use Livewire\Attributes\On;
-use Masmerise\Toaster\Toaster;
 use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 
-final class UserTable extends PowerGridComponent
+
+final class AssignedTable extends PowerGridComponent
 {
-    public string $tableName = 'userTable';
+    public string $tableName = 'assigned-table';
 
     public function setUp(): array
     {
-        //Si se quiere poner un checkbox al principio para seleccionar uno o varios, se descomenta esta línea
-        /*  $this->showCheckBox(); */
+        $this->showCheckBox();
 
         return [
             PowerGrid::header()
@@ -35,7 +32,7 @@ final class UserTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return User::query();
+        return Valuation::query()->where('status', 0);
     }
 
     public function relationSearch(): array
@@ -47,76 +44,70 @@ final class UserTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('id')
-            ->add('name')
-            ->add('email')
+            ->add('date_formatted', fn (Valuation $model) => Carbon::parse($model->date)->format('d/m/Y'))
             ->add('type')
-            ->add('created_at');
+            ->add('folio')
+            ->add('property_type');
+            //->add('created_at');
     }
 
     public function columns(): array
     {
         return [
-            Column::make('ID', 'id'),
-            Column::make('Nombre', 'name')
-                ->sortable()
-                ->searchable(),
-
-            Column::make('Email', 'email')
-                ->sortable()
-                ->searchable(),
+            Column::make('Id', 'id'),
+            Column::make('Fecha', 'date_formatted', 'date')
+                ->sortable(),
 
             Column::make('Tipo', 'type')
                 ->sortable()
                 ->searchable(),
 
-            Column::action('Acciones')
+            Column::make('Folio', 'folio')
+                ->sortable()
+                ->searchable(),
+
+            Column::make('Tipo de propiedad', 'property_type')
+                ->sortable()
+                ->searchable(),
+
+         /*    Column::make('Created at', 'created_at_formatted', 'created_at')
+                ->sortable(),
+
+            Column::make('Created at', 'created_at')
+                ->sortable()
+                ->searchable(), */
+
+            Column::action('Action')
         ];
     }
 
     public function filters(): array
     {
         return [
+            /* Filter::datepicker('date'), */
         ];
     }
 
- /*    #[\Livewire\Attributes\On('edit')]
+    #[\Livewire\Attributes\On('edit')]
     public function edit($rowId): void
     {
         $this->js('alert('.$rowId.')');
-    } */
-
-    #[\Livewire\Attributes\On('delete')]
-    public function delete($rowId): void
-    {
-        /* $this->js('alert(' . $rowId . ')'); */
-        $user = User::find($rowId);
-        $user?->delete();
-        /*  session()->flash("info", "Usuario eliminado con éxito");
-        // Fuerza una recarga de página y muestra el mensaje */
-        Toaster::error('Usuario eliminado con éxito');
-        $this->dispatch('pg:eventRefresh-' . $this->tableName);
-
     }
 
-    public function actions(User $row): array
+    public function actions(Valuation $row): array
     {
         return [
             Button::add()
-                ->slot('Editar')
+                ->slot('Asignar: '.$row->id)
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                /* ->dispatch('edit', ['rowId' => $row->id]), */
-                ->route('user.edit', ['id' => $row->id]),
+                ->dispatch('openAssignModal', ['rowId' => $row->id]),
 
-            Button::add('delete')
-                ->slot('Eliminar')
+                Button::add()
+                ->slot('Cambiar Estatus: ' . $row->id)
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->attributes([
-                    // Si confirma, dispara el dispatch; si no, corta la propagación
-                    'onclick' => "if(!confirm('¿Estás seguro de eliminar este usuario?')) event.stopImmediatePropagation()"
-                ])
-                ->dispatch('delete', ['rowId' => $row->id])
+                ->dispatch('openStatusModal', ['rowId' => $row->id])
         ];
     }
 

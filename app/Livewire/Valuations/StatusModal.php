@@ -4,13 +4,14 @@ namespace App\Livewire\Valuations;
 
 use Livewire\Component;
 use Livewire\Attribute\On;
+use Masmerise\Toaster\Toaster;
 
 class StatusModal extends Component
 {
 
     /* public $folioId = null; */
-    public $estatus;
-    public $mostrarModal = false;
+    public $status, $statusChange;
+    public $showModalStatus = false;
 
     protected $listeners = ['openStatusModal'];
 
@@ -18,22 +19,28 @@ class StatusModal extends Component
     public function openStatusModal()
     {
         /* $this->folioId = $id; */
-        $this->mostrarModal = true;
-        $this->estatus = null;
+        $this->showModalStatus = true;
+        $this->status = null;
     }
 
-    public function cerrarModal()
+    public function closeModalStatus()
     {
-        $this->mostrarModal = false;
+        $this->showModalStatus = false;
     }
 
-    public function guardar()
+    public function saveAssign()
     {
         // Validación y lógica de guardado aquí
         // ...
+        $this->validate([
+            "statusChange" => 'required',
+        ]);
 
-        $this->cerrarModal();
-        $this->dispatchBrowserEvent('alerta', ['message' => 'Estatus actualizado']);
+        Toaster::success('Estatus cambiado con éxito');
+        $this->closeModalStatus();
+        return redirect()->route('dashboard', ['currentView' => 'reviewed']);
+        /* $this->dispatchBrowserEvent('alerta', ['message' => 'Estatus actualizado']); */
+
     }
     public function render()
     {

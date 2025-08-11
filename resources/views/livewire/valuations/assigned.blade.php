@@ -64,7 +64,7 @@
                                 <flux:select  wire:model="operator">
                                     <flux:select.option value="operator">-- Selecciona una opción --</flux:select.option>
                                     @foreach ($users as $user)
-                                        <flux:select.option value="{{ $user->id }}">
+                                       <flux:select.option value="{{ $user->id }}">
 
                                             {{ $user->name }}
                                         </flux:select.option>
@@ -88,7 +88,7 @@
             </div>
         </div>
     </div> --}}
-    @session('success')
+{{--     @session('success')
         <div id="alerta"
             class="flex items-center p-2 mb-4 text-sm text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-green-900 dark:text-green-300 dark:border-green-800"
             role="alert">
@@ -98,19 +98,21 @@
             </svg>
             <span class="font-medium"> {{ $value }} </span>
         </div>
-    @endsession
+    @endsession --}}
     <div class="p-3">
         <h1 class="text-2xl font-bold mb-4">Pendientes de asignar</h1>
 
         {{-- Aquí tus botones o mensajes --}}
-        <div class="flex justify-end mb-4">
+        {{-- <div class="flex justify-end mb-4">
             <button wire:click="save" class="btn btn-primary">
                 Asignar Seleccionados
             </button>
-        </div>
+        </div> --}}
 
         {{-- Renderizado del componente anidado --}}
-        <livewire:valuations.assigned-table />
+         <livewire:valuations.assigned-table />
+         <livewire:valuations.status-modal />
+         <livewire:valuations.assigned-modal />
     </div>
 
 

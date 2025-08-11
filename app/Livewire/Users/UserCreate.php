@@ -4,8 +4,6 @@ namespace App\Livewire\Users;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Livewire\Component;
-use Illuminate\Support\Facades\Log;
-use Masmerise\Toaster\Toaster;
 
 
 class UserCreate extends Component
