@@ -3,8 +3,8 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <x-toaster-hub class="z-50 top-0 right-0 p-6" />
+     <body class="min-h-screen bg-white dark:bg-zinc-800">
+        <x-toaster-hub class="z-50 top-0 right-0 p-8" />
         <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
@@ -29,6 +29,7 @@
             <flux:spacer />
 
 
+
             <!-- Desktop User Menu -->
             <flux:dropdown class="hidden lg:block" position="bottom" align="start">
                 <flux:profile
@@ -37,7 +38,8 @@
                     icon:trailing="chevrons-up-down"
                 />
 
-                <flux:menu class="w-[220px]">
+
+             <flux:menu class="w-[220px]">
                     <flux:menu.radio.group>
                         <div class="p-0 text-sm font-normal">
                             <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
@@ -128,6 +130,6 @@
         {{ $slot }}
 
 
-
+        @fluxScripts
     </body>
 </html>
