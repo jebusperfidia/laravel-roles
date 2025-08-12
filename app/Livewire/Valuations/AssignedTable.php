@@ -11,16 +11,37 @@ use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
+use Illuminate\Support\Facades\Auth;
+use PowerComponents\LivewirePowerGrid\Facades\Rule;
+use Livewire\Attributes\On;
+
 
 
 final class AssignedTable extends PowerGridComponent
 {
     public string $tableName = 'assigned-table';
+    public $user;
+
+    public array $ids = [];
+
+    public function header(): array
+    {
+        return [
+            Button::add('assign-masive')
+                /* ->slot('Asignación masiva') */
+                ->slot(('Asignar masivamente (<span x-text="window.pgBulkActions.count(\'' . $this->tableName . '\')"></span>)'))
+                ->class('cursor-pointer block pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                /* ->dispatch('openAssignModal', ['ids' => $this->ids]) */
+                ->dispatch('AssignMasive.' . $this->tableName, []),
+        ];
+    }
 
     public function setUp(): array
     {
         $this->showCheckBox();
 
+       /*  $this->user = auth()->user();
+ */
         return [
             PowerGrid::header()
                 ->showSearchInput(),
@@ -47,13 +68,13 @@ final class AssignedTable extends PowerGridComponent
             ->add('date_formatted', fn (Valuation $model) => Carbon::parse($model->date)->format('d/m/Y'))
             ->add('type')
             ->add('folio')
-            ->add('property_type');
+            ->add('property_type', fn (Valuation $model) => ucwords(str_replace('_', ' ', $model->property_type)));
             //->add('created_at');
     }
 
     public function columns(): array
     {
-        return [
+        $cols = [
             Column::make('Id', 'id'),
             Column::make('Fecha', 'date_formatted', 'date')
                 ->sortable(),
@@ -68,17 +89,22 @@ final class AssignedTable extends PowerGridComponent
 
             Column::make('Tipo de propiedad', 'property_type')
                 ->sortable()
-                ->searchable(),
+                ->searchable()
 
-         /*    Column::make('Created at', 'created_at_formatted', 'created_at')
+        /*    Column::make('Created at', 'created_at_formatted', 'created_at')
                 ->sortable(),
 
             Column::make('Created at', 'created_at')
                 ->sortable()
                 ->searchable(), */
-
-            Column::action('Action')
         ];
+
+        // Conditionally add the 'Acciones' column for Administrador users
+       /*  if ($this->user && $this->user->type === 'Administrador') { */
+            $cols[] = Column::action('Acciones');
+     /*    } */
+
+        return $cols;
     }
 
     public function filters(): array
@@ -88,26 +114,46 @@ final class AssignedTable extends PowerGridComponent
         ];
     }
 
-    #[\Livewire\Attributes\On('edit')]
+    /*     #[\Livewire\Attributes\On('edit')]
     public function edit($rowId): void
     {
         $this->js('alert('.$rowId.')');
+    }
+ */
+
+    #[On('AssignMasive.assigned-table')]
+    public function bulkAssign(): void
+    {
+
+        if($this->checkboxValues === []) {
+            $this->js('alert("No hay filas seleccionadas")');
+            return;
+        }
+         //$this->ids = $ids;
+        /* dd($this->checkboxValues); */
+        $this->dispatch('openAssignModal', $this->checkboxValues, 'massive');
+        $this->dispatch('pg:eventRefresh-' . $this->tableName);
+
+        //$this->js('alert(window.pgBulkActions.get(\'' . $this->tableName . '\'))');
+
+        /* dd($this->checkboxValues); */
     }
 
     public function actions(Valuation $row): array
     {
         return [
             Button::add()
-                ->slot('Asignar: '.$row->id)
+                ->slot('Asignar')
+                /* ->slot('Asignar') */
                 ->id()
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch('openAssignModal', ['rowId' => $row->id]),
+                ->class('cursor-pointer pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->dispatch('openAssignModal', ['ids' => [$row->id]]),
 
                 Button::add()
-                ->slot('Cambiar Estatus: ' . $row->id)
+                ->slot('Cambiar Estatus')
                 ->id()
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch('openStatusModal', ['rowId' => $row->id])
+                ->class('cursor-pointer pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->dispatch('openStatusModal', ['Id' => $row->id])
         ];
     }
 

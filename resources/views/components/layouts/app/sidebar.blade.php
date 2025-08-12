@@ -23,37 +23,11 @@
                     {{-- <flux:navlist.item icon="archive-box" :href="route('valuation.archived')" :current="request()->routeIs('valuation.archived')" wire:navigate>{{ __('Avalúos archivados') }}</flux:navlist.item> --}}
                     <flux:navlist.item icon="chart-bar-square" :href="route('market.data')" :current="request()->routeIs('market.data')" wire:navigate>{{ __('Fichas de mercado') }}</flux:navlist.item>
                 </flux:navlist.group>
-               {{--   <flux:navlist.group heading="Avaluos" expandable :expanded="false">
-                    <flux:navlist.item icon="plus" href="#">Nuevo avalúo</flux:navlist.item>
-                    <flux:navlist.item icon="document-duplicate" href="#">Duplicar avalúos</flux:navlist.item>
-                    <flux:navlist.item icon="archive-box" href="#">Avalúos archivados</flux:navlist.item>
-                    <flux:navlist.item icon="presentation-chart-bar" href="#">Fichas de mercado</flux:navlist.item>
-                </flux:navlist.group> --}}
-                {{-- <flux:navlist.group class="grid">
-                    <flux:navlist.item icon="book-open" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Informacion general') }}</flux:navlist.item>
-                    <flux:navlist.item icon="map-pin" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Localización del inmueble') }}</flux:navlist.item>
-                    <flux:navlist.item icon="map" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Avaluos cercanos') }}</flux:navlist.item>
-                    <flux:navlist.item icon="clipboard-document-check" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Decl, adv y justificaciones') }}</flux:navlist.item>
-                    <flux:navlist.item icon="table-cells" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Características urbanas') }}</flux:navlist.item>
-                    <flux:navlist.item icon="archive-box" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Equipamento urbano') }}</flux:navlist.item>
-                    <flux:navlist.item icon="building-office-2" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Terreno') }}</flux:navlist.item>
-                    <flux:navlist.item icon="document-text" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Descripción inmueble') }}</flux:navlist.item>
-                    <flux:navlist.item icon="camera" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Reporte fotográfico') }}</flux:navlist.item>
-                    <flux:navlist.item icon="printer" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Impresión PDF') }}</flux:navlist.item>
-                </flux:navlist.group> --}}
+
             </flux:navlist>
 
             <flux:spacer />
 
-          {{--   <flux:navlist variant="outline">
-                <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                {{ __('Repository') }}
-                </flux:navlist.item>
-
-                <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                {{ __('Documentation') }}
-                </flux:navlist.item>
-            </flux:navlist> --}}
 
             <!-- Desktop User Menu -->
             <flux:dropdown class="hidden lg:block" position="bottom" align="start">

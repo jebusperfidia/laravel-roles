@@ -1,4 +1,4 @@
-<div>
+
 
     {{--  @session('success')
         <div id="alerta"
@@ -99,6 +99,7 @@
             <span class="font-medium"> {{ $value }} </span>
         </div>
     @endsession --}}
+<div>
     <div class="p-3">
         <h1 class="text-2xl font-bold mb-4">Pendientes de asignar</h1>
 

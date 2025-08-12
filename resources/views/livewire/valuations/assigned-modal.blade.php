@@ -5,13 +5,17 @@
     <div class="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-sm flex justify-center items-center p-4">
 
         <div class="bg-white rounded-lg shadow-2xl p-6 w-full max-w-sm">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Asignar</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Asignar
 
+                {{ $type === 'massive' ? 'Masivamente' : 'Individualmente' }}
+
+            </h2>
+            {{-- {{ $Id }} --}}
                    <flux:select wire:model="appraiser">
         <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
         @foreach ($users as $user)
             <flux:select.option value="{{ $user->id }}">
-
+                {{-- {{dd($valuationsId)}} --}}
                 {{ $user->name }}
             </flux:select.option>
         @endforeach
@@ -22,7 +26,7 @@
             @foreach ($users as $user)
                 <flux:select.option value="{{ $user->id }}">
 
-                    {{ $user->name }}
+                    {{ $user->name.$user->id }}
                 </flux:select.option>
             @endforeach
         </flux:select>
