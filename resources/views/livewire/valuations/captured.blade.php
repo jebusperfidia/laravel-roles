@@ -45,7 +45,8 @@
                             <td class="px-6 py-2 text-gray-700">2018</td>
                             <td class="px-6 py-2 space-x-1">
                                 <div class="flex items-center gap-2 flex-wrap max-w-[500px]">
-                                    <button
+                                        {{-- <button wire:click="$dispatch('openForms', { id: 5 })" --}}
+                                        <button wire:click="$dispatch('openForms')"
                                         class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300">
                                         Capturar
                                     </button>

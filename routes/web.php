@@ -12,6 +12,7 @@ use App\Livewire\Users\UserEdit;
 use App\Livewire\Valuations\ValuationCreate;
 use App\Livewire\Valuations\ValuationDuplicate;
 use App\Livewire\Valuations\ValuationsIndex;
+use App\Livewire\Forms\FormIndex;
 
 /* Route::get('/', function () {
     return view('welcome');
@@ -59,6 +60,9 @@ Route::get('/dashboard', ValuationsIndex::class)->middleware(['auth'])->name('da
 
     //Rutas de mercado
     Route::get("markets/data", MarketData::class)->name("market.data");
+
+    //Rutas de formularios
+    Route::get("form/index", FormIndex::class)->name("form.index");
 
 
     Route::get('settings/profile', Profile::class)->name('settings.profile');

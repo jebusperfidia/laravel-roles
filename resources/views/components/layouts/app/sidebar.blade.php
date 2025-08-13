@@ -13,6 +13,7 @@
             </a>
 
             <flux:navlist variant="outline">
+                @unless (session()->has('valuation-active-form'))
                 <flux:navlist.group :heading="__('Menu')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Inicio') }}</flux:navlist.item>
                     @if (auth()->user()->type === 'Administrador')
@@ -23,7 +24,22 @@
                     {{-- <flux:navlist.item icon="archive-box" :href="route('valuation.archived')" :current="request()->routeIs('valuation.archived')" wire:navigate>{{ __('Avalúos archivados') }}</flux:navlist.item> --}}
                     <flux:navlist.item icon="chart-bar-square" :href="route('market.data')" :current="request()->routeIs('market.data')" wire:navigate>{{ __('Fichas de mercado') }}</flux:navlist.item>
                 </flux:navlist.group>
+                  @endunless
 
+                @if (session()->has('valuation-active-form'))
+                <flux:navlist.group class="grid">
+                    <flux:navlist.item icon="book-open" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Informacion general') }}</flux:navlist.item>
+                    <flux:navlist.item icon="map-pin" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Localización del inmueble') }}</flux:navlist.item>
+                    <flux:navlist.item icon="map" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Avaluos cercanos') }}</flux:navlist.item>
+                    <flux:navlist.item icon="clipboard-document-check" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Decl, adv y justificaciones') }}</flux:navlist.item>
+                    <flux:navlist.item icon="table-cells" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Características urbanas') }}</flux:navlist.item>
+                    <flux:navlist.item icon="archive-box" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Equipamento urbano') }}</flux:navlist.item>
+                    <flux:navlist.item icon="building-office-2" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Terreno') }}</flux:navlist.item>
+                    <flux:navlist.item icon="document-text" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Descripción inmueble') }}</flux:navlist.item>
+                    <flux:navlist.item icon="camera" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Reporte fotográfico') }}</flux:navlist.item>
+                    <flux:navlist.item icon="printer" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Impresión PDF') }}</flux:navlist.item>
+                </flux:navlist.group>
+                 @endif
             </flux:navlist>
 
             <flux:spacer />
@@ -131,5 +147,11 @@
 
 
         @fluxScripts
+        <script>
+  window.addEventListener('clear-powergrid', () => {
+    // Ajusta esta clave al namespace real que usa PowerGrid
+    localStorage.removeItem('powergrid-selected-rows');
+  });
+</script>
     </body>
 </html>

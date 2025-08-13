@@ -26,20 +26,38 @@ final class AssignedTable extends PowerGridComponent
 
     public function header(): array
     {
-        return [
+
+
+       /*  return [
             Button::add('assign-masive')
-                /* ->slot('Asignación masiva') */
+
                 ->slot(('Asignar masivamente (<span x-text="window.pgBulkActions.count(\'' . $this->tableName . '\')"></span>)'))
                 ->class('cursor-pointer block pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                /* ->dispatch('openAssignModal', ['ids' => $this->ids]) */
                 ->dispatch('AssignMasive.' . $this->tableName, []),
-        ];
+        ]; */
+
+        $header = [];
+        $user = Auth::user();
+
+        // Solo se agrega el botón si el usuario es un 'Administrador'
+        if ($user && $user->type === 'Administrador') {
+            $header[] = Button::add('assign-masive')
+                /* ->slot(('Asignar masivamente (<span x-text="window.pgBulkActions.count(\'' . $this->tableName . '\')"></span>)')) */
+                ->slot('Asignar masivamente')
+                ->class('cursor-pointer block pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->dispatch('AssignMasive.' . $this->tableName, []);
+        }
+
+        return $header;
     }
 
     public function setUp(): array
     {
+        $this->checkboxValues = [];
+        $this->user = Auth::user();
+        if ($this->user && $this->user->type === 'Administrador') {
         $this->showCheckBox();
-
+        }
        /*  $this->user = auth()->user();
  */
         return [
@@ -99,9 +117,13 @@ final class AssignedTable extends PowerGridComponent
                 ->searchable(), */
         ];
 
-        // Conditionally add the 'Acciones' column for Administrador users
+
        /*  if ($this->user && $this->user->type === 'Administrador') { */
             $cols[] = Column::action('Acciones');
+      /*   }
+        // Conditionally add the 'Acciones' column for Administrador users
+       /*  if ($this->user && $this->user->type === 'Administrador') { */
+           /*  $cols[] = Column::action('Acciones'); */
      /*    } */
 
         return $cols;
@@ -147,13 +169,15 @@ final class AssignedTable extends PowerGridComponent
                 /* ->slot('Asignar') */
                 ->id()
                 ->class('cursor-pointer pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch('openAssignModal', ['ids' => [$row->id]]),
+                ->dispatch('openAssignModal', ['ids' => [$row->id]])
+                ->can($this->user->type === 'Administrador'),
 
                 Button::add()
                 ->slot('Cambiar Estatus')
                 ->id()
                 ->class('cursor-pointer pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
                 ->dispatch('openStatusModal', ['Id' => $row->id])
+                ->can($this->user->type === 'Administrador')
         ];
     }
 

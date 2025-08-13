@@ -33,6 +33,7 @@ class ValuationsIndex extends Component
     public function setView($view)
     {
         $this->currentView = $view;
+       /*  $this->dispatchBrowserEvent('clear-powergrid'); */
     }
 
     public function render()

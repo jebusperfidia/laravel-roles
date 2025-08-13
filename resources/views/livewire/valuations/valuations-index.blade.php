@@ -1,4 +1,4 @@
-<div>
+
     {{-- <div class="flex flex-row gap-4 flex-wrap justify-start w-full"> --}}
     <!-- Card Azul -->
     {{--     <a href=""
@@ -227,7 +227,7 @@ text-white transition-transform hover:scale-105 hover:shadow-lg cursor-pointer">
 </button>
 </div> --}}
     {{-- {{dd($unassigned)}} --}}
-
+<div>
     <div class="flex w-full gap-6 px-4">
         <button wire:click="setView('assigned')"
             class="flex-1 w-1/4 p-6 rounded-xl shadow-md
