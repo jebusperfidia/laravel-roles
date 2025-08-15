@@ -18,9 +18,9 @@
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Inicio') }}</flux:navlist.item>
                     @if (auth()->user()->type === 'Administrador')
                     <flux:navlist.item icon="users" :href="route('user.index')" :current="request()->routeIs('user.index')" wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
-                    @endif
                     <flux:navlist.item icon="plus" :href="route('valuation.create')" :current="request()->routeIs('valuation.create')" wire:navigate>{{ __('Nuevo avalúo') }}</flux:navlist.item>
                     <flux:navlist.item icon="document-duplicate" :href="route('valuation.duplicate')" :current="request()->routeIs('valuation.duplicate')" wire:navigate>{{ __('Duplicar avalúo') }}</flux:navlist.item>
+                    @endif
                     {{-- <flux:navlist.item icon="archive-box" :href="route('valuation.archived')" :current="request()->routeIs('valuation.archived')" wire:navigate>{{ __('Avalúos archivados') }}</flux:navlist.item> --}}
                     <flux:navlist.item icon="chart-bar-square" :href="route('market.data')" :current="request()->routeIs('market.data')" wire:navigate>{{ __('Fichas de mercado') }}</flux:navlist.item>
                 </flux:navlist.group>
@@ -28,16 +28,16 @@
 
                 @if (session()->has('valuation-active-form'))
                 <flux:navlist.group class="grid">
-                    <flux:navlist.item icon="book-open" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Informacion general') }}</flux:navlist.item>
-                    <flux:navlist.item icon="map-pin" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Localización del inmueble') }}</flux:navlist.item>
-                    <flux:navlist.item icon="map" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Avaluos cercanos') }}</flux:navlist.item>
-                    <flux:navlist.item icon="clipboard-document-check" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Decl, adv y justificaciones') }}</flux:navlist.item>
-                    <flux:navlist.item icon="table-cells" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Características urbanas') }}</flux:navlist.item>
-                    <flux:navlist.item icon="archive-box" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Equipamento urbano') }}</flux:navlist.item>
-                    <flux:navlist.item icon="building-office-2" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Terreno') }}</flux:navlist.item>
-                    <flux:navlist.item icon="document-text" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Descripción inmueble') }}</flux:navlist.item>
-                    <flux:navlist.item icon="camera" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Reporte fotográfico') }}</flux:navlist.item>
-                    <flux:navlist.item icon="printer" :href="route('dashboard')" :current="request()->routeIs('#')" wire:navigate>{{ __('Impresión PDF') }}</flux:navlist.item>
+                    <flux:navlist.item icon="book-open" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Informacion general') }}</flux:navlist.item>
+                    <flux:navlist.item icon="map-pin" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Localización del inmueble') }}</flux:navlist.item>
+                    <flux:navlist.item icon="map" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Avaluos cercanos') }}</flux:navlist.item>
+                    <flux:navlist.item icon="clipboard-document-check" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Decl, adv y justificaciones') }}</flux:navlist.item>
+                    <flux:navlist.item icon="table-cells" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Características urbanas') }}</flux:navlist.item>
+                    <flux:navlist.item icon="archive-box" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Equipamento urbano') }}</flux:navlist.item>
+                    <flux:navlist.item icon="building-office-2" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Terreno') }}</flux:navlist.item>
+                    <flux:navlist.item icon="document-text" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Descripción inmueble') }}</flux:navlist.item>
+                    <flux:navlist.item icon="camera" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Reporte fotográfico') }}</flux:navlist.item>
+                    <flux:navlist.item icon="printer" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Impresión PDF') }}</flux:navlist.item>
                 </flux:navlist.group>
                  @endif
             </flux:navlist>

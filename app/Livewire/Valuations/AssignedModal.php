@@ -30,6 +30,7 @@ class AssignedModal extends Component
         $this->type = $type;
         /*  dd($this->type); */
         $this->reset(['appraiser', 'operator']); // Limpiamos valores anteriores
+        $this->resetValidation();
         $this->showModalAssign = true;
         $this->assign = null;
     }

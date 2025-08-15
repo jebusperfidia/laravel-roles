@@ -4,21 +4,28 @@ namespace App\Livewire\Valuations;
 
 use Livewire\Component;
 use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Session;
 
 class Captured extends Component
 {
 
-    public $IdValuation = [];
+    public $id;
 
-    /* protected $listeners = ['openForms']; */
+    protected $listeners = ['openForms'];
 
 
     #[On('openForms')]
     /* public function openForms(array $IdValuation) */
-    public function openForms()
+    public function openForms($id)
     {
+
+        $this->id = $id;
+        //dd($this->id);
+
+        Session::put('valuation_id', $this->id);
+        /* dd('ID de valoración recibida:', $this->id, gettype($this->id)); */
        /*  $this->IdValuation = $IdValuation['id']; */
-        /* dd('método recibido correctamente', $this->IdValuation); */
+       /*  dd('método recibido correctamente', $this->id); */
         // Redirigimos a la ruta 'ruta.destino' y pasamos el parámetro
         /* return redirect()->route('ruta.destino', ['IdValuation' => $IdValuation]); */
 

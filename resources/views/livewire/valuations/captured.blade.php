@@ -1,4 +1,4 @@
-<div>
+{{-- <div>
 
     @session('success')
         <div id="alerta"
@@ -45,7 +45,7 @@
                             <td class="px-6 py-2 text-gray-700">2018</td>
                             <td class="px-6 py-2 space-x-1">
                                 <div class="flex items-center gap-2 flex-wrap max-w-[500px]">
-                                        {{-- <button wire:click="$dispatch('openForms', { id: 5 })" --}}
+
                                         <button wire:click="$dispatch('openForms')"
                                         class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300">
                                         Capturar
@@ -60,10 +60,7 @@
                                         Cambiar estatus
                                     </button>
                                     @endif
-                                    {{-- <button wire:click="$emit('openStatusModal', '{{ $folioId }}')"
-                                        class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700">
-                                        Cambiar estatus
-                                    </button> --}}
+
                                 </div>
                             </td>
 
@@ -76,4 +73,26 @@
     </div>
     <livewire:valuations.status-modal />
 
+</div>
+ --}}
+
+
+ <div>
+    <div class="p-3">
+        <h1 class="text-2xl font-bold mb-4">Pendientes de elaboración</h1>
+
+        {{-- Aquí tus botones o mensajes --}}
+        {{-- <div class="flex justify-end mb-4">
+            <button wire:click="save" class="btn btn-primary">
+                Asignar Seleccionados
+            </button>
+        </div> --}}
+
+        {{-- Renderizado del componente anidado --}}
+         <livewire:valuations.captured-table />
+         <livewire:valuations.status-modal />
+    </div>
+
+
+    {{--    <livewire:valuations.assigned-table /> --}}
 </div>

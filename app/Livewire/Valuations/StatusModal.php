@@ -36,6 +36,8 @@ class StatusModal extends Component
             "statusChange" => 'required',
         ]);
 
+
+
         Toaster::success('Estatus cambiado con éxito');
         $this->closeModalStatus();
         return redirect()->route('dashboard', ['currentView' => 'reviewed']);

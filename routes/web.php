@@ -47,15 +47,16 @@ Route::get('/dashboard', ValuationsIndex::class)->middleware(['auth'])->name('da
 
     // Rutas de usuario (solo para Administrador)
     Route::middleware(['admin'])->group(function () {
+        //Rutas de usuarios
         Route::get("users", UserIndex::class)->name("user.index");
         Route::get("users/create", UserCreate::class)->name("user.create");
-        Route::get("users/{id}/edit", UserEdit::class)->name("user.edit");
+        Route::get("users/edit/{id}", UserEdit::class)->name("user.edit");
+        //Rutas de avaluos
+        Route::get("valuations/create", ValuationCreate::class)->name("valuation.create");
+        Route::get("valuations/duplicate", ValuationDuplicate::class)->name("valuation.duplicate");
     });
 
 
-    //Rutas de avaluos
-    Route::get("valuations/create", ValuationCreate::class)->name("valuation.create");
-    Route::get("valuations/duplicate", ValuationDuplicate::class)->name("valuation.duplicate");
    /*  Route::get("valuations/archived", ValuationArchived::class)->name("valuation.archived"); */
 
     //Rutas de mercado

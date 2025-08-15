@@ -2,15 +2,29 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\Valuation;
 use Livewire\Component;
 use Illuminate\Support\Facades\Session;
 
 class FormIndex extends Component
 {
-
+    /* public $IdValuation; */
+     public $id;
+    public $valuation;
 
     public function mount()
-    {
+    {/*
+        $this->IdValuation = $id; */
+        //dd('Valoración ID recibida:', $id, gettype($id));
+
+        $this->id = Session::get('valuation_id');
+        Session::forget('valuation_id');
+        $this->valuation = Valuation::find($this->id);
+        /* dd($this->id); */
+        /* $this->valuation = Valuation::find($id); */
+       /*  dd('Valoración ID recibida:', $this->valuation); */
+
+
         Session::put('valuation-active-form', true);
     }
 
