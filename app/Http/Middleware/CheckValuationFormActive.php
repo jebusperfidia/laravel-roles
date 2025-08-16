@@ -20,13 +20,14 @@ class CheckValuationFormActive
         /*  dd('El middleware se está ejecutando'); */
         // 1. Verificamos si la sesión 'valuation-active-form' está activa.
         if (Session::get('valuation-active-form')) {
+            $allowed = ['form.index', 'logout'];
 
             // 2. Definimos las rutas a las que el usuario puede acceder, incluso con la sesión activa.
             // Estas son las excepciones a la regla de redirección.
-            $allowedRoutes = ['form.index', 'logout'];
+            /* $allowedRoutes = ['form.index', 'logout']; */
 
             // 3. Si el usuario está intentando acceder a una de las rutas permitidas, lo dejamos pasar.
-            if ($request->routeIs($allowedRoutes)) {
+            if ($request->routeIs(...$allowed)) {
                 return $next($request);
             }
 
