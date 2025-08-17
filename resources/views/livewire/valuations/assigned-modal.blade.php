@@ -64,16 +64,12 @@
                 <div class="flex justify-end gap-2 mt-6">
                     <!-- Botón Guardar con estilo azul como el de "Revisar" -->
                     <button wire:click="saveAssign"
-                        class="cursor-pointer px-4 py-2 text-xs font-medium text-white
-                           bg-blue-700 rounded-lg hover:bg-blue-800
-                           focus:ring-4 focus:outline-none focus:ring-blue-300">
+                        class="cursor-pointer btn-primary btn-table">
                         Guardar
                     </button>
                     <!-- Botón Cancelar con estilo gris como el de "Cambiar estatus" -->
                     <button wire:click="closeModalAssign"
-                        class="cursor-pointer px-4 py-2 text-xs font-medium text-white
-                           bg-slate-600 rounded-lg hover:bg-slate-700
-                           focus:ring-4 focus:outline-none focus:ring-slate-300">
+                        class="cursor-pointer btn-deleted btn-table">
                         Cancelar
                     </button>
                 </div>

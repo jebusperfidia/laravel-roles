@@ -137,16 +137,16 @@ final class CapturedTable extends PowerGridComponent
     {
         return [
             Button::add('edit')
-                ->slot('Capturar: ' . $row->id)
+                ->slot('Capturar')
                 ->id()
-                ->class('cursor-pointer pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class('cursor-pointer btn-primary btn-table pr-3')
                 ->dispatch('openForms', ['id' => $row->id]),
                 /* ->route('form.index', ['id' => $row->id]), */
 
             Button::add()
-                ->slot('Cambiar Estatus ' . $row->id)
+                ->slot('Cambiar estatus')
                 ->id()
-                ->class('cursor-pointer pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class('cursor-pointer btn-change btn-table')
                 ->dispatch('openStatusModal', ['Id' => $row->id])
                 ->can($this->user->type === 'Administrador')
         ];

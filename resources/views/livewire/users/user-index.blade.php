@@ -28,11 +28,12 @@
             </div>
         @endsession --}}
 
-        <a href={{ route('user.create') }}
+        {{-- <a href={{ route('user.create') }}
             class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300">
             Crear usuario
-        </a>
-        <div class="w-full mt-4">
+        </a> --}}
+        <flux:button class="btn-primary" href="{{ route('user.create') }}" variant="primary">Crear usuario</flux:button>
+        <div class="w-full mt-2">
 
             {{--  <flux:input class="p-4" placeholder="Buscar elemento" wire:model.live="search" />
 

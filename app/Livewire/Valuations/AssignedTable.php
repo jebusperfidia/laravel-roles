@@ -44,7 +44,7 @@ final class AssignedTable extends PowerGridComponent
             $header[] = Button::add('assign-masive')
                 /* ->slot(('Asignar masivamente (<span x-text="window.pgBulkActions.count(\'' . $this->tableName . '\')"></span>)')) */
                 ->slot('Asignar masivamente')
-                ->class('cursor-pointer block pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class('cursor-pointer btn-primary')
                 ->dispatch('AssignMasive.' . $this->tableName, []);
         }
 
@@ -168,14 +168,14 @@ final class AssignedTable extends PowerGridComponent
                 ->slot('Asignar')
                 /* ->slot('Asignar') */
                 ->id()
-                ->class('cursor-pointer pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class('cursor-pointer btn-intermediary btn-table pr-3')
                 ->dispatch('openAssignModal', ['ids' => [$row->id]])
                 ->can($this->user->type === 'Administrador'),
 
                 Button::add()
-                ->slot('Cambiar Estatus')
+                ->slot('Cambiar estatus')
                 ->id()
-                ->class('cursor-pointer pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class('cursor-pointer btn-change btn-table')
                 ->dispatch('openStatusModal', ['Id' => $row->id])
                 ->can($this->user->type === 'Administrador')
         ];

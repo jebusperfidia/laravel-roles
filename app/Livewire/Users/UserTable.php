@@ -104,14 +104,15 @@ final class UserTable extends PowerGridComponent
             Button::add()
                 ->slot('Editar')
                 ->id()
-                ->class('cursor-pointer pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class('cursor-pointer btn-intermediary btn-table pr-3')
                 /* ->dispatch('edit', ['rowId' => $row->id]), */
                 ->route('user.edit', ['id' => $row->id]),
 
             Button::add('delete')
                 ->slot('Eliminar')
                 ->id()
-                ->class('cursor-pointer pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                /* ->class('cursor-pointer pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700') */
+                ->class('cursor-pointer btn-deleted btn-table')
                 ->attributes([
                     // Si confirma, dispara el dispatch; si no, corta la propagación
                     'onclick' => "if(!confirm('¿Estás seguro de eliminar este usuario?')) event.stopImmediatePropagation()"

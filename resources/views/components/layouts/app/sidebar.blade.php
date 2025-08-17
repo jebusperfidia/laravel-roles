@@ -70,20 +70,8 @@
                     </flux:navlist.item>
                 </flux:navlist.group>
             @endunless
-            {{-- Grupo de botones para la lógica de FormIndex --}}
+
             @if (session()->has('valuation-active-form'))
-                {{--   <flux:navlist.group class="grid">
-                    <flux:navlist.item icon="book-open" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Informacion general') }}</flux:navlist.item>
-                    <flux:navlist.item icon="map-pin" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Localización del inmueble') }}</flux:navlist.item>
-                    <flux:navlist.item icon="map" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Avaluos cercanos') }}</flux:navlist.item>
-                    <flux:navlist.item icon="clipboard-document-check" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Decl, adv y justificaciones') }}</flux:navlist.item>
-                    <flux:navlist.item icon="table-cells" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Características urbanas') }}</flux:navlist.item>
-                    <flux:navlist.item icon="archive-box" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Equipamento urbano') }}</flux:navlist.item>
-                    <flux:navlist.item icon="building-office-2" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Terreno') }}</flux:navlist.item>
-                    <flux:navlist.item icon="document-text" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Descripción inmueble') }}</flux:navlist.item>
-                    <flux:navlist.item icon="camera" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Reporte fotográfico') }}</flux:navlist.item>
-                    <flux:navlist.item icon="printer" :href="route('form.index')" :current="request()->routeIs('form.index')" wire:navigate>{{ __('Impresión PDF') }}</flux:navlist.item>
-                </flux:navlist.group> --}}
                 <flux:navlist.group class="grid">
                     @foreach ($formSections as $item)
                         <flux:navlist.item icon="{{ $item['icon'] }}"

@@ -65,7 +65,7 @@
                     <span class="text-[#FA2C37]">El campo tipo de inmueble es obligatirio.</span>
                     </div>
                     @enderror
-                <flux:button class="mt-10" type="submit" variant="primary">Crear avalúo</flux:button>
+                <flux:button class="mt-10 cursor-pointer btn-primary" type="submit" variant="primary">Crear avalúo</flux:button>
             </form>
            </div>
     </div>

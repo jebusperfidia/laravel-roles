@@ -5,7 +5,7 @@
             {{-- <a   onclick="if(confirm('¿Estás seguro de que quieres volver? Se perderán los datos.')){
         Livewire.dispatch('backMain');
         window.location.href = '/';}" --}}
-            class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300">
+            class="cursor-pointer btn-primary">
             Regresar al menú principal
         </a>
     </div>

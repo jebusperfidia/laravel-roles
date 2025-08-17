@@ -53,7 +53,7 @@
                     <span class="text-[#FA2C37]">Debe seleccionar el avalúo hijo.</span>
                     </div>
                     @enderror
-                <flux:button class="mt-10" type="submit" variant="primary">Duplicar avalúo</flux:button>
+                <flux:button class="mt-10 btn-primary cursor-pointer" type="submit" variant="primary">Duplicar avalúo</flux:button>
             </form>
            </div>
     </div>
