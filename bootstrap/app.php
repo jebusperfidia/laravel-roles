@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\CheckValuationFormActive;
+use App\Http\Middleware\CheckValuationId;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' =>AdminMiddleware::class,
             'formActive' => CheckValuationFormActive::class,
+            'checkValuationId' => CheckValuationId::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

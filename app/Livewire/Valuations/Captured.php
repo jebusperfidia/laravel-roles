@@ -5,6 +5,7 @@ namespace App\Livewire\Valuations;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Redirect;
 
 class Captured extends Component
 {
@@ -14,7 +15,7 @@ class Captured extends Component
     protected $listeners = ['openForms'];
 
 
-    #[On('openForms')]
+      #[On('openForms')]
     /* public function openForms(array $IdValuation) */
     public function openForms($id)
     {
@@ -23,6 +24,8 @@ class Captured extends Component
         //dd($this->id);
 
         Session::put('valuation_id', $this->id);
+
+        Session::put('valuation-active-form', true);
         /* dd('ID de valoración recibida:', $this->id, gettype($this->id)); */
        /*  $this->IdValuation = $IdValuation['id']; */
        /*  dd('método recibido correctamente', $this->id); */

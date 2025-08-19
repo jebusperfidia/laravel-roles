@@ -47,7 +47,7 @@ class FormIndex extends Component
         //dd('Valoración ID recibida:', $id, gettype($id));
 
         // 1. Marcar flujo activo
-        Session::put('valuation-active-form', true);
+        /* Session::put('valuation-active-form', true); */
 
         // 2. Recuperar valuation_id de sesión
         $this->id = Session::get('valuation_id');

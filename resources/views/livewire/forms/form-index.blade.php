@@ -1,18 +1,26 @@
 <div>
-    <div>
+    <div class="flex justify-between">
+        <p>
+            @if ($valuation)
+                Folio de valuación: <strong>{{ $valuation->folio }}</strong>
+
+            @else
+            <p>no se encontró folio</p>
+            @endif
+
+        </p>
         <a wire:click="backMain"
             wire:confirm="¿Estás seguro de que deseas salir? Se borrarán los datos de la sesión actual."
             {{-- <a   onclick="if(confirm('¿Estás seguro de que quieres volver? Se perderán los datos.')){
         Livewire.dispatch('backMain');
-        window.location.href = '/';}" --}}
-            class="cursor-pointer btn-primary">
+        window.location.href = '/';}" --}} class="cursor-pointer btn-primary">
             Regresar al menú principal
         </a>
     </div>
     <br>
-    <flux:heading size="xl" level="1">{{ __('Información general') }}</flux:heading>
+    {{--  <flux:heading size="xl" level="1">{{ __('Información general') }}</flux:heading> --}}
     {{-- <flux:subheading size="lg" class="mb-6">{{ ('Información General') }}</flux:subheading> --}}
-    <flux:separator variant="subtle" />
+    <flux:separator/>
     {{--  <h2>Valor de la valoración: {{ $valuation }}</h2> --}}
     {{-- En este div necesito renderizar el componente --}}
     <div>

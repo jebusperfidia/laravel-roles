@@ -175,3 +175,89 @@ input[type="password"],
 textarea {
   color: #000000; /* Example: Sets text color to red */
 }
+
+
+/* Contenedor formularios */
+.form-container {
+  border: 1px solid #d1dadb;
+  border-radius: 0.5rem;
+  margin: 1rem 0 2rem;
+}
+
+/* Encabezado del formulario */
+.form-container__header {
+  background-color: #E5E7EB;
+  color: #000;
+  padding: 0.5rem 1rem;
+  font-size: 1.20rem;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+/* Cuerpo con padding adaptativo */
+.form-container__content {
+  padding: 1.5rem 1rem;
+}
+
+@media (min-width: 768px) {
+  .form-container__content {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Grid base */
+.form-grid {
+  display: grid;
+}
+
+/* Variante 1 columna */
+.form-grid--1 {
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1rem;
+  /* max-width: 36rem; */
+  max-width: 45rem;                       /* [EDIT] eliminamos límite para inputs más largos */
+  padding-bottom: 16px;
+}
+
+/* Hacer que los inputs ocupen todo el ancho de la columna */
+.form-grid--1 input,
+.form-grid--1 select,
+.form-grid--1 textarea {
+  width: 100%;                           /* [EDIT] ancho completo */
+}
+
+/* Variante 2 columnas */
+.form-grid--2 {
+  grid-template-columns: repeat(1, 1fr);
+  /* gap: 2rem; */
+  gap: 2rem 5rem;                        /* [EDIT] fila-gap 2rem, column-gap 4rem */
+  padding-bottom: 16px;
+}
+
+@media (min-width: 768px) {
+  .form-grid--2 {
+    grid-template-columns: repeat(2, 1fr);
+    /* el gap ya está declarado arriba y funciona tanto en móvil como en desktop */
+  }
+}
+
+/* Asegurar ancho completo de inputs en cada columna */
+.form-grid--2 input,
+.form-grid--2 select,
+.form-grid--2 textarea {
+  width: 100%;                           /* [EDIT] llenan su columna ahora más angosta */
+}
+
+/* Variante 3 columnas (sin cambios) */
+.form-grid--3 {
+  grid-template-columns: repeat(1, 1fr);
+  gap: 2rem;
+  padding-bottom: 16px;
+}
+
+@media (min-width: 768px) {
+  .form-grid--3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

@@ -19,6 +19,7 @@ use App\Livewire\Forms\FormIndex;
 })->name('home'); */
 
 /* Redireccionamiento al login, evitando el acceso a welcome */
+
 Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
@@ -34,13 +35,14 @@ Route::get('/', function () {
 })->middleware(['auth'])->name('dashboard'); */
 
 
-//Ruta de configuración del perfil de usuario
+//Rutas disponibles solo para usuarios autenticados
 Route::middleware(['auth'])->group(function () {
 
     Route::redirect('settings', 'settings/profile');
     Route::get('settings/profile', Profile::class)->name('settings.profile');
     Route::get('settings/password', Password::class)->name('settings.password');
 
+    //Estas rutas solo están disponbibles si el flujo de formulario está activo
     Route::middleware(('formActive'))->group(function () {
 
         //Ruta principal, carga la ruta de valuaciones index, con el tablero principal
@@ -62,12 +64,16 @@ Route::middleware(['auth'])->group(function () {
     //Rutas de mercado
     Route::get("markets/data", MarketData::class)->name("market.data");
 
-    //Rutas de formularios
-    Route::get("form/index", FormIndex::class)->name("form.index");
 
+    //Si no está inicializada la variable de sesión que almacena el id de la valuación, no se ingresará a la ruta y se debe volver al dashboard
+    Route::middleware(['checkValuationId'])
+        ->group(function () {
+            //Rutas de formularios
+            Route::get("form/index", FormIndex::class)->name("form.index");
+        });
 
 
     /* Route::get('settings/appearance', Appearance::class)->name('settings.appearance'); */
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
