@@ -99,6 +99,8 @@ select:focus[data-flux-control] {
     @apply text-black;
 } */
 
+/*ESTILOS PARA LOS BOTONES PRINCIPALES DEL SISTEMA*/
+
 .btn-primary {
     background-color: #25998B;
     color: #ffffff;
@@ -169,6 +171,9 @@ select:focus[data-flux-control] {
     padding: 0.25rem 0.75rem;    /* reduce px-4 py-2 a px-3 py-1 */
 }
 
+
+/* ESTILOS PARA LOGIN NO DEFINITIVOS */
+
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -176,6 +181,7 @@ textarea {
   color: #000000; /* Example: Sets text color to red */
 }
 
+/* ESTILOS PARA LOS CONTENEDORES Y GRIDS DE LOS FORMULARIOS */
 
 /* Contenedor formularios */
 .form-container {
@@ -189,7 +195,7 @@ textarea {
   background-color: #E5E7EB;
   color: #000;
   padding: 0.5rem 1rem;
-  font-size: 1.20rem;
+  font-size: 1.1rem;
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
 }
@@ -216,7 +222,7 @@ textarea {
   grid-template-columns: repeat(1, 1fr);
   gap: 1rem;
   /* max-width: 36rem; */
-  max-width: 45rem;                       /* [EDIT] eliminamos límite para inputs más largos */
+  max-width: 45rem;
   padding-bottom: 16px;
 }
 
@@ -224,14 +230,14 @@ textarea {
 .form-grid--1 input,
 .form-grid--1 select,
 .form-grid--1 textarea {
-  width: 100%;                           /* [EDIT] ancho completo */
+  width: 100%;
 }
 
 /* Variante 2 columnas */
 .form-grid--2 {
   grid-template-columns: repeat(1, 1fr);
   /* gap: 2rem; */
-  gap: 2rem 5rem;                        /* [EDIT] fila-gap 2rem, column-gap 4rem */
+  gap: 2rem 5rem;
   padding-bottom: 16px;
 }
 
@@ -246,7 +252,7 @@ textarea {
 .form-grid--2 input,
 .form-grid--2 select,
 .form-grid--2 textarea {
-  width: 100%;                           /* [EDIT] llenan su columna ahora más angosta */
+  width: 100%;
 }
 
 /* Variante 3 columnas (sin cambios) */
@@ -260,4 +266,57 @@ textarea {
   .form-grid--3 {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+/* ESTILOS PARA LOS FORMULARIOS DE RADIOS */
+
+.form-grid-radios {
+    grid-template-columns: 40% 60%;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+
+/* El resto de las clases son las mismas de la respuesta anterior */
+.radio-label {
+    text-align: right;
+    padding-right: 1rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.radio-input {
+    /* Este contenedor no necesita estilos especiales, solo sirve para agrupar */
+}
+
+/* Para los radios horizontales */
+.radio-group-horizontal {
+    display: flex;
+    gap: 1.5rem;
+}
+
+/* Para los radios verticales */
+.radio-group-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Estilos comunes para las etiquetas de los radio */
+.radio-group-horizontal label,
+.radio-group-vertical label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+
+
+.form-grid-1-center {
+    grid-template-columns: 20% 60%;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
