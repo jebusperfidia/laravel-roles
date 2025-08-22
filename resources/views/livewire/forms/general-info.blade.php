@@ -12,19 +12,42 @@
             </div>
             {{-- Fila 2 --}}
             <div class="form-grid form-grid--2">
-                <flux:input label="Tipo de avaluo" type="text" wire:model="gi_type" placeholder="" />
-                <flux:input label="Tipo de cálculo" type="text" wire:model="gi_calculation_type" placeholder="" />
+                <div>
+                    <label for="tipo" class="flux-label text-sm">Tipo de avalúo</label>
+                    <flux:select wire:model="gi_type" class="mt-2  text-gray-800 [&_option]:text-gray-900">
+                        <flux:select.option value="fiscal">Fiscal</flux:select.option>
+                        <flux:select.option value="comercial">Comercial</flux:select.option>
+                    </flux:select>
+                </div>
+                <div>
+                    <label for="tipo" class="flux-label text-sm">Tipo de cálculo</label>
+                    <flux:select wire:model="gi_calculationType" class="mt-2 text-gray-800 [&_option]:text-gray-900">
+                        <flux:select.option value="Administrador">Cálculos activados</flux:select.option>
+                        <flux:select.option value="Operador">Operador</flux:select.option>
+                    </flux:select>
+                </div>
             </div>
             {{-- Fila 3 --}}
             <div class="form-grid form-grid--2">
-                <flux:input label="Valuador" type="text" wire:model="gi_valuator" placeholder="" />
+                <div>
+                    <label for="tipo" class="flux-label text-sm">Valuador</label>
+                    <flux:select wire:model="gi_valuator">
+                        <flux:select.option value=""></flux:select.option>
+                        @foreach ($users as $user)
+                            <flux:select.option value="{{ $user->id }}">
+                                {{ $user->name }}
+                            </flux:select.option>
+                        @endforeach
+                    </flux:select>
+                </div>
                 <flux:checkbox.group wire:model="gi_preValuation" label="Es un pre-avalúo">
-                    <flux:checkbox value="push" />
+                    <flux:checkbox value="" />
                 </flux:checkbox.group>
             </div>
         </div>
     </div>
 
+    {{-- <p>{{$gi_typePerson}}</p> --}}
     <div class="form-container">
         <div class="form-container__header">
             Datos del propietario
@@ -32,7 +55,14 @@
         <div class="form-container__content">
             {{-- Fila 1 --}}
             <div class="form-grid form-grid--3">
-                <flux:input label="Tipo de persona" type="text" wire:model="gi_typePerson" placeholder="" />
+                <div>
+                    <label for="tipo" class="flux-label text-sm">Tipo de persona</label>
+                    <flux:select wire:model.live="gi_typePerson"
+                        class="mt-[8px] text-gray-800 [&_option]:text-gray-900">
+                        <flux:select.option value="Fisica">Fisica</flux:select.option>
+                        <flux:select.option value="Moral">Moral</flux:select.option>
+                    </flux:select>
+                </div>
                 <flux:input label="RFC" type="text" wire:model="gi_rfc" placeholder="" />
                 <flux:input label="CURP" type="text" wire:model="gi_curp" placeholder="" />
             </div>

@@ -106,7 +106,8 @@ select:focus[data-flux-control] {
     color: #ffffff;
     padding: 0.5rem 1rem;       /* igual a Tailwind px-4 py-2 */
     border-radius: 0.375rem;    /* rounded */
-    border: 1px solid transparent;
+    border: 1px solid;
+    /* border: 1px solid transparent; */
     transition: box-shadow 0.2s ease, background-color 0.2s ease;
     outline: none;              /* quita el outline por defecto */
 }
@@ -178,8 +179,10 @@ input[type="text"],
 input[type="email"],
 input[type="password"],
 textarea {
-  color: #000000; /* Example: Sets text color to red */
+  color: #000000;
 }
+
+
 
 /* ESTILOS PARA LOS CONTENEDORES Y GRIDS DE LOS FORMULARIOS */
 
@@ -286,9 +289,6 @@ textarea {
     color: #333;
 }
 
-.radio-input {
-    /* Este contenedor no necesita estilos especiales, solo sirve para agrupar */
-}
 
 /* Para los radios horizontales */
 .radio-group-horizontal {
@@ -319,4 +319,57 @@ textarea {
     align-items: center;
     gap: 1rem;
     margin-bottom: 1.5rem;
+}
+
+
+/* ESTILOS PARA EL CUSTOM FLUX:HEADING */
+.custom-flux-heading {
+    font-size: 24px;
+    font-weight: bolder;
+    color: #0F1922;
+    margin-bottom: 0;
+}
+
+.custom-flux-subheading {
+    font-size: 14px;
+    font-weight: bold;
+    color: #343f48;
+}
+
+/* ESTILOS ENLACE DE RECUPERACIÓN DE CONTRASEÑA */
+.password-link-custom {
+text-decoration: none;
+  border-bottom: 1px solid #ccc; /* tu borde gris */
+  /* padding: 5px 10px; */
+  color: #000;
+  display: inline-block;
+  transition: all 0.2s ease-in-out;
+}
+
+.password-link-custom:hover {
+    border-color: #666;
+    color:#000
+}
+
+    ui-label {
+        color: #000;
+        font-size: 14px;
+        font-weight: 400;
+    }
+
+
+.password-input-wrapper [data-flux-icon] {
+    color: #6b7280; /* gray-500 */
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.show-icon-custom [data-flux-icon] {
+    color: #7a808b; /* text-gray-500 */
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.show-icon-custom [data-flux-icon]:hover {
+    color: #000; /* text-black */
 }

@@ -15,15 +15,16 @@
             required
             autofocus
             placeholder="email@ejemplo.com"
-            class="border-2 border-gray-300 text-black mt-2"
+            class="border-2 border-gray-300 text-black mt-2 rounded-lg
+            "
             {{-- viewable --}}
         />
         </div>
-        <flux:button class="w-full btn-primary cursor-pointer" variant="primary" type="submit">{{ __('Enviar enlace de recuperación a su email') }}</flux:button>
+        <flux:button class="w-full btn-primary cursor-pointer" variant="primary" type="submit" onclick="this.blur();">{{ __('Enviar enlace de recuperación a su email') }}</flux:button>
     </form>
 
     <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-400">
         <span>{{ __('Regresar al') }}</span>
-        <flux:link class="text-black" :href="route('login')" wire:navigate>{{ __('login') }}</flux:link>
+        <flux:link class="text-black password-link-custom" :href="route('login')" wire:navigate>{{ __('login') }}</flux:link>
     </div>
 </div>

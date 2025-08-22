@@ -78,7 +78,7 @@ class AssignedModal extends Component
             Toaster::success('Asignación individual generada con éxito');
         }
         $this->closeModalAssign();
-        return redirect()->route('dashboard', ['currentView' => 'completed']);
+        return redirect()->route('dashboard', ['currentView' => 'captured']);
         /* $this->dispatchBrowserEvent('alerta', ['message' => 'Estatus actualizado']); */
     }
 

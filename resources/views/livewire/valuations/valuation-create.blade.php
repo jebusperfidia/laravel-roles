@@ -10,7 +10,7 @@
                 <flux:input type="date" max="2999-12-31" label="Fecha de avalúo"  id="fecha_actual" class="flux-input" wire:model="date" readonly/>
                     <label for="tipo" class="flux-label text-sm">Tipo de avalúo:</label>
                     <flux:select wire:model="type" class="mt-2  text-gray-800 [&_option]:text-gray-900">
-                        <flux:select.option value="casa_habitacion">-- Selecciona una opción --</flux:select.option>
+                        <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                         <flux:select.option value="fiscal">Fiscal</flux:select.option>
                         <flux:select.option value="comercial">Comercial</flux:select.option>
                     </flux:select>

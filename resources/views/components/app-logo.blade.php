@@ -3,6 +3,6 @@
     <img src="{{ asset('logo1.svg') }}" class="size-8" alt="App Logo">
 </div>
 <div class="ms-1 grid flex-1 text-start text-sm">
-    <span class="mb-0.5 truncate leading-tight font-semibold mx-auto my-0 text-gray-600">ESTUDIO ÁLAMO</span>
-    <span class="mb-0.5 truncate leading-tight font-semibold text-tiny mx-auto my-0">ARQUITECTURA + VALUACIÓN</span>
+    <span class="mb-0.5 truncate leading-tight font-bold mx-auto my-0 text-[#0F1922]">ESTUDIO ÁLAMO</span>
+    <span class="mb-0.5 truncate leading-tight font-semibold text-tiny mx-auto my-0 text-[#343f48]">ARQUITECTURA + VALUACIÓN</span>
 </div>
