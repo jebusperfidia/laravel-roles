@@ -11,8 +11,8 @@
                     <label for="tipo" class="flux-label text-sm">Tipo de avalúo:</label>
                     <flux:select wire:model="type" class="mt-2  text-gray-800 [&_option]:text-gray-900">
                         <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                        <flux:select.option value="fiscal">Fiscal</flux:select.option>
-                        <flux:select.option value="comercial">Comercial</flux:select.option>
+                        <flux:select.option value="Fiscal">Fiscal</flux:select.option>
+                        <flux:select.option value="Comercial">Comercial</flux:select.option>
                     </flux:select>
                     @error('type')
 

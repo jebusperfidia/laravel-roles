@@ -1,8 +1,7 @@
-@import 'tailwindcss';
-@import '../../vendor/livewire/flux/dist/flux.css';
+@import "tailwindcss";
+@import "../../vendor/livewire/flux/dist/flux.css";
 /* Importación PowerGrid */
-@import '../../vendor/power-components/livewire-powergrid/resources/css/tailwind4.css';
-
+@import "../../vendor/power-components/livewire-powergrid/resources/css/tailwind4.css";
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -18,7 +17,9 @@
 /* Aquí terminan */
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
 
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;
@@ -37,8 +38,8 @@
     --color-accent-foreground: var(--color-white);
 
     /* Colores PowerGrid */
-     --color-pg-primary-50: oklch(0.985 0 0);
-     --color-pg-primary-100: oklch(0.97 0 0);
+    --color-pg-primary-50: oklch(0.985 0 0);
+    --color-pg-primary-100: oklch(0.97 0 0);
     --color-pg-primary-200: oklch(0.922 0 0);
     --color-pg-primary-300: oklch(0.87 0 0);
     --color-pg-primary-400: oklch(0.708 0 0);
@@ -50,12 +51,10 @@
     --color-pg-primary-950: oklch(0.145 0 0);
     /* Aquí terminan colores PowerGrid */
 
-
-/* Estilos personalizados */
-     --text-tiny: 0.625rem;
-     --primary-alamo: #25998B;
-     --primary-delete: #40598B;
-
+    /* Estilos personalizados */
+    --text-tiny: 0.625rem;
+    --primary-alamo: #25998b;
+    --primary-delete: #40598b;
 }
 
 @layer theme {
@@ -67,7 +66,6 @@
 }
 
 @layer base {
-
     *,
     ::after,
     ::before,
@@ -82,12 +80,13 @@
 }
 
 [data-flux-label] {
-    @apply  !mb-0 !leading-tight;
+    @apply !mb-0 !leading-tight;
 }
 
-input:focus[data-flux-control],
-textarea:focus[data-flux-control],
+/* input:focus[data-flux-control],
+textarea:focus[data-flux-control], */
 select:focus[data-flux-control] {
+    /* @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground; */
     @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
 }
 
@@ -102,173 +101,171 @@ select:focus[data-flux-control] {
 /*ESTILOS PARA LOS BOTONES PRINCIPALES DEL SISTEMA*/
 
 .btn-primary {
-    background-color: #25998B;
+    background-color: #25998b;
     color: #ffffff;
-    padding: 0.5rem 1rem;       /* igual a Tailwind px-4 py-2 */
-    border-radius: 0.375rem;    /* rounded */
+    padding: 0.5rem 1rem; /* igual a Tailwind px-4 py-2 */
+    border-radius: 0.375rem; /* rounded */
     border: 1px solid;
     /* border: 1px solid transparent; */
     transition: box-shadow 0.2s ease, background-color 0.2s ease;
-    outline: none;              /* quita el outline por defecto */
+    outline: none; /* quita el outline por defecto */
 }
 
 .btn-primary:hover,
 .btn-primary:focus {
-  /* capa blanca semitransparente */
-  box-shadow: inset 0 0 0 1000px rgba(255, 255, 255, 0.1);
+    /* capa blanca semitransparente */
+    box-shadow: inset 0 0 0 1000px rgba(255, 255, 255, 0.1);
 }
 
 .btn-intermediary {
-    background-color: #2974EE;
+    background-color: #2974ee;
     color: #ffffff;
-    padding: 0.5rem 1rem;       /* igual a Tailwind px-4 py-2 */
-    border-radius: 0.375rem;    /* rounded */
+    padding: 0.5rem 1rem; /* igual a Tailwind px-4 py-2 */
+    border-radius: 0.375rem; /* rounded */
     border: 1px solid transparent;
     transition: box-shadow 0.2s ease, background-color 0.2s ease;
-    outline: none;              /* quita el outline por defecto */
+    outline: none; /* quita el outline por defecto */
 }
 
 .btn-intermediary:hover,
 .btn-intermediary:focus {
-  /* capa blanca semitransparente */
-  box-shadow: inset 0 0 0 1000px rgba(255, 255, 255, 0.1);
+    /* capa blanca semitransparente */
+    box-shadow: inset 0 0 0 1000px rgba(255, 255, 255, 0.1);
 }
 
 .btn-change {
-    background-color: #43434C;
+    background-color: #43434c;
     color: #ffffff;
-    padding: 0.5rem 1rem;       /* igual a Tailwind px-4 py-2 */
-    border-radius: 0.375rem;    /* rounded */
+    padding: 0.5rem 1rem; /* igual a Tailwind px-4 py-2 */
+    border-radius: 0.375rem; /* rounded */
     border: 1px solid transparent;
     transition: box-shadow 0.2s ease, background-color 0.2s ease;
-    outline: none;              /* quita el outline por defecto */
+    outline: none; /* quita el outline por defecto */
 }
 
 .btn-change:hover,
 .btn-change:focus {
-  /* capa blanca semitransparente */
-  box-shadow: inset 0 0 0 1000px rgba(255, 255, 255, 0.1);
+    /* capa blanca semitransparente */
+    box-shadow: inset 0 0 0 1000px rgba(255, 255, 255, 0.1);
 }
 
 .btn-deleted {
-    background-color: #E32A34;
+    background-color: #e32a34;
     color: #ffffff;
-    padding: 0.5rem 1rem;       /* igual a Tailwind px-4 py-2 */
-    border-radius: 0.375rem;    /* rounded */
+    padding: 0.5rem 1rem; /* igual a Tailwind px-4 py-2 */
+    border-radius: 0.375rem; /* rounded */
     border: 1px solid transparent;
     transition: box-shadow 0.2s ease, background-color 0.2s ease;
-    outline: none;              /* quita el outline por defecto */
+    outline: none; /* quita el outline por defecto */
 }
 
 .btn-deleted:hover,
 .btn-deleted:focus {
-  /* capa blanca semitransparente */
-  box-shadow: inset 0 0 0 1000px rgba(255, 255, 255, 0.1);
+    /* capa blanca semitransparente */
+    box-shadow: inset 0 0 0 1000px rgba(255, 255, 255, 0.1);
 }
-
 
 .btn-table {
-    font-size: 1rem;         /* texto un poco más pequeño */
-    padding: 0.25rem 0.75rem;    /* reduce px-4 py-2 a px-3 py-1 */
+    font-size: 1rem; /* texto un poco más pequeño */
+    padding: 0.25rem 0.75rem; /* reduce px-4 py-2 a px-3 py-1 */
 }
 
-
-/* ESTILOS PARA LOGIN NO DEFINITIVOS */
+/* ESTILOS PARA TODOS LOS INPUT */
 
 input[type="text"],
 input[type="email"],
 input[type="password"],
 textarea {
-  color: #000000;
+    color: #000000;
 }
 
-
+/* ESTILOS PARA LOS INPUT SELECT */
 
 /* ESTILOS PARA LOS CONTENEDORES Y GRIDS DE LOS FORMULARIOS */
 
 /* Contenedor formularios */
 .form-container {
-  border: 1px solid #d1dadb;
-  border-radius: 0.5rem;
-  margin: 1rem 0 2rem;
+    border: 1px solid #d1dadb;
+    border-radius: 0.5rem;
+    margin: 1rem 0 2rem;
 }
 
 /* Encabezado del formulario */
 .form-container__header {
-  background-color: #E5E7EB;
-  color: #000;
-  padding: 0.5rem 1rem;
-  font-size: 1.1rem;
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
+    background-color: #e5e7eb;
+    color: #000;
+    padding: 0.5rem 1rem;
+    font-size: 1.1rem;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
 }
 
 /* Cuerpo con padding adaptativo */
 .form-container__content {
-  padding: 1.5rem 1rem;
+    padding: 1.5rem 1rem;
 }
 
 @media (min-width: 768px) {
-  .form-container__content {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
+    .form-container__content {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
 }
 
 /* Grid base */
 .form-grid {
-  display: grid;
+    display: grid;
 }
 
 /* Variante 1 columna */
 .form-grid--1 {
-  grid-template-columns: repeat(1, 1fr);
-  gap: 1rem;
-  /* max-width: 36rem; */
-  max-width: 45rem;
-  padding-bottom: 16px;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1rem;
+    /* max-width: 36rem; */
+    max-width: 45rem;
+    padding-bottom: 16px;
 }
 
 /* Hacer que los inputs ocupen todo el ancho de la columna */
 .form-grid--1 input,
 .form-grid--1 select,
 .form-grid--1 textarea {
-  width: 100%;
+    width: 100%;
 }
 
 /* Variante 2 columnas */
 .form-grid--2 {
-  grid-template-columns: repeat(1, 1fr);
-  /* gap: 2rem; */
-  gap: 2rem 5rem;
-  padding-bottom: 16px;
+    grid-template-columns: repeat(1, 1fr);
+    /* gap: 2rem; */
+    gap: 2rem 5rem;
+    padding-bottom: 16px;
 }
 
 @media (min-width: 768px) {
-  .form-grid--2 {
-    grid-template-columns: repeat(2, 1fr);
-    /* el gap ya está declarado arriba y funciona tanto en móvil como en desktop */
-  }
+    .form-grid--2 {
+        grid-template-columns: repeat(2, 1fr);
+        /* el gap ya está declarado arriba y funciona tanto en móvil como en desktop */
+    }
 }
 
 /* Asegurar ancho completo de inputs en cada columna */
 .form-grid--2 input,
 .form-grid--2 select,
 .form-grid--2 textarea {
-  width: 100%;
+    width: 100%;
 }
 
 /* Variante 3 columnas (sin cambios) */
 .form-grid--3 {
-  grid-template-columns: repeat(1, 1fr);
-  gap: 2rem;
-  padding-bottom: 16px;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 2rem;
+    padding-bottom: 16px;
 }
 
 @media (min-width: 768px) {
-  .form-grid--3 {
-    grid-template-columns: repeat(3, 1fr);
-  }
+    .form-grid--3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 /* ESTILOS PARA LOS FORMULARIOS DE RADIOS */
@@ -280,7 +277,6 @@ textarea {
     margin-bottom: 1.5rem;
 }
 
-
 /* El resto de las clases son las mismas de la respuesta anterior */
 .radio-label {
     text-align: right;
@@ -288,7 +284,6 @@ textarea {
     font-weight: 500;
     color: #333;
 }
-
 
 /* Para los radios horizontales */
 .radio-group-horizontal {
@@ -312,8 +307,6 @@ textarea {
     cursor: pointer;
 }
 
-
-
 .form-grid-1-center {
     grid-template-columns: 20% 60%;
     align-items: center;
@@ -321,12 +314,11 @@ textarea {
     margin-bottom: 1.5rem;
 }
 
-
 /* ESTILOS PARA EL CUSTOM FLUX:HEADING */
 .custom-flux-heading {
     font-size: 24px;
     font-weight: bolder;
-    color: #0F1922;
+    color: #0f1922;
     margin-bottom: 0;
 }
 
@@ -338,25 +330,42 @@ textarea {
 
 /* ESTILOS ENLACE DE RECUPERACIÓN DE CONTRASEÑA */
 .password-link-custom {
-text-decoration: none;
-  border-bottom: 1px solid #ccc; /* tu borde gris */
-  /* padding: 5px 10px; */
-  color: #000;
-  display: inline-block;
-  transition: all 0.2s ease-in-out;
+    text-decoration: none;
+    border-bottom: 1px solid #ccc; /* tu borde gris */
+    /* padding: 5px 10px; */
+    color: #000;
+    display: inline-block;
+    transition: all 0.2s ease-in-out;
 }
 
 .password-link-custom:hover {
     border-color: #666;
-    color:#000
+    color: #000;
 }
 
-    ui-label {
-        color: #000;
-        font-size: 14px;
-        font-weight: 400;
-    }
+/* ESTILOS PARA LOS LABEL, ASÍ COMO CLASES AUXILIARES */
 
+/* ui-label {
+    color: #000;
+    font-size: 14px;
+    font-weight: 400;
+} */
+
+/* PEQUEÑO MARGEN PARA MEJORAR ESTILOS EN LABEL DE LOS ELEMENTOS INPUT SELECT DE FLUX */
+/* .margin-input-to-label {
+    margin-top: 6px;
+}
+ */
+/* ESTILOS PARA EL ELEMENTOS SUP CON EL ASTERISCO QUE INDICA QUE UN INPUT ES REQUERIDO */
+.sup-required {
+    color: red;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+/* .span-label-required {
+    border-bottom: 4px solid red;
+} */
 
 .password-input-wrapper [data-flux-icon] {
     color: #6b7280; /* gray-500 */

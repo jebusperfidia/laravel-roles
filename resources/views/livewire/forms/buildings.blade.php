@@ -7,12 +7,12 @@
 
 
             <div class="form-grid form-grid--1">
-                <flux:input id="field1" label="Campo A" type="text" wire:model="fieldA" placeholder="Escribe aquí" />
+                <flux:input id="field1" label="Campo A" type="text" ="" placeholder="Escribe aquí" />
             </div>
 
 
             <div class="form-grid form-grid--1">
-                <flux:input id="field2" label="Campo B" type="email" wire:model="fieldB"
+                <flux:input id="field2" label="Campo B" type="email" =""
                     placeholder="correo@ejemplo.com" />
             </div>
 
@@ -32,12 +32,12 @@
 
 
             <div class="form-grid form-grid--1">
-                <flux:input id="field1" label="Campo A" type="text" wire:model="fieldA" placeholder="Escribe aquí" />
+                <flux:input id="field1" label="Campo A" type="text" ="" placeholder="Escribe aquí" />
             </div>
 
 
             <div class="form-grid form-grid--1">
-                <flux:input id="field2" label="Campo B" type="email" wire:model="fieldB"
+                <flux:input id="field2" label="Campo B" type="email" =""
                     placeholder="correo@ejemplo.com" />
             </div>
 
@@ -52,12 +52,12 @@
 
 
             <div class="form-grid form-grid--1">
-                <flux:input id="field1" label="Campo A" type="text" wire:model="fieldA" placeholder="Escribe aquí" />
+                <flux:input id="field1" label="Campo A" type="text" ="" placeholder="Escribe aquí" />
             </div>
 
 
             <div class="form-grid form-grid--1">
-                <flux:input id="field2" label="Campo B" type="email" wire:model="fieldB"
+                <flux:input id="field2" label="Campo B" type="email" =""
                     placeholder="correo@ejemplo.com" />
             </div>
 

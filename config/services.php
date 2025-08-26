@@ -34,5 +34,9 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'dipomex' => [
+        'base_uri' => 'https://api.tau.com.mx/dipomex/v1',
+        'apikey'   => env('DIPOMEX_APIKEY'),
+    ],
 
 ];
