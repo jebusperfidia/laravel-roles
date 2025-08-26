@@ -6,7 +6,6 @@ use App\Models\Valuation;
 use Livewire\Component;
 use Illuminate\Support\Facades\Session;
 use App\Models\User;
-use App\Models\Assignament;
 use App\Models\Assignment;
 use Masmerise\Toaster\Toaster;
 
@@ -205,7 +204,7 @@ class GeneralInfo extends Component
         //hacemos la validación final enviando 3 atributos, el primero las reglas
         //el segundo un atributo para no reemplazar los mensajes de validación
         //Y el tercero es para obtener los valores de los atributos traducidos
-        $this->validate($rules, [],      $this->validationAttributes());
+        $this->validate($rules, [], $this->validationAttributes());
 
     }
 

@@ -4,41 +4,53 @@
     <flux:separator variant="subtle" />
 
     <div>
-            {{-- <a href={{route('user.index')}} class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300">
-                Regresar
-            </a> --}}
-        <flux:button class="btn-intermediary" href="{{ route('user.index') }}" variant="primary">Regresar</flux:button>
-           <div class="w-150">
+
+        <flux:button class="btn-intermediary mb-6" href="{{ route('user.index') }}" variant="primary">Regresar</flux:button>
+        <div class="w-150">
             <form wire:submit='save' class="mt-6 space-y-6">
-               <flux:input wire:model='name' label="Nombre" placeholder="Nombre" />
-               <flux:input wire:model='email' label="Email"  type="email" placeholder="Email" />
-               <label for="tipo" class="flux-label text-sm">Tipo de usuario</label>
-               <flux:select wire:model="type" class="mt-2 text-gray-800 [&_option]:text-gray-900">
+                <flux:field class="flux-field">
+                    <flux:label>Nombre</flux:label>
+                    <flux:input type="text" wire:model='name' placeholder="Nombre" />
+                    <div class="error-container">
+                        <flux:error name="name" />
+                    </div>
+                </flux:field>
+                <flux:field class="flux-field">
+                    <flux:label>Email</flux:label>
+                    <flux:input type="email" wire:model='email' placeholder="Email" />
+                    <div class="error-container">
+                        <flux:error name="email" />
+                    </div>
+                </flux:field>
+                <flux:field class="flux-field">
+                    <flux:label>Tipo de usuario</flux:label>
+                    <flux:select wire:model="type" class=" text-gray-800 [&_option]:text-gray-900">
                         <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                         <flux:select.option value="Administrador">Administrador</flux:select.option>
                         <flux:select.option value="Operador">Operador</flux:select.option>
-                </flux:select>
-                 @error('type')
-                   {{--  <p class="text-sm text-red-600">El campo tipo de avalúo es obligatorio.</p> --}}
-                    <div role="alert" aria-live="polite" aria-atomic="true"
-                        class="text-sm font-medium rounded-md flex items-center gap-2"
-                        data-flux-error="">
-                    <!-- Ícono triangular de advertencia -->
-                    <svg class="shrink-0 size-5 inline" xmlns="http://www.w3.org/2000/svg"
-                         viewBox="0 0 20 20" fill="#FA2C37" aria-hidden="true" data-slot="icon">
-                      <path fill-rule="evenodd"
-                            d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
-                            clip-rule="evenodd"></path>
-                    </svg>
-                    <!-- Mensaje -->
-                    <span class="text-[#FA2C37]">El campo tipo de usuario es obligatirio.</span>
+                    </flux:select>
+                    <div class="error-container">
+                        <flux:error name="type"/>
                     </div>
-                    @enderror
-               <flux:input wire:model='password' label="Password"  type="password" placeholder="Password" />
-               <flux:input wire:model='confirmar_password' label="Confirmar password"  type="password" placeholder="Confirmar Password" />
-                <flux:button class="mt-10 cursor-pointer btn-primary" type="submit" variant="primary">Guardar usuario</flux:button>
+                </flux:field>
+                <flux:field class="flux-field">
+                    <flux:label>Password</flux:label>
+                    <flux:input type="password" wire:model='password' placeholder="Password" />
+                    <div class="error-container">
+                        <flux:error name="password" />
+                    </div>
+                </flux:field>
+                <flux:field class="flux-field">
+                    <flux:label>Confirmar password</flux:label>
+                    <flux:input type="password" wire:model='confirmar_password' placeholder="Confirmar password" />
+                    <div class="error-container">
+                        <flux:error name="confirmar_password" />
+                    </div>
+                </flux:field>
+                <flux:button class="mt-10 cursor-pointer btn-primary" type="submit" variant="primary">Guardar usuario
+                </flux:button>
             </form>
-           </div>
+        </div>
     </div>
 
 </div>

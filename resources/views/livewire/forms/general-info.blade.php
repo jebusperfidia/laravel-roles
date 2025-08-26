@@ -10,46 +10,46 @@
             </div>
             <div class="form-container__content">
                 <div class="form-grid form-grid--2">
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Folio</flux:label>
                         <flux:input type="text" wire:model='gi_folio' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_folio" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Fecha de creación<span class="sup-required">*</span></flux:label>
                         <flux:input type="date" wire:model='gi_date' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_date" />
                         </div>
                     </flux:field>
                 </div>
                 <div class="form-grid form-grid--2">
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Tipo de avalúo</flux:label>
                         <flux:select wire:model="gi_type" class="text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="fiscal">Fiscal</flux:select.option>
                             <flux:select.option value="comercial">Comercial</flux:select.option>
                         </flux:select>
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_type" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Tipo de cálculo</flux:label>
                         <flux:select wire:model="gi_calculationType" class=" text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="calculation_active">Cálculos activados</flux:select.option>
                             <flux:select.option value="calculation_false">Este avalúo no realiza cálculos
                             </flux:select.option>
                         </flux:select>
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_calculationType" />
                         </div>
                     </flux:field>
                 </div>
                 <div class="form-grid form-grid--2">
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Valuador<span class="sup-required">*</span></flux:label>
                         <flux:select wire:model="gi_valuator">
                             @foreach ($users as $user)
@@ -58,11 +58,11 @@
                             </flux:select.option>
                             @endforeach
                         </flux:select>
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_valuator" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Es un pre-avalúo</flux:label>
                         <flux:checkbox wire:model.live="gi_preValuation" />
                     </flux:field>
@@ -93,7 +93,7 @@
             </div>
             <div class="form-container__content">
                 <div class="form-grid form-grid--3">
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Tipo de persona<span class="sup-required">*</span></flux:label>
                         <flux:select wire:model.live="gi_ownerTypePerson"
                             class="text-gray-800 [&_option]:text-gray-900">
@@ -101,21 +101,21 @@
                             <flux:select.option value="Fisica">Fisica</flux:select.option>
                             <flux:select.option value="Moral">Moral</flux:select.option>
                         </flux:select>
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_ownerTypePerson" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>RFC</flux:label>
                         <flux:input type="text" wire:model='gi_ownerRfc' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_ownerRfc" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>CURP</flux:label>
                         <flux:input type="text" wire:model='gi_ownerCurp' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_ownerCurp" />
                         </div>
                     </flux:field>
@@ -124,24 +124,24 @@
                 --}}
                 @unless ($gi_ownerTypePerson === 'Moral')
                 <div class="form-grid form-grid--3">
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Nombre<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_ownerName' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_ownerName" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Apellido Paterno<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_ownerFirstName' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_ownerFirstName" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Apellido Materno<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_ownerSecondName' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_ownerSecondName" />
                         </div>
                     </flux:field>
@@ -149,10 +149,10 @@
                 @endunless
                 @if ($gi_ownerTypePerson === 'Moral')
                 <div class="form-grid form-grid--3">
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Nombre de la empresa<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_ownerCompanyName' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_ownerCompanyName" />
                         </div>
                     </flux:field>
@@ -160,13 +160,13 @@
                 @endif
 
                 <div class="form-grid form-grid--3 pt-4">
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Copiar dirección del inmueble</flux:label>
                         <flux:checkbox wire:model.live="gi_copyFromProperty" />
                     </flux:field>
                 </div>
                 <div class="form-grid form-grid--3 pt-4">
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Código postal<span class="sup-required">*</span></flux:label>
                         <flux:input.group>
                             <flux:input type="text" wire:model='gi_ownerCp' />
@@ -174,59 +174,59 @@
                                 Buscar
                             </flux:button>
                         </flux:input.group>
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_ownerCp" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Entidad<span class="sup-required">*</span></flux:label>
                         <flux:select wire:model.live="gi_ownerEntity" class="text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                         </flux:select>
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_ownerEntity" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Alcaldia/municipio<span class="sup-required">*</span></flux:label>
                         <flux:select wire:model.live="gi_ownerLocality" class="text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                         </flux:select>
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_ownerLocality" />
                         </div>
                     </flux:field>
                 </div>
                 <div class="form-grid form-grid--3">
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Colonia<span class="sup-required">*</span></flux:label>
                         <flux:select wire:model.live="gi_ownerColony" class="text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                         </flux:select>
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_ownerColony" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Calle<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_ownerStreet' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_ownerStreet" />
                         </div>
                     </flux:field>
                 </div>
                 <div class="form-grid form-grid--3">
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Número exterior<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_ownerAbroadNumber' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_ownerAbroadNumber" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Número interior</flux:label>
                         <flux:input type="text" wire:model='gi_ownerInsideNumber' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_ownerInsideNumber" />
                         </div>
                     </flux:field>
@@ -257,7 +257,7 @@
             </div>
             <div class="form-container__content">
                 <div class="form-grid form-grid--3">
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Tipo de persona<span class="sup-required">*</span></flux:label>
                         <flux:select wire:model.live="gi_applicTypePerson"
                             class="text-gray-800 [&_option]:text-gray-900">
@@ -265,21 +265,21 @@
                             <flux:select.option value="Fisica">Fisica</flux:select.option>
                             <flux:select.option value="Moral">Moral</flux:select.option>
                         </flux:select>
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicTypePerson" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>RFC</flux:label>
                         <flux:input type="text" wire:model='gi_applicRfc' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicRfc" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>CURP</flux:label>
                         <flux:input type="text" wire:model='gi_applicCurp' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicCurp" />
                         </div>
                     </flux:field>
@@ -288,24 +288,24 @@
                 @unless ($gi_applicTypePerson === 'Moral')
                 <div class="form-grid form-grid--3">
 
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Nombre<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_applicName' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicName" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Apellido Paterno<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_applicFirstName' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicFirstName" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Apellido Materno<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_applicSecondName' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicSecondName" />
                         </div>
                     </flux:field>
@@ -314,20 +314,20 @@
                 @if ($gi_applicTypePerson === 'Moral')
                 <div class="form-grid form-grid--3">
 
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Nombre de la empresa<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_applicCompanyName' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicCompanyName" />
                         </div>
                     </flux:field>
                 </div>
                 @endif
                 <div class="form-grid form-grid--3">
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Número de seguridad social<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_applicNss' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicNss" />
                         </div>
                     </flux:field>
@@ -337,81 +337,81 @@
                     <h2 class="border-b-2 border-gray-300">Dirección del solicitante</h2>
                 </div>
                 <div class="form-grid form-grid--3">
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Copiar dirección del inmueble</flux:label>
                         <flux:checkbox wire:model.live="gi_copyFromProperty2" />
                     </flux:field>
                 </div>
                 <div class="form-grid form-grid--3">
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Código postal<span class="sup-required">*</span></flux:label>
                         <flux:input.group>
                             <flux:input type="text" wire:model='gi_applicCp' />
                             <flux:button wire:click='buscarCP' icon="magnifying-glass" class="cursor-pointer">
                                 Buscar</flux:button>
                         </flux:input.group>
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicCp" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Entidad<span class="sup-required">*</span></flux:label>
                         <flux:select wire:model="gi_applicEntity" class="text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="a">-- Selecciona una opción --</flux:select.option>
                         </flux:select>
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicEntity" />
                         </div>
                     </flux:field>
 
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Alcaldia/municipio<span class="sup-required">*</span></flux:label>
                         <flux:select wire:model="gi_applicLocality" class="text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="a">-- Selecciona una opción --</flux:select.option>
                         </flux:select>
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicLocality" />
                         </div>
                     </flux:field>
                 </div>
                 <div class="form-grid form-grid--3">
 
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Colonia<span class="sup-required">*</span></flux:label>
                         <flux:select wire:model.live="gi_applicColony" class="text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="a">-- Selecciona una opción --</flux:select.option>
                         </flux:select>
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicColony" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Calle<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_applicStreet' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicStreet" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Número exterior<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_applicAbroadNumber' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicAbroadNumber" />
                         </div>
                     </flux:field>
                 </div>
                 <div class="form-grid form-grid--3">
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Número interior</flux:label>
                         <flux:input type="text" wire:model='gi_applicInsideNumber' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicInsideNumber" />
                         </div>
                     </flux:field>
-                    <flux:field>
+                    <flux:field class="flux:field">
                         <flux:label>Teléfono</flux:label>
                         <flux:input type="text" wire:model='gi_applicPhone' />
-                        <div>
+                        <div class="error-container">
                             <flux:error name="gi_applicPhone" />
                         </div>
                     </flux:field>
@@ -444,13 +444,13 @@
                 </div>
                 <div class="form-container__content">
                     <div class="form-grid form-grid--3">
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Copiar dirección del propietario</flux:label>
                             <flux:checkbox wire:model.live="gi_copyFromOwner" />
                         </flux:field>
                     </div>
                     <div class="form-grid form-grid--3">
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <label for="tipo" class="flux-label text-sm">Código postal<span
                                     class="sup-required">*</span></label>
                             <flux:input.group>
@@ -458,128 +458,128 @@
                                 <flux:button wire:click='buscarCP' icon="magnifying-glass" class="cursor-pointer">Buscar
                                 </flux:button>
                             </flux:input.group>
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyCp" />
                             </div>
                         </flux:field>
 
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Entidad<span class="sup-required">*</span></flux:label>
                             <flux:select wire:model.live="gi_propertyEntity"
                                 class="text-gray-800 [&_option]:text-gray-900">
                                 <flux:select.option value="a">-- Selecciona una opción --</flux:select.option>
                             </flux:select>
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyEntity" />
                             </div>
                         </flux:field>
 
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Alcaldia/municipio<span class="sup-required">*</span></flux:label>
                             <flux:select wire:model.live="gi_propertyLocality"
                                 class="text-gray-800 [&_option]:text-gray-900">
                                 <flux:select.option value="a">-- Selecciona una opción --</flux:select.option>
                             </flux:select>
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyLocality" />
                             </div>
                         </flux:field>
                     </div>
                     {{-- Fila 7 --}}
                     <div class="form-grid form-grid--3">
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Ciudad<span class="sup-required">*</span></flux:label>
                             <flux:select wire:model.live="gi_propertyCity"
                                 class="text-gray-800 [&_option]:text-gray-900">
                                 <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                             </flux:select>
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyCity" />
                             </div>
                         </flux:field>
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Colonia<span class="sup-required">*</span></flux:label>
                             <flux:select wire:model.live="gi_propertyColony"
                                 class="text-gray-800 [&_option]:text-gray-900">
                                 <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                             </flux:select>
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyColony" />
                             </div>
                         </flux:field>
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Calle<span class="sup-required">*</span></flux:label>
                             <flux:input type="text" wire:model='gi_propertyStreet' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyStreet" />
                             </div>
                         </flux:field>
                     </div>
 
                     <div class="form-grid form-grid--3">
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Número exterior<span class="sup-required">*</span></flux:label>
                             <flux:input type="text" wire:model='gi_propertyAbroadNumber' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyAbroadNumber" />
                             </div>
                         </flux:field>
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Número interior</flux:label>
                             <flux:input type="text" wire:model='gi_propertyInsideNumber' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyInsideNumber" />
                             </div>
                         </flux:field>
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Manzana</flux:label>
                             <flux:input type="text" wire:model='gi_propertyBlock' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyBlock" />
                             </div>
                         </flux:field>
                     </div>
 
                     <div class="form-grid form-grid--3">
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Super manzana</flux:label>
                             <flux:input type="text" wire:model='gi_propertySuperBlock' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertySuperBlock" />
                             </div>
                         </flux:field>
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Lote</flux:label>
                             <flux:input type="text" wire:model='gi_propertyLot' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyLot" />
                             </div>
                         </flux:field>
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Edificio</flux:label>
                             <flux:input type="text" wire:model='gi_propertyBuilding' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyBuilding" />
                             </div>
                         </flux:field>
                     </div>
 
                     <div class="form-grid form-grid--3">
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Departamento</flux:label>
                             <flux:input type="text" wire:model='gi_propertyDepartament' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyDepartament" />
                             </div>
                         </flux:field>
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Entrada</flux:label>
                             <flux:input type="text" wire:model='gi_propertyAccess' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyAccess" />
                             </div>
                         </flux:field>
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Nivel</flux:label>
                             <flux:select wire:model.live="gi_propertyLevel"
                                 class="text-gray-800 [&_option]:text-gray-900">
@@ -590,65 +590,65 @@
                                 </flux:select.option>
                                 @endforeach
                             </flux:select>
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyLevel" />
                             </div>
                         </flux:field>
                     </div>
 
                     <div class="form-grid form-grid--3">
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Condominio</flux:label>
                             <flux:input type="text" wire:model='gi_propertyCondominium' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyCondominium" />
                             </div>
                         </flux:field>
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Entre calle</flux:label>
                             <flux:input type="text" wire:model='gi_propertyStreetBetween' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyStreetBetween" />
                             </div>
                         </flux:field>
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Y calle</flux:label>
                             <flux:input type="text" wire:model='gi_propertyAndStreet' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyAndStreet" />
                             </div>
                         </flux:field>
                     </div>
 
                     <div class="form-grid form-grid--3">
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Nombre del conjuto habitacional</flux:label>
                             <flux:input type="text" wire:model='gi_propertyHousingComplex' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyHousingComplex" />
                             </div>
                         </flux:field>
                     </div>
 
                     <div class="form-grid form-grid--3">
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Número de cuenta predial<span class="sup-required">*</span></flux:label>
                             <flux:input type="text" wire:model='gi_propertyTax' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyTax" />
                             </div>
                         </flux:field>
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Número de cuenta de agua<span class="sup-required">*</span></flux:label>
                             <flux:input type="text" wire:model='gi_propertyWaterAccount' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyWaterAccount" />
                             </div>
                         </flux:field>
                     </div>
 
                     <div class="form-grid form-grid--3">
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Tipo de inmueble<span class="sup-required">*</span></flux:label>
                             <flux:select wire:model.live="gi_propertyType"
                                 class="text-gray-800 [&_option]:text-gray-900">
@@ -659,11 +659,11 @@
                                 </flux:select.option>
                                 @endforeach
                             </flux:select>
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyType" />
                             </div>
                         </flux:field>
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Tipo de inmueble SIGAPRED<span class="sup-required">*</span></flux:label>
                             <flux:select wire:model.live="gi_propertyTypeSigapred"
                                 class="text-gray-800 [&_option]:text-gray-900">
@@ -674,11 +674,11 @@
                                 </flux:select.option>
                                 @endforeach
                             </flux:select>
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyTypeSigapred" />
                             </div>
                         </flux:field>
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Uso de suelo<span class="sup-required">*</span></flux:label>
                             <flux:select wire:model.live="gi_propertyLandUse"
                                 class="text-gray-800 [&_option]:text-gray-900">
@@ -689,14 +689,14 @@
                                 </flux:select.option>
                                 @endforeach
                             </flux:select>
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyLandUse" />
                             </div>
                         </flux:field>
                     </div>
 
                     <div class="form-grid form-grid--3">
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Tipo de vivienda<span class="sup-required">*</span></flux:label>
                             <flux:select wire:model.live="gi_propertyTypeHousing"
                                 class="text-gray-800 [&_option]:text-gray-900">
@@ -708,28 +708,28 @@
                                     escriturada
                                 </flux:select.option>
                             </flux:select>
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyTypeHousing" />
                             </div>
                         </flux:field>
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Constructor (vivienda nueva)<span class="sup-required">*</span></flux:label>
                             <flux:input type="text" wire:model='gi_propertyConstructor' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyConstructor" />
                             </div>
                         </flux:field>
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>RFC constructor (vivienda nueva)<span class="sup-required">*</span></flux:label>
                             <flux:input type="text" wire:model='gi_propertyRfcConstructor' />
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_propertyRfcConstructor" />
                             </div>
                         </flux:field>
                     </div>
 
                     <div class="form-grid form-grid--1">
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Información adicional<span class="sup-required">*</span></flux:label>
                             <flux:input type="text" wire:model='gi_propertyAdditionalData' />
                             <flux:error name="gi_propertyAdditionalData" />
@@ -764,7 +764,7 @@
                 </div>
                 <div class="form-container__content">
                     <div class="form-grid form-grid--1">
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <flux:label>Propósito del avalúo<span class="sup-required">*</span></flux:label>
                             <flux:select wire:model="gi_purpose" class="text-gray-800 [&_option]:text-gray-900">
                                 <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
@@ -778,14 +778,14 @@
                                     sobre traslado de dominio</flux:select.option>
                                 <flux:select.option value="Otro">Otro</flux:select.option>
                             </flux:select>
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_purpose" />
                             </div>
                         </flux:field>
                     </div>
 
                     <div class="form-grid form-grid--1">
-                        <div>
+                        <div class="error-container">
                             <flux:label>Propósito del avalúo para Sigapred<span class="sup-required">*</span>
                             </flux:label>
                             <flux:select wire:model="gi_purposeSigapred" class="text-gray-800 [&_option]:text-gray-900">
@@ -802,24 +802,24 @@
                                     Establecer la base gravable para el pago de derechos y construcciones inmobiliarias
                                 </flux:select.option>
                             </flux:select>
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_purposeSigapred" />
                             </div>
                         </div>
                     </div>
 
                     <div class="form-grid form-grid--1">
-                            <flux:field>
+                            <flux:field class="flux:field">
                                 <flux:label>Objeto del avalúo<span class="sup-required">*</span></flux:label>
                                 <flux:input type="text" wire:model='gi_objective' />
-                                <div>
+                                <div class="error-container">
                                     <flux:error name="gi_objective" />
                                 </div>
                             </flux:field>
                     </div>
 
                     <div class="form-grid form-grid--1">
-                        <flux:field>
+                        <flux:field class="flux:field">
                             <label for="tipo" class="flux-label text-sm">Régimen de propiedad<span
                                     class="sup-required">*</span></label>
                             <flux:select wire:model="gi_ownerShipRegime"
@@ -830,7 +830,7 @@
                                 <flux:select.option value="Moral">Privada copropiedad</flux:select.option>
                                 <flux:select.option value="Moral">Pública</flux:select.option>
                             </flux:select>
-                            <div>
+                            <div class="error-container">
                                 <flux:error name="gi_ownerShipRegime" />
                             </div>
                         </flux:field>

@@ -4,9 +4,9 @@
 
 // Genera automáticamente el array de niveles
 $levels = [
-    '-3' => 'Sótano 3',
-    '-2' => 'Sótano 2',
-    '-1' => 'Sótano 1',
+    '-3' => 'Sotano 3',
+    '-2' => 'Sotano 2',
+    '-1' => 'Sotano 1',
     '0'  => 'Planta baja',
 ];
 
@@ -18,8 +18,8 @@ return [
     // Múltiples listas de inputs en un solo archivo
     'levels' => $levels,
     'property_types' => [
-        '0' => 'Casa habitación',
-        '1'  => 'Casa habitación en condominio',
+        '0' => 'Casa habitacion',
+        '1'  => 'Casa habitacion en condominio',
         '2'  => 'Casas múltiples',
         '3'  => 'Departamento en condominio',
         '4'  => 'Edificio de productos',
@@ -27,7 +27,7 @@ return [
         '6'  => 'Nave industrial',
         '7'  => 'Oficina',
         '8'  => 'Oficina en condominio',
-        '9'  => 'Otro en construcción',
+        '9'  => 'Otro en construccion',
         '10'  => 'Terreno',
         '11'  => 'Terreno en condominio',
         '12'  => 'Vivienda recuperada'
@@ -35,8 +35,8 @@ return [
     'property_types_sigapred' => [
         '0' => 'Bodega',
         '1' => 'Cajón de estacionamiento',
-        '2' => 'Casa habitación',
-        '3' => 'Casa habitación condominio',
+        '2' => 'Casa habitacion',
+        '3' => 'Casa habitacion condominio',
         '4' => 'Centro comercial',
         '5' => 'Departamento en condominio',
         '6' => 'Edificio de departamentos',

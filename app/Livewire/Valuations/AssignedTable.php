@@ -86,7 +86,8 @@ final class AssignedTable extends PowerGridComponent
             ->add('date_formatted', fn (Valuation $model) => Carbon::parse($model->date)->format('d/m/Y'))
             ->add('type')
             ->add('folio')
-            ->add('property_type', fn (Valuation $model) => ucwords(str_replace('_', ' ', $model->property_type)));
+            /* ->add('property_type', fn (Valuation $model) => ucwords(str_replace('_', ' ', $model->property_type))); */
+            ->add('property_type');
             //->add('created_at');
     }
 
