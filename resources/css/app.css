@@ -286,6 +286,8 @@ textarea {
 
 /* ESTILOS PARA LOS FORMULARIOS DE RADIOS */
 
+
+
 .form-grid-radios {
     grid-template-columns: 40% 60%;
     align-items: center;
@@ -293,13 +295,20 @@ textarea {
     margin-bottom: 1.5rem;
 }
 
-/* El resto de las clases son las mismas de la respuesta anterior */
+/* Estilos para los textos */
 .radio-label {
     text-align: right;
     padding-right: 1rem;
     font-weight: 500;
     color: #333;
+    font-size: 14px;
 }
+
+
+.text-label-radio {
+    font-size: 12px;
+}
+
 
 /* Para los radios horizontales */
 .radio-group-horizontal {
@@ -312,6 +321,16 @@ textarea {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+}
+
+/* SOBREESCRIBIR ESTILOS PARA LOS INPUT DE CARACTERÍSTICAS URBANAS, USANDO A LA PAR .form-grid-radios */
+
+.form-grid-urban {
+    grid-template-columns: 20% 55% 25%;
+}
+
+.urban-infr {
+    margin-bottom: 0;
 }
 
 /* Estilos comunes para las etiquetas de los radio */

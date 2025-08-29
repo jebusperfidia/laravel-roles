@@ -170,7 +170,7 @@
                         <flux:label>Código postal<span class="sup-required">*</span></flux:label>
                         <flux:input.group>
                             <flux:input type="text" wire:model='gi_ownerCp' />
-                            <flux:button wire:click='buscarCP' icon="magnifying-glass" class="cursor-pointer">
+                            <flux:button wire:click='buscarCP1' icon="magnifying-glass" class="cursor-pointer">
                                 Buscar
                             </flux:button>
                         </flux:input.group>
@@ -347,7 +347,7 @@
                         <flux:label>Código postal<span class="sup-required">*</span></flux:label>
                         <flux:input.group>
                             <flux:input type="text" wire:model='gi_applicCp' />
-                            <flux:button wire:click='buscarCP' icon="magnifying-glass" class="cursor-pointer">
+                            <flux:button wire:click='buscarCP2' icon="magnifying-glass" class="cursor-pointer">
                                 Buscar</flux:button>
                         </flux:input.group>
                         <div class="error-container">
@@ -416,9 +416,9 @@
                         </div>
                     </flux:field>
                 </div>
-                @endif
             </div>
         </div>
+    @endif
 
 
 
@@ -455,7 +455,7 @@
                                     class="sup-required">*</span></label>
                             <flux:input.group>
                                 <flux:input type="text" wire:model='gi_propertyCp' />
-                                <flux:button wire:click='buscarCP' icon="magnifying-glass" class="cursor-pointer">Buscar
+                                <flux:button wire:click='buscarCP3' icon="magnifying-glass" class="cursor-pointer">Buscar
                                 </flux:button>
                             </flux:input.group>
                             <div class="error-container">

@@ -7,6 +7,7 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Session;
 use App\Models\User;
 use App\Models\Assignment;
+use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
 
 class GeneralInfo extends Component
@@ -63,6 +64,9 @@ class GeneralInfo extends Component
         $this->gi_folio = $valuation->folio;
         $this->gi_date = $valuation->date;
         $this->gi_type = $valuation->type;
+
+        $this->gi_propertyType = $valuation->property_type;
+
         //Obtenemos el nombre del valuador a partir de las consultas ya generadas
         $this->gi_valuator = User::where('id', $assignament->appraiser_id)->value('name');
     }
@@ -70,14 +74,28 @@ class GeneralInfo extends Component
     public function saveAll()
     {
 
-        //Ejecutar función con todas las reglas de validación y validaciones condicionales
-        $this->validateAllContainers();
+        //Ejecutar función con todas las reglas de validación y validaciones condicionales, guardando todo en una variable
+        $validator = $this->validateAllContainers();
+
+        //Comprobamos si se obtuvieron errores de validación
+        if ($validator->fails()) {
+            //Enviamos un mensaje en pantalla indicando que existen errores de validación
+            Toaster::error('Existen errores de validación');
+
+            //Colocamos los errores en pantalla
+            $this->setErrorBag($validator->getMessageBag());
+
+            //Hacemos un return para detener el flujo del sistema
+            return;
+        }
 
         //Aquí se ejecutará la lógica de guardado
 
+
+
         //Al finalizar, aquí se puede generar un Toaster de guardado o bien, copiar alguna otra función para redireccionar
         //y a la vez enviar un toaster
-        Toaster::success('Asignación individual generada con éxito');
+        Toaster::success('Archivos guardados con éxito con éxito');
     }
 
     //Generamos todas las reglas de validación por contenedor en un solo método, pero que contenga las validaciones condicionales
@@ -88,10 +106,10 @@ class GeneralInfo extends Component
         $container1 = [
             'gi_folio' => 'string',
             'gi_date' => 'required',
-            'gi_type' => '',
-            'gi_calculationType' => '',
+            'gi_type' => 'required',
+            'gi_calculationType' => 'required',
             'gi_valuator' => 'required',
-            'gi_preValuation' => ''
+            'gi_preValuation' => 'nullable'
         ];
 
         //VALIDACIONES CONTAINER 2
@@ -200,18 +218,36 @@ class GeneralInfo extends Component
         //Finalmente, añadiremos las reglas del contenedor 4 y 5 en nuestro arreglo general
         $rules = array_merge($rules, $container4, $container5);
 
-        //Una vez añaditas todas las reglas de validación de nuestro flujo de validaciones,
-        //hacemos la validación final enviando 3 atributos, el primero las reglas
-        //el segundo un atributo para no reemplazar los mensajes de validación
-        //Y el tercero es para obtener los valores de los atributos traducidos
-        $this->validate($rules, [], $this->validationAttributes());
+
+        //Genereamos una variable para validar posteriormente si hay algún error de validación desde el método save
+       return  Validator::make(
+            $this->all(),
+            //hacemos la validación final enviando 3 atributos, el primero las reglas
+            //el segundo un atributo para no reemplazar los mensajes de validación
+            //Y el tercero es para obtener los valores de los atributos traducidos
+            $rules,
+            [],
+            $this->validationAttributes()
+        );
 
     }
 
-    public function buscarCP()
+    public function buscarCP1()
     {
         Toaster::success('Hasta aquí todo bien');
     }
+
+    public function buscarCP2()
+    {
+        Toaster::success('Hasta aquí todo bien');
+    }
+
+
+    public function buscarCP3()
+    {
+        Toaster::success('Hasta aquí todo bien');
+    }
+
 
     //Generamos los atributos traducidos para cambiar el valor de los wire:model en los
     //mensajes de cada error de validación
