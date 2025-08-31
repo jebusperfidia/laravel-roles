@@ -328,7 +328,7 @@
                     <div class="radio-input">
                         <div class="radio-group-horizontal">
                             <flux:field class="radio-group-horizontal">
-                                <flux:checkbox wire:model='inf_allServices' class="cursor-pointer" />
+                                <flux:checkbox wire:model.live='inf_allServices' class="cursor-pointer" />
                             </flux:field>
                         </div>
                     </div>
@@ -600,7 +600,7 @@
                     </div>
                     <div class="radio-input">
                         <div class="radio-group-horizontal">
-                            <flux:radio.group wire:model.live='inf_garbageCollection'
+                            <flux:radio.group wire:model.live.debounce.150ms='inf_garbageCollection'
                                 class="radio-group-horizontal text-label-radio">
                                 <label>
                                     <flux:radio value="1" />1. Si existe
@@ -629,13 +629,13 @@
                             <flux:radio.group wire:model='inf_garbageCollectionFrecuency'
                                 class="radio-group-horizontal text-label-radio">
                                 <label>
-                                    <flux:input type="number" />
+                                    <flux:input type="text" wire:model='inf_garbageCollectionFrecuency' />
                                 </label>
                                 <label>
                                     Cada x número de días
                                 </label>
                                 <div class="flux justify-end">
-                                    <flux:error name="inf_garbageCollection" />
+                                    <flux:error name="inf_garbageCollectionFrecuency" />
                                 </div>
                             </flux:radio.group>
                         </div>
@@ -759,7 +759,7 @@
                             <div class="w-80">
                                 <div class="mb-1 text-sm font-medium text-gray-700 flex justify-center">Material</div>
                                 <flux:field>
-                                    <flux:select wire:model.live="inf_roadways"
+                                    <flux:select wire:model.live.debounce.150ms="inf_roadways"
                                         class=" text-gray-800 [&_option]:text-gray-900">
                                        {{--  <flux:select.option value="">-- Selecciona una opción --</flux:select.option> --}}
                                         <flux:select.option value="1. Terraceria">1. Terraceria</flux:select.option>
@@ -802,7 +802,7 @@
                         <div class="radio-group-horizontal flex gap-4">
                             <div class="w-80">
                                 <flux:field>
-                                    <flux:select wire:model.live="inf_sidewalks"
+                                    <flux:select wire:model.live.debounce.150ms="inf_sidewalks"
                                         class=" text-gray-800 [&_option]:text-gray-900">
                                         {{-- <flux:select.option value="">-- Selecciona una opción --</flux:select.option> --}}
                                         <flux:select.option class="flex gap-4" value="1. Concreto">1. Concreto
@@ -844,7 +844,7 @@
                         <div class="radio-group-horizontal">
                             <div class="w-80">
                                 <flux:field>
-                                    <flux:select wire:model.live="inf_curbs" class=" text-gray-800 [&_option]:text-gray-900">
+                                    <flux:select wire:model.live.debounce.150ms="inf_curbs" class=" text-gray-800 [&_option]:text-gray-900">
                                         {{-- <flux:select.option value="">-- Selecciona una opción --</flux:select.option> --}}
                                         <flux:select.option class="flex gap-4" value="1. Concreto">1. Concreto
                                         </flux:select.option>
@@ -941,7 +941,7 @@
                     </div>
                     <div class="radio-input">
                         <flux:field class="radio-group-horizontal">
-                            <flux:input type="text" wire:model='luse_mandatoryFreeArea'/>
+                            <flux:input type="text" wire:model.live.debounce.150ms='luse_mandatoryFreeArea'/>
                         </flux:field>
                     </div>
                     <div class="error-container">
@@ -954,7 +954,7 @@
                         Niveles permitidos<span class="sup-required">*</span>
                     </div>
                     <flux:field class="radio-group-horizontal">
-                        <flux:input type="text" wire:model='luse_allowedLevels' min="0" max="999" />
+                        <flux:input type="text" wire:model.live.debounce.150ms='luse_allowedLevels' min="0" max="999"  step="any" />
                     </flux:field>
                     <div class="error-container">
                         <flux:error name="luse_allowedLevels" />
@@ -968,7 +968,7 @@
                     </div>
                     <div class="radio-input">
                         <flux:field class="radio-group-horizontal">
-                            <flux:input type="text" wire:model='luse_landCoefficientArea' />
+                            <flux:input type="text" wire:model.live.debounce.150ms='luse_landCoefficientArea' readonly/>
                         </flux:field>
                     </div>
                     <div class="error-container">

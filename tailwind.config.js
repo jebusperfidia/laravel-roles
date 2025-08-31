@@ -12,6 +12,7 @@ module.exports = {
         extend: {},
     },
 
+
     plugins: [
         // Estilos oficiales para la plantilla default de Livewire-Tables
         require("livewire-tables/dist/tailwind"),

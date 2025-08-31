@@ -18,8 +18,10 @@ class UrbanFeatures extends Component
     public $cu_zoneClassification, $cu_predominantBuildings, $cu_zoneBuildingLevels, $cu_buildingUsage, $cu_zoneSaturationIndex,
     $cu_populationDensity, $cu_housingDensity, $cu_zoneSocioeconomicLevel, $cu_accessRoutesImportance, $cu_environmentalPollution;
 
+    public bool $inf_allServices = false;
+
     //Variables segundo contenedor
-    public $inf_allServices, $inf_waterDistribution, $inf_wastewaterCollection, $inf_streetStormDrainage, $inf_zoneStormDrainage,
+    public $inf_waterDistribution, $inf_wastewaterCollection, $inf_streetStormDrainage, $inf_zoneStormDrainage,
     $inf_mixedDrainageSystem, $inf_otherWaterDisposal, $inf_electricSupply, $inf_electricalConnection, $inf_publicLighting,
     $inf_naturalGas, $inf_security, $inf_garbageCollection, $inf_garbageCollectionFrecuency,$inf_telephoneService, $inf_telephoneConnection,
     $inf_roadSignage, $inf_streetNaming, $inf_roadways, $inf_roadwaysMts, $inf_roadwaysOthers, $inf_sidewalks, $inf_sidewalksMts, $inf_sidewalksOthers, $inf_curbs, $inf_curbsMts, $inf_curbsOthers;
@@ -46,19 +48,24 @@ class UrbanFeatures extends Component
             $this->inf_security = 3;
             $this->inf_garbageCollection = 2;
             //Se inicializa la variable condicional
-            $this->inf_garbageCollectionFrecuency;
+            $this->inf_garbageCollectionFrecuency = 0;
             $this->inf_telephoneService = 3;
             $this->inf_telephoneConnection = 2;
             $this->inf_roadSignage = 2;
             $this->inf_streetNaming = 2;
 
-            //Tercer contenedor
+            //Apartado tabla segundo contenedor
             $this->inf_roadways = '1. Terraceria';
             $this->inf_roadwaysMts = 0;
             $this->inf_sidewalks = '5. No presenta';
             $this->inf_sidewalksMts = 0;
             $this->inf_curbs = '3. No existe';
             $this->inf_curbsMts = 0;
+
+            //Variables tercer contenedor:
+            $this->luse_mandatoryFreeArea = 0;
+            $this->luse_allowedLevels = 0;
+            $this->luse_landCoefficientArea = 0;
 
 
         //Obtenemos los datos para diferentes input select, desde el archivo de configuración properties_inputs
@@ -133,7 +140,15 @@ class UrbanFeatures extends Component
             'inf_curbsMts'             => 'nullable|numeric|gte:0',
         ];
 
-        //Valores condicionales
+        //VALORES CONDICIONALES
+
+        //valor de recolección de basura
+        if ($this->inf_garbageCollection === '1') {
+            $container2 = array_merge(
+                $container2,
+        ['inf_garbageCollectionFrecuency' => 'required|numeric|gt:0']);
+        }
+
         if($this->inf_roadways === '6. Otros'){
             $container2 = array_merge(
                 $container2,
@@ -179,6 +194,85 @@ class UrbanFeatures extends Component
     }
 
 
+    /**
+     * Elimina todo menos dígitos y un único punto decimal
+     */
+    private function sanitizeDecimal(string $value): string
+    {
+        // 1. Quitar caracteres que no sean dígito o punto
+        $clean = preg_replace('/[^0-9.]/', '', $value);
+
+        // 2. Si hay más de un punto, mantener solo el primero
+        $parts = explode('.', $clean);
+        if (count($parts) > 1) {
+            $clean = $parts[0] . '.' . implode('', array_slice($parts, 1));
+        }
+
+        return $clean;
+    }
+
+    /**
+     * Cada vez que cambie luse_mandatoryFreeArea:
+     *  - sanea el valor
+     *  - recalcula el coeficiente
+     */
+    public function updatedLuseMandatoryFreeArea($value)
+    {
+        $this->luse_mandatoryFreeArea = $this->sanitizeDecimal($value);
+        $this->calculateLandCoefficientArea();
+    }
+
+    /**
+     * Cada vez que cambie luse_allowedLevels:
+     *  - sanea el valor
+     *  - recalcula el coeficiente
+     */
+    public function updatedLuseAllowedLevels($value)
+    {
+        $this->luse_allowedLevels = $this->sanitizeDecimal($value);
+        $this->calculateLandCoefficientArea();
+    }
+
+    /**
+     * Suma ambos campos y asigna el resultado
+     */
+    protected function calculateLandCoefficientArea(): void
+    {
+        $a = $this->luse_mandatoryFreeArea    !== ''
+            ? (float) $this->luse_mandatoryFreeArea
+            : 0;
+
+        $b = $this->luse_allowedLevels        !== ''
+            ? (float) $this->luse_allowedLevels
+            : 0;
+
+        $this->luse_landCoefficientArea = $b - ($a*.100);
+    }
+
+    //Watcher para asignar todos los servicios
+    public function updatedInfAllServices($value){
+        if($value === true) {
+            /* dd('si funciona'); */
+            $this->inf_waterDistribution = 1;
+            $this->inf_wastewaterCollection = 1;
+            $this->inf_streetStormDrainage = 1;
+            $this->inf_zoneStormDrainage = 1;
+            $this->inf_mixedDrainageSystem = 1;
+            $this->inf_otherWaterDisposal = 2;
+            $this->inf_electricSupply = 1;
+            $this->inf_electricalConnection = 1;
+            $this->inf_publicLighting = 2;
+            $this->inf_naturalGas = 1;
+            $this->inf_security = 1;
+            $this->inf_garbageCollection = 1;
+            $this->inf_garbageCollectionFrecuency = 1;
+            $this->inf_telephoneService = 1;
+            $this->inf_telephoneConnection = 1;
+            $this->inf_roadSignage = 1;
+            $this->inf_streetNaming = 1;
+        }
+    }
+
 
     // Watcher para Vialidades
     public function updatedInfRoadways($value)
@@ -203,6 +297,7 @@ class UrbanFeatures extends Component
             $this->inf_curbsMts = 0;
         }
     }
+
 
     protected function validationAttributes(): array
     {
@@ -233,6 +328,7 @@ class UrbanFeatures extends Component
             'inf_naturalGas'            => ' ',
             'inf_security'              => ' ',
             'inf_garbageCollection'     => ' ',
+            'inf_garbageCollectionFrecuency' => ' ',
             'inf_telephoneService'      => ' ',
             'inf_telephoneConnection'   => ' ',
             'inf_roadSignage'           => ' ',

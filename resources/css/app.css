@@ -333,6 +333,9 @@ textarea {
     margin-bottom: 0;
 }
 
+
+
+
 /* Estilos comunes para las etiquetas de los radio */
 .radio-group-horizontal label,
 .radio-group-vertical label {
@@ -416,4 +419,27 @@ textarea {
 
 .show-icon-custom [data-flux-icon]:hover {
     color: #000; /* text-black */
+}
+
+.form-group-horizontal-right {
+  /* 1. Convierte el div en un contenedor flexible */
+  display: flex;
+
+  /* 2. Empuja todo el contenido hacia el final (la derecha) */
+  justify-content: flex-end;
+
+  /* 3. Alinea el label y el input verticalmente al centro */
+  align-items: center;
+
+  /* 4. Crea un espacio entre el label y el input */
+  gap: 12px;
+
+
+    /* Línea añadida para solucionar el problema */
+  width: 100%;
+ }
+
+/* 1. Úsala en el div del grid para que ocupe el ancho completo */
+.form-grid--full-width {
+    max-width: none; /* Anula el max-width de 45rem */
 }
