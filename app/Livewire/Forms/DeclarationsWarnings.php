@@ -70,7 +70,6 @@ class DeclarationsWarnings extends Component
     }
 
 
-
     protected function validationAttributes(): array
     {
         return [

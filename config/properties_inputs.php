@@ -108,5 +108,12 @@ return [
         '16' => 20,
         '17' => 15,
         '18' => 10,
+    ],
+    'proximity_urban_reference' => [
+        ['clave' => '1', 'nombre' => 'Habitacional', 'descripcion' => 'Uso de vivienda unifamiliar o multifamiliar'],
+        ['clave' => '2', 'nombre' => 'Industrial',   'descripcion' => 'Naves, bodegas, talleres'],
+        ['clave' => '3', 'nombre' => 'Comercial',    'descripcion' => 'Locales, tiendas, centros de venta'],
+        ['clave' => '4', 'nombre' => 'Mixta',        'descripcion' => 'Combinación de usos'],
+        ['clave' => '5', 'nombre' => 'Otro',         'descripcion' => 'Uso no contemplado arriba'],
     ]
 ];

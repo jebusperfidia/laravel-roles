@@ -9,21 +9,21 @@
                 <div class="form-grid form-grid--3 mt-3 mb-2 text-lg">
                     <flux:field>
                         <flux:label>Latitud</flux:label>
-                        <flux:input type="number" wire:model='latitud' />
+                        <flux:input type="number" wire:model.live.debounce.500ms='latitud' />
                         <div class="error-container">
                             <flux:error name="gi_ownerShipRegime" />
                         </div>
                     </flux:field>
                     <flux:field>
                         <flux:label>Longitud</flux:label>
-                        <flux:input type="number" wire:model='longitud' />
+                        <flux:input type="number" wire:model.live.debounce.500ms='longitud' />
                         <div class="error-container">
                             <flux:error name="gi_ownerShipRegime" />
                         </div>
                     </flux:field>
                     <flux:field>
                         <flux:label>Altitud</flux:label>
-                        <flux:input type="number" wire:model='altitud' />
+                        <flux:input type="number" wire:model.live.debounce.500ms='altitud' />
                         <div class="error-container">
                             <flux:error name="gi_ownerShipRegime" />
                         </div>

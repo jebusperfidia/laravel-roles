@@ -27,7 +27,8 @@ class UrbanFeatures extends Component
     $inf_roadSignage, $inf_streetNaming, $inf_roadways, $inf_roadwaysMts, $inf_roadwaysOthers, $inf_sidewalks, $inf_sidewalksMts, $inf_sidewalksOthers, $inf_curbs, $inf_curbsMts, $inf_curbsOthers;
 
     //Variables tercer contenedor
-    public $luse_landUse, $luse_descriptionSourceLand, $luse_mandatoryFreeArea, $luse_allowedLevels, $luse_landCoefficientArea;
+    public $luse_landUse, $luse_descriptionSourceLand;
+    public int $luse_mandatoryFreeArea, $luse_allowedLevels, $luse_landCoefficientArea;
 
     public function mount(){
 
@@ -197,16 +198,16 @@ class UrbanFeatures extends Component
     /**
      * Elimina todo menos dígitos y un único punto decimal
      */
-    private function sanitizeDecimal(string $value): string
+    private function sanitizeDecimal(int $value): int
     {
         // 1. Quitar caracteres que no sean dígito o punto
         $clean = preg_replace('/[^0-9.]/', '', $value);
 
-        // 2. Si hay más de un punto, mantener solo el primero
+       /*  // 2. Si hay más de un punto, mantener solo el primero
         $parts = explode('.', $clean);
         if (count($parts) > 1) {
             $clean = $parts[0] . '.' . implode('', array_slice($parts, 1));
-        }
+        } */
 
         return $clean;
     }
@@ -218,6 +219,10 @@ class UrbanFeatures extends Component
      */
     public function updatedLuseMandatoryFreeArea($value)
     {
+        if ($value === null) {
+            $this->luse_mandatoryFreeArea = 0;
+            return;
+        }
         $this->luse_mandatoryFreeArea = $this->sanitizeDecimal($value);
         $this->calculateLandCoefficientArea();
     }
@@ -229,6 +234,10 @@ class UrbanFeatures extends Component
      */
     public function updatedLuseAllowedLevels($value)
     {
+        if ($value === null) {
+            $this->luse_allowedLevels = 0;
+            return;
+        }
         $this->luse_allowedLevels = $this->sanitizeDecimal($value);
         $this->calculateLandCoefficientArea();
     }
