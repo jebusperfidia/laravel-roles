@@ -941,7 +941,7 @@
                     </div>
                     <div class="radio-input">
                         <flux:field class="radio-group-horizontal">
-                            <flux:input type="number" wire:model.live.debounce.500ms='luse_mandatoryFreeArea'/>
+                            <flux:input type="number" wire:model.live.debounce.800ms='luse_mandatoryFreeArea'/>
                         </flux:field>
                     </div>
                     <div class="error-container">
@@ -954,7 +954,7 @@
                         Niveles permitidos<span class="sup-required">*</span>
                     </div>
                     <flux:field class="radio-group-horizontal">
-                        <flux:input type="number" wire:model.live.debounce.500ms='luse_allowedLevels' min="0" max="999"  step="any" />
+                        <flux:input type="number" wire:model.live.debounce.800ms='luse_allowedLevels' min="0" max="999"  step="any" />
                     </flux:field>
                     <div class="error-container">
                         <flux:error name="luse_allowedLevels" />

@@ -6,6 +6,8 @@ use Livewire\Component;
 
 class ConstructionElements extends Component
 {
+    public $sli_dateDeed = '';
+    public $sli_notaryDeed = '';
 
     // 1. Estado del tab activo
     public string $activeTab = 'obra_negra';
@@ -21,6 +23,23 @@ class ConstructionElements extends Component
     {
         $this->activeTab = $tab;
     }
+
+
+    // Método para el campo de fecha
+    public function appendDate(string $textToAppend): void
+    {
+        // Si el textarea no está vacío, añade un espacio antes del nuevo texto.
+        $prefix = !empty($this->sli_dateDeed) ? ' ' : '';
+        $this->sli_dateDeed .= $prefix . $textToAppend;
+    }
+
+    // Método para el campo de notario
+    public function appendNotary(string $textToAppend): void
+    {
+        $prefix = !empty($this->sli_notaryDeed) ? ' ' : '';
+        $this->sli_notaryDeed .= $prefix . $textToAppend;
+    }
+
 
     public function render()
     {

@@ -71,7 +71,7 @@
 
                     {{-- Obra negra --}}
                     @if ($activeTab === 'obra_negra')
-                    {{-- <h2 class="text-lg font-semibold mb-4">Obra negra</h2>
+                    <h2 class="text-lg font-semibold mb-4">Obra negra</h2>
                     <table class="w-full table-auto border">
                         <thead>
                             <tr class="bg-gray-100">
@@ -89,133 +89,9 @@
                                 </td>
                                 <td class="px-2 py-1 border">$</td>
                             </tr>
-
+                            {{-- ... más filas --}}
                         </tbody>
-                    </table> --}}
-
-
-
-                    <div>
-
-
-
-
-                        <div class="form-grid form-grid--2">
-                            <flux:field class="flux:field">
-                                <flux:label>Fecha<span class="sup-required">*</span></flux:label>
-
-                                {{-- 1. Contenedor relativo para posicionar el botón y el menú --}}
-                                <div class="relative w-full">
-
-                                    {{-- Usamos flux:textarea normalmente, con su wire:model --}}
-                                    <flux:textarea wire:model='sli_dateDeed'
-                                        placeholder="Escribe o selecciona una fecha..." />
-
-                                    {{-- 2. Dropdown de Flux UI para el menú --}}
-                                    <flux:dropdown class="absolute top-0 right-0 mt-2 mr-2">
-                                        {{-- 3. Botón que activa el dropdown (nuestra flecha) --}}
-                                        <button type="button"
-                                            class="inline-flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-pointer bl-2">
-                                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                fill="currentColor">
-                                                <path fill-rule="evenodd"
-                                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                        </button>
-
-                                        {{-- 4. Contenido del menú desplegable --}}
-                                        <flux:menu class="w-48">
-                                            {{-- 5. Opciones del menú. Cada una llama a un método en el componente
-                                            Livewire --}}
-                                            <flux:menu.item class="cursor-pointer menu-item-personalized"
-                                                wire:click.prevent="appendDate('{{ now()->toDateString() }}')">
-                                                <span>Fecha de Hoy</span>
-                                            </flux:menu.item>
-                                            <flux:menu.item class="cursor-pointer menu-item-personalized"
-                                                wire:click.prevent="appendDate('{{ now()->subDay()->toDateString() }}')">
-                                                <span>Fecha de Ayer</span>
-                                            </flux:menu.item>
-                                            {{--
-                                            <flux:menu.separator /> --}}
-                                            <flux:menu.item class="cursor-pointer menu-item-personalized"
-                                                wire:click.prevent="appendDate('S/F')">
-                                                <span>Sin Fecha (S/F)</span>
-                                            </flux:menu.item>
-                                        </flux:menu>
-                                    </flux:dropdown>
-
-                                </div>
-                                <div class="error-container">
-                                    <flux:error name="sli_dateDeed" />
-                                </div>
-                            </flux:field>
-
-                            <flux:field class="flux:field">
-                                <flux:label>Notario<span class="sup-required">*</span></flux:label>
-                                <div class="relative w-full">
-                                    <div class="relative">
-                                        <!-- 1) Padding right para dejar espacio al botón -->
-                                        <flux:textarea wire:model="sli_notaryDeed" placeholder="Nombre del notario..."
-                                            class="w-full pr-10" />
-
-                                        <!-- 2) Contenedor absoluto que ocupa todo el alto y centra el contenido -->
-                                        <div class="absolute inset-y-0 right-0 pr-2 flex items-center">
-                                            <flux:dropdown align="right">
-                                                <button type="button"
-                                                    class="inline-flex items-center justify-center text-gray-400 hover:text-gray-400 cursor-pointer">
-                                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fill-rule="evenodd"
-                                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4‐4a1 1 0 010‐1.414z"
-                                                            clip-rule="evenodd" />
-                                                    </svg>
-                                                </button>
-                                                <flux:menu class="w-56">
-                                                    <flux:menu.item class="cursor-pointer"
-                                                        wire:click.prevent="appendNotary('Lic. Juan Pérez')">
-                                                        <span>Lic. Juan Pérez (Notaría 5)</span>
-                                                    </flux:menu.item>
-                                                    <flux:menu.item class="cursor-pointer"
-                                                        wire:click.prevent="appendNotary('Lic. Ana García')">
-                                                        <span>Lic. Ana García (Notaría 12)</span>
-                                                    </flux:menu.item>
-                                                </flux:menu>
-                                            </flux:dropdown>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="error-container">
-                                    <flux:error name="sli_notaryDeed" />
-                                </div>
-                            </flux:field>
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    </div>
-
-
+                    </table>
                     @endif
 
                     {{-- Acabados 1 --}}

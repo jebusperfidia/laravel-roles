@@ -45,7 +45,7 @@
                             </button>
 
                             {{-- MENÚ --}}
-                            <flux:menu class="absolute left-0 top-full mt-1 w-full bg-white
+                            <flux:menu class="absolute left-0 top-full mt-1 w-3/5 bg-white
                                border border-gray-200 rounded-md shadow-lg z-10">
 
                                 <flux:menu.item disabled>
@@ -60,7 +60,7 @@
 
                                 {{-- “Ninguno” --}}
                                 <flux:menu.item wire:click="$set('urbanProximity','')" class="block w-full px-2 py-2 cursor-pointer
-                       hover:bg-gray-100 transition-colors">
+                       hover:bg-gray-100 transition-colors menu-item-personalized ">
                                     <div class="w-full grid grid-cols-[20%_30%_50%]">
                                         <span class="text-left">0</span>
                                         <span class="text-left">Ninguna </span>
@@ -70,7 +70,7 @@
 
                                 @foreach($usages as $item)
                                 <flux:menu.item wire:click="$set('urbanProximity','{{ $item['clave'] }}')" class="block w-full px-2 py-2 cursor-pointer
-                         hover:bg-gray-100 transition-colors
+                         hover:bg-gray-100 transition-colors menu-item-personalized
                          {{ $urbanProximity == $item['clave'] ? 'bg-gray-100' : '' }}">
                                     <div class="w-full grid grid-cols-[20%_30%_50%]">
                                         <span class="text-left">{{ $item['clave'] }}</span>

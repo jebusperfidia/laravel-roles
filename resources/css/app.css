@@ -443,3 +443,16 @@ textarea {
 .form-grid--full-width {
     max-width: none; /* Anula el max-width de 45rem */
 }
+
+
+
+/* ESTILOS PARA ELEMENTOS DE CONSTRUCCION */
+.menu-item-personalized {
+  padding: 0.5rem 1rem;               /* ajusta el padding si lo necesitas */
+  transition: background-color .2s;
+}
+
+.menu-item-personalized:hover {
+  background-color: #c0c0c0;         /* equivale a gray-100 en Tailwind */
+  color: #1f2937;                    /* gray-800, opcional si quieres cambiar el texto */
+}

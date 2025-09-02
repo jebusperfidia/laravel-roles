@@ -110,10 +110,10 @@ return [
         '18' => 10,
     ],
     'proximity_urban_reference' => [
-        ['clave' => '1', 'nombre' => 'Habitacional', 'descripcion' => 'Uso de vivienda unifamiliar o multifamiliar'],
-        ['clave' => '2', 'nombre' => 'Industrial',   'descripcion' => 'Naves, bodegas, talleres'],
-        ['clave' => '3', 'nombre' => 'Comercial',    'descripcion' => 'Locales, tiendas, centros de venta'],
-        ['clave' => '4', 'nombre' => 'Mixta',        'descripcion' => 'Combinación de usos'],
-        ['clave' => '5', 'nombre' => 'Otro',         'descripcion' => 'Uso no contemplado arriba'],
+        ['clave' => '1', 'nombre' => 'Centrica', 'descripcion' => 'Zonas limitadas generalmente por vía primarias, definidas por la autoridad como zona centro'],
+        ['clave' => '2', 'nombre' => 'Intermedia',   'descripcion' => 'Se trata de una proximidad definida a partir de vias primarias limitadas generalmente por vialidades de velocidad intermedia'],
+        ['clave' => '3', 'nombre' => 'Periférica',    'descripcion' => 'Se encuentra su acceso y límite mediante vías rápidas, en la mayoria de los casos reconocida como zona urbana de crecimiento inmediato, forma parte de la ciudad'],
+        ['clave' => '4', 'nombre' => 'De expansión',  'descripcion' => 'Zona reconocida por la autoridad como de crecimiento potencial, en muchos casos no se encuentra definido su uso de suelo y se encuentra en proceso de reconomcimiento, en función de su crecimiento, próxima a ser parte de la ciudad'],
+        ['clave' => '5', 'nombre' => 'Rural',         'descripcion' => 'Reconocido por la autoridad como de uso agrícola o sin dotación de servicios'],
     ]
 ];
