@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Valuations;
 
+use App\Models\Valuation;
 use App\Models\Assignment;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,6 +13,8 @@ use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use Illuminate\Support\Facades\Auth;
+use Masmerise\Toaster\Toaster;
+use Livewire\Attributes\On;
 
 final class CapturedTable extends PowerGridComponent
 {
@@ -114,9 +117,9 @@ final class CapturedTable extends PowerGridComponent
                 ->searchable()
                 ->sortable(),
 
-            Column::make('Operador', 'operator_name')
+           /*  Column::make('Operador', 'operator_name')
                 ->searchable()
-                ->sortable(),
+                ->sortable(), */
 
             Column::action('Acciones')
         ];
@@ -127,11 +130,22 @@ final class CapturedTable extends PowerGridComponent
         return [];
     }
 
-/*     #[\Livewire\Attributes\On('edit')]
-    public function edit($rowId): void
+    #[on('deleteValuation')]
+    public function deleteValuation($rowId): void
     {
-        $this->js('alert(' . $rowId . ')');
-    } */
+        //dd($id, Valuation::find($id));
+        $valuation = Valuation::find($rowId);
+        //dd($valuation);
+        $valuation?->delete();
+        /*  session()->flash("info", "Usuario eliminado con éxito");
+        // Fuerza una recarga de página y muestra el mensaje */
+        Toaster::error('Avalúo eliminado con éxito');
+        //$this->emitUp('$refresh');
+        $this->dispatch('refreshValuationsIndex');
+        //redirect()->route('dashboard', ['currentView' => 'captured']);
+        //$this->dispatch('pg:eventRefresh-' . $this->tableName);
+    }
+
 
     public function actions(Assignment $row): array
     {
@@ -148,7 +162,15 @@ final class CapturedTable extends PowerGridComponent
                 ->id()
                 ->class('cursor-pointer btn-change btn-table')
                 ->dispatch('openStatusModal', ['Id' => $row->id])
-                ->can($this->user->type === 'Administrador')
+                ->can($this->user->type === 'Administrador'),
+
+            Button::add()
+                ->confirm('¿Estás seguro de eliminar el avalúo?')
+                ->slot('Eliminar')
+                ->id()
+                ->class('cursor-pointer btn-deleted btn-table pr-3')
+                ->dispatch('deleteValuation', ['rowId' => $row->id])
+                ->can($this->user->type === 'Administrador'),
         ];
     }
 

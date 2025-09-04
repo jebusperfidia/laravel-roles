@@ -4,267 +4,159 @@
             Elementos de la construcción
         </div>
         <div class="form-container__content">
-
             <div class="flex flex-col w-full h-full">
 
-                {{-- Contenedor del Navbar con Alpine.js para la responsividad --}}
-                {{-- CAMBIO 2: Se añade un margen inferior (mb-4) para separar la barra del contenido --}}
-                <div x-data="{ open: false }" class="relative md:flex md:items-center md:justify-between mb-4">
+                {{-- Navbar responsivo con hamburguesa --}}
+                <div x-data="{ open: false }" class="w-full">
+                    @php
+                    $tabs = [
+                    'obra_negra' => 'Obra negra',
+                    'acabados1' => 'Acabados 1',
+                    'acabados2' => 'Acabados 2',
+                    'carpinteria' => 'Carpintería',
+                    'hidraulicas' => 'Hidráulicas y sanitarias',
+                    'herreria' => 'Herrería',
+                    'otros' => 'Otros elementos',
+                    ];
+                    $lastKey = array_key_last($tabs);
+                    @endphp
 
-                    {{-- Botón de "hamburguesa" para vista móvil (sin cambios) --}}
-                    <div class="flex items-center justify-between w-full p-2 border-b md:hidden">
-                        <span class="font-semibold text-gray-700">Menú de Secciones</span>
-                        <button @click="open = !open" class="text-gray-600 hover:text-gray-800 focus:outline-none">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 6h16M4 12h16m-7 6h7"></path>
-                            </svg>
-                        </button>
-                    </div>
-
-                    {{--
-                    CAMBIO 2 (CONTINUACIÓN): El borde inferior ahora es más discreto (border-gray-200)
-                    y solo se aplica a la barra principal, no a cada elemento.
-                    --}}
-                    <flux:navbar :class="{'hidden': !open, 'flex': open}"
-                        class="flex-col w-full mt-2 md:flex md:flex-row md:items-center md:mt-0 md:border-b md:border-gray-200 absolute md:relative z-10 bg-white shadow-md md:shadow-none rounded-md p-2 md:p-0">
-                        @php
-                        $tabs = [
-                        'obra_negra' => 'Obra negra',
-                        'acabados1' => 'Acabados 1',
-                        'acabados2' => 'Acabados 2',
-                        'carpinteria' => 'Carpintería',
-                        'hidraulicas' => 'Hidráulicas y sanitarias',
-                        'herreria' => 'Herrería',
-                        'otros' => 'Otros elementos',
-                        ];
-                        @endphp
+                    {{-- Navbar para pantallas grandes (≥950px) --}}
+                    <flux:navbar class="hidden xl:flex bg-white border-b-2">
                         @foreach ($tabs as $key => $label)
-                        <flux:navbar.item wire:click.prevent="setTab('{{ $key }}')" @click="open = false"
-                            :active="$activeTab === '{{ $key }}'" {{-- Se eliminaron los bordes de separación de aquí
-                            --}}
-                            class="cursor-pointer mb-4 px-4 py-3 md:py-2 transition-colors
-                                {{ $activeTab === $key
-                                    ? 'border-b-2 border-[#43A497] text-[#3A8B88] font-semibold bg-gray-50 md:bg-transparent'
-                                    : 'text-gray-600 hover:text-[#5CBEB4] hover:bg-gray-50 md:hover:bg-transparent' }}">
+                        <flux:navbar.item wire:click.prevent="setTab('{{ $key }}')"
+                            :active="$activeTab === '{{ $key }}'" class="cursor-pointer px-4 py-2 transition-colors
+                                    {{ $activeTab === $key
+                                        ? 'border-b-2 border-[#43A497] text-[#3A8B88] font-semibold'
+                                        : 'text-gray-600 hover:text-[#5CBEB4]' }}">
                             {{ $label }}
                         </flux:navbar.item>
 
-                        {{--
-                        CAMBIO 3: Se añade un punto como separador minimalista.
-                        - Se muestra solo en pantallas de escritorio ('hidden md:inline').
-                        - Se usa la variable $loop->last de Blade para no añadir un punto después del último elemento.
-                        --}}
-                        @if (!$loop->last)
-                        <span class="hidden md:inline text-gray-300 mx-2">&bull;</span>
+                        @if ($key !== $lastKey)
+                        <span class="text-gray-300 select-none self-center">•</span>
                         @endif
                         @endforeach
                     </flux:navbar>
+
+                    {{-- Menú hamburguesa para pantallas pequeñas (<950px) --}} <div
+                        class="xl:hidden flex justify-end p-4 bg-white border-b-2">
+                        {{-- <span class="text-lg font-semibold text-[#3A8B88]">Opciones</span> --}}
+                        <button @click="open = !open" class="text-[#000000] focus:outline-none cursor-pointer">
+                            <template x-if="!open">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </template>
+                            <template x-if="open">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </template>
+                        </button>
                 </div>
 
-                {{--
-                CAMBIO 1: El contenido de aquí en adelante no fue modificado en absoluto,
-                tal como lo solicitaste.
-                --}}
-                <div class="w-full flex-1 p-4 overflow-auto">
-
-                    {{-- Obra negra --}}
-                    @if ($activeTab === 'obra_negra')
-                    {{-- <h2 class="text-lg font-semibold mb-4">Obra negra</h2>
-                    <table class="w-full table-auto border">
-                        <thead>
-                            <tr class="bg-gray-100">
-                                <th class="px-2 py-1 border">Ítem</th>
-                                <th class="px-2 py-1 border">Cantidad</th>
-                                <th class="px-2 py-1 border">Costo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="px-2 py-1 border">Ladrillo</td>
-                                <td class="px-2 py-1 border">
-                                    <input type="number" wire:model.defer="obraNegra.ladrillo"
-                                        class="w-24 border rounded px-1 py-0.5">
-                                </td>
-                                <td class="px-2 py-1 border">$</td>
-                            </tr>
-
-                        </tbody>
-                    </table> --}}
-
-
-
-                    <div>
-
-
-
-
-                        <div class="form-grid form-grid--2">
-                            <flux:field class="flux:field">
-                                <flux:label>Fecha<span class="sup-required">*</span></flux:label>
-
-                                {{-- 1. Contenedor relativo para posicionar el botón y el menú --}}
-                                <div class="relative w-full">
-
-                                    {{-- Usamos flux:textarea normalmente, con su wire:model --}}
-                                    <flux:textarea wire:model='sli_dateDeed'
-                                        placeholder="Escribe o selecciona una fecha..." />
-
-                                    {{-- 2. Dropdown de Flux UI para el menú --}}
-                                    <flux:dropdown class="absolute top-0 right-0 mt-2 mr-2">
-                                        {{-- 3. Botón que activa el dropdown (nuestra flecha) --}}
-                                        <button type="button"
-                                            class="inline-flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-pointer bl-2">
-                                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                fill="currentColor">
-                                                <path fill-rule="evenodd"
-                                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                        </button>
-
-                                        {{-- 4. Contenido del menú desplegable --}}
-                                        <flux:menu class="w-48">
-                                            {{-- 5. Opciones del menú. Cada una llama a un método en el componente
-                                            Livewire --}}
-                                            <flux:menu.item class="cursor-pointer menu-item-personalized"
-                                                wire:click.prevent="appendDate('{{ now()->toDateString() }}')">
-                                                <span>Fecha de Hoy</span>
-                                            </flux:menu.item>
-                                            <flux:menu.item class="cursor-pointer menu-item-personalized"
-                                                wire:click.prevent="appendDate('{{ now()->subDay()->toDateString() }}')">
-                                                <span>Fecha de Ayer</span>
-                                            </flux:menu.item>
-                                            {{--
-                                            <flux:menu.separator /> --}}
-                                            <flux:menu.item class="cursor-pointer menu-item-personalized"
-                                                wire:click.prevent="appendDate('S/F')">
-                                                <span>Sin Fecha (S/F)</span>
-                                            </flux:menu.item>
-                                        </flux:menu>
-                                    </flux:dropdown>
-
-                                </div>
-                                <div class="error-container">
-                                    <flux:error name="sli_dateDeed" />
-                                </div>
-                            </flux:field>
-
-                            <flux:field class="flux:field">
-                                <flux:label>Notario<span class="sup-required">*</span></flux:label>
-                                <div class="relative w-full">
-                                    <div class="relative">
-                                        <!-- 1) Padding right para dejar espacio al botón -->
-                                        <flux:textarea wire:model="sli_notaryDeed" placeholder="Nombre del notario..."
-                                            class="w-full pr-10" />
-
-                                        <!-- 2) Contenedor absoluto que ocupa todo el alto y centra el contenido -->
-                                        <div class="absolute inset-y-0 right-0 pr-2 flex items-center">
-                                            <flux:dropdown align="right">
-                                                <button type="button"
-                                                    class="inline-flex items-center justify-center text-gray-400 hover:text-gray-400 cursor-pointer">
-                                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fill-rule="evenodd"
-                                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4‐4a1 1 0 010‐1.414z"
-                                                            clip-rule="evenodd" />
-                                                    </svg>
-                                                </button>
-                                                <flux:menu class="w-56">
-                                                    <flux:menu.item class="cursor-pointer"
-                                                        wire:click.prevent="appendNotary('Lic. Juan Pérez')">
-                                                        <span>Lic. Juan Pérez (Notaría 5)</span>
-                                                    </flux:menu.item>
-                                                    <flux:menu.item class="cursor-pointer"
-                                                        wire:click.prevent="appendNotary('Lic. Ana García')">
-                                                        <span>Lic. Ana García (Notaría 12)</span>
-                                                    </flux:menu.item>
-                                                </flux:menu>
-                                            </flux:dropdown>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="error-container">
-                                    <flux:error name="sli_notaryDeed" />
-                                </div>
-                            </flux:field>
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    </div>
-
-
-                    @endif
-
-                    {{-- Acabados 1 --}}
-                    @if ($activeTab === 'acabados1')
-                    <h2 class="text-lg font-semibold mb-4">Acabados 1</h2>
-                    <div class="space-y-3">
-                        <label class="block">
-                            Tipo de pasta:
-                            <input type="text" wire:model.defer="acabados1.pasta"
-                                class="border rounded w-full px-2 py-1">
-                        </label>
-                        <label class="block">
-                            Espesor (mm):
-                            <input type="number" wire:model.defer="acabados1.espesor"
-                                class="border rounded w-full px-2 py-1">
-                        </label>
-                    </div>
-                    @endif
-
-                    {{-- El resto de tus vistas de tabs no necesita cambios --}}
-                    @if ($activeTab === 'acabados2')
-                    <h2 class="text-lg font-semibold mb-4">Acabados 2</h2>
-                    <p>Aquí puedes poner selects, sliders, lo que necesites.</p>
-                    @endif
-                    @if ($activeTab === 'carpinteria')
-                    <h2 class="text-lg font-semibold mb-4">Carpintería</h2>
-                    <textarea wire:model.defer="carpinteria.notas" class="border rounded w-full h-32 p-2"
-                        placeholder="Descripción de carpintería..."></textarea>
-                    @endif
-                    @if ($activeTab === 'hidraulicas')
-                    <h2 class="text-lg font-semibold mb-4">Hidráulicas y sanitarias</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="text" wire:model.defer="hidraulicas.tuberia" placeholder="Tipo de tubería"
-                            class="border rounded p-2">
-                        <input type="number" wire:model.defer="hidraulicas.diametro" placeholder="Diámetro (mm)"
-                            class="border rounded p-2">
-                    </div>
-                    @endif
-                    @if ($activeTab === 'herreria')
-                    <h2 class="text-lg font-semibold mb-4">Herrería</h2>
-                    <p>Define aquí tus inputs, tablas o lo que requieras.</p>
-                    @endif
-                    @if ($activeTab === 'otros')
-                    <h2 class="text-lg font-semibold mb-4">Otros elementos</h2>
-                    <p>Más campos extras u observaciones.</p>
-                    @endif
+                {{-- Menú desplegable en móvil --}}
+                <div x-show="open" x-transition class="xl:hidden bg-white border-b border-gray-200">
+                    <ul class="flex flex-col divide-y divide-gray-100">
+                        @foreach ($tabs as $key => $label)
+                        <li>
+                            <button wire:click.prevent="setTab('{{ $key }}')" @click="open = false" class="cursor-pointer w-full text-left px-4 py-3 transition-colors
+                                            {{ $activeTab === $key
+                                                ? 'border-l-4 border-[#43A497] bg-[#F0FDFD] text-[#3A8B88] font-semibold'
+                                                : 'text-gray-700 hover:bg-gray-100' }}">
+                                {{ $label }}
+                            </button>
+                        </li>
+                        @endforeach
+                    </ul>
                 </div>
+            </div>
+
+            {{-- Contenedor de contenido al 100% del ancho y alto disponible --}}
+            <div class="w-full flex-1 p-4 overflow-auto">
+
+                {{-- Obra negra --}}
+                @if ($activeTab === 'obra_negra')
+                <h2 class="text-lg font-semibold mb-4">Obra negra</h2>
+                <table class="w-full table-auto border">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="px-2 py-1 border">Ítem</th>
+                            <th class="px-2 py-1 border">Cantidad</th>
+                            <th class="px-2 py-1 border">Costo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="px-2 py-1 border">Ladrillo</td>
+                            <td class="px-2 py-1 border">
+                                <input type="number" wire:model.defer=" " class="w-24 border rounded px-1 py-0.5">
+                            </td>
+                            <td class="px-2 py-1 border">$</td>
+                        </tr>
+                        {{-- ... más filas --}}
+                    </tbody>
+                </table>
+                @endif
+
+                {{-- Acabados 1 --}}
+                @if ($activeTab === 'acabados1')
+                <h2 class="text-lg font-semibold mb-4">Acabados 1</h2>
+                <div class="space-y-3">
+                    <label class="block">
+                        Tipo de pasta:
+                        <input type="text" wire:model.live="acabados1_pasta" class="border rounded w-full px-2 py-1">
+                    </label>
+                    <label class="block">
+                        Espesor (mm):
+                        <input type="number" wire:model.live="acabados1_espesor"
+                            class="border rounded w-full px-2 py-1">
+                    </label>
+                </div>
+                @endif
+
+                {{-- Acabados 2 --}}
+                @if ($activeTab === 'acabados2')
+                <h2 class="text-lg font-semibold mb-4">Acabados 2</h2>
+                <p>Aquí puedes poner selects, sliders, lo que necesites.</p>
+                @endif
+
+                {{-- Carpintería --}}
+                @if ($activeTab === 'carpinteria')
+                <h2 class="text-lg font-semibold mb-4">Carpintería</h2>
+                <textarea wire:model.live="carpinteria_notas" class="border rounded w-full h-32 p-2"
+                    placeholder="Descripción de carpintería..."></textarea>
+                @endif
+
+                {{-- Hidráulicas y sanitarias --}}
+                @if ($activeTab === 'hidraulicas')
+                <h2 class="text-lg font-semibold mb-4">Hidráulicas y sanitarias</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="text" wire:model.live="hidraulicas_tuberia" placeholder="Tipo de tubería"
+                        class="border rounded p-2">
+                    <input type="number" wire:model.defer="hidraulicas_diametro" placeholder="Diámetro (mm)"
+                        class="border rounded p-2">
+                </div>
+                @endif
+
+                {{-- Herrería --}}
+                @if ($activeTab === 'herreria')
+                <h2 class="text-lg font-semibold mb-4">Herrería</h2>
+                <p>Define aquí tus inputs, tablas o lo que requieras.</p>
+                @endif
+
+                {{-- Otros elementos --}}
+                @if ($activeTab === 'otros')
+                <h2 class="text-lg font-semibold mb-4">Otros elementos</h2>
+                <p>Más campos extras u observaciones.</p>
+                @endif
+
             </div>
         </div>
     </div>
-    <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos</flux:button>
+</div>
+
+<flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos</flux:button>
 </div>

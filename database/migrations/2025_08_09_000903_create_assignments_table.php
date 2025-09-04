@@ -18,19 +18,19 @@ return new class extends Migration
                 //Tabla de referencia
                 ->constrained('valuations')
                 //Si se elimina el avaluo, se eliminan las asignaciones
-                ->cacscadeOnDelete();
+                ->cascadeOnDelete();
             //Llave forenea de la tabla usuarios, para asignar al perito o appraiser
             $table->foreignId('appraiser_id')
                 //Tabla de referencia
                 ->constrained('users')
                 //Si se elimina el usuario perito, se eliminan sus asignaciones
-                ->cacscadeOnDelete();
+                ->cascadeOnDelete();
             //Llave foranea de la tabla usuarios, para asignar al operador o operator
             $table->foreignId('operator_id')
                 //Tabla de referencia
                 ->constrained('users')
                 //Si se elimina el usuario operador, se eliminan sus asignaciones
-                ->cacscadeOnDelete();
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }

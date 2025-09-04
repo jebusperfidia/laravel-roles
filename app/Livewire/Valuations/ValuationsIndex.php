@@ -4,6 +4,7 @@ namespace App\Livewire\Valuations;
 
 use Livewire\Component;
 use App\Models\Valuation;
+use Livewire\Attributes\On;
 
 class ValuationsIndex extends Component
 {
@@ -34,6 +35,14 @@ class ValuationsIndex extends Component
     {
         $this->currentView = $view;
        /*  $this->dispatchBrowserEvent('clear-powergrid'); */
+    }
+
+
+
+    #[on('refreshValuationsIndex')]
+    public function refreshComponent(): void
+    {
+        $this->dispatch('$refresh');
     }
 
     public function render()

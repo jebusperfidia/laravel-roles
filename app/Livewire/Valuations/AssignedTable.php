@@ -14,8 +14,7 @@ use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use Illuminate\Support\Facades\Auth;
 use PowerComponents\LivewirePowerGrid\Facades\Rule;
 use Livewire\Attributes\On;
-
-
+use Masmerise\Toaster\Toaster;
 
 final class AssignedTable extends PowerGridComponent
 {
@@ -162,6 +161,21 @@ final class AssignedTable extends PowerGridComponent
         /* dd($this->checkboxValues); */
     }
 
+    #[on('deleteValuation')]
+    public function deleteValuation($rowId):void
+    {
+        //dd($id, Valuation::find($id));
+        $valuation = Valuation::find($rowId);
+        //dd($valuation);
+        $valuation?->delete();
+        /*  session()->flash("info", "Usuario eliminado con éxito");
+        // Fuerza una recarga de página y muestra el mensaje */
+        Toaster::error('Avalúo eliminado con éxito');
+        //$this->dispatch('pg:eventRefresh-' . $this->tableName);
+        $this->dispatch('refreshValuationsIndex');
+        //redirect()->route('dashboard', ['currentView' => 'assigned']);
+    }
+
     public function actions(Valuation $row): array
     {
         return [
@@ -178,7 +192,15 @@ final class AssignedTable extends PowerGridComponent
                 ->id()
                 ->class('cursor-pointer btn-change btn-table')
                 ->dispatch('openStatusModal', ['Id' => $row->id])
-                ->can($this->user->type === 'Administrador')
+                ->can($this->user->type === 'Administrador'),
+
+                Button::add()
+                ->confirm('¿Estás seguro de eliminar el avalúo?')
+                ->slot('Eliminar')
+                ->id()
+                ->class('cursor-pointer btn-deleted btn-table pr-3')
+                ->dispatch('deleteValuation', ['rowId' => $row->id])
+                ->can($this->user->type === 'Administrador'),
         ];
     }
 
