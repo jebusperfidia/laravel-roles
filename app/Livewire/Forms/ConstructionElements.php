@@ -6,7 +6,16 @@ use Livewire\Component;
 
 class ConstructionElements extends Component
 {
-    public $acabados1_pasta, $carpinteria_notas, $hidraulicas_tuberia, $acabados1_espesor, $hidraulicas_diametro, $obraNegra_ladrillo;
+
+
+    /* Primera parte */
+    public $sc_structure, $sc_shallowFoundation;
+
+    /* Segunda parte */
+    public $fn1_hallFlats, $fn1_hallWalls;
+
+    /* Tercera parte */
+    public $fn2_cementPlaster;
 
     // 1. Estado del tab activo
     public string $activeTab = 'obra_negra';

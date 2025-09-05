@@ -10,7 +10,7 @@
 
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Clasificación de la zona<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">
@@ -31,7 +31,7 @@
                     </div>
                 </div>
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Construcciones predominantes en la zona<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">
@@ -46,7 +46,7 @@
 
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         N° de niveles de las construcciones de la zona<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">
@@ -61,7 +61,7 @@
 
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Uso de las construcciones<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">
@@ -83,7 +83,7 @@
 
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Índice de saturación de la zona<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">
@@ -106,7 +106,7 @@
 
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Densidad de población<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">
@@ -131,7 +131,7 @@
 
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Densidad habitacional (habitantes)<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">
@@ -158,7 +158,7 @@
 
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Nivel socioeconómico de la zona<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">
@@ -246,7 +246,7 @@
 
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Vías de acceso e importancia<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">
@@ -260,7 +260,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Contaminación ambiental en la zona<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">
@@ -322,7 +322,7 @@
 
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Cuenta con todos los servicios
                     </div>
                     <div class="radio-input">
@@ -338,7 +338,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Red de distribución de agua potable <br> <b>(Para nivel 2)</b>
                     </div>
                     <div class="radio-input">
@@ -360,7 +360,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Red de recolección de aguas residuales <br> <b>(Para nivel 2)</b>
                     </div>
                     <div class="radio-input">
@@ -386,7 +386,7 @@
 
                 <div
                     class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2 text-label-radio">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Red de drenaje de aguas pluviales en la calle <br> <b>(Para nivel 2)</b>
                     </div>
                     <div class="radio-input">
@@ -408,7 +408,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Red de drenaje de aguas pluviales en la zona <br> (Para nivel 2)
                     </div>
                     <div class="radio-input">
@@ -430,7 +430,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Sistema mixto (aguas residuales y pluviales) <br> <b>(Para nivel 2)</b>
                     </div>
                     <div class="radio-input">
@@ -452,7 +452,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Otro tipo de desalojo de aguas
                     </div>
                     <div class="radio-input">
@@ -474,7 +474,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Suministro eléctrico <br> <b>(Para nivel 2)</b>
                     </div>
                     <div class="radio-input">
@@ -499,7 +499,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Acomedita de suministro eléctrico al inmueble
                     </div>
                     <div class="radio-input">
@@ -521,7 +521,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Alumbrado público <br> (Para nivel 3)
                     </div>
                     <div class="radio-input">
@@ -546,7 +546,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Gas natural <br> <b>(Para nivel 4)</b>
                     </div>
                     <div class="radio-input">
@@ -571,7 +571,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Vigilancia <br> <b>(Para nivel 4)</b>
                     </div>
                     <div class="radio-input">
@@ -595,7 +595,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Recolección de basura
                     </div>
                     <div class="radio-input">
@@ -621,7 +621,7 @@
                 {{-- AÑADIR VALOR CONDICIONAL --}}
                 @if ($inf_garbageCollection === "1")
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Frecuancia de recolección de basura<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">
@@ -650,7 +650,7 @@
 
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Suministro telefónico, por medio de
                     </div>
                     <div class="radio-input">
@@ -675,7 +675,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Acometida telefónica al inmueble
                     </div>
                     <div class="radio-input">
@@ -697,7 +697,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Señalizacióin de vías
                     </div>
                     <div class="radio-input">
@@ -719,7 +719,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Nomenclatura de calles
                     </div>
                     <div class="radio-input">
@@ -751,7 +751,7 @@
 
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban urban-infr">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Vialidades<span class="sup-required">*</span><br> (Para nivel 3)
                     </div>
                     <div class="radio-input">
@@ -795,7 +795,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban urban-infr">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Banquetas<span class="sup-required">*</span><br> (Para nivel 3)
                     </div>
                     <div class="radio-input">
@@ -837,7 +837,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban urban-infra">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Guarniciones<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">
@@ -908,7 +908,7 @@
                 </div> --}}
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Uso de suelo<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">
@@ -922,7 +922,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Descripción y fuente donde se obtuvo el uso del suelo<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">
@@ -936,7 +936,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Área libre obligatoria %<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">
@@ -950,7 +950,7 @@
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Niveles permitidos<span class="sup-required">*</span>
                     </div>
                     <flux:field class="radio-group-horizontal">
@@ -963,7 +963,7 @@
 
 
                 <div class="form-grid form-grid--3 form-grid-radios form-grid-urban form-grid-urban border-b-2">
-                    <div class="radio-label border-r-2">
+                    <div class="min-w-[140px] radio-label border-r-2">
                         Coeficiente de uso de suelo de la zona<span class="sup-required">*</span>
                     </div>
                     <div class="radio-input">

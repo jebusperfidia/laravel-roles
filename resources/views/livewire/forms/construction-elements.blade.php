@@ -74,88 +74,917 @@
                 </div>
             </div>
 
-            {{-- Contenedor de contenido al 100% del ancho y alto disponible --}}
-            <div class="w-full flex-1 p-4 overflow-auto">
 
-                {{-- Obra negra --}}
-                @if ($activeTab === 'obra_negra')
-                <h2 class="text-lg font-semibold mb-4">Obra negra</h2>
-                <table class="w-full table-auto border">
-                    <thead>
-                        <tr class="bg-gray-100">
-                            <th class="px-2 py-1 border">Ítem</th>
-                            <th class="px-2 py-1 border">Cantidad</th>
-                            <th class="px-2 py-1 border">Costo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="px-2 py-1 border">Ladrillo</td>
-                            <td class="px-2 py-1 border">
-                                <input type="number" wire:model.defer=" " class="w-24 border rounded px-1 py-0.5">
-                            </td>
-                            <td class="px-2 py-1 border">$</td>
-                        </tr>
-                        {{-- ... más filas --}}
-                    </tbody>
-                </table>
-                @endif
 
-                {{-- Acabados 1 --}}
-                @if ($activeTab === 'acabados1')
-                <h2 class="text-lg font-semibold mb-4">Acabados 1</h2>
-                <div class="space-y-3">
-                    <label class="block">
-                        Tipo de pasta:
-                        <input type="text" wire:model.live="acabados1_pasta" class="border rounded w-full px-2 py-1">
-                    </label>
-                    <label class="block">
-                        Espesor (mm):
-                        <input type="number" wire:model.live="acabados1_espesor"
-                            class="border rounded w-full px-2 py-1">
-                    </label>
+
+
+
+
+
+
+
+
+
+
+
+
+            {{-- Obra negra --}}
+            @if ($activeTab === 'obra_negra')
+            {{-- <h2 class="text-lg font-semibold mb-4">Obra negra</h2>
+            <table class="w-full table-auto border">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="px-2 py-1 border">Ítem</th>
+                        <th class="px-2 py-1 border">Cantidad</th>
+                        <th class="px-2 py-1 border">Costo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="px-2 py-1 border">Ladrillo</td>
+                        <td class="px-2 py-1 border">
+                            <input type="number" wire:model.defer=" " class="w-24 border rounded px-1 py-0.5">
+                        </td>
+                        <td class="px-2 py-1 border">$</td>
+                    </tr>
+                    más filas
+                </tbody>
+            </table> --}}
+            {{-- Shell construction --}}
+            <div class="form-container__content">
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Estructura<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='sc_structure'/>
+                        <div class="error-container">
+                            <flux:error name="sc_structure"/>
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Cimentación<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='sc_shallowFoundation'/>
+                        <div class="error-container">
+                            <flux:error name="sc_shallowFoundation"/>
+                        </div>
+                    </flux:field>
                 </div>
-                @endif
-
-                {{-- Acabados 2 --}}
-                @if ($activeTab === 'acabados2')
-                <h2 class="text-lg font-semibold mb-4">Acabados 2</h2>
-                <p>Aquí puedes poner selects, sliders, lo que necesites.</p>
-                @endif
-
-                {{-- Carpintería --}}
-                @if ($activeTab === 'carpinteria')
-                <h2 class="text-lg font-semibold mb-4">Carpintería</h2>
-                <textarea wire:model.live="carpinteria_notas" class="border rounded w-full h-32 p-2"
-                    placeholder="Descripción de carpintería..."></textarea>
-                @endif
-
-                {{-- Hidráulicas y sanitarias --}}
-                @if ($activeTab === 'hidraulicas')
-                <h2 class="text-lg font-semibold mb-4">Hidráulicas y sanitarias</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="text" wire:model.live="hidraulicas_tuberia" placeholder="Tipo de tubería"
-                        class="border rounded p-2">
-                    <input type="number" wire:model.defer="hidraulicas_diametro" placeholder="Diámetro (mm)"
-                        class="border rounded p-2">
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Entrepisos<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='sc_intermediateFloor'/>
+                        <div class="error-container">
+                            <flux:error name="sc_intermediateFloor"/>
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Techos<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='sc_ceiling'/>
+                        <div class="error-container">
+                            <flux:error name="sc_ceiling"/>
+                        </div>
+                    </flux:field>
                 </div>
-                @endif
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Muros<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='sc_walls'/>
+                        <div class="error-container">
+                            <flux:error name="sc_walls"/>
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Trabes y columnas<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='sc_beamsColumns'/>
+                        <div class="error-container">
+                            <flux:error name="sc_beamsColumns"/>
+                        </div>
+                    </flux:field>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Azoteas<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='sc_roof'/>
+                        <div class="error-container">
+                            <flux:error name="sc_roof"/>
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Bardas<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='sc_fences'/>
+                        <div class="error-container">
+                            <flux:error name="sc_fences"/>
+                        </div>
+                    </flux:field>
+                </div>
+            </div>
 
-                {{-- Herrería --}}
-                @if ($activeTab === 'herreria')
-                <h2 class="text-lg font-semibold mb-4">Herrería</h2>
-                <p>Define aquí tus inputs, tablas o lo que requieras.</p>
-                @endif
+            @endif
 
-                {{-- Otros elementos --}}
-                @if ($activeTab === 'otros')
-                <h2 class="text-lg font-semibold mb-4">Otros elementos</h2>
-                <p>Más campos extras u observaciones.</p>
-                @endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            {{-- Acabados 1 --}}
+            {{-- Finishes --}}
+            @if ($activeTab === 'acabados1')
+           {{--  <div class="form-container__content"> --}}
+                <div class="mt-8">
+                    <div class="overflow-x-auto max-w-full">
+                        <table class="min-w-[550px] table-fixed w-full border-2 ">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="w-[140px] px-2 py-1 border">Espacio</th>
+                                    <th class="w-[90px] px-2 py-1 border">Cantidad<span class="sup-required">*</span></th>
+                                    <th class="w-[28%] px-2 py-1 border">Pisos<span class="sup-required">*</span></th>
+                                    <th class="w-[28%] px-2 py-1 border">Muros<span class="sup-required">*</span></th>
+                                    <th class="w-[28%] px-2 py-1 border">Plafones<span class="sup-required">*</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{-- hall --}}
+                                <tr>
+                                    <td class="px-2 py-1 border text-sm text-center">Sala</td>
+                                    <td class="px-2 py-1 border text-sm"></td>
+                                    <td class="px-2 py-1 border text-sm">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_hallFlats'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_hallFlats"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_hallWalls'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_hallWalls"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_hallCeilings'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_hallCeilings"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                </tr>
+                                {{-- stay-diningRoom --}}
+                                <tr>
+                                    <td class="px-2 py-1 border text-sm text-center">Estancia / comedor</td>
+                                    <td class="px-2 py-1 border text-sm"></td>
+                                    <td class="px-2 py-1 border text-sm">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_stdrFlats'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_stdrFlats"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_stdrWalls'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_stdrWalls"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_stdrCeilings'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_stdrCeilings"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                </tr>
+                                {{-- Kitchen --}}
+                                <tr>
+                                    <td class="px-2 py-1 border text-sm text-center">Cocina</td>
+                                    <td class="px-2 py-1 border text-sm"></td>
+                                    <td class="px-2 py-1 border text-sm">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_kitchenFlats'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_kitchenFlats"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_kitchenWalls'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_kitchenWalls"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_kitchenCeilings'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_kitchenCeilings"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                </tr>
+                                {{-- bedrooms --}}
+                                <tr>
+                                    <td class="px-2 py-1 border text-sm text-center">Recámaras</td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field>
+                                            <flux:select wire:model="fn1_bedroomsNumber" class="w-[20px] text-gray-800 [&_option]:text-gray-900">
+                                                <flux:select.option value="0">0</flux:select.option>
+                                                <flux:select.option value="1">1</flux:select.option>
+                                                <flux:select.option value="2">2</flux:select.option>
+                                                <flux:select.option value="3">3</flux:select.option>
+                                                <flux:select.option value="4">4</flux:select.option>
+                                                <flux:select.option value="5">5</flux:select.option>
+                                                <flux:select.option value="6">6</flux:select.option>
+                                                <flux:select.option value="7">7</flux:select.option>
+                                                <flux:select.option value="8">8</flux:select.option>
+                                                <flux:select.option value="9">9</flux:select.option>
+                                                <flux:select.option value="10">10</flux:select.option>
+                                            </flux:select>
+                                        </flux:field>
+                                        <div class="error-container">
+                                            <flux:error name="fn1_bedroomsNumber"/>
+                                        </div>
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_bedroomsFlats'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_bedroomsFlats"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_bedroomsWalls'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_bedroomsWalls"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_bedroomsCeilings'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_bedroomsCeilings"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-2 py-1 border text-sm text-center">Baños</td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field>
+                                            <flux:select wire:model="fn1_bathroomsNumber" class="w-[20px] text-gray-800 [&_option]:text-gray-900">
+                                                <flux:select.option value="0">0</flux:select.option>
+                                                <flux:select.option value="1">1</flux:select.option>
+                                                <flux:select.option value="2">2</flux:select.option>
+                                                <flux:select.option value="3">3</flux:select.option>
+                                                <flux:select.option value="4">4</flux:select.option>
+                                                <flux:select.option value="5">5</flux:select.option>
+                                                <flux:select.option value="6">6</flux:select.option>
+                                                <flux:select.option value="7">7</flux:select.option>
+                                                <flux:select.option value="8">8</flux:select.option>
+                                                <flux:select.option value="9">9</flux:select.option>
+                                                <flux:select.option value="10">10</flux:select.option>
+                                            </flux:select>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_bathroomsFlats'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_bathroomsFlats"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_bathroomsWalls'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_bathroomsWalls"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_bathroomsCeilings'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_bathroomsCeilings"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-2 py-1 border text-sm text-center">Medios baños</td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field>
+                                            <flux:select wire:model="fn1_halfBathrooms" class="w-[20px] text-gray-800 [&_option]:text-gray-900">
+                                                <flux:select.option value="0">0</flux:select.option>
+                                                <flux:select.option value="1">1</flux:select.option>
+                                                <flux:select.option value="2">2</flux:select.option>
+                                                <flux:select.option value="3">3</flux:select.option>
+                                                <flux:select.option value="4">4</flux:select.option>
+                                                <flux:select.option value="5">5</flux:select.option>
+                                                <flux:select.option value="6">6</flux:select.option>
+                                                <flux:select.option value="7">7</flux:select.option>
+                                                <flux:select.option value="8">8</flux:select.option>
+                                                <flux:select.option value="9">9</flux:select.option>
+                                                <flux:select.option value="10">10</flux:select.option>
+                                            </flux:select>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_halfBathroomsFlats'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_halfBathroomsFlats"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_halfBathroomsWalls'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_halfBathroomsWalls"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_halfBathroomsCeilings'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_halfBathroomsCeilings"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                </tr>
+                                {{-- Utility yard --}}
+                                <tr>
+                                    <td class="px-2 py-1 border text-sm text-center">Patio servicio</td>
+                                    <td class="px-2 py-1 border text-sm"></td>
+                                    <td class="px-2 py-1 border text-sm">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_utyrFlats'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_utyrFlats"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_utyrWalls'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_utyrWalls"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_utyrCeilings'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_utyrCeilings"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-2 py-1 border text-sm text-center">Escaleras</td>
+                                    <td class="px-2 py-1 border text-sm"></td>
+                                    <td class="px-2 py-1 border text-sm">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_stairsFlats'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_stairsFlats"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_stairsWalls'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_stairsWalls"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_stairsCeilings'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_stairsCeilings"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                </tr>
+                                {{-- covered parking --}}
+                                <tr>
+                                    <td class="px-2 py-1 border text-sm text-center">Estacionamiento cubierto</td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field>
+                                            <flux:select wire:model="fn1_copaNumber" class="w-[20px] text-gray-800 [&_option]:text-gray-900">
+                                                <flux:select.option value="0">0</flux:select.option>
+                                                <flux:select.option value="1">1</flux:select.option>
+                                                <flux:select.option value="2">2</flux:select.option>
+                                                <flux:select.option value="3">3</flux:select.option>
+                                                <flux:select.option value="4">4</flux:select.option>
+                                                <flux:select.option value="5">5</flux:select.option>
+                                                <flux:select.option value="6">6</flux:select.option>
+                                                <flux:select.option value="7">7</flux:select.option>
+                                                <flux:select.option value="8">8</flux:select.option>
+                                                <flux:select.option value="9">9</flux:select.option>
+                                                <flux:select.option value="10">10</flux:select.option>
+                                            </flux:select>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_copaFlats'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_copaFlats"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_copaWalls'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_copaWalls"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_copaCeilings'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_copaCeilings"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-2 py-1 border text-sm text-center">Estacionamiento descubierto</td>
+                                    <td class="px-2 py-1 border text-sm">
+                                        <flux:field>
+                                            <flux:select wire:model="fn1_unpaNumber" class="w-[20px] text-gray-800 [&_option]:text-gray-900">
+                                                <flux:select.option value="0">0</flux:select.option>
+                                                <flux:select.option value="1">1</flux:select.option>
+                                                <flux:select.option value="2">2</flux:select.option>
+                                                <flux:select.option value="3">3</flux:select.option>
+                                                <flux:select.option value="4">4</flux:select.option>
+                                                <flux:select.option value="5">5</flux:select.option>
+                                                <flux:select.option value="6">6</flux:select.option>
+                                                <flux:select.option value="7">7</flux:select.option>
+                                                <flux:select.option value="8">8</flux:select.option>
+                                                <flux:select.option value="9">9</flux:select.option>
+                                                <flux:select.option value="10">10</flux:select.option>
+                                            </flux:select>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_unpaFlats'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_unpaFlats"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_unpaWalls'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_unpaWalls"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="px-2 py-1 border">
+                                        <flux:field class="flux_field pt-8">
+                                            <flux:textarea wire:model='fn1_unpaWalls'/>
+                                            <div class="error-container">
+                                                <flux:error name="fn1_unpaWalls"/>
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            {{-- Acabados 2 --}}
+            @if ($activeTab === 'acabados2')
+            <div class="form-container__content">
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Aplanados<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='fn2_cementPlaster'/>
+                        <div class="error-container">
+                            <flux:error name="fn2_cementPlaster"/>
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Plafones<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='fn2_ceilings'/>
+                        <div class="error-container">
+                            <flux:error name="fn2_ceilings"/>
+                        </div>
+                    </flux:field>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Lambrines<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='fn2_furredWalls'/>
+                        <div class="error-container">
+                            <flux:error name="fn2_furredWalls"/>
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Escaleras<span class="sup-required">*</span><span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='fn2_stairs'/>
+                        <div class="error-container">
+                            <flux:error name="fn2_stairs"/>
+                        </div>
+                    </flux:field>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Pisos<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='fn2_flats'/>
+                        <div class="error-container">
+                            <flux:error name="fn2_flats"/>
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Zocos<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='fn2_plinths'/>
+                        <div class="error-container">
+                            <flux:error name="fn2_plinths"/>
+                        </div>
+                    </flux:field>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Pintura<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='fn2_paint'/>
+                        <div class="error-container">
+                            <flux:error name="fn2_paint"/>
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Recubrimientos especiales<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='fn2_specialCoating'/>
+                        <div class="error-container">
+                            <flux:error name="fn2_specialCoating"/>
+                        </div>
+                    </flux:field>
+                </div>
+            </div>
+            @endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            {{-- Carpintería --}}
+            {{-- carpentry --}}
+            @if ($activeTab === 'carpinteria')
+            <div class="form-container__content">
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Puertas de acceso a la vivienda<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='car_doorsAccess'/>
+                        <div class="error-container">
+                            <flux:error name="car_doorsAccess"/>
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Puertas interiores<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='car_insideDoors'/>
+                        <div class="error-container">
+                            <flux:error name="car_insideDoors"/>
+                        </div>
+                    </flux:field>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Muebles empotrados o fijos fuera de recámaras<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='car_fixedFurnitureBedrooms'/>
+                        <div class="error-container">
+                            <flux:error name="car_fixedFurnitureBedrooms"/>
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Muebles empotrados o fijos en recámaras<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='car_fixedFurnitureInsideBedrooms'/>
+                        <div class="error-container">
+                            <flux:error name="car_fixedFurnitureInsideBedrooms"/>
+                        </div>
+                    </flux:field>
+                </div>
 
             </div>
-        </div>
+            @endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            {{-- Hidráulicas y sanitarias --}}
+            {{-- Hydraulic and sanitary --}}
+            @if ($activeTab === 'hidraulicas')
+            <div class="form-container__content">
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <div class="mb-3">
+                            <flux:label>Muebles de baño<span class="sup-required">*</span></flux:label>
+                        </div>
+                        <flux:textarea wire:model='hs_structure'/>
+                        <div class="error-container">
+                            <flux:error name="hs_structure"/>
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux_field pt2">
+                        <div class="flex justify-between mb-3">
+                        <flux:label>Ramaleos hidráulicos<span class="sup-required">*</span></flux:label>
+                        <div>
+                            <flux:radio.group class="flex justify-end items-baseline gap-2" wire:model="hs_hiddenApparentShallow" size="sm">
+                                <flux:radio label="Oculta" value="Oculta" />
+                                <flux:radio label="Aparente" value="Aparente" />
+                            </flux:radio.group>
+                        </div>
+                        </div>
+                        <flux:textarea wire:model='hs_shallowFoundation'/>
+                        <div class="error-container">
+                            <flux:error name="hs_shallowFoundation"/>
+                        </div>
+                    </flux:field>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <div class="flex justify-between mb-3">
+                            <flux:label>Ramaleos sanitarios<span class="sup-required">*</span></flux:label>
+                            <div>
+                                <flux:radio.group class="flex justify-end items-baseline gap-2" wire:model="hs_hiddenApparentFloor" size="sm">
+                                    <flux:radio label="Oculta"  value="Oculta"/>
+                                    <flux:radio label="Aparente"  value="Aparente"/>
+                                </flux:radio.group>
+                            </div>
+                        </div>
+                        <flux:textarea wire:model='hs_intermediateFloor'/>
+                        <div class="error-container">
+                            <flux:error name="hs_intermediateFloor"/>
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux_field pt2">
+                        <div class="flex justify-between mb-3">
+                        <flux:label>Eléctricas<span class="sup-required">*</span></flux:label>
+                        <div>
+                            <flux:radio.group class="flex justify-end items-baseline gap-2" wire:model="hs_hiddenApparentCeiling" size="sm">
+                                <flux:radio label="Oculta" value="Oculta" />
+                                <flux:radio label="Aparente" value="Aparente" />
+                            </flux:radio.group>
+                        </div>
+                        </div>
+                        <flux:textarea wire:model='hs_ceiling'/>
+                        <div class="error-container">
+                            <flux:error name="hs_ceiling"/>
+                        </div>
+                    </flux:field>
+                </div>
+
+            </div>
+            @endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            {{-- Herrería --}}
+            {{-- smithy --}}
+            @if ($activeTab === 'herreria')
+            <div class="form-container__content">
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Puerta de patio de servicio<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='sm_serviceDoor'/>
+                        <div class="error-container">
+                            <flux:error name="sm_serviceDoor"/>
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Ventaneria<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='sm_windows'/>
+                        <div class="error-container">
+                            <flux:error name="sm_windows"/>
+                        </div>
+                    </flux:field>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Otros (especificar)<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='sm_others'/>
+                        <div class="error-container">
+                            <flux:error name="sm_others"/>
+                        </div>
+                    </flux:field>
+                </div>
+
+            </div>
+            @endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            {{-- Otros elementos --}}
+            @if ($activeTab === 'otros')
+            <div class="form-container__content">
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Vidriería<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='oe_structure'/>
+                        <div class="error-container">
+                            <flux:error name="oe_glassworks"/>
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Cerrajería<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='oe_locksmith'/>
+                        <div class="error-container">
+                            <flux:error name="oe_locksmith"/>
+                        </div>
+                    </flux:field>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux_field pt2">
+                        <flux:label>Fachadas<span class="sup-required">*</span></flux:label>
+                        <flux:textarea wire:model='oe_facades'/>
+                        <div class="error-container">
+                            <flux:error name="oe_facades"/>
+                        </div>
+                    </flux:field>
+                    <flux:field>
+                        <flux:label>Cuenta con elevador<span class="sup-required">*</span></flux:label>
+                        <flux:radio.group  wire:model="oe_elevator" size="sm">
+                            <flux:radio label="Si cuenta" value="Si cuenta" />
+                            <flux:radio label="No cuenta" value="No cuenta" />
+                        </flux:radio.group>
+                    </flux:field>
+                </div>
+
+            </div>
+            @endif
+
     </div>
+</div>
 </div>
 
 <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos</flux:button>

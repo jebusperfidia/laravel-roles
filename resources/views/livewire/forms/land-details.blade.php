@@ -315,18 +315,18 @@
             <div class="form-container__content">
 
 
-                <div class="form-grid form-grid--3 form-grid-1-center">
-                    <div class="flex justify-end items-center pr-2">Anexo de colindancias</div>
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <flux:label class="label-variation">Anexo de colindancias</flux:label>
                     <flux:input type="text" wire:model="state" placeholder="Guanajuato" />
                 </div>
 
-                <div class="form-grid form-grid--3 form-grid-1-center">
-                    <div class="flex justify-end items-center pr-2">Anexo de colindancias</div>
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <flux:label class="label-variation">Anexo de colindancias</flux:label>
                     <flux:input type="text" wire:model="state" placeholder="Guanajuato" />
                 </div>
 
-                <div class="form-grid form-grid--3 form-grid-1-center">
-                    <div class="flex justify-end items-center pr-2">Imágenes cargadas</div>
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <flux:label class="label-variation">Imágenes cargadas</flux:label>
                 </div>
 
             </div>

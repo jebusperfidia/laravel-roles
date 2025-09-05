@@ -7,8 +7,10 @@
             <div class="form-container__content">
 
 
-                <div class="form-grid form-grid--3 form-grid-1-center">
-                    <div class="flex justify-end items-center pr-2">Referencia de proximidad urbana</div>
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <div class="label-variation">
+                        <flux:label>Referencia de <br>proximidad urbana</flux:label>
+                    </div>
 
 
                     {{-- Inicia --}}
@@ -91,8 +93,10 @@
                 </div>
 
 
-                <div class="form-grid form-grid--3 form-grid-1-center">
-                    <div class="flex justify-end items-center pr-2">Uso actual</div>
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start">
+                        <flux:label>Uso actual</flux:label>
+                    </div>
                     <div class="radio-input">
                         <flux:field>
                             <div class="radio-group-horizontal">
@@ -105,8 +109,10 @@
                     </div>
                 </div>
 
-                <div class="form-grid form-grid--3 form-grid-1-center">
-                    <div class="flex justify-end items-center pr-2">Espacio de uso múltiple</div>
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <div class="label-variation">
+                        <flux:label>Espacio de uso múltiple</flux:label>
+                    </div>
                     <div class="radio-input">
                         <flux:field>
                             <div class="radio-group-horizontal">
@@ -123,8 +129,10 @@
                     </div>
                 </div>
 
-                <div class="form-grid form-grid--3 form-grid-1-center">
-                    <div class="flex justify-end items-center pr-2">Nivel en edificio (condominio)</div>
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <div class="label-variation">
+                        <flux:label>Nivel de edicificio <br>(condominio)</flux:label>
+                    </div>
                     <div class="radio-input">
                         <flux:field>
                             <div class="radio-group-horizontal">
@@ -136,8 +144,10 @@
                         </flux:field>
                     </div>
                 </div>
-                <div class="form-grid form-grid--3 form-grid-1-center">
-                    <div class="flex justify-end items-center pr-2">Calidad del proyecto</div>
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <div class="label-variation">
+                        <flux:label>Calidad del proyecto</flux:label>
+                    </div>
                     <div class="radio-input">
                         <flux:field>
                             <div class="radio-group-horizontal">

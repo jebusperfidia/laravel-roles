@@ -8,7 +8,7 @@
            <div class="w-150">
             <form wire:submit='save' class="mt-6 space-y-6">
                 {{-- <flux:input type="date" max="2999-12-31" label="Fecha de avalúo"  id="fecha_actual" class="flux-input" wire:model="date" readonly/> --}}
-                <flux:field class="flux:field">
+                <flux:field class="flux-field">
                     <flux:label>Fecha actual</flux:label>
                     <flux:input type="date" wire:model='date' max="2999-12-31" id="fecha_actual" readonly />
                     <div class="error-container">
@@ -27,14 +27,14 @@
                     </div>
                 </flux:field>
                    {{--  <flux:input wire:model='folio' label="Folio" placeholder="El folio solo puede contener numeros, letras y guiones" /> --}}
-                   <flux:field class="flux:field">
+                   <flux:field class="flux-field">
                     <flux:label>Folio</flux:label>
                     <flux:input type="text" wire:model='folio' placeholer="El folio solo puede contener numeros, letras y guiones" />
                     <div class="error-container">
                         <flux:error name="folio" />
                     </div>
                 </flux:field>
-                    <flux:field class="flux:field">
+                    <flux:field class="flux-field">
                         <flux:label>Tipo de inmueble</flux:label>
                         <flux:select wire:model.live="property_type" class="text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
