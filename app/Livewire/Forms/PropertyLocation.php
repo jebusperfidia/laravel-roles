@@ -11,25 +11,28 @@ class PropertyLocation extends Component
 
     public $latitud, $longitud, $altitud;
 
-    public function mount() {
-        $this->latitud = '0';
-        $this->longitud = '0';
-        $this->altitud = '0';
+    public function mount()
+    {
+        // Coordenadas iniciales (puedes ajustarlas a una ubicación por defecto más útil)
+        $this->latitud = '19.4326';
+        $this->longitud = '-99.1332';
+        $this->altitud = '2240';
     }
 
-    public function save(){
+    public function save()
+    {
 
         $rules = [
-            'latitud'  => ['required'],
-            'longitud' => ['required'],
-            'altitud'  => ['required']
+            'latitud'  => ['required', 'numeric', 'between:-90,90'],
+            'longitud' => ['required', 'numeric', 'between:-180,180'],
+            'altitud'  => ['required', 'numeric']
         ];
 
         $validator = Validator::make(
             $this->all(),
             $rules,
             []
-        /*     $this->validationAttributes() */
+            /* $this->validationAttributes() */
         );
 
         //Comprobamos si se obtuvieron errores de validación
@@ -45,7 +48,8 @@ class PropertyLocation extends Component
         }
 
 
-        Toaster::success('Datos guardados con éxito');
+        Toaster::success('Formulario guardado con éxito');
+        return redirect()->route('form.index', ['section' => 'nerby-valuations']);
     }
 
 
@@ -54,10 +58,13 @@ class PropertyLocation extends Component
     {
         if ($value === '') {
             $this->latitud = 0;
+            // AÑADIDO: Despachar evento para actualizar el mapa
+            $this->dispatchLocationUpdate();
             return;
         }
         $this->latitud = $this->sanitizeDecimal($value);
-        /*  $this->calculateLandCoefficientArea(); */
+        // AÑADIDO: Despachar evento para actualizar el mapa
+        $this->dispatchLocationUpdate();
     }
 
     //Watchers para las variables
@@ -65,10 +72,13 @@ class PropertyLocation extends Component
     {
         if ($value === '') {
             $this->longitud = 0;
+            // AÑADIDO: Despachar evento para actualizar el mapa
+            $this->dispatchLocationUpdate();
             return;
         }
         $this->longitud = $this->sanitizeDecimal($value);
-        /*  $this->calculateLandCoefficientArea(); */
+        // AÑADIDO: Despachar evento para actualizar el mapa
+        $this->dispatchLocationUpdate();
     }
 
     //Watchers para las variables
@@ -79,7 +89,13 @@ class PropertyLocation extends Component
             return;
         }
         $this->altitud = $this->sanitizeDecimal($value);
-        /*  $this->calculateLandCoefficientArea(); */
+    }
+
+    // AÑADIDO: Método para despachar el evento de actualización de ubicación al navegador.
+    // Esto permite que nuestro JavaScript reaccione a los cambios en el backend.
+    private function dispatchLocationUpdate()
+    {
+        $this->dispatch('locationUpdated', ['lat' => $this->latitud, 'lon' => $this->longitud]);
     }
 
     private function sanitizeDecimal(string $value): string
@@ -106,8 +122,6 @@ class PropertyLocation extends Component
 
         return $clean;
     }
-
-
 
     public function render()
     {

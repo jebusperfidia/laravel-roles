@@ -310,6 +310,7 @@ textarea {
 }
 
 
+
 /* Para los radios horizontales */
 .radio-group-horizontal {
     display: flex;
@@ -347,7 +348,7 @@ textarea {
 
 .form-grid-3-variation {
     display: grid;
-    grid-template-columns: 180px 1fr;
+    grid-template-columns: 180px 50%;
     align-items: center;
     gap: 1rem;
     margin-bottom: 1.5rem;
@@ -483,4 +484,14 @@ textarea {
 .menu-item-personalized:hover {
   background-color: #c0c0c0;         /* equivale a gray-100 en Tailwind */
   color: #1f2937;                    /* gray-800, opcional si quieres cambiar el texto */
+}
+
+
+ui-close[data-flux-modal-close] > button {
+    cursor: pointer;
+}
+
+.btn-buildins:hover {
+    transition: box-shadow 0.2s ease, background-color 0.2s ease;
+    outline: none; /* quita el outline por defecto */
 }

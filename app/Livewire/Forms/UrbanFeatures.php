@@ -28,7 +28,7 @@ class UrbanFeatures extends Component
 
     //Variables tercer contenedor
     public $luse_landUse, $luse_descriptionSourceLand;
-    public int $luse_mandatoryFreeArea, $luse_allowedLevels, $luse_landCoefficientArea;
+    public float $luse_mandatoryFreeArea, $luse_allowedLevels, $luse_landCoefficientArea;
 
     public function mount(){
 
@@ -93,7 +93,8 @@ class UrbanFeatures extends Component
             return;
         }
 
-        Toaster::success('Los datos fueron guardados con éxito');
+        Toaster::success('Formulario guardado con éxito');
+        return redirect()->route('form.index', ['section' => 'urban-equipment']);
     }
 
     public function validateAllContainers(){
@@ -198,32 +199,35 @@ class UrbanFeatures extends Component
     /**
      * Elimina todo menos dígitos y un único punto decimal
      */
-    private function sanitizeDecimal(int $value): int
+    private function sanitizeDecimal(?string $value): float
     {
-        // 1. Quitar caracteres que no sean dígito o punto
+        // Si el valor es nulo o una cadena vacía, se retorna 0.0
+        if ($value === null || trim($value) === '') {
+            return 0.0;
+        }
+
+        // Se reemplazan las comas por puntos para que PHP lo interprete como decimal
+        $value = str_replace(',', '.', $value);
+
+        // Se elimina cualquier carácter que no sea un número o un punto decimal.
         $clean = preg_replace('/[^0-9.]/', '', $value);
 
-       /*  // 2. Si hay más de un punto, mantener solo el primero
-        $parts = explode('.', $clean);
-        if (count($parts) > 1) {
-            $clean = $parts[0] . '.' . implode('', array_slice($parts, 1));
-        } */
-
-        return $clean;
+        // Se convierte el string limpio a un tipo flotante.
+        return (float) $clean;
     }
 
+
     /**
-     * Cada vez que cambie luse_mandatoryFreeArea:
+     * Cada vez que cambie luse_mandatoryFreeArea:z
      *  - sanea el valor
      *  - recalcula el coeficiente
      */
     public function updatedLuseMandatoryFreeArea($value)
     {
-        if ($value === null) {
-            $this->luse_mandatoryFreeArea = 0;
-            return;
-        }
-        $this->luse_mandatoryFreeArea = $this->sanitizeDecimal($value);
+        // Se sanea el valor de entrada y se asigna a la propiedad.
+        // Se usa un casting (float) para garantizar que el valor sea un número.
+        $this->luse_mandatoryFreeArea = (float) $this->sanitizeDecimal($value);
+        // Se llama a la función para recalcular el coeficiente.
         $this->calculateLandCoefficientArea();
     }
 
@@ -234,11 +238,10 @@ class UrbanFeatures extends Component
      */
     public function updatedLuseAllowedLevels($value)
     {
-        if ($value === null) {
-            $this->luse_allowedLevels = 0;
-            return;
-        }
-        $this->luse_allowedLevels = $this->sanitizeDecimal($value);
+        // Se sanea el valor de entrada y se asigna a la propiedad.
+        // Se usa un casting (float) para garantizar que el valor sea un número.
+        $this->luse_allowedLevels = (float) $this->sanitizeDecimal($value);
+        // Se llama a la función para recalcular el coeficiente.
         $this->calculateLandCoefficientArea();
     }
 
@@ -247,16 +250,17 @@ class UrbanFeatures extends Component
      */
     protected function calculateLandCoefficientArea(): void
     {
-        $a = $this->luse_mandatoryFreeArea    !== ''
-            ? (float) $this->luse_mandatoryFreeArea
-            : 0;
+        // Los valores ya son flotantes gracias a los métodos `updated`.
+        $a = $this->luse_mandatoryFreeArea;
+        $b = $this->luse_allowedLevels;
 
-        $b = $this->luse_allowedLevels        !== ''
-            ? (float) $this->luse_allowedLevels
-            : 0;
+        // Se realiza el cálculo y se asigna el resultado.
+        $result = $b * (1 - ($a * 0.01));
 
-        $this->luse_landCoefficientArea = $b - ($a*.100);
+        // Redondea el resultado a 2 decimales y lo asigna
+        $this->luse_landCoefficientArea = round($result, 2);
     }
+
 
     //Watcher para asignar todos los servicios
     public function updatedInfAllServices($value){

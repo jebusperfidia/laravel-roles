@@ -1,4 +1,17 @@
 <div>
+    {{-- AÑADIDO: Estilos CSS de Leaflet. Esencial para que el mapa se vea correctamente. --}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        /* AÑADIDO: Asegura que los contenedores de los mapas tengan una altura definida */
+        .map-container {
+            height: 350px;
+            border-radius: 12px;
+            z-index: 1;
+            /* Asegura que el mapa se muestre correctamente sobre otros elementos */
+        }
+    </style>
+
     <div class="flex justify-end font-semibold text-sm text-red-600 pt-2 -mb-3"><span>* Campos obligatorios</span></div>
     <form wire:submit="save">
         {{-- CONTENEDOR 1 --}}
@@ -325,9 +338,115 @@
                     <flux:input type="text" wire:model="state" placeholder="Guanajuato" />
                 </div>
 
-                <div class="form-grid form-grid--3 form-grid-3-variation">
+                <div class="form-grid form-grid--3 form-grid-3-variation mb-4">
                     <flux:label class="label-variation">Imágenes cargadas</flux:label>
                 </div>
+
+                <div class="flex justify-between text-lg border-b-2 border-gray-300 mt-8">
+                    <h2>Grupos de colindancias</h2>
+                    <flux:modal.trigger name="add-construction" class="flex justify-end mb-2">
+                        <flux:button class="btn-primary btn-table cursor-pointer mr-2">Agregar grupo</flux:button>
+                    </flux:modal.trigger>
+                </div>
+                <br>
+                <div class="flex justify-between text-md">
+                    <h3>Grupos 1</h3>
+                    <flux:modal.trigger name="add-construction" class="flex justify-end">
+                        <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"></flux:button>
+                    </flux:modal.trigger>
+                </div>
+                {{-- TABLA DE ELEMENTOS --}}
+                    <div class="mt-2">
+                        <div class="overflow-x-auto max-w-full">
+                            <table class="min-w-[550px] table-fixed w-full border-2 ">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th class="px-2 py-1 border whitespace-nowrap">Descripcion</th>
+                                        <th class="w-[120px] px-2 py-1 border whitespace-nowrap">Clasificación<span
+                                                class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[32px] px-2 py-1 border">Uso<span class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[5%] px-2 py-1 border">Niveles edificio<span class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[5%] px-2 py-1 border">Niveles por tipo de construcción<span
+                                                class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[5%] px-2 py-1 border">Rango niveles TGDF<span class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[5%] px-2 py-1 border">Edad<span class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[5%] px-2 py-1 border">Superficie<span class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[5%] px-2 py-1 border">Fuente de información<span class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[5%] px-2 py-1 border">Costo unit reposición nuevo<span class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[5%] px-2 py-1 border">Avance obra<span class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[5%] px-2 py-1 border">Estado de conservación<span class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[5%] px-2 py-1 border">RA<span class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[5%] px-2 py-1 border">Vend<span class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[5%] px-2 py-1 border">Acc<span class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[5%] px-2 py-1 border">Desc<span class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[100px] py-1 border">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    {{-- Valor de ejemplo para usar en los for --}}
+                                    <tr>
+                                        <td class="px-2 py-1 border text-xs text-center">Casa habitación
+                                        </td>
+                                        <td class="px-2 py-1 border text-xs text-left">
+                                            <span>7. Residencial plus</span><br>
+                                            <span>6. Lujo</span>
+                                        </td>
+                                        <td class="px-2 py-1 border text-sm text-center">H</td>
+                                        <td class="px-2 py-1 border text-sm text-center">1</td>
+                                        <td class="px-2 py-1 border text-sm text-center">1</td>
+                                        <td class="px-2 py-1 border text-sm text-center">02</td>
+                                        <td class="px-2 py-1 border text-sm text-center">1</td>
+                                        <td class="px-2 py-1 border text-sm text-center">100.00</td>
+                                        <td class="px-2 py-1 border text-sm text-center">Escrituras</td>
+                                        <td class="px-2 py-1 border text-sm text-center">$1,000</td>
+                                        <td class="px-2 py-1 border text-sm text-center">100%</td>
+                                        <td class="px-2 py-1 border text-sm text-center">1.0 Bueno</td>
+                                        <td class="px-2 py-1 border text-sm text-center">
+                                            <flux:checkbox wire:model='data' />
+                                        </td>
+                                        <td class="px-2 py-1 border text-sm text-center">
+                                            <input type="radio" wire:model="respuesta" name="opcion_unica" value="A"
+                                                class="w-4 h-4 text-blue-500">
+                                        </td>
+                                        <td class="px-2 py-1 border text-sm text-center">
+                                            <input type="radio" wire:model="respuesta" name="opcion_unica" value="B"
+                                                class="w-4 h-4 text-blue-500">
+                                        </td>
+                                        <td class="px-2 py-1 border text-sm text-center">
+                                            <input type="radio" wire:model="respuesta" name="opcion_unica" value="C"
+                                                class="w-4 h-4 text-blue-500">
+                                        </td>
+                                        <td class="my-2 flex justify-evenly">
+                                            <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                                <flux:button type="button" icon-leading="pencil"
+                                                    class="cursor-pointer btn-intermediary btn-buildins" />
+                                                </flux:modal-trigger>
+                                                <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                                    <flux:button type="button" icon-leading="trash"
+                                                        class="cursor-pointer btn-deleted btn-buildings" />
+                                                    </flux:modal-trigger>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
             </div>
         </div>
@@ -349,9 +468,11 @@
                     <h2 class="border-b-2 border-gray-300">Croquis - micro</h2>
                 </div>
 
-                <div class="form-grid form-grid--3 mt-3 mb-2 text-lg">
-                    <h2 class="border-b-4">Map</h2>
-                    <h2 class="border-b-4">Map</h2>
+                <div class="form-grid form-grid--3 mt-3 mb-2 text-lg" wire:ignore>
+
+                <div id="map-macro" class="map-container"></div>
+
+                <div id="map-micro" class="map-container"></div>
                 </div>
 
                 <div class="form-grid form-grid--3 mt-3 mb-2 text-lg">
@@ -780,16 +901,37 @@
             <div class="form-container__content">
 
 
-                <div class="form-grid form-grid--1">
-                    Banner
-                </div>
-                <div class="form-grid form-grid--1">
-                    Banner
-                </div>
-                <div class="form-grid form-grid--1">
-                    Componente superficie
-                </div>
+              <div class="mt-8">
+                <div class="overflow-x-auto max-w-full">
+                    <table class="min-w-[550px] table-fixed w-full border-2 ">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="px-2 py-1 ">Superficie en M²</th>
+                                <th class="px-2 py-1 ">Área de valor</th>
+                                <th class="px-2 py-1 ">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
 
+                            {{-- Valor de ejemplo para usar en los for --}}
+                            <tr>
+                                <td class="px-2 py-1 text-xs text-center">Vida útil total del inmueble:</td>
+                                <td class="px-2 py-1 text-xs text-left"></td>
+                                <td class="my-2 flex justify-evenly">
+                                    <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                        <flux:button type="button" icon-leading="pencil" class="cursor-pointer btn-intermediary btn-buildins" />
+                                        </flux:modal-trigger>
+                                        <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                            <flux:button type="button" icon-leading="trash" class="cursor-pointer btn-deleted btn-buildings" />
+                                            </flux:modal-trigger>
+                                </td>
+                            </tr>
+
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
             </div>
         </div>
@@ -797,4 +939,28 @@
 
         <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos</flux:button>
     </form>
+    <script>
+       document.addEventListener('livewire:initialized', () => {
+    // Coordenadas
+    const lat = 19.4326;
+    const lng = -99.1332;
+    const coords = [lat, lng];
+
+    // Mapa Macro (vista amplia)
+    const mapMacro = L.map('map-macro').setView(coords, 12);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(mapMacro);
+    L.marker(coords).addTo(mapMacro).bindPopup('Tu ubicación').openPopup();
+
+    // Mapa Micro (vista de calle)
+    const mapMicro = L.map('map-micro').setView(coords, 18);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(mapMicro);
+    L.marker(coords).addTo(mapMicro).bindPopup('Tu ubicación').openPopup();
+    });
+
+
+    </script>
 </div>

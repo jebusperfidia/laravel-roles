@@ -43,7 +43,7 @@
                                 <div class="form-group-horizontal-right">
                                     <flux:label>Iglesia<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='church' />
+                                        <flux:input type="number" wire:model.lazy='church' />
                                         <flux:error name="church" />
                                     </flux:field>
                                 </div>
@@ -83,7 +83,7 @@
                                 <div class="form-group-horizontal-right">
                                     <flux:label>Mercado<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='market' />
+                                        <flux:input type="number" wire:model.lazy='market' />
                                         <flux:error name="market" />
                                     </flux:field>
                                 </div>
@@ -92,7 +92,7 @@
                                 <div class="form-group-horizontal-right mb-4">
                                     <flux:label>Supermercado<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='superMarket' />
+                                        <flux:input type="number" wire:model.lazy='superMarket' />
                                         <flux:error name="superMarket" />
                                     </flux:field>
                                 </div>
@@ -101,7 +101,7 @@
                                 <flux:label>Locales comerciales<span class="sup-required">*</span>
                                 </flux:label>
                                 <flux:field class="w-80">
-                                    <flux:input type="number" wire:model.live.debounce.500ms='commercialSpaces' />
+                                    <flux:input type="number" wire:model.lazy='commercialSpaces' />
                                     <flux:error name="commercialSpaces" />
                                 </flux:field>
                             </div>
@@ -110,7 +110,7 @@
                                     <flux:label>Cantidad locales comerciales<span class="sup-required">*</span>
                                     </flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='numberCommercialSpaces' />
+                                        <flux:input type="number" wire:model.lazy='numberCommercialSpaces' />
                                         <flux:error name="numberCommercialSpaces" />
                                     </flux:field>
                                 </div>
@@ -150,7 +150,7 @@
                                 <div class="form-group-horizontal-right">
                                     <flux:label>Plaza pública<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='publicSquare' />
+                                        <flux:input type="number" wire:model.lazy='publicSquare' />
                                         <flux:error name="publicSquare" />
                                     </flux:field>
                                 </div>
@@ -190,7 +190,7 @@
                                 <div class="form-group-horizontal-right">
                                     <flux:label>Parques<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='parks' />
+                                        <flux:input type="number" wire:model.lazy='parks' />
                                         <flux:error name="parks" />
                                     </flux:field>
                                 </div>
@@ -199,7 +199,7 @@
                                 <div class="form-group-horizontal-right">
                                     <flux:label>Jardines<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='gardens' />
+                                        <flux:input type="number" wire:model.lazy='gardens' />
                                         <flux:error name="gardens" />
                                     </flux:field>
                                 </div>
@@ -209,7 +209,7 @@
                                     <flux:label>Canchas deportivas<span class="sup-required">*</span>
                                     </flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='sportsCourts' />
+                                        <flux:input type="number" wire:model.lazy='sportsCourts' />
                                         <flux:error name="sportsCourts" />
                                     </flux:field>
                                 </div>
@@ -218,7 +218,7 @@
                                 <div class="form-group-horizontal-right">
                                     <flux:label>Centro deportivo<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='sportsCenter' />
+                                        <flux:input type="number" wire:model.lazy='sportsCenter' />
                                         <flux:error name="sportsCenter" />
                                     </flux:field>
                                 </div>
@@ -259,7 +259,7 @@
                                 <div class="form-group-horizontal-right">
                                     <flux:label>Primaria<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='primarySchool' />
+                                        <flux:input type="number" wire:model.lazy='primarySchool' />
                                         <flux:error name="primarySchool" />
                                     </flux:field>
                                 </div>
@@ -268,7 +268,7 @@
                                 <div class="form-group-horizontal-right mb-4">
                                     <flux:label>Secundaria<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='middleSchool' />
+                                        <flux:input type="number" wire:model.lazy='middleSchool' />
                                         <flux:error name="middleSchool" />
                                     </flux:field>
                                 </div>
@@ -277,7 +277,7 @@
                                 <div class="form-group-horizontal-right mb-4">
                                     <flux:label>Preparatoria<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='highSchool' />
+                                        <flux:input type="number" wire:model.lazy='highSchool' />
                                         <flux:error name="highSchool" />
                                     </flux:field>
                                 </div>
@@ -286,7 +286,7 @@
                                 <div class="form-group-horizontal-right mb-4">
                                     <flux:label>Universidad<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='university' />
+                                        <flux:input type="number" wire:model.lazy='university' />
                                         <flux:error name="university" />
                                     </flux:field>
                                 </div>
@@ -295,7 +295,7 @@
                                 <div class="form-group-horizontal-right mb-4">
                                     <flux:label>Otras escuelas cercanas<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='otherNearbySchools' />
+                                        <flux:input type="number" wire:model.lazy='otherNearbySchools' />
                                         <flux:error name="otherNearbySchools" />
                                     </flux:field>
                                 </div>
@@ -339,7 +339,7 @@
                                 <div class="form-group-horizontal-right">
                                     <flux:label>Primer nivel<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='firstLevel' />
+                                        <flux:input type="number" wire:model.lazy='firstLevel' />
                                         <flux:error name="firstLevel" />
                                     </flux:field>
                                 </div>
@@ -348,7 +348,7 @@
                                 <div class="form-group-horizontal-right">
                                     <flux:label>Segundo nivel<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='secondLevel' />
+                                        <flux:input type="number" wire:model.lazy='secondLevel' />
                                         <flux:error name="firstLevel" />
                                     </flux:field>
                                 </div>
@@ -357,7 +357,7 @@
                                 <div class="form-group-horizontal-right">
                                     <flux:label>Tercer nivel<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='thirdLevel' />
+                                        <flux:input type="number" wire:model.lazy='thirdLevel' />
                                         <flux:error name="firstLevel" />
                                     </flux:field>
                                 </div>
@@ -398,7 +398,7 @@
                                 <div class="form-group-horizontal-right">
                                     <flux:label>Banco<span class="sup-required">*</span></flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='bank' />
+                                        <flux:input type="number" wire:model.lazy='bank' />
                                         <flux:error name="bank" />
                                     </flux:field>
                                 </div>
@@ -441,7 +441,7 @@
                                     <flux:label>Centro comunitario<span class="sup-required">*</span>
                                     </flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='communityCenter' />
+                                        <flux:input type="number" wire:model.lazy='communityCenter' />
                                         <flux:error name="communityCenter" />
                                     </flux:field>
                                 </div>
@@ -483,7 +483,7 @@
                                     <flux:label>Distancia urbano<span class="sup-required">*</span>
                                     </flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='urbanDistance' />
+                                        <flux:input type="number" wire:model.lazy='urbanDistance' />
                                         <flux:error name="urbanDistance" />
                                     </flux:field>
                                 </div>
@@ -493,7 +493,7 @@
                                     <flux:label>Frecuencia urbano<span class="sup-required">*</span>
                                     </flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='urbanFrequency' />
+                                        <flux:input type="number" wire:model.lazy='urbanFrequency' />
                                         <flux:error name="urbanFrequency" />
                                     </flux:field>
                                 </div>
@@ -503,7 +503,7 @@
                                     <flux:label>Distancia urbano<span class="sup-required">*</span>
                                     </flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='suburbanDistance' />
+                                        <flux:input type="number" wire:model.lazy='suburbanDistance' />
                                         <flux:error name="urbanDistance" />
                                     </flux:field>
                                 </div>
@@ -513,7 +513,7 @@
                                     <flux:label>Frecuencia suburnano<span class="sup-required">*</span>
                                     </flux:label>
                                     <flux:field class="w-80">
-                                        <flux:input type="number" wire:model.live.debounce.500ms='suburbanFrequency' />
+                                        <flux:input type="number" wire:model.lazy='suburbanFrequency' />
                                         <div>
                                             <flux:error name="suburbanFrequency" />
                                         </div>

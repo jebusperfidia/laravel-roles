@@ -65,7 +65,8 @@ class DeclarationsWarnings extends Component
         }
 
         //
-        Toaster::success('Los datos fueron guardados con éxito');
+        Toaster::success('Formulario guardado con éxito');
+        return redirect()->route('form.index', ['section' => 'urban-features']);
 
     }
 

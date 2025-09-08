@@ -59,7 +59,8 @@ class LandDetails extends Component
 
         //Al finalizar, aquí se puede generar un Toaster de guardado o bien, copiar alguna otra función para redireccionar
         //y a la vez enviar un toaster
-        Toaster::success('Archivos guardados con éxito con éxito');
+        Toaster::success('Formulario guardado con éxito');
+        return redirect()->route('form.index', ['section' => 'property-description']);
     }
 
     public function validateAllContainers()

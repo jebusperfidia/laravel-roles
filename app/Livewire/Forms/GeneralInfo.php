@@ -95,7 +95,9 @@ class GeneralInfo extends Component
 
         //Al finalizar, aquí se puede generar un Toaster de guardado o bien, copiar alguna otra función para redireccionar
         //y a la vez enviar un toaster
-        Toaster::success('Archivos guardados con éxito con éxito');
+
+        Toaster::success('Formulario guardado con éxito');
+        return redirect()->route('form.index', ['section' => 'property-location']);
     }
 
     //Generamos todas las reglas de validación por contenedor en un solo método, pero que contenga las validaciones condicionales
@@ -107,7 +109,7 @@ class GeneralInfo extends Component
             'gi_folio' => 'string',
             'gi_date' => 'required',
             'gi_type' => 'required',
-            'gi_calculationType' => 'required',
+            /* 'gi_calculationType' => 'required', */
             'gi_valuator' => 'required',
             'gi_preValuation' => 'nullable'
         ];
@@ -118,12 +120,12 @@ class GeneralInfo extends Component
             'gi_ownerRfc' => 'nullable|min:12',
             'gi_ownerCurp' => 'nullable|min:18',
             'gi_ownerCp' => 'required|min:5',
-            'gi_ownerEntity' => 'required',
+          /*   'gi_ownerEntity' => 'required',
             'gi_ownerLocality' => 'required',
-            'gi_ownerColony' => 'required',
-            'gi_ownerStreet' => 'required|number',
-            'gi_ownerAbroadNumber' => 'required|number',
-            'gi_ownerInsideNumber' => 'nullable|number'
+            'gi_ownerColony' => 'required', */
+            'gi_ownerStreet' => 'required',
+            'gi_ownerAbroadNumber' => 'required|numeric',
+            'gi_ownerInsideNumber' => 'nullable|numeric'
         ];
 
         //Validaciones Si el tipo de persona es Fisica
@@ -145,13 +147,13 @@ class GeneralInfo extends Component
             'gi_applicCurp' => 'nullable|min:18',
             'gi_applicNss' => 'nullable|min:11',
             'gi_applicCp' => 'required|min:5',
-            'gi_applicEntity' => 'required',
+    /*         'gi_applicEntity' => 'required',
             'gi_applicLocality' => 'required',
-            'gi_applicColony' => 'required',
-            'gi_applicStreet' => 'required|number',
-            'gi_applicAbroadNumber' => 'required|number',
-            'gi_applicInsideNumber' => 'nullable|number',
-            'gi_applicPhone'    => 'nullable|number'
+            'gi_applicColony' => 'required', */
+            'gi_applicStreet' => 'required',
+            'gi_applicAbroadNumber' => 'required|numeric',
+            'gi_applicInsideNumber' => 'nullable|numeric',
+            'gi_applicPhone'    => 'nullable|numeric'
         ];
 
         //Validaciones específicas según tipo de solicitante
@@ -168,13 +170,13 @@ class GeneralInfo extends Component
     //VALIDACIONES CONTAINER 4
         $container4 = [
             'gi_propertyCp' => 'required|min:5',
-            'gi_propertyEntity' => 'required',
+           /*  'gi_propertyEntity' => 'required',
             'gi_propertyLocality' => 'required',
             'gi_propertyCity' => 'required',
-            'gi_propertyColony' => 'required',
-            'gi_propertyStreet' => 'required|number',
-            'gi_propertyAbroadNumber' => 'required|number',
-            'gi_propertyInsideNumber' => 'nullable|number',
+            'gi_propertyColony' => 'required', */
+            'gi_propertyStreet' => 'required',
+            'gi_propertyAbroadNumber' => 'required|numeric',
+            'gi_propertyInsideNumber' => 'nullable|numeric',
             'gi_propertyBlock' => 'nullable',
             'gi_propertySuperBlock' => 'nullable',
             'gi_propertyLot' => 'nullable',
@@ -186,7 +188,7 @@ class GeneralInfo extends Component
             'gi_propertyStreetBetween' => 'nullable',
             'gi_propertyAndStreet' => 'nullable',
             'gi_propertyHousingComplex' => 'nullable',
-            'gi_propertyTax' => 'required|number',
+            'gi_propertyTax' => 'required|numeric',
             'gi_propertyWaterAccount' => 'required',
             'gi_propertyType' => 'required',
             'gi_propertyTypeSigapred' => 'required',

@@ -785,7 +785,7 @@
                             <div class="w-80">
                                 <div class="mb-1 text-sm font-medium text-gray-700 flex justify-center">Ancho</div>
                                 <flux:field>
-                                    <flux:input type="text" wire:model='inf_roadwaysMts' :disabled="$inf_roadways === '7. No presenta'" />
+                                    <flux:input type="number" wire:model='inf_roadwaysMts' :disabled="$inf_roadways === '7. No presenta'" />
                                     <flux:label class="text-[12px]">Metros</flux:label>
                                 </flux:field>
                                 <flux:error name="inf_roadwaysMts" />
@@ -827,7 +827,7 @@
                             </div>
                             <div class="w-80">
                                 <flux:field>
-                                    <flux:input type="text" wire:model='inf_sidewalksMts' :disabled="$inf_sidewalks === '5. No presenta'" />
+                                    <flux:input type="number" wire:model='inf_sidewalksMts' :disabled="$inf_sidewalks === '5. No presenta'" />
                                    <flux:label class="text-[12px]">Metros</flux:label>
                                    <flux:error name="inf_sidewalksMts" />
                                 </flux:field>
@@ -864,7 +864,7 @@
                             </div>
                             <div class="w-80">
                                 <flux:field>
-                                    <flux:input type="text" wire:model='inf_curbsMts' :disabled="$inf_curbs === '3. No existe'"/>
+                                    <flux:input type="number" wire:model='inf_curbsMts' :disabled="$inf_curbs === '3. No existe'"/>
                                     <flux:label class="text-[12px]">Metros</flux:label>
                                     <flux:error name="inf_curbsMts" />
                                 </flux:field>
@@ -941,7 +941,7 @@
                     </div>
                     <div class="radio-input">
                         <flux:field class="radio-group-horizontal">
-                            <flux:input type="number" wire:model.live.debounce.800ms='luse_mandatoryFreeArea'/>
+                            <flux:input type="number" wire:model.lazy='luse_mandatoryFreeArea'/>
                         </flux:field>
                     </div>
                     <div class="error-container">
@@ -954,7 +954,7 @@
                         Niveles permitidos<span class="sup-required">*</span>
                     </div>
                     <flux:field class="radio-group-horizontal">
-                        <flux:input type="number" wire:model.live.debounce.800ms='luse_allowedLevels' min="0" max="999"  step="any" />
+                        <flux:input type="number" wire:model.lazy='luse_allowedLevels' min="0" max="999"  step="any" />
                     </flux:field>
                     <div class="error-container">
                         <flux:error name="luse_allowedLevels" />
@@ -968,7 +968,7 @@
                     </div>
                     <div class="radio-input">
                         <flux:field class="radio-group-horizontal">
-                            <flux:input type="number" wire:model.live.debounce.150ms='luse_landCoefficientArea' readonly/>
+                            <flux:input type="number" wire:model.live='luse_landCoefficientArea' readonly/>
                         </flux:field>
                     </div>
                     <div class="error-container">
