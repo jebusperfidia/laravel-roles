@@ -5,9 +5,14 @@ namespace App\Livewire\Forms;
 use Livewire\Component;
 use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
+use Livewire\WithFileUploads;
+use Flux\Flux;
 
 class LandDetails extends Component
 {
+
+    use WithFileUploads;
+    public $photos = []; // Propiedad para almacenar múltiples archivos
 
     //PRIMER CONTENEDOR
     public $sli_sourceLegalInformation;
@@ -28,12 +33,31 @@ class LandDetails extends Component
 
     //SEGUNDO CONTENEDOR
 
+
+
+
+
+
+
+    //Vatiable para crear grupo
+    public $group;
+
+    //Variables para crear elemento de grupo
+    public $orientation, $adjacent;
+    public float $extent;
+
+
+
+
+
     //TERCER CONTENEDOR
     public $ct_streetWithFront, $ct_CrossStreet1, $ct_crossStreetOrientation1, $ct_CrossStreet2, $ct_crossStreetOrientation2,
         $ct_borderStreet1, $ct_borderStreetOrientation1, $ct_borderStreet2, $ct_borderStreetOrientation2, $ct_location,
         $ct_configuration, $ct_topography, $ct_typeOfRoad, $ct_panoramicFeatures, $ct_EasementRestrictions;
 
-
+    public function mount(){
+        $this->extent = 0;
+    }
 
     public function save()
     {
@@ -62,6 +86,114 @@ class LandDetails extends Component
         Toaster::success('Formulario guardado con éxito');
         return redirect()->route('form.index', ['section' => 'property-description']);
     }
+
+
+
+
+    //FUNCIONES PARA GRUPOS Y ELEMENTOS DEL MISMO
+
+    public function openAddGroup()
+    {
+        $this->resetValidation();
+        Flux::modal('add-group')->show();      // 3) Abre el modal
+
+    }
+
+    public function openAddElement()
+    {
+        $this->resetValidation();
+        Flux::modal('add-element')->show();      // 3) Abre el modal
+    }
+
+    public function openEditElement()
+    {
+        $this->resetValidation();
+        Flux::modal('edit-element')->show();      // 3) Abre el modal
+
+    }
+
+
+    public function addGroup(){
+
+
+        $rules = [
+            'group' => 'required'
+        ];
+
+        $this->validate(
+            $rules,
+            [],
+            $this->validationAttributeGroup()
+        );
+
+        Toaster::success('Grupo agregado con éxito');
+        $this->modal('add-group')->close();
+    }
+
+
+
+    public function deleteGroup(){
+
+        Toaster::error('Grupo eliminado con éxito');
+
+    }
+
+    public function addItem()
+    {
+        $rules = [
+            'orientation' => 'required',
+            'extent' => 'required',
+            'adjacent' => 'required',
+        ];
+
+        $this->validate(
+            $rules,
+            [],
+            $this->validationAttributesItem()
+        );
+
+
+        $this->orientation = '';
+        $this->extent = 0;
+        $this->orientation = '';
+
+        Toaster::success('Elemento agregado con éxito');
+        $this->modal('add-item')->close();
+    }
+
+
+    public function editItem(){
+
+
+        $rules = [
+            'orientation' => 'required',
+            'extent' => 'required',
+            'adjacent' => 'required',
+        ];
+
+        $this->validate(
+            $rules,
+            [],
+            $this->validationAttributesItem()
+        );
+
+
+        $this->orientation = '';
+        $this->extent = 0;
+        $this->orientation = '';
+
+        Toaster::success('Elemento editado con éxito');
+        $this->modal('edit-item')->close();
+    }
+
+
+    public function deleteItem(){
+        Toaster::error('Elemento eliminado con éxito');
+    }
+
+
+
+
 
     public function validateAllContainers()
     {
@@ -236,6 +368,68 @@ class LandDetails extends Component
         ];
     }
 
+
+    protected function validationAttributeGroup(): array
+    {
+        return [
+            'group' => 'grupo'
+        ];
+    }
+
+
+    protected function validationAttributesItem(): array
+    {
+        return [
+            'orientation' => 'orientacion',
+            'extent' => ' medida',
+            'adjacent' => 'colindancia',
+        ];
+    }
+
+    //FUNCION PARA LA CARGA DE ARCHIVOS
+    public function updatedPhotos()
+    {
+        $this->validate([
+            'photos.*' => 'required|mimes:pdf,jpg,jpeg|max:2048', // Valida cada archivo en el array
+        ]);
+    }
+
+
+    /**
+     * Función principal para cargar y guardar los archivos en el servidor.
+     * Esta función es llamada por el botón 'Cargar archivo'
+     */
+    public function uploadFiles()
+    {
+        // 3: Validación para el campo vacío: se utiliza 'required' en la propiedad 'photos'.
+        $this->validate([
+            'photos' => 'required', // Se asegura de que al menos un archivo haya sido seleccionado.
+            'photos.*' => 'mimes:pdf,jpg,jpeg|max:2048',
+        ], [
+            // Mensaje de error personalizado para la validación del campo vacío
+            'photos.required' => 'Por favor, selecciona al menos un archivo para cargar.',
+        ]);
+
+        // Itera sobre cada archivo en el array de 'photos'.
+        foreach ($this->photos as $photo) {
+            // Guarda cada archivo en el disco 'public' dentro de la carpeta 'attachments'.
+            $path = $photo->store('attachments', 'public');
+
+            // TODO: Aquí debes agregar la lógica para guardar la ruta del archivo ($path) en tu base de datos.
+            // Por ejemplo:
+            // Attachment::create([
+            //     'file_name' => $photo->getClientOriginalName(),
+            //     'path' => $path,
+            //     'user_id' => auth()->id(),
+            // ]);
+        }
+
+        // Limpia el array de archivos para resetear el input.
+        $this->photos = [];
+
+        // Muestra un mensaje de éxito que se puede mostrar en la vista.
+        session()->flash('message', '¡Archivos cargados correctamente!');
+    }
 
 
     public function render()

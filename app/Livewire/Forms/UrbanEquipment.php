@@ -61,11 +61,29 @@ class UrbanEquipment extends Component
     }
 
 
+
+    private function sanitizeInteger($value): int
+    {
+        // Si el valor es nulo o una cadena vacía, se retorna 0
+        if ($value === null || trim((string)$value) === '') {
+            return 0;
+        }
+
+        // Elimina cualquier carácter que no sea un número
+        // Esto remueve signos +, - y otros símbolos no numéricos
+        $clean = preg_replace('/[^0-9]/', '', (string)$value);
+
+        // Convierte el resultado a entero
+        return (int) $clean;
+    }
+
+
     //VALORES DE ACTUALIZACIÓN MEDIANTE WATCHERS PARA TEMPLOS
     public function updatedChurch($value) {
-        if($value === null){
+      /*   if($value === null){
             $this->church = 0;
-        }
+        } */
+        $this->church = $this->sanitizeInteger($value);
         $this->updatedTempleCheckbox();
     }
 
@@ -77,35 +95,27 @@ class UrbanEquipment extends Component
     //VALORES DE ACTUALIZACIÓN MEDIANTE WATCHERS PARA MERCADOS
 
     public function updatedMarket($value) {
-        if ($value === null) {
-            $this->market = 0;
-        }
+        $this->market = $this->sanitizeInteger($value);
         $this->updatedMarketCheckbox();
     }
 
     public function updatedSuperMarket($value)
     {
-        if ($value === null) {
-            $this->superMarket = 0;
-        }
+        $this->superMarket = $this->sanitizeInteger($value);
         $this->updatedMarketCheckbox();
     }
 
 
     public function updatedCommercialSpaces($value)
     {
-        if ($value === null) {
-            $this->commercialSpaces = 0;
-        }
+        $this->commercialSpaces = $this->sanitizeInteger($value);
         $this->updatedMarketCheckbox();
     }
 
 
     public function updatedNumberCommercialSpaces($value)
     {
-        if ($value === null) {
-            $this->numberCommercialSpaces = 0;
-        }
+        $this->numberCommercialSpaces = $this->sanitizeInteger($value);
         $this->updatedMarketCheckbox();
     }
 
@@ -120,9 +130,7 @@ class UrbanEquipment extends Component
     //VALORES DE ACTUALIZACIÓN MEDIANTE WATCHERS PARA PLAZAS PÚBLICAS
 
     public function updatedPublicSquare($value){
-        if ($value === null) {
-            $this->publicSquare = 0;
-        }
+        $this->publicSquare = $this->sanitizeInteger($value);
         $this->updatedPublicSquareCheckbox();
     }
 
@@ -137,33 +145,25 @@ class UrbanEquipment extends Component
 
     public function updatedParks($value)
     {
-        if ($value === null) {
-            $this->parks = 0;
-        }
+        $this->parks = $this->sanitizeInteger($value);
         $this->updatedParkGardensCheckbox();
     }
 
     public function updatedGardens($value)
     {
-        if ($value === null) {
-            $this->gardens = 0;
-        }
+        $this->gardens = $this->sanitizeInteger($value);
         $this->updatedParkGardensCheckbox();
     }
 
     public function updatedSportsCourts($value)
     {
-        if ($value === null) {
-            $this->sportsCourts = 0;
-        }
+        $this->sportsCourts = $this->sanitizeInteger($value);
         $this->updatedParkGardensCheckbox();
     }
 
     public function updatedSportsCenter($value)
     {
-        if ($value === null) {
-            $this->sportsCenter = 0;
-        }
+        $this->sportsCenter = $this->sanitizeInteger($value);
         $this->updatedParkGardensCheckbox();
     }
 
@@ -182,41 +182,31 @@ class UrbanEquipment extends Component
 
     public function updatedPrimarySchool($value)
     {
-        if ($value === null) {
-            $this->primarySchool = 0;
-        }
+        $this->primarySchool = $this->sanitizeInteger($value);
         $this->updatedSchoolsCheckbox();
     }
 
     public function updatedMiddleSchool($value)
     {
-        if ($value === null) {
-            $this->middleSchool = 0;
-        }
+        $this->middleSchool = $this->sanitizeInteger($value);
         $this->updatedSchoolsCheckbox();
     }
 
     public function updatedHighSchool($value)
     {
-        if ($value === null) {
-            $this->highSchool = 0;
-        }
+        $this->highSchool = $this->sanitizeInteger($value);
         $this->updatedSchoolsCheckbox();
     }
 
     public function updatedUniversity($value)
     {
-        if ($value === null) {
-            $this->university = 0;
-        }
+        $this->university = $this->sanitizeInteger($value);
         $this->updatedSchoolsCheckbox();
     }
 
     public function updatedOtherNearbySchools($value)
     {
-        if ($value === null) {
-            $this->otherNearbySchools = 0;
-        }
+        $this->otherNearbySchools = $this->sanitizeInteger($value);
         $this->updatedSchoolsCheckbox();
     }
 
@@ -234,26 +224,20 @@ class UrbanEquipment extends Component
 
     public function updatedFirstLevel($value)
     {
-        if ($value === null) {
-            $this->firstLevel = 0;
-        }
+        $this->firstLevel = $this->sanitizeInteger($value);
         $this->updatedHospitalsCheckbox();
     }
 
 
     public function updatedSecondLevel($value)
     {
-        if ($value === null) {
-            $this->secondLevel = 0;
-        }
+        $this->secondLevel = $this->sanitizeInteger($value);
         $this->updatedHospitalsCheckbox();
     }
 
     public function updatedThirdLevel($value)
     {
-        if ($value === null) {
-            $this->thirdLevel = 0;
-        }
+        $this->thirdLevel = $this->sanitizeInteger($value);
         $this->updatedHospitalsCheckbox();
     }
 
@@ -270,9 +254,7 @@ class UrbanEquipment extends Component
 
     public function updatedBank($value)
     {
-        if ($value === null) {
-            $this->bank = 0;
-        }
+        $this->bank = $this->sanitizeInteger($value);
         $this->updatedBanksCheckbox();
     }
 
@@ -288,9 +270,7 @@ class UrbanEquipment extends Component
 
     public function updatedCommunityCenter($value)
     {
-        if ($value === null) {
-            $this->communityCenter = 0;
-        }
+        $this->communityCenter = $this->sanitizeInteger($value);
         $this->updatedCommunityCenterCheckbox();
     }
 
@@ -305,33 +285,25 @@ class UrbanEquipment extends Component
     //VALORES DE ACTUALIZACIÓN PARA TRANSPORTE
     public function updatedUrbanDistance($value)
     {
-        if ($value === null) {
-            $this->urbanDistance = 0;
-        }
+        $this->urbanDistance = $this->sanitizeInteger($value);
         $this->updatedtransportCheckbox();
     }
 
     public function updatedUrbanFrequency($value)
     {
-        if ($value === null) {
-            $this->urbanFrequency = 0;
-        }
+        $this->urbanFrequency = $this->sanitizeInteger($value);
         $this->updatedtransportCheckbox();
     }
 
     public function updatedSuburbanDistance($value)
     {
-        if ($value === null) {
-            $this->suburbanDistance = 0;
-        }
+        $this->suburbanDistance = $this->sanitizeInteger($value);
         $this->updatedtransportCheckbox();
     }
 
     public function updatedSuburbanFrequency($value)
     {
-        if ($value === null) {
-            $this->suburbanFrequency = 0;
-        }
+        $this->suburbanFrequency = $this->sanitizeInteger($value);
         $this->updatedtransportCheckbox();
     }
 

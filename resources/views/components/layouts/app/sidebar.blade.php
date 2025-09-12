@@ -74,12 +74,11 @@
             @if (session()->has('valuation-active-form'))
                 <flux:navlist.group class="grid">
                     @foreach ($formSections as $item)
-                        <flux:navlist.item icon="{{ $item['icon'] }}"
-                            :href="route('form.index', ['section' => $item['key']])"
-                            :current="request()->routeIs('form.index') && request()->get('section') === $item['key']"
-                            wire:navigate>
-                            {{ $item['label'] }}
-                        </flux:navlist.item>
+                       <flux:navlist.item icon="{{ $item['icon'] }}" :href="route('form.index', ['section' => $item['key']])"
+                        :current="request()->routeIs('form.index') && request()->get('section') === $item['key']"
+                        wire:navigate>
+                        {{ $item['label'] }}
+                    </flux:navlist.item>
                     @endforeach
                 </flux:navlist.group>
             @endif

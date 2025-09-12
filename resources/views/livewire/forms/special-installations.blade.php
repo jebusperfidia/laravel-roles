@@ -13,8 +13,13 @@
                     @php
                     $tabs = [
                     'privativas' => 'Privativas',
-                    'comunes' => 'Comunes',
+                    /* 'comunes' => 'Comunes', */
                     ];
+
+                    if(stripos($valuation->property_type, 'condominio')){
+                    $tabs = array_merge($tabs, ['comunes' => 'Comunes']);
+                    }
+
                     $lastKey = array_key_last($tabs);
                     @endphp
 
@@ -26,7 +31,7 @@
                                                         {{ $activeTab === $key
                                                             ? 'border-b-2 border-[#43A497] text-[#3A8B88] font-semibold'
                                                             : 'text-gray-600 hover:text-[#5CBEB4]' }}">
-                            {{ $label }}
+                           <span class="text-[16px]">{{ $label }}</span>
                         </flux:navbar.item>
 
                         @if ($key !== $lastKey)
@@ -124,9 +129,11 @@
                             </div>
 
                 {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
-                <flux:modal.trigger name="add-construction" class="flex justify-end">
-                    <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"></flux:button>
-                </flux:modal.trigger>
+                {{-- <flux:modal.trigger name="add-construction" class="flex justify-end"> --}}
+                    <div class="flex justify-end">
+                        <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus" wire:click='openAddElement'></flux:button>
+                    </div>
+                {{-- </flux:modal.trigger> --}}
 
                 {{-- TABLA DE ELEMENTOS --}}
                 <div class="mt-2">
@@ -211,14 +218,15 @@
                                             class="w-4 h-4 text-blue-500">
                                     </td>
                                     <td class="my-2 flex justify-evenly">
-                                        <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                       {{--  <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
-                                                class="cursor-pointer btn-intermediary btn-buildins" />
-                                            </flux:modal-trigger>
-                                            <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                                <flux:button type="button" icon-leading="trash"
-                                                    class="cursor-pointer btn-deleted btn-buildings" />
-                                                </flux:modal-trigger>
+                                                class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElement'/>
+                                            {{-- </flux:modal-trigger> --}}
+                                           {{--  <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
+                                                <flux:button
+                                                onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()" wire:click="deleteElement"
+                                                icon-leading="trash" class="cursor-pointer btn-deleted btn-buildings" />
+                                               {{--  </flux:modal-trigger> --}}
                                     </td>
                                 </tr>
                             </tbody>
@@ -231,9 +239,10 @@
                     <h2 class="border-b-2 border-gray-300">Elementos accesorios</h2>
                 </div>
                 {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
-                <flux:modal.trigger name="add-construction" class="flex justify-end">
-                    <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"></flux:button>
-                </flux:modal.trigger>
+                <div class="flex justify-end">
+                        <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus" wire:click='openAddElement'>
+                        </flux:button>
+                    </div>
 
 
                 {{-- TABLA DE ELEMENTOS --}}
@@ -319,14 +328,15 @@
                                             class="w-4 h-4 text-blue-500">
                                     </td>
                                     <td class="my-2 flex justify-evenly">
-                                        <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
-                                                class="cursor-pointer btn-intermediary btn-buildins" />
-                                            </flux:modal-trigger>
-                                            <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                                <flux:button type="button" icon-leading="trash"
-                                                    class="cursor-pointer btn-deleted btn-buildings" />
-                                                </flux:modal-trigger>
+                                                class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElement'/>
+                                            {{-- </flux:modal-trigger> --}}
+                                            {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
+                                                <flux:button
+                                                onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()" wire:click="deleteElement"
+                                                icon-leading="trash"  class="cursor-pointer btn-deleted btn-buildings" />
+                                                {{-- </flux:modal-trigger> --}}
                                     </td>
                                 </tr>
                             </tbody>
@@ -340,9 +350,12 @@
                 </div>
 
                 {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
-                <flux:modal.trigger name="add-construction" class="flex justify-end">
-                    <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"></flux:button>
-                </flux:modal.trigger>
+                {{-- <flux:modal.trigger name="add-construction" class="flex justify-end"> --}}
+                  <div class="flex justify-end">
+                            <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus" wire:click='openAddElement'>
+                            </flux:button>
+                        </div>
+                {{-- </flux:modal.trigger> --}}
 
                 {{-- TABLA DE ELEMENTOS --}}
                 <div class="mt-2">
@@ -427,14 +440,15 @@
                                             class="w-4 h-4 text-blue-500">
                                     </td>
                                     <td class="my-2 flex justify-evenly">
-                                        <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                        <{{-- flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
-                                                class="cursor-pointer btn-intermediary btn-buildins" />
-                                            </flux:modal-trigger>
-                                            <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                                <flux:button type="button" icon-leading="trash"
-                                                    class="cursor-pointer btn-deleted btn-buildings" />
-                                                </flux:modal-trigger>
+                                                class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElement'/>
+                                            {{-- </flux:modal-trigger> --}}
+                                           {{--  <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
+                                                <flux:button
+                                                onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()" wire:click="deleteElement"
+                                                type="button" icon-leading="trash" class="cursor-pointer btn-deleted btn-buildings" />
+                                                {{-- </flux:modal-trigger> --}}
                                     </td>
                                 </tr>
                             </tbody>
@@ -450,7 +464,7 @@
 
                 @if ($activeTab === 'comunes')
              {{-- MODAL PARA EDITAR ELEMENTO --}}
-            <flux:modal name="edit-construction" class="md:w-96">
+            <flux:modal name="edit-element" class="md:w-96">
                 <div class="space-y-6">
                     <div>
                         <flux:heading size="lg">Añadir elemento</flux:heading>
@@ -471,7 +485,7 @@
 
 
             {{-- MODAL PARA CREAR NUEVO ELEMENTO --}}
-            <flux:modal name="add-construction" class="md:w-96">
+            <flux:modal name="add-element" class="md:w-96">
                 <div class="space-y-6">
                     <div>
                         <flux:heading size="lg">Añadir elemento</flux:heading>
@@ -496,9 +510,10 @@
             </div>
 
             {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
-            <flux:modal.trigger name="add-construction" class="flex justify-end">
-                <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"></flux:button>
-            </flux:modal.trigger>
+          <div class="flex justify-end">
+                    <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus" wire:click='openAddElement'>
+                    </flux:button>
+                </div>
 
             {{-- TABLA DE ELEMENTOS --}}
             <div class="mt-2">
@@ -578,14 +593,16 @@
                                         class="w-4 h-4 text-blue-500">
                                 </td>
                                 <td class="my-2 flex justify-evenly">
-                                    <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                    {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                         <flux:button type="button" icon-leading="pencil"
-                                            class="cursor-pointer btn-intermediary btn-buildins" />
-                                        </flux:modal-trigger>
-                                        <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                            <flux:button type="button" icon-leading="trash"
+                                            class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElement'/>
+                                       {{--  </flux:modal-trigger> --}}
+                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
+                                            <flux:button
+                                            onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()" wire:click="deleteElement"
+                                            type="button" icon-leading="trash"
                                                 class="cursor-pointer btn-deleted btn-buildings" />
-                                            </flux:modal-trigger>
+                                           {{--  </flux:modal-trigger> --}}
                                 </td>
                             </tr>
                         </tbody>
@@ -600,9 +617,10 @@
 
 
             {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
-            <flux:modal.trigger name="add-construction" class="flex justify-end">
-                <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"></flux:button>
-            </flux:modal.trigger>
+            <div class="flex justify-end">
+                    <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus" wire:click='openAddElement'>
+                    </flux:button>
+                </div>
 
             {{-- TABLA DE ELEMENTOS --}}
             <div class="mt-2">
@@ -682,14 +700,16 @@
                                         class="w-4 h-4 text-blue-500">
                                 </td>
                                 <td class="my-2 flex justify-evenly">
-                                    <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                    {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                         <flux:button type="button" icon-leading="pencil"
-                                            class="cursor-pointer btn-intermediary btn-buildins" />
-                                        </flux:modal-trigger>
-                                        <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                            <flux:button type="button" icon-leading="trash"
+                                            class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElement'/>
+                                        {{-- </flux:modal-trigger> --}}
+                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
+                                            <flux:button
+                                            onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()" wire:click="deleteElement"
+                                            type="button" icon-leading="trash"
                                                 class="cursor-pointer btn-deleted btn-buildings" />
-                                            </flux:modal-trigger>
+                                            {{-- </flux:modal-trigger> --}}
                                 </td>
                             </tr>
                         </tbody>
@@ -703,10 +723,10 @@
             </div>
 
             {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
-            <flux:modal.trigger name="add-construction" class="flex justify-end">
-                <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"></flux:button>
-            </flux:modal.trigger>
-
+         <div class="flex justify-end">
+                <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus" wire:click='openAddElement'>
+                </flux:button>
+            </div>
             {{-- TABLA DE ELEMENTOS --}}
             <div class="mt-2">
                 <div class="overflow-x-auto max-w-full">
@@ -785,14 +805,16 @@
                                         class="w-4 h-4 text-blue-500">
                                 </td>
                                 <td class="my-2 flex justify-evenly">
-                                    <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                   {{--  <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                         <flux:button type="button" icon-leading="pencil"
-                                            class="cursor-pointer btn-intermediary btn-buildins" />
-                                        </flux:modal-trigger>
-                                        <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                            <flux:button type="button" icon-leading="trash"
+                                            class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElement'/>
+                                        {{-- </flux:modal-trigger> --}}
+                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
+                                            <flux:button
+                                            onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()" wire:click="deleteElement"
+                                            type="button" icon-leading="trash"
                                                 class="cursor-pointer btn-deleted btn-buildings" />
-                                            </flux:modal-trigger>
+                                            {{-- </flux:modal-trigger> --}}
                                 </td>
                             </tr>
                         </tbody>

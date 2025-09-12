@@ -329,71 +329,101 @@
 
 
                 <div class="form-grid form-grid--3 form-grid-3-variation">
+
+                    {{-- Primer elemento hijo: el label --}}
                     <flux:label class="label-variation">Anexo de colindancias</flux:label>
-                    <flux:input type="text" wire:model="state" placeholder="Guanajuato" />
+
+                    {{-- Segundo elemento hijo: el contenedor de todo el contenido --}}
+                    <div>
+                        <div class="flex items-center gap-4">
+                            {{-- Input de archivo oculto para múltiples selecciones --}}
+                            <input type="file" wire:model="photos" class="sr-only" id="file-upload" multiple>
+
+                            {{-- Botón estilizado para seleccionar archivos --}}
+                            <label for="file-upload"
+                                class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <svg class="h-5 w-5 text-gray-500 mr-2" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 4-4z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                Seleccionar archivo
+                            </label>
+
+                            {{-- Muestra la cantidad de archivos seleccionados o un mensaje por defecto --}}
+                            @if (count($photos) > 0)
+                            <span class="text-sm text-gray-500">
+                                {{ count($photos) }} archivo(s) seleccionado(s)
+                            </span>
+                            @else
+                            <span class="text-sm text-gray-500">
+                                No se ha seleccionado archivo
+                            </span>
+                            @endif
+                        </div>
+
+                        {{-- El error de validación debe aparecer debajo del input --}}
+                        @error('photos.*')
+                        {{-- <span class="text-red-500 text-sm mt-1">{{ $message }}</span> --}}
+                        <flux:error name="photos" />
+                        @enderror
+                        @error('photos')
+                        {{-- <span class="text-red-500 text-sm mt-1">{{ $message }}</span> --}}
+                        <flux:error name="photos" />
+                        @enderror
+
+                        {{-- El botón de carga va debajo de todo --}}
+                        <div class="mt-4">
+                            <flux:button wire:click="uploadFiles" class="btn-primary btn-files cursor-pointer">Cargar
+                                archivos
+                            </flux:button>
+                        </div>
+
+                        {{-- Muestra un mensaje de éxito cuando la carga es correcta --}}
+                        @if (session()->has('message'))
+                        <div class="mt-4 text-green-600 text-sm font-semibold">
+                            {{ session('message') }}
+                        </div>
+                        @endif
+                    </div>
                 </div>
 
-                <div class="form-grid form-grid--3 form-grid-3-variation">
-                    <flux:label class="label-variation">Anexo de colindancias</flux:label>
-                    <flux:input type="text" wire:model="state" placeholder="Guanajuato" />
-                </div>
 
                 <div class="form-grid form-grid--3 form-grid-3-variation mb-4">
                     <flux:label class="label-variation">Imágenes cargadas</flux:label>
                 </div>
 
+
                 <div class="flex justify-between text-lg border-b-2 border-gray-300 mt-8">
                     <h2>Grupos de colindancias</h2>
-                    <flux:modal.trigger name="add-construction" class="flex justify-end mb-2">
-                        <flux:button class="btn-primary btn-table cursor-pointer mr-2">Agregar grupo</flux:button>
-                    </flux:modal.trigger>
+                    {{-- <flux:modal.trigger name="add-group" class="flex justify-end mb-2"> --}}
+                        <flux:button class="btn-primary btn-table cursor-pointer mb-2" wire:click='openAddGroup'>Agregar grupo</flux:button>
+                    {{-- </flux:modal.trigger> --}}
                 </div>
                 <br>
-                <div class="flex justify-between text-md">
-                    <h3>Grupos 1</h3>
-                    <flux:modal.trigger name="add-construction" class="flex justify-end">
-                        <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"></flux:button>
-                    </flux:modal.trigger>
-                </div>
-                {{-- TABLA DE ELEMENTOS --}}
+                <div class="border-2 p-4">
+                    <div class="flex justify-between text-md mt-2">
+                        <h3>Grupos 1</h3>
+                        <flux:button
+                            onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
+                            wire:click="deleteGroup" type="button" class="btn-deleted btn-files cursor-pointer mr-2">
+                            Eliminar grupo</flux:button>
+                    </div>
+                    <div class="flex justify-between text-md">
+                        {{-- <flux:modal.trigger name="add-item" class="flex justify-end"> --}}
+                            <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus" wire:click='openAddElement'></flux:button>
+                        {{-- </flux:modal.trigger> --}}
+                    </div>
+                    {{-- TABLA DE ELEMENTOS --}}
                     <div class="mt-2">
                         <div class="overflow-x-auto max-w-full">
                             <table class="min-w-[550px] table-fixed w-full border-2 ">
                                 <thead>
                                     <tr class="bg-gray-100">
-                                        <th class="px-2 py-1 border whitespace-nowrap">Descripcion</th>
-                                        <th class="w-[120px] px-2 py-1 border whitespace-nowrap">Clasificación<span
-                                                class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[32px] px-2 py-1 border">Uso<span class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[5%] px-2 py-1 border">Niveles edificio<span class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[5%] px-2 py-1 border">Niveles por tipo de construcción<span
-                                                class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[5%] px-2 py-1 border">Rango niveles TGDF<span class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[5%] px-2 py-1 border">Edad<span class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[5%] px-2 py-1 border">Superficie<span class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[5%] px-2 py-1 border">Fuente de información<span class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[5%] px-2 py-1 border">Costo unit reposición nuevo<span class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[5%] px-2 py-1 border">Avance obra<span class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[5%] px-2 py-1 border">Estado de conservación<span class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[5%] px-2 py-1 border">RA<span class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[5%] px-2 py-1 border">Vend<span class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[5%] px-2 py-1 border">Acc<span class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[5%] px-2 py-1 border">Desc<span class="sup-required">*</span>
-                                        </th>
+                                        <th class="px-2 py-1 border whitespace-nowrap">Orientacion</th>
+                                        <th class="py-1 border">Medida</th>
+                                        <th class="px-2 py-1 border">Colindancia</th>
                                         <th class="w-[100px] py-1 border">Acciones</th>
                                     </tr>
                                 </thead>
@@ -403,51 +433,29 @@
                                     <tr>
                                         <td class="px-2 py-1 border text-xs text-center">Casa habitación
                                         </td>
-                                        <td class="px-2 py-1 border text-xs text-left">
-                                            <span>7. Residencial plus</span><br>
-                                            <span>6. Lujo</span>
-                                        </td>
-                                        <td class="px-2 py-1 border text-sm text-center">H</td>
                                         <td class="px-2 py-1 border text-sm text-center">1</td>
                                         <td class="px-2 py-1 border text-sm text-center">1</td>
-                                        <td class="px-2 py-1 border text-sm text-center">02</td>
-                                        <td class="px-2 py-1 border text-sm text-center">1</td>
-                                        <td class="px-2 py-1 border text-sm text-center">100.00</td>
-                                        <td class="px-2 py-1 border text-sm text-center">Escrituras</td>
-                                        <td class="px-2 py-1 border text-sm text-center">$1,000</td>
-                                        <td class="px-2 py-1 border text-sm text-center">100%</td>
-                                        <td class="px-2 py-1 border text-sm text-center">1.0 Bueno</td>
-                                        <td class="px-2 py-1 border text-sm text-center">
-                                            <flux:checkbox wire:model='data' />
-                                        </td>
-                                        <td class="px-2 py-1 border text-sm text-center">
-                                            <input type="radio" wire:model="respuesta" name="opcion_unica" value="A"
-                                                class="w-4 h-4 text-blue-500">
-                                        </td>
-                                        <td class="px-2 py-1 border text-sm text-center">
-                                            <input type="radio" wire:model="respuesta" name="opcion_unica" value="B"
-                                                class="w-4 h-4 text-blue-500">
-                                        </td>
-                                        <td class="px-2 py-1 border text-sm text-center">
-                                            <input type="radio" wire:model="respuesta" name="opcion_unica" value="C"
-                                                class="w-4 h-4 text-blue-500">
-                                        </td>
+
+
                                         <td class="my-2 flex justify-evenly">
-                                            <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                            {{-- <flux:modal.trigger name="edit-item" class="flex justify-end"> --}}
                                                 <flux:button type="button" icon-leading="pencil"
-                                                    class="cursor-pointer btn-intermediary btn-buildins" />
-                                                </flux:modal-trigger>
-                                                <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                                    <flux:button type="button" icon-leading="trash"
+                                                    class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElement'/>
+                                                {{-- </flux:modal-trigger> --}}
+                                                {{-- <flux:modal.trigger name="edit-construction"
+                                                    class="flex justify-end"> --}}
+                                                    <flux:button
+                                                        onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
+                                                        wire:click="deleteItem" type="button" icon-leading="trash"
                                                         class="cursor-pointer btn-deleted btn-buildings" />
-                                                    </flux:modal-trigger>
+                                                    {{-- </flux:modal-trigger> --}}
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-
+                </div>
             </div>
         </div>
 
@@ -470,9 +478,9 @@
 
                 <div class="form-grid form-grid--3 mt-3 mb-2 text-lg" wire:ignore>
 
-                <div id="map-macro" class="map-container"></div>
+                    <div id="map-macro" class="map-container"></div>
 
-                <div id="map-micro" class="map-container"></div>
+                    <div id="map-micro" class="map-container"></div>
                 </div>
 
                 <div class="form-grid form-grid--3 mt-3 mb-2 text-lg">
@@ -571,7 +579,8 @@
                                 @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
                                 , !$errors->has('ct_location')
                                 ? 'border border-gray-300 text-gray-700 hover:border-gray-400'
-                                : 'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500',
+                                : 'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500
+                                focus:border-red-500',
                                 ])
                                 >
                                 <span class="flex-1 text-left text-gray-700">
@@ -604,13 +613,14 @@
                                     6. Manzana completa
                                     @break
 
-                                 {{--    @default
-                                   3 - Centrica - Campo --}}
+                                    {{-- @default
+                                    3 - Centrica - Campo --}}
                                     @endswitch
                                 </span>
-                                <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
 
@@ -620,7 +630,8 @@
 
                                 {{-- Cabecera fija --}}
                                 <flux:menu.item disabled>
-                                    <div class="w-full grid grid-cols-[20%_30%_50%] px-2 py-1 text-gray-600 font-medium">
+                                    <div
+                                        class="w-full grid grid-cols-[20%_30%_50%] px-2 py-1 text-gray-600 font-medium">
                                         <span>Clave</span>
                                         <span>Nombre</span>
                                         <span>Frentes</span>
@@ -707,12 +718,12 @@
                         </div>
                     </div>
                     <flux:field class="flux-field">
-                            <flux:label>Configuracion<span class="sup-required">*</span></flux:label>
-                            <flux:select wire:model="ct_configuration" class=" text-gray-800 [&_option]:text-gray-900">
-                                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                                <flux:select.option value="1. Regular">1.Regular</flux:select.option>
-                                <flux:select.option value="2. Irregular">2. Irregular</flux:select.option>
-                            </flux:select>
+                        <flux:label>Configuracion<span class="sup-required">*</span></flux:label>
+                        <flux:select wire:model="ct_configuration" class=" text-gray-800 [&_option]:text-gray-900">
+                            <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                            <flux:select.option value="1. Regular">1.Regular</flux:select.option>
+                            <flux:select.option value="2. Irregular">2. Irregular</flux:select.option>
+                        </flux:select>
                         <div>
                             <flux:error name="ct_configuration" />
                         </div>
@@ -722,13 +733,15 @@
                 <div class="form-grid form-grid--2">
                     <flux:field class="flux-field">
                         <flux:label>Topografía<span class="sup-required">*</span></flux:label>
-                       <flux:select wire:model="ct_topography" class=" text-gray-800 [&_option]:text-gray-900">
-                        <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                        <flux:select.option value="1. Plano">1. Plano</flux:select.option>
-                        <flux:select.option value="2. Accidentado">2. Accidentado</flux:select.option>
-                        <flux:select.option value="3. Con pendiente ascendente">3. Con pendiente ascendente</flux:select.option>
-                        <flux:select.option value="4. Con pendiente descendente">4. Con pendiente descendente</flux:select.option>
-                    </flux:select>
+                        <flux:select wire:model="ct_topography" class=" text-gray-800 [&_option]:text-gray-900">
+                            <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                            <flux:select.option value="1. Plano">1. Plano</flux:select.option>
+                            <flux:select.option value="2. Accidentado">2. Accidentado</flux:select.option>
+                            <flux:select.option value="3. Con pendiente ascendente">3. Con pendiente ascendente
+                            </flux:select.option>
+                            <flux:select.option value="4. Con pendiente descendente">4. Con pendiente descendente
+                            </flux:select.option>
+                        </flux:select>
                         <div class="error-container">
                             <flux:error name="ct_topography" />
                         </div>
@@ -742,7 +755,8 @@
                                 @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
                                 , !$errors->has('ct_typeOfRoad')
                                 ? 'border border-gray-300 text-gray-700 hover:border-gray-400'
-                                : 'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500',
+                                : 'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500
+                                focus:border-red-500',
                                 ])
                                 >
                                 <span class="flex-1 text-left text-gray-700">
@@ -771,9 +785,10 @@
                                     3 - Centrica - Campo --}}
                                     @endswitch
                                 </span>
-                                <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
 
@@ -783,7 +798,8 @@
 
                                 {{-- Cabecera fija --}}
                                 <flux:menu.item disabled>
-                                    <div class="w-full grid grid-cols-[20%_30%_50%] px-2 py-1 text-gray-600 font-medium">
+                                    <div
+                                        class="w-full grid grid-cols-[20%_30%_50%] px-2 py-1 text-gray-600 font-medium">
                                         <span>Clave</span>
                                         <span>Nombre</span>
                                         <span>Frentes</span>
@@ -869,11 +885,21 @@
                     </flux:field> --}}
                     <flux:field class="flux-field">
                         <flux:label>Servimbre y/o restricciones<span class="sup-required">*</span></flux:label>
-                        <flux:select wire:model="ct_EasementRestrictions" class=" text-gray-800 [&_option]:text-gray-900">
+                        <flux:select wire:model="ct_EasementRestrictions"
+                            class=" text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                            <flux:select.option value="No existen restricciones de construccion en el terreno">No existen restricciones de construccion en el terreno</flux:select.option>
-                            <flux:select.option value="Las propias del reglamento de construccion vigente">Las propias del reglamento de construccion vigente</flux:select.option>
-                            <flux:select.option value="Las propias del programa delegacional de desarrollo urbano, en cuanto a numero de niveles, altura de las construcciones, porcentaje de area libre y area de vivienda minima">Las propias del programa delegacional de desarrollo urbano, en cuanto a numero de niveles, altura de las construcciones, porcentaje de area libre y area de vivienda minima</flux:select.option>
+                            <flux:select.option value="No existen restricciones de construccion en el terreno">No
+                                existen
+                                restricciones de construccion en el terreno</flux:select.option>
+                            <flux:select.option value="Las propias del reglamento de construccion vigente">Las propias
+                                del
+                                reglamento de construccion vigente</flux:select.option>
+                            <flux:select.option
+                                value="Las propias del programa delegacional de desarrollo urbano, en cuanto a numero de niveles, altura de las construcciones, porcentaje de area libre y area de vivienda minima">
+                                Las propias del programa delegacional de desarrollo urbano, en cuanto a numero de
+                                niveles,
+                                altura de las construcciones, porcentaje de area libre y area de vivienda minima
+                            </flux:select.option>
                             <flux:select.option value="Otras">Otras</flux:select.option>
                         </flux:select>
 
@@ -901,46 +927,211 @@
             <div class="form-container__content">
 
 
-              <div class="mt-8">
-                <div class="overflow-x-auto max-w-full">
-                    <table class="min-w-[550px] table-fixed w-full border-2 ">
-                        <thead>
-                            <tr class="bg-gray-100">
-                                <th class="px-2 py-1 ">Superficie en M²</th>
-                                <th class="px-2 py-1 ">Área de valor</th>
-                                <th class="px-2 py-1 ">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                <div class="mt-8">
+                    <div class="overflow-x-auto max-w-full">
+                        <table class="min-w-[550px] table-fixed w-full border-2 ">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="px-2 py-1 ">Superficie en M²</th>
+                                    <th class="px-2 py-1 ">Área de valor</th>
+                                    <th class="px-2 py-1 ">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
 
-                            {{-- Valor de ejemplo para usar en los for --}}
-                            <tr>
-                                <td class="px-2 py-1 text-xs text-center">Vida útil total del inmueble:</td>
-                                <td class="px-2 py-1 text-xs text-left"></td>
-                                <td class="my-2 flex justify-evenly">
-                                    <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                        <flux:button type="button" icon-leading="pencil" class="cursor-pointer btn-intermediary btn-buildins" />
-                                        </flux:modal-trigger>
+                                {{-- Valor de ejemplo para usar en los for --}}
+                                <tr>
+                                    <td class="px-2 py-1 text-xs text-center">Vida útil total del inmueble:</td>
+                                    <td class="px-2 py-1 text-xs text-left"></td>
+                                    <td class="my-2 flex justify-evenly">
                                         <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                            <flux:button type="button" icon-leading="trash" class="cursor-pointer btn-deleted btn-buildings" />
+                                            <flux:button type="button" icon-leading="pencil"
+                                                class="cursor-pointer btn-intermediary btn-buildins" />
                                             </flux:modal-trigger>
-                                </td>
-                            </tr>
+                                            <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                                <flux:button type="button" icon-leading="trash"
+                                                    class="cursor-pointer btn-deleted btn-buildings" />
+                                                </flux:modal-trigger>
+                                    </td>
+                                </tr>
 
 
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
 
             </div>
         </div>
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        {{-- MODALES --}}
+
+
+
+        {{-- Agregar grupo --}}
+        <flux:modal name="add-group" class="md:w-96">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg">Crear grupo</flux:heading>
+                    {{-- <flux:text class="mt-2"></flux:text> --}}
+                </div>
+                <flux:field class="flux-field">
+                    <flux:label>Nombre del grupo</flux:label>
+                    <flux:input type="text" wire:model='group' />
+                    <div class="error-container">
+                        <flux:error name="group" />
+                    </div>
+                </flux:field>
+                <div class="flex">
+                    <flux:spacer />
+                    <flux:button type="button" wire:click='addGroup' class="btn-primary cursor-pointer">Crear grupo
+                    </flux:button>
+                </div>
+            </div>
+        </flux:modal>
+
+
+
+        {{-- Agregar elemento --}}
+
+        <flux:modal name="add-element" class="md:w-96">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg">Crear elemento</flux:heading>
+                    {{-- <flux:text class="mt-2"></flux:text> --}}
+                </div>
+                <flux:field class="flux-field">
+                    <flux:label>Orientación<span class="sup-required">*</span></flux:label>
+                    <flux:input type="text" wire:model='orientation'/>
+                    <div class="error-container">
+                        <flux:error name="orientation"/>
+                    </div>
+                </flux:field>
+                <flux:field class="flux-field">
+                    <flux:label>Medida<span class="sup-required">*</span></flux:label>
+                    <flux:input type="number" wire:model='extent'/>
+                    <div class="error-container">
+                        <flux:error name="extent"/>
+                    </div>
+                </flux:field>
+                <flux:field class="flux-field">
+                    <flux:label>Colindancia<span class="sup-required">*</span></flux:label>
+                    <flux:input type="text" wire:model='adjacent'/>
+                    <div class="error-container">
+                        <flux:error name="adjacent"/>
+                    </div>
+                </flux:field>
+                <div class="flex">
+                    <flux:spacer />
+                    <flux:button type="button" wire:click='addItem' class="btn-primary cursor-pointer">Crear elemento
+                    </flux:button>
+                </div>
+            </div>
+        </flux:modal>
+
+
+        {{-- Editar elemento --}}
+
+        <flux:modal name="edit-element" class="md:w-96">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg">Editar elemento</flux:heading>
+                    {{-- <flux:text class="mt-2"></flux:text> --}}
+                </div>
+               <flux:field class="flux-field">
+                        <flux:label>Orientación<span class="sup-required">*</span></flux:label>
+                        <flux:input type="text" wire:model='orientation' />
+                        <div class="error-container">
+                            <flux:error name="orientation" />
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux-field">
+                        <flux:label>Medida<span class="sup-required">*</span></flux:label>
+                        <flux:input type="number" wire:model='extent' />
+                        <div class="error-container">
+                            <flux:error name="extent" />
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux-field">
+                        <flux:label>Colindancia<span class="sup-required">*</span></flux:label>
+                        <flux:input type="text" wire:model='adjacent' />
+                        <div class="error-container">
+                            <flux:error name="adjacent" />
+                        </div>
+                    </flux:field>
+                <div class="flex">
+                    <flux:spacer />
+                    <flux:button type="button" wire:click='editItem' class="btn-primary cursor-pointer">Editar elemento
+                    </flux:button>
+                </div>
+            </div>
+        </flux:modal>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos</flux:button>
     </form>
     <script>
-       document.addEventListener('livewire:initialized', () => {
+        document.addEventListener('livewire:navigated', () => {
+
     // Coordenadas
     const lat = 19.4326;
     const lng = -99.1332;

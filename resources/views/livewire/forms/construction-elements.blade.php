@@ -30,7 +30,7 @@
                                     {{ $activeTab === $key
                                         ? 'border-b-2 border-[#43A497] text-[#3A8B88] font-semibold'
                                         : 'text-gray-600 hover:text-[#5CBEB4]' }}">
-                                {{ $label }}
+                                <span class="text-[16px]">{{ $label }}</span>
                             </flux:navbar.item>
 
                             @if ($key !== $lastKey)
@@ -42,7 +42,8 @@
                         {{-- Menú hamburguesa para pantallas pequeñas (<950px) --}} <div
                             class="xl:hidden flex justify-end p-4 bg-white border-b-2">
                             {{-- <span class="text-lg font-semibold text-[#3A8B88]">Opciones</span> --}}
-                            <button type="button" @click="open = !open" class="text-[#000000] focus:outline-none cursor-pointer">
+                            <button type="button" @click="open = !open"
+                                class="text-[#000000] focus:outline-none cursor-pointer">
                                 <template x-if="!open">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
                                         viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
@@ -63,7 +64,8 @@
                         <ul class="flex flex-col divide-y divide-gray-100">
                             @foreach ($tabs as $key => $label)
                             <li>
-                                <button type="button" wire:click.prevent="setTab('{{ $key }}')" @click="open = false" class="cursor-pointer w-full text-left px-4 py-3 transition-colors
+                                <button type="button" wire:click.prevent="setTab('{{ $key }}')" @click="open = false"
+                                    class="cursor-pointer w-full text-left px-4 py-3 transition-colors
                                             {{ $activeTab === $key
                                                 ? 'border-l-4 border-[#43A497] bg-[#F0FDFD] text-[#3A8B88] font-semibold'
                                                 : 'text-gray-700 hover:bg-gray-100' }}">
@@ -329,7 +331,7 @@
                                                     <flux:select.option value="10">10</flux:select.option>
                                                 </flux:select>
                                             </flux:field>
-                                           {{--  <div class="error-container">
+                                            {{-- <div class="error-container">
                                                 <flux:error name="fn1_bedroomsNumber" />
                                             </div> --}}
                                         </td>
@@ -605,112 +607,62 @@
 
 
 
-
-
-
-
-
-
-
-                    {{-- MODAL PARA EDITAR ELEMENTO --}}
-                    <flux:modal name="edit-construction" class="md:w-96">
-                        <div class="space-y-6">
-                            <div>
-                                <flux:heading size="lg">Añadir elemento</flux:heading>
-                            </div>
-
-                            <flux:input label="Name" placeholder="Your name" />
-
-                            <flux:input label="Date of birth" type="date" />
-
-                            <div class="flex">
-                                <flux:spacer />
-
-                                <flux:button type="submit" class="btn-primary btn-table" variant="primary">Guardar</flux:button>
-                            </div>
-                        </div>
-                    </flux:modal>
-
-
-                    {{-- MODAL PARA CREAR NUEVO ELEMENTO --}}
-                    <flux:modal name="add-construction" class="md:w-96">
-                        <div class="space-y-6">
-                            <div>
-                                <flux:heading size="lg">Añadir elemento</flux:heading>
-                            </div>
-
-                            <flux:input label="Name" placeholder="Your name" />
-
-                            <flux:input label="Date of birth" type="date" />
-
-                            <div class="flex">
-                                <flux:spacer />
-
-                                <flux:button type="submit" class="btn-primary btn-table" variant="primary">Guardar</flux:button>
-                            </div>
-                        </div>
-                    </flux:modal>
-
-
-                    <div class="mt-8">
-                        <h3>Si el inmueble cuenta con más espacios no listados en la tabla anterior, por favor agregarlos en la siguiente tabla:</h3>
+                    <div class="mt-8 mb-4">
+                        <h3>Si el inmueble cuenta con más espacios no listados en la tabla anterior, por favor
+                            agregarlos en la siguiente tabla:</h3>
                     </div>
 
                     {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
-                    <flux:modal.trigger name="add-construction" class="flex justify-end">
-                        <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"></flux:button>
-                    </flux:modal.trigger>
+                    {{-- <flux:modal.trigger name="add-item" class="flex justify-end"> --}}
+                        <flux:button type="button" class="btn-primary btn-table cursor-pointer mt-2" icon="plus" wire:click='openAddElement'>
+                        </flux:button>
+                    {{-- </flux:modal.trigger> --}}
 
-                    {{-- Tabla otros acabados  --}}
+                    {{-- Tabla otros acabados --}}
                     <div class="mt-8">
-                            <div class="overflow-x-auto max-w-full">
-                                <table class="min-w-[550px] table-fixed w-full border-2 ">
-                                    <thead>
-                                        <tr class="bg-gray-100">
-                                            <th class="px-2 py-1 border whitespace-nowrap">Espacio</th>
-                                            <th class="w-[16%] px-2 py-1 border whitespace-nowrap">cantidad<span
-                                                    class="sup-required">*</span>
-                                            </th>
-                                            <th class="w-[20%] px-2 py-1 border">Pisos<span class="sup-required">*</span>
-                                            </th>
-                                            <th class="w-[20%] px-2 py-1 border">Muros<span class="sup-required">*</span>
-                                            </th>
-                                            <th class="w-[20%] px-2 py-1 border">Plafones<span
-                                                    class="sup-required">*</span>
-                                            </th>
-                                            <th class="w-[12%] py-1 border">Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                        <div class="overflow-x-auto max-w-full">
+                            <table class="min-w-[550px] table-fixed w-full border-2 ">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th class="px-2 py-1 border whitespace-nowrap">Espacio</th>
+                                        <th class="w-[16%] px-2 py-1 border whitespace-nowrap">cantidad<span
+                                                class="sup-required">*</span>
+                                        </th>
+                                        <th class="w-[20%] px-2 py-1 border">Pisos</th>
+                                        <th class="w-[20%] px-2 py-1 border">Muros</th>
+                                        <th class="w-[20%] px-2 py-1 border">Plafones</th>
+                                        <th class="w-[12%] py-1 border">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
 
-                                        {{-- Valor de ejemplo para usar en los for --}}
-                                        <tr>
-                                            <td class="px-2 py-1 border text-xs text-center">Casa habitación
-                                            </td>
-                                            <td class="px-2 py-1 border text-xs text-center">
-                                                <span>7. Residencial plus</span><br>
-                                                <span>6. Lujo</span>
-                                            </td>
-                                            <td class="px-2 py-1 border text-sm text-center">H</td>
-                                            <td class="px-2 py-1 border text-sm text-center">1</td>
-                                            <td class="px-2 py-1 border text-sm text-center">1</td>
+                                    {{-- Valor de ejemplo para usar en los for --}}
+                                    <tr>
+                                        <td class="px-2 py-1 border text-xs text-center">Terraza
+                                        </td>
+                                        <td class="px-2 py-1 border text-xs text-center">1</td>
+                                        <td class="px-2 py-1 border text-sm text-center">a</td>
+                                        <td class="px-2 py-1 border text-sm text-center">a</td>
+                                        <td class="px-2 py-1 border text-sm text-center">a</td>
 
 
-                                            <td class="my-2 flex justify-evenly">
-                                                <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                                    <flux:button type="button" icon-leading="pencil"
-                                                        class="cursor-pointer btn-intermediary btn-buildins" />
-                                                    </flux:modal-trigger>
-                                                    <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                                        <flux:button type="button" icon-leading="trash"
-                                                            class="cursor-pointer btn-deleted btn-buildings" />
-                                                </flux:modal-trigger>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                                        <td class="my-2 flex justify-evenly">
+                                            {{-- <flux:modal.trigger name="edit-item" class="flex justify-end"> --}}
+                                                <flux:button type="button" icon-leading="pencil"
+                                                    class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElement' />
+                                                {{-- </flux:modal-trigger> --}}
+                                                {{-- <flux:modal.trigger class="flex justify-end"> --}}
+                                                    <flux:button
+                                                        onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
+                                                        wire:click="deleteItem" type="button" icon-leading="trash"
+                                                        class="cursor-pointer btn-deleted btn-buildings" />
+                                                    {{-- </flux:modal-trigger> --}}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
+                    </div>
                     @endif
 
 
@@ -1113,6 +1065,131 @@
                 </div>
             </div>
         </div>
+
+
+
+
+
+
+
+
+        {{-- MODAL PARA CREAR NUEVO ELEMENTO --}}
+        <flux:modal name="add-element" class="md:w-96">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg">Añadir elemento</flux:heading>
+                </div>
+
+                <flux:field class="flux-field">
+                    <flux:label>Espacio<span class="sup-required">*</span></flux:label>
+                    <flux:input type="text" wire:model='space' />
+                    <div class="error-container">
+                        <flux:error name="space" />
+                    </div>
+                </flux:field>
+
+                <flux:field class="flux-field">
+                    <flux:label>Cantidad<span class="sup-required">*</span></flux:label>
+                    <flux:input type="number" wire:model='amount' />
+                    <div class="error-container">
+                        <flux:error name="amount" />
+                    </div>
+                </flux:field>
+
+                <flux:field class="flux-field">
+                    <flux:label>Pisos<span class="sup-required">*</span></flux:label>
+                    <flux:input type="text" wire:model='floors' />
+                    <div class="error-container">
+                        <flux:error name="floors" />
+                    </div>
+                </flux:field>
+
+                <flux:field class="flux-field">
+                    <flux:label>Muros<span class="sup-required">*</span></flux:label>
+                    <flux:input type="text" wire:model='walls' />
+                    <div class="error-container">
+                        <flux:error name="walls" />
+                    </div>
+                </flux:field>
+
+                <flux:field class="flux-field">
+                    <flux:label>Plafones<span class="sup-required">*</span></flux:label>
+                    <flux:input type="text" wire:model='ceilings' />
+                    <div class="error-container">
+                        <flux:error name="ceilings" />
+                    </div>
+                </flux:field>
+
+                <div class="flex">
+                    <flux:spacer />
+
+                    <flux:button type="button" wire:click='addItem' class="btn-primary btn-table cursor-pointer">Crear
+                        elemento
+                    </flux:button>
+                </div>
+            </div>
+        </flux:modal>
+
+
+
+        {{-- MODAL PARA EDITAR ELEMENTO --}}
+        <flux:modal name="edit-element" class="md:w-96">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg">Editar elemento</flux:heading>
+                </div>
+                <flux:field class="flux-field">
+                    <flux:label>Espacio<span class="sup-required">*</span></flux:label>
+                    <flux:input type="text" wire:model='space' />
+                    <div class="error-container">
+                        <flux:error name="space" />
+                    </div>
+                </flux:field>
+
+                <flux:field class="flux-field">
+                    <flux:label>Cantidad<span class="sup-required">*</span></flux:label>
+                    <flux:input type="number" wire:model='amount' />
+                    <div class="error-container">
+                        <flux:error name="amount" />
+                    </div>
+                </flux:field>
+
+                <flux:field class="flux-field">
+                    <flux:label>Pisos<span class="sup-required">*</span></flux:label>
+                    <flux:input type="text" wire:model='floors' />
+                    <div class="error-container">
+                        <flux:error name="floors" />
+                    </div>
+                </flux:field>
+
+                <flux:field class="flux-field">
+                    <flux:label>Muros<span class="sup-required">*</span></flux:label>
+                    <flux:input type="text" wire:model='walls' />
+                    <div class="error-container">
+                        <flux:error name="walls" />
+                    </div>
+                </flux:field>
+
+                <flux:field class="flux-field">
+                    <flux:label>Plafones<span class="sup-required">*</span></flux:label>
+                    <flux:input type="text" wire:model='ceilings' />
+                    <div class="error-container">
+                        <flux:error name="ceilings" />
+                    </div>
+                </flux:field>
+
+                <div class="flex">
+                    <flux:spacer />
+
+                    <flux:button type="button" wire:click='editItem' class="btn-primary btn-table cursor-pointer">Editar
+                        elemento</flux:button>
+                </div>
+            </div>
+        </flux:modal>
+
+
+
+
 
         <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos</flux:button>
     </form>

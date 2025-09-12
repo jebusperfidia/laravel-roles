@@ -5,7 +5,7 @@
     <form wire:submit='save'>
         <div class="form-container">
             <div class="form-container__header">
-                Datos importantes
+                Equipamiento urbano
             </div>
             <div class="form-container__content">
 

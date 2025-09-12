@@ -53,6 +53,7 @@ class PropertyLocation extends Component
     }
 
 
+
     //Watchers para las variables
     public function updatedLatitud($value)
     {

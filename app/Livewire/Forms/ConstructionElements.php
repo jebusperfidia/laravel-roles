@@ -5,6 +5,7 @@ namespace App\Livewire\Forms;
 use Livewire\Component;
 use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
+use Flux\Flux;
 
 class ConstructionElements extends Component
 {
@@ -48,6 +49,10 @@ class ConstructionElements extends Component
     // Estado del tab activo
     public string $activeTab;
 
+    //Variables para agregar elemento a tabla de acabados 1
+    public $space, $amount, $floors, $walls, $ceilings;
+
+
     //  Inicializar con el tab por defecto
     public function mount()
     {
@@ -86,6 +91,89 @@ class ConstructionElements extends Component
 
         Toaster::success('Archivos guardados con éxito con éxito');
     }
+
+
+
+    //FUNCIONES PARA GRUPOS Y ELEMENTOS DEL MISMO
+
+    public function openAddElement()
+    {
+        $this->resetValidation();
+        Flux::modal('add-element')->show();      // 3) Abre el modal
+    }
+
+    public function openEditElement()
+    {
+        $this->resetValidation();
+        Flux::modal('edit-element')->show();      // 3) Abre el modal
+
+    }
+
+
+    public function addItem()
+    {
+        $rules = [
+            'space' => 'required',
+            'amount' => 'required',
+            'floors' => 'required',
+            'walls' => 'required',
+            'ceilings' => 'required'
+        ];
+
+        $this->validate(
+            $rules,
+            [],
+            $this->validationAttributesItems()
+        );
+
+
+        $this->space = '';
+        $this->amount = '';
+        $this->floors = '';
+        $this->walls = '';
+        $this->ceilings = '';
+
+        Toaster::success('Elemento agregado con éxito');
+        $this->modal('add-item')->close();
+    }
+
+
+
+    public function deleteItem()
+    {
+
+        Toaster::error('Elemento eliminado con éxito');
+    }
+
+
+
+    public function editItem()
+    {
+         $rules = [
+            'space' => 'required',
+            'amount' => 'required',
+            'floors' => 'required',
+            'walls' => 'required',
+            'ceilings' => 'required'
+        ];
+
+        $this->validate(
+            $rules,
+            [],
+            $this->validationAttributesItems()
+        );
+
+
+        $this->space = '';
+        $this->amount = '';
+        $this->floors = '';
+        $this->walls = '';
+        $this->ceilings = '';
+
+        Toaster::success('Elemento editado con éxito');
+        $this->modal('edit-item')->close();
+    }
+
 
 
 
@@ -273,6 +361,17 @@ class ConstructionElements extends Component
             'oe_facades'                 => 'fachadas',
             /* 'oe_elevator'                => 'cuenta con elevador */
 
+        ];
+    }
+
+    protected function validationAttributesItems(): array
+    {
+        return [
+            'space' => 'espacio',
+            'amount' => 'cantidad',
+            'floors' => 'pisos',
+            'walls' => 'paredes',
+            'ceilings' => 'plafones'
         ];
     }
 

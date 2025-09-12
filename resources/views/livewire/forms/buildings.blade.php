@@ -1,13 +1,13 @@
 <div>
-    <form wire:submit=''>
+    <form wire:submit='save'>
 
 
         <div class="form-container">
             <div class="form-container__header">
-                De las contrucciones
+                De las construcciones
             </div>
             <div class="form-container__content">
-
+                {{-- {{$valuation->property_type}} --}}
 
 
                 {{-- Navbar responsivo con hamburguesa --}}
@@ -15,8 +15,13 @@
                     @php
                     $tabs = [
                     'privativas' => 'Privativas',
-                    'comunes' => 'Comunes',
+                    /* 'comunes' => 'Comunes', */
                     ];
+
+                    if(stripos($valuation->property_type, 'condominio')){
+                    $tabs = array_merge($tabs, ['comunes' => 'Comunes']);
+                    }
+
                     $lastKey = array_key_last($tabs);
                     @endphp
 
@@ -26,9 +31,9 @@
                         <flux:navbar.item wire:click.prevent="setTab('{{ $key }}')"
                             :active="$activeTab === '{{ $key }}'" class="cursor-pointer px-4 py-2 transition-colors
                                                         {{ $activeTab === $key
-                                                            ? 'border-b-2 border-[#43A497] text-[#3A8B88] font-semibold'
+                                                            ? ' border-b-2 border-[#43A497] text-[#3A8B88] font-semibold'
                                                             : 'text-gray-600 hover:text-[#5CBEB4]' }}">
-                            {{ $label }}
+                            <span class="text-[16px]">{{ $label }}</span>
                         </flux:navbar.item>
 
                         @if ($key !== $lastKey)
@@ -78,51 +83,13 @@
 
 
                 @if ($activeTab === 'privativas')
-                {{-- MODAL PARA EDITAR ELEMENTO --}}
-                <flux:modal name="edit-construction" class="md:w-96">
-                    <div class="space-y-6">
-                        <div>
-                            <flux:heading size="lg">Añadir elemento</flux:heading>
-                        </div>
-
-                        <flux:input label="Name" placeholder="Your name" />
-
-                        <flux:input label="Date of birth" type="date" />
-
-                        <div class="flex">
-                            <flux:spacer />
-
-                            <flux:button type="submit" class="btn-primary btn-table" variant="primary">Guardar
-                            </flux:button>
-                        </div>
-                    </div>
-                </flux:modal>
-
-
-                {{-- MODAL PARA CREAR NUEVO ELEMENTO --}}
-                <flux:modal name="add-construction" class="md:w-96">
-                    <div class="space-y-6">
-                        <div>
-                            <flux:heading size="lg">Añadir elemento</flux:heading>
-                        </div>
-
-                        <flux:input label="Name" placeholder="Your name" />
-
-                        <flux:input label="Date of birth" type="date" />
-
-                        <div class="flex">
-                            <flux:spacer />
-
-                            <flux:button type="submit" class="btn-primary btn-table" variant="primary">Guardar
-                            </flux:button>
-                        </div>
-                    </div>
-                </flux:modal>
 
                 {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
-                <flux:modal.trigger name="add-construction" class="flex justify-end">
-                    <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"></flux:button>
-                </flux:modal.trigger>
+                {{-- <flux:modal.trigger name="add-element" class="flex justify-end pt-8"> --}}
+                    <div class="flex justify-end pt-4">
+                        <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus" wire:click='openAddElement'></flux:button>
+                    </div>
+               {{--  </flux:modal.trigger> --}}
 
                 {{-- TABLA DE ELEMENTOS --}}
                 <div class="mt-2">
@@ -131,43 +98,21 @@
                             <thead>
                                 <tr class="bg-gray-100">
                                     <th class="px-2 py-1 border whitespace-nowrap">Descripcion</th>
-                                    <th class="w-[120px] px-2 py-1 border whitespace-nowrap">Clasificación<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[32px] px-2 py-1 border">Uso<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Niveles edificio<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Niveles por tipo de construcción<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Rango niveles TGDF<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Edad<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Superficie<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Fuente de información<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Costo unit reposición nuevo<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Avance obra<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Estado de conservación<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">RA<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Vend<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Acc<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Desc<span class="sup-required">*</span>
-                                    </th>
+                                    <th class="w-[120px] px-2 py-1 border whitespace-nowrap">Clasificación</th>
+                                    <th class="w-[32px] px-2 py-1 border">Uso</th>
+                                    <th class="w-[5%] px-2 py-1 border">Niveles edificio</th>
+                                    <th class="w-[5%] px-2 py-1 border">Niveles por tipo de construcción</th>
+                                    <th class="w-[5%] px-2 py-1 border">Rango niveles TGDF</th>
+                                    <th class="w-[5%] px-2 py-1 border">Edad</th>
+                                    <th class="w-[5%] px-2 py-1 border">Superficie</th>
+                                    <th class="w-[5%] px-2 py-1 border">Fuente de información</th>
+                                    <th class="w-[5%] px-2 py-1 border">Costo unit reposición nuevo</th>
+                                    <th class="w-[5%] px-2 py-1 border">Avance obra</th>
+                                    <th class="w-[5%] px-2 py-1 border">Estado de conservación</th>
+                                    <th class="w-[5%] px-2 py-1 border">RA</th>
+                                    <th class="w-[5%] px-2 py-1 border">Vend</th>
+                                    <th class="w-[5%] px-2 py-1 border">Acc</th>
+                                    <th class="w-[5%] px-2 py-1 border">Desc</th>
                                     <th class="w-[100px] py-1 border">Acciones</th>
                                 </tr>
                             </thead>
@@ -191,30 +136,33 @@
                                     <td class="px-2 py-1 border text-sm text-center">$1,000</td>
                                     <td class="px-2 py-1 border text-sm text-center">100%</td>
                                     <td class="px-2 py-1 border text-sm text-center">1.0 Bueno</td>
-                                    <td class="px-2 py-1 border text-sm text-center">
-                                        <flux:checkbox wire:model='data' />
+                                    <td class="px-2 py-1 flex justify-center">
+                                        <flux:checkbox wire:model='data' disabled/>
                                     </td>
                                     <td class="px-2 py-1 border text-sm text-center">
                                         <input type="radio" wire:model="respuesta" name="opcion_unica" value="A"
-                                            class="w-4 h-4 text-blue-500">
+                                            class="w-4 h-4 text-blue-500" disabled>
                                     </td>
                                     <td class="px-2 py-1 border text-sm text-center">
                                         <input type="radio" wire:model="respuesta" name="opcion_unica" value="B"
-                                            class="w-4 h-4 text-blue-500">
+                                            class="w-4 h-4 text-blue-500" disabled>
                                     </td>
                                     <td class="px-2 py-1 border text-sm text-center">
                                         <input type="radio" wire:model="respuesta" name="opcion_unica" value="C"
-                                            class="w-4 h-4 text-blue-500">
+                                            class="w-4 h-4 text-blue-500" disabled>
                                     </td>
                                     <td class="my-2 flex justify-evenly">
-                                        <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                        {{-- <flux:modal.trigger name="edit-element" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
-                                                class="cursor-pointer btn-intermediary btn-buildins" />
-                                            </flux:modal-trigger>
-                                            <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                                <flux:button type="button" icon-leading="trash"
+                                                class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElement'/>
+                                            {{-- </flux:modal-trigger> --}}
+                                            {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                                --}}
+                                                <flux:button
+                                                    onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
+                                                    wire:click="deleteElement" type="button" icon-leading="trash"
                                                     class="cursor-pointer btn-deleted btn-buildings" />
-                                                </flux:modal-trigger>
+                                                {{-- </flux:modal-trigger> --}}
                                     </td>
                                 </tr>
                             </tbody>
@@ -235,92 +183,36 @@
                         <table class="min-w-[550px] table-fixed w-full border-2 ">
                             <thead>
                                 <tr class="bg-gray-100">
-                                    <th class="px-2 py-1 border whitespace-nowrap">Descripcion</th>
-                                    <th class="w-[120px] px-2 py-1 border whitespace-nowrap">Clasificación<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[32px] px-2 py-1 border">Uso<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Niveles edificio<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Niveles por tipo de construcción<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Rango niveles TGDF<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Edad<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Superficie<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Fuente de información<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Costo unit reposición nuevo<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Avance obra<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Estado de conservación<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">RA<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Vend<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Acc<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Desc<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[100px] py-1 border">Acciones</th>
+                                    <th class="w-[20%] px-2 py-1 border">Descripcion</th>
+                                    <th class="w-[5%] px-2 py-1 border">Edad</th>
+                                    <th class="w-[5%] py-1 border">Vida útil</th>
+                                    <th class="w-[5%] px-2 py-1 border">Vida útil remanente</th>
+                                    <th class="w-[5%] px-2 py-1 border">Superficie</th>
+                                    <th class="w-[5%] px-2 py-1 border">Costo unitario reposición nuevo</th>
+                                    <th class="w-[5%] px-2 py-1 border">Factor edad</th>
+                                    <th class="w-[5%] px-2 py-1 border">Factor conservación</th>
+                                    <th class="w-[5%] px-2 py-1 border">Avance obra</th>
+                                    <th class="w-[5%] px-2 py-1 border">Factor resultante</th>
+                                    <th class="w-[5%] px-2 py-1 border">Costo unitario neto de reposición</th>
+                                    <th class="w-[5%] px-2 py-1 border">Valor total</th>
                                 </tr>
                             </thead>
                             <tbody>
 
                                 {{-- Valor de ejemplo para usar en los for --}}
                                 <tr>
-                                    <td class="px-2 py-1 border text-xs text-center">Casa habitación
-                                    </td>
-                                    <td class="px-2 py-1 border text-xs text-left">
-                                        <span>7. Residencial plus</span><br>
-                                        <span>6. Lujo</span>
-                                    </td>
-                                    <td class="px-2 py-1 border text-sm text-center">H</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">02</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">100.00</td>
-                                    <td class="px-2 py-1 border text-sm text-center">Escrituras</td>
-                                    <td class="px-2 py-1 border text-sm text-center">$1,000</td>
-                                    <td class="px-2 py-1 border text-sm text-center">100%</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1.0 Bueno</td>
-                                    <td class="px-2 py-1 border text-sm text-center">
-                                        <flux:checkbox wire:model='data' />
-                                    </td>
-                                    <td class="px-2 py-1 border text-sm text-center">
-                                        <input type="radio" wire:model="respuesta" name="opcion_unica" value="A"
-                                            class="w-4 h-4 text-blue-500">
-                                    </td>
-                                    <td class="px-2 py-1 border text-sm text-center">
-                                        <input type="radio" wire:model="respuesta" name="opcion_unica" value="B"
-                                            class="w-4 h-4 text-blue-500">
-                                    </td>
-                                    <td class="px-2 py-1 border text-sm text-center">
-                                        <input type="radio" wire:model="respuesta" name="opcion_unica" value="C"
-                                            class="w-4 h-4 text-blue-500">
-                                    </td>
-                                    <td class="my-2 flex justify-evenly">
-                                        <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                            <flux:button type="button" icon-leading="pencil"
-                                                class="cursor-pointer btn-intermediary btn-buildins" />
-                                            </flux:modal-trigger>
-                                            <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                                <flux:button type="button" icon-leading="trash"
-                                                    class="cursor-pointer btn-deleted btn-buildings" />
-                                                </flux:modal-trigger>
-                                    </td>
+                                    <td class="px-2 py-1 border text-xs text-center">Casa habitación</td>
+                                    <td class="px-2 py-1 border text-xs text-center">1</td>
+                                    <td class="px-2 py-1 border text-xs text-center">90</td>
+                                    <td class="px-2 py-1 border text-sm text-center">89</td>
+                                    <td class="px-2 py-1 border text-sm text-center">100</td>
+                                    <td class="px-2 py-1 border text-sm text-center">$100000</td>
+                                    <td class="px-2 py-1 border text-sm text-center">0.9900</td>
+                                    <td class="px-2 py-1 border text-sm text-center">1.0</td>
+                                    <td class="px-2 py-1 border text-sm text-center">100.00%</td>
+                                    <td class="px-2 py-1 border text-sm text-center">0.9900</td>
+                                    <td class="px-2 py-1 border text-sm text-center">$0.990</td>
+                                    <td class="px-2 py-1 border text-sm text-center">$99.0000</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -332,146 +224,91 @@
 
 
                 @if ($activeTab === 'comunes')
-                <flux:modal name="edit-construction" class="md:w-96">
-                    <div class="space-y-6">
-                        <div>
-                            <flux:heading size="lg">Añadir elemento</flux:heading>
-                        </div>
-
-                        <flux:input label="Name" placeholder="Your name" />
-
-                        <flux:input label="Date of birth" type="date" />
-
-                        <div class="flex">
-                            <flux:spacer />
-
-                            <flux:button type="submit" class="btn-primary btn-table" variant="primary">Guardar
-                            </flux:button>
-                        </div>
-                    </div>
-                </flux:modal>
-
-
-                {{-- MODAL PARA CREAR NUEVO ELEMENTO --}}
-                <flux:modal name="add-construction" class="md:w-96">
-                    <div class="space-y-6">
-                        <div>
-                            <flux:heading size="lg">Añadir elemento</flux:heading>
-                        </div>
-
-                        <flux:input label="Name" placeholder="Your name" />
-
-                        <flux:input label="Date of birth" type="date" />
-
-                        <div class="flex">
-                            <flux:spacer />
-
-                            <flux:button type="submit" class="btn-primary btn-table" variant="primary">Guardar
-                            </flux:button>
-                        </div>
-                    </div>
-                </flux:modal>
 
                 {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
-                <flux:modal.trigger name="add-construction" class="flex justify-end">
-                    <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"></flux:button>
-                </flux:modal.trigger>
+                {{-- <flux:modal.trigger name="add-element" class="flex justify-end pt-8"> --}}
+                   <div class="flex justify-end pt-4">
+                    <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus" wire:click='openAddElement'>
+                    </flux:button>
+                </div>
+                {{-- </flux:modal.trigger> --}}
 
                 {{-- TABLA DE ELEMENTOS --}}
                 <div class="mt-2">
                     <div class="overflow-x-auto max-w-full">
-                        <table class="min-w-[550px] table-fixed w-full border-2 ">
-                            <thead>
-                                <tr class="bg-gray-100">
-                                    <th class="px-2 py-1 border whitespace-nowrap">Descripcion</th>
-                                    <th class="w-[120px] px-2 py-1 border whitespace-nowrap">Clasificación<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[32px] px-2 py-1 border">Uso<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Niveles edificio<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Niveles por tipo de construcción<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Rango niveles TGDF<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Edad<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Superficie<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Fuente de información<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Costo unit reposición nuevo<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Avance obra<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Estado de conservación<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">RA<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Vend<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Acc<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Desc<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[100px] py-1 border">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                   <table class="min-w-[550px] table-fixed w-full border-2 ">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="px-2 py-1 border whitespace-nowrap">Descripcion</th>
+                            <th class="w-[120px] px-2 py-1 border whitespace-nowrap">Clasificación</th>
+                            <th class="w-[32px] px-2 py-1 border">Uso</th>
+                            <th class="w-[5%] px-2 py-1 border">Niveles edificio</th>
+                            <th class="w-[5%] px-2 py-1 border">Niveles por tipo de construcción</th>
+                            <th class="w-[5%] px-2 py-1 border">Rango niveles TGDF</th>
+                            <th class="w-[5%] px-2 py-1 border">Edad</th>
+                            <th class="w-[5%] px-2 py-1 border">Superficie</th>
+                            <th class="w-[5%] px-2 py-1 border">Fuente de información</th>
+                            <th class="w-[5%] px-2 py-1 border">Costo unit reposición nuevo</th>
+                            <th class="w-[5%] px-2 py-1 border">Avance obra</th>
+                            <th class="w-[5%] px-2 py-1 border">Estado de conservación</th>
+                            <th class="w-[5%] px-2 py-1 border">RA</th>
+                            <th class="w-[5%] px-2 py-1 border">Vend</th>
+                            <th class="w-[5%] px-2 py-1 border">Acc</th>
+                            <th class="w-[5%] px-2 py-1 border">Desc</th>
+                            <th class="w-[100px] py-1 border">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
-                                {{-- Valor de ejemplo para usar en los for --}}
-                                <tr>
-                                    <td class="px-2 py-1 border text-xs text-center">Casa habitación
-                                    </td>
-                                    <td class="px-2 py-1 border text-xs text-left">
-                                        <span>7. Residencial plus</span><br>
-                                        <span>6. Lujo</span>
-                                    </td>
-                                    <td class="px-2 py-1 border text-sm text-center">H</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">02</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">100.00</td>
-                                    <td class="px-2 py-1 border text-sm text-center">Escrituras</td>
-                                    <td class="px-2 py-1 border text-sm text-center">$1,000</td>
-                                    <td class="px-2 py-1 border text-sm text-center">100%</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1.0 Bueno</td>
-                                    <td class="px-2 py-1 border text-sm text-center">
-                                        <flux:checkbox wire:model='data' />
-                                    </td>
-                                    <td class="px-2 py-1 border text-sm text-center">
-                                        <input type="radio" wire:model="respuesta" name="opcion_unica" value="A"
-                                            class="w-4 h-4 text-blue-500">
-                                    </td>
-                                    <td class="px-2 py-1 border text-sm text-center">
-                                        <input type="radio" wire:model="respuesta" name="opcion_unica" value="B"
-                                            class="w-4 h-4 text-blue-500">
-                                    </td>
-                                    <td class="px-2 py-1 border text-sm text-center">
-                                        <input type="radio" wire:model="respuesta" name="opcion_unica" value="C"
-                                            class="w-4 h-4 text-blue-500">
-                                    </td>
-                                    <td class="my-2 flex justify-evenly">
-                                        <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                            <flux:button type="button" icon-leading="pencil"
-                                                class="cursor-pointer btn-intermediary btn-buildins" />
-                                            </flux:modal-trigger>
-                                            <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                                <flux:button type="button" icon-leading="trash"
-                                                    class="cursor-pointer btn-deleted btn-buildings" />
-                                                </flux:modal-trigger>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        {{-- Valor de ejemplo para usar en los for --}}
+                        <tr>
+                            <td class="px-2 py-1 border text-xs text-center">Casa club
+                            </td>
+                            <td class="px-2 py-1 border text-xs text-left">
+                                <span>7. Residencial plus</span><br>
+                                <span>6. Lujo</span>
+                            </td>
+                            <td class="px-2 py-1 border text-sm text-center">H</td>
+                            <td class="px-2 py-1 border text-sm text-center">1</td>
+                            <td class="px-2 py-1 border text-sm text-center">1</td>
+                            <td class="px-2 py-1 border text-sm text-center">02</td>
+                            <td class="px-2 py-1 border text-sm text-center">1</td>
+                            <td class="px-2 py-1 border text-sm text-center">100.00</td>
+                            <td class="px-2 py-1 border text-sm text-center">Escrituras</td>
+                            <td class="px-2 py-1 border text-sm text-center">$1,000</td>
+                            <td class="px-2 py-1 border text-sm text-center">100%</td>
+                            <td class="px-2 py-1 border text-sm text-center">1.0 Bueno</td>
+                            <td class="px-2 py-1 flex justify-center">
+                                <flux:checkbox wire:model='data' disabled />
+                            </td>
+                            <td class="px-2 py-1 border text-sm text-center">
+                                <input type="radio" wire:model="respuesta" name="opcion_unica" value="A" class="w-4 h-4 text-blue-500"
+                                    disabled>
+                            </td>
+                            <td class="px-2 py-1 border text-sm text-center">
+                                <input type="radio" wire:model="respuesta" name="opcion_unica" value="B" class="w-4 h-4 text-blue-500"
+                                    disabled>
+                            </td>
+                            <td class="px-2 py-1 border text-sm text-center">
+                                <input type="radio" wire:model="respuesta" name="opcion_unica" value="C" class="w-4 h-4 text-blue-500"
+                                    disabled>
+                            </td>
+                            <td class="my-2 flex justify-evenly">
+                                {{-- <flux:modal.trigger name="edit-element" class="flex justify-end"> --}}
+                                    <flux:button type="button" icon-leading="pencil"
+                                        class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElement'/>
+                                    {{-- </flux:modal-trigger> --}}
+                                    {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                        --}}
+                                        <flux:button
+                                            onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
+                                            wire:click="deleteElement" type="button" icon-leading="trash"
+                                            class="cursor-pointer btn-deleted btn-buildings" />
+                                        {{-- </flux:modal-trigger> --}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
                     </div>
                 </div>
 
@@ -485,98 +322,42 @@
                 {{-- TABLA DE ELEMENTOS --}}
                 <div class="mt-2">
                     <div class="overflow-x-auto max-w-full">
-                        <table class="min-w-[550px] table-fixed w-full border-2 ">
-                            <thead>
-                                <tr class="bg-gray-100">
-                                    <th class="px-2 py-1 border whitespace-nowrap">Descripcion</th>
-                                    <th class="w-[120px] px-2 py-1 border whitespace-nowrap">Clasificación<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[32px] px-2 py-1 border">Uso<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Niveles edificio<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Niveles por tipo de construcción<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Rango niveles TGDF<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Edad<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Superficie<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Fuente de información<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Costo unit reposición nuevo<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Avance obra<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Estado de conservación<span
-                                            class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">RA<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Vend<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Acc<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[5%] px-2 py-1 border">Desc<span class="sup-required">*</span>
-                                    </th>
-                                    <th class="w-[100px] py-1 border">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                      <table class="min-w-[550px] table-fixed w-full border-2 ">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="w-[20%] px-2 py-1 border">Descripcion</th>
+                                <th class="w-[5%] px-2 py-1 border">Edad</th>
+                                <th class="w-[5%] py-1 border">Vida útil</th>
+                                <th class="w-[5%] px-2 py-1 border">Vida útil remanente</th>
+                                <th class="w-[5%] px-2 py-1 border">Superficie</th>
+                                <th class="w-[5%] px-2 py-1 border">Costo unitario reposición nuevo</th>
+                                <th class="w-[5%] px-2 py-1 border">Factor edad</th>
+                                <th class="w-[5%] px-2 py-1 border">Factor conservación</th>
+                                <th class="w-[5%] px-2 py-1 border">Avance obra</th>
+                                <th class="w-[5%] px-2 py-1 border">Factor resultante</th>
+                                <th class="w-[5%] px-2 py-1 border">Costo unitario neto de reposición</th>
+                                <th class="w-[5%] px-2 py-1 border">Valor total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
 
-                                {{-- Valor de ejemplo para usar en los for --}}
-                                <tr>
-                                    <td class="px-2 py-1 border text-xs text-center">Casa habitación
-                                    </td>
-                                    <td class="px-2 py-1 border text-xs text-left">
-                                        <span>7. Residencial plus</span><br>
-                                        <span>6. Lujo</span>
-                                    </td>
-                                    <td class="px-2 py-1 border text-sm text-center">H</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">02</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">100.00</td>
-                                    <td class="px-2 py-1 border text-sm text-center">Escrituras</td>
-                                    <td class="px-2 py-1 border text-sm text-center">$1,000</td>
-                                    <td class="px-2 py-1 border text-sm text-center">100%</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1.0 Bueno</td>
-                                    <td class="px-2 py-1 border text-sm text-center">
-                                        <flux:checkbox wire:model='data' />
-                                    </td>
-                                    <td class="px-2 py-1 border text-sm text-center">
-                                        <input type="radio" wire:model="respuesta" name="opcion_unica" value="A"
-                                            class="w-4 h-4 text-blue-500">
-                                    </td>
-                                    <td class="px-2 py-1 border text-sm text-center">
-                                        <input type="radio" wire:model="respuesta" name="opcion_unica" value="B"
-                                            class="w-4 h-4 text-blue-500">
-                                    </td>
-                                    <td class="px-2 py-1 border text-sm text-center">
-                                        <input type="radio" wire:model="respuesta" name="opcion_unica" value="C"
-                                            class="w-4 h-4 text-blue-500">
-                                    </td>
-                                    <td class="my-2 flex justify-evenly">
-                                        <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                            <flux:button type="button" icon-leading="pencil"
-                                                class="cursor-pointer btn-intermediary btn-buildins" />
-                                            </flux:modal-trigger>
-                                            <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                                <flux:button type="button" icon-leading="trash"
-                                                    class="cursor-pointer btn-deleted btn-buildings" />
-                                                </flux:modal-trigger>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            {{-- Valor de ejemplo para usar en los for --}}
+                            <tr>
+                                <td class="px-2 py-1 border text-xs text-center">Casa club</td>
+                                <td class="px-2 py-1 border text-xs text-center">1</td>
+                                <td class="px-2 py-1 border text-xs text-center">90</td>
+                                <td class="px-2 py-1 border text-sm text-center">89</td>
+                                <td class="px-2 py-1 border text-sm text-center">100</td>
+                                <td class="px-2 py-1 border text-sm text-center">$100000</td>
+                                <td class="px-2 py-1 border text-sm text-center">0.9900</td>
+                                <td class="px-2 py-1 border text-sm text-center">1.0</td>
+                                <td class="px-2 py-1 border text-sm text-center">100.00%</td>
+                                <td class="px-2 py-1 border text-sm text-center">0.9900</td>
+                                <td class="px-2 py-1 border text-sm text-center">$0.990</td>
+                                <td class="px-2 py-1 border text-sm text-center">$99.0000</td>
+                            </tr>
+                        </tbody>
+                    </table>
                     </div>
                 </div>
                 @endif
@@ -587,28 +368,26 @@
                 </div>
 
 
-                <div class="mt-2">
-                    <div class="overflow-x-auto max-w-full">
-                        <table class="min-w-[550px] table-fixed w-full border-2 ">
+                <div class="mt-2 form-grid form-grid--3">
+                    <div class="overflow-x-auto">
+                        <table class="border-2 ">
                             <thead>
                                 <tr class="bg-gray-100">
-                                    <th class="px-2 py-1 "></th>
-                                    <th class="px-2 py-1 ">Privatias</th>
-                                    <th class="px-2 py-1 ">Comunes</th>
+                                    <th class="border px-2 py-1 "></th>
+                                    <th class="border px-2 py-1 ">Privativas</th>
+                                    <th class="border px-2 py-1 ">Comunes</th>
                                 </tr>
                             </thead>
                             <tbody>
-
-                                {{-- Valor de ejemplo para usar en los for --}}
                                 <tr>
-                                    <td class="px-2 py-1 text-xs text-center">Superficie total de construcciones:</td>
-                                    <td class="px-2 py-1 text-xs text-left"></td>
-                                    <td class="px-2 py-1 text-sm text-center">H</td>
+                                    <td class="border px-2 py-1 text-xs text-center">Superficie total de construcciones:</td>
+                                    <td class="border px-2 py-1 text-xs text-center">1</td>
+                                    <td class="border px-2 py-1 text-sm text-center">1</td>
                                 </tr>
                                 <tr>
-                                    <td class="px-2 py-1 text-xs text-center">Valor total de construcciones:</td>
-                                    <td class="px-2 py-1 text-xs text-left"></td>
-                                    <td class="px-2 py-1 text-sm text-center">H</td>
+                                    <td class="border px-2 py-1 text-xs text-center">Valor total de construcciones:</td>
+                                    <td class="border px-2 py-1 text-xs text-center">1</td>
+                                    <td class="border px-2 py-1 text-sm text-center">1</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -616,23 +395,23 @@
                 </div>
 
 
-                <div class="mt-8">
-                    <div class="overflow-x-auto max-w-full">
-                        <table class="min-w-[550px] table-fixed w-full border-2 ">
+               <div class="mt-2 form-grid form-grid--3">
+                    <div class="overflow-x-auto">
+                        <table class="border-2 ">
                             <thead>
                                 <tr class="bg-gray-100">
-                                    <th class="px-2 py-1 "></th>
-                                    <th class="px-2 py-1 ">Vendible</th>
-                                    <th class="px-2 py-1 ">Acessoria</th>
+                                    <th class="border px-2 py-1 "></th>
+                                    <th class="border px-2 py-1 ">Acessoria</th>
+                                    <th class="border px-2 py-1 ">Vendible</th>
                                 </tr>
                             </thead>
                             <tbody>
 
                                 {{-- Valor de ejemplo para usar en los for --}}
                                 <tr>
-                                    <td class="px-2 py-1 text-xs text-center">Superficie total de construcciones:</td>
-                                    <td class="px-2 py-1 text-xs text-left"></td>
-                                    <td class="px-2 py-1 text-sm text-center">H</td>
+                                    <td class="border px-2 py-1 text-xs text-center">Superficie total de construcciones:</td>
+                                    <td class="border px-2 py-1 text-xs text-center">1</td>
+                                    <td class="border px-2 py-1 text-sm text-center">1</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -661,31 +440,31 @@
     <div class="form-container__content">
 
 
-        <div class="mt-8">
-            <div class="overflow-x-auto max-w-full">
-                <table class="min-w-[550px] table-fixed w-full border-2 ">
+      <div class="mt-2 form-grid form-grid--3">
+            <div class="overflow-x-auto">
+                <table class="border-2 ">
                     <thead>
                         <tr class="bg-gray-100">
-                            <th class="px-2 py-1 "></th>
-                            <th class="px-2 py-1 ">Ponderada</th>
+                            <th class="border px-2 py-1 "></th>
+                            <th class="border px-2 py-1 ">Ponderada</th>
                         </tr>
                     </thead>
                     <tbody>
 
                         {{-- Valor de ejemplo para usar en los for --}}
                         <tr>
-                            <td class="px-2 py-1 text-xs text-center">Vida útil total del inmueble:</td>
-                            <td class="px-2 py-1 text-xs text-left"></td>
+                            <td class="border px-2 py-1 text-xs text-center">Vida útil total del inmueble:</td>
+                            <td class="border px-2 py-1 text-xs text-center">90 años</td>
                         </tr>
 
                         <tr>
-                            <td class="px-2 py-1 text-xs text-center">Edad del inmueble del inmueble:</td>
-                            <td class="px-2 py-1 text-xs text-left"></td>
+                            <td class="border px-2 py-1 text-xs text-center">Edad del inmueble del inmueble:</td>
+                            <td class="border px-2 py-1 text-xs text-center">1 año</td>
                         </tr>
 
                         <tr>
-                            <td class="px-2 py-1 text-xs text-center">Vida útil remanente del inmueble:</td>
-                            <td class="px-2 py-1 text-xs text-left"></td>
+                            <td class="border px-2 py-1 text-xs text-center">Vida útil remanente del inmueble:</td>
+                            <td class="border px-2 py-1 text-xs text-center">89 años</td>
                         </tr>
                     </tbody>
                 </table>
@@ -710,10 +489,10 @@
             <div class="radio-input">
                 <flux:field>
                     <div class="radio-group-horizontal">
-                        <flux:input type="text" />
+                        <flux:input type="text" wire:model='sourceReplacementObtained' />
                     </div>
                     <div>
-                        <flux:error name="multipleUseSpace" />
+                        <flux:error name="sourceReplacementObtained" />
                     </div>
                 </flux:field>
             </div>
@@ -726,7 +505,7 @@
             <div class="radio-input">
                 <flux:field>
                     <div class="radio-group-horizontal">
-                        <flux:select wire:model="multipleUseSpace" class=" text-gray-800 [&_option]:text-gray-900">
+                        <flux:select wire:model="conservationStatus" class=" text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                             <flux:select.option value="Ruidoso">Ruidoso</flux:select.option>
                             <flux:select.option value="Malo">Mali</flux:select.option>
@@ -734,11 +513,12 @@
                             <flux:select.option value="Bueno">Bueno</flux:select.option>
                             <flux:select.option value="Muy bueno">Muy bueno</flux:select.option>
                             <flux:select.option value="Nuevo">Nuevo</flux:select.option>
-                            <flux:select.option value="Recientemente remodelado">Recientemente remodelado</flux:select.option>
+                            <flux:select.option value="Recientemente remodelado">Recientemente remodelado
+                            </flux:select.option>
                         </flux:select>
                     </div>
                     <div>
-                        <flux:error name="multipleUseSpace" />
+                        <flux:error name="conservationStatus" />
                     </div>
                 </flux:field>
             </div>
@@ -748,15 +528,15 @@
 
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Observaciones al estado de conseración</flux:label>
+                <flux:label>Observaciones al estado de conservación</flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
                     <div class="radio-group-horizontal">
-                        <flux:textarea/>
+                        <flux:textarea wire:model='observationsStateConservation' />
                     </div>
                     <div>
-                        <flux:error name="multipleUseSpace" />
+                        <flux:error name="observationsStateConservation" />
                     </div>
                 </flux:field>
             </div>
@@ -769,7 +549,8 @@
             <div class="radio-input">
                 <flux:field>
                     <div class="radio-group-horizontal">
-                        <flux:select wire:model="multipleUseSpace" class=" text-gray-800 [&_option]:text-gray-900">
+                        <flux:select wire:model="generalTypePropertiesZone"
+                            class=" text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                             <flux:select.option value="Minima">Mínima</flux:select.option>
                             <flux:select.option value="Economica">Económica</flux:select.option>
@@ -783,7 +564,7 @@
                         </flux:select>
                     </div>
                     <div>
-                        <flux:error name="multipleUseSpace" />
+                        <flux:error name="generalTypePropertiesZone" />
                     </div>
                 </flux:field>
             </div>
@@ -796,13 +577,13 @@
             <div class="radio-input">
                 <flux:field>
                     <div class="radio-group-horizontal">
-                        <flux:select wire:model="multipleUseSpace" class=" text-gray-800 [&_option]:text-gray-900">
+                        <flux:select wire:model="generalClassProperty" class=" text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                            <flux:select.option value="Ruidoso">Ruidoso</flux:select.option>
+                            <flux:select.option value="Ruidoso">Residencial plus</flux:select.option>
                         </flux:select>
                     </div>
                     <div>
-                        <flux:error name="multipleUseSpace" />
+                        <flux:error name="generalClassProperty" />
                     </div>
                 </flux:field>
             </div>
@@ -815,10 +596,10 @@
             <div class="radio-input">
                 <flux:field>
                     <div class="radio-group-horizontal">
-                        <flux:input type="number" />
+                        <flux:input type="number" wire:model='yearCompletedWork' readonly />
                     </div>
                     <div>
-                        <flux:error name="multipleUseSpace" />
+                        <flux:error name="yearCompletedWork" />
                     </div>
                 </flux:field>
             </div>
@@ -830,40 +611,40 @@
             <div class="radio-input">
                 <flux:field>
                     <div class="radio-group-horizontal">
-                        <flux:input type="number" />
+                        <flux:input type="number" wire:model.lazy='profitableUnitsSubject' />
                     </div>
                     <div>
-                        <flux:error name="multipleUseSpace" />
+                        <flux:error name="profitableUnitsSubject" />
                     </div>
                 </flux:field>
             </div>
         </div>
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Unidades rentables generales</flux:label>
+                <flux:label>Unidades rentables (generales)</flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
                     <div class="radio-group-horizontal">
-                        <flux:input type="number" />
+                        <flux:input type="number" wire:model.lazy='profitableUnitsGeneral' />
                     </div>
                     <div>
-                        <flux:error name="multipleUseSpace" />
+                        <flux:error name="profitableUnitsGeneral" />
                     </div>
                 </flux:field>
             </div>
         </div>
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Unidadesrentables del conjunto (en condominios)</flux:label>
+                <flux:label>Unidades rentables del conjunto (en condominios)</flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
                     <div class="radio-group-horizontal">
-                        <flux:input type="number" />
+                        <flux:input type="number" wire:model.lazy='profitableUnitsCondominiums' />
                     </div>
                     <div>
-                        <flux:error name="multipleUseSpace" />
+                        <flux:error name="profitableUnitsCondominiums" />
                     </div>
                 </flux:field>
             </div>
@@ -875,11 +656,11 @@
             <div class="radio-input">
                 <flux:field>
                     <div class="radio-group-horizontal">
-                        <flux:input type="number" /><br>
-                        <small>Se refiere al número de niveles total del inmueble valuado</small>
+                        <flux:input type="number" wire:model.lazy='numberSubjectLevels' />
                     </div>
+                    <small>Se refiere al número de niveles total del inmueble valuado</small>
                     <div>
-                        <flux:error name="multipleUseSpace" />
+                        <flux:error name="numberSubjectLevels" />
                     </div>
                 </flux:field>
             </div>
@@ -891,25 +672,25 @@
             <div class="radio-input">
                 <flux:field>
                     <div class="radio-group-horizontal">
-                        <flux:input type="number" />
+                        <flux:input type="number" wire:model.lazy='progressGeneralWorks' />
                     </div>
                     <div>
-                        <flux:error name="multipleUseSpace" />
+                        <flux:error name="progressGeneralWorks" />
                     </div>
                 </flux:field>
             </div>
         </div>
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Gradp de % avance de áreas comune</flux:label>
+                <flux:label>Grado de % avance de áreas comunes</flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
                     <div class="radio-group-horizontal">
-                        <flux:input type="number" />
+                        <flux:input type="number" wire:model.lazy='degreeProgressCommonAreas' />
                     </div>
                     <div>
-                        <flux:error name="multipleUseSpace" />
+                        <flux:error name="degreeProgressCommonAreas" />
                     </div>
                 </flux:field>
             </div>
@@ -918,6 +699,346 @@
 
     </div>
 </div>
+
+
+
+
+
+
+{{-- MODAL PARA EDITAR ELEMENTO --}}
+<flux:modal name="edit-element" class="md:w-96">
+    <div class="space-y-2">
+        <div>
+            <flux:heading size="lg">Editar elemento</flux:heading>
+        </div>
+
+        <flux:field class="flux-field">
+            <flux:label>Descripción<span class="sup-required">*</span></flux:label>
+            <flux:input type="text" wire:model='description' />
+            <div class="error-container">
+                <flux:error name="description" />
+            </div>
+        </flux:field>
+        <flux:field class="flux-field">
+            <label for="tipo" class="flux-label text-sm">Clasificación<span class="sup-required">*</span></label>
+            <flux:select wire:model="clasification" class="text-gray-800 [&_option]:text-gray-900">
+                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                @foreach ($construction_classification as $value => $label)
+                <flux:select.option value="{{ $label }}">
+                    {{ $label }}
+                </flux:select.option>
+                @endforeach
+            </flux:select>
+            <div class="error-container">
+                <flux:error name="clasification" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <label for="tipo" class="flux-label text-sm">Uso<span class="sup-required">*</span></label>
+            <flux:select wire:model="use" class="text-gray-800 [&_option]:text-gray-900">
+                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                @foreach ($construction_use as $value => $label)
+                <flux:select.option value="{{ $value }}">
+                    {{ $value }} - {{$label}}
+                </flux:select.option>
+                @endforeach
+            </flux:select>
+            <div class="error-container">
+                <flux:error name="use" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Niveles edificio<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='buildingLevels' />
+            <div class="error-container">
+                <flux:error name="buildingLevels" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Niveles por tipo de construcción<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='levelsConstructionType' />
+            <div class="error-container">
+                <flux:error name="levelsConstructionType" />
+            </div>
+        </flux:field>
+        <flux:field class="flux-field">
+            <flux:label>Edad<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='age' />
+            <div class="error-container">
+                <flux:error name="age" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Superficie<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='surface' />
+            <div class="error-container">
+                <flux:error name="surface" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <label for="tipo" class="flux-label text-sm">Fuente de información<span class="sup-required">*</span></label>
+            <flux:select wire:model="sourceInformation" class="text-gray-800 [&_option]:text-gray-900">
+                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                @foreach ($construction_source_information as $value => $label)
+                <flux:select.option value="{{ $label }}">
+                    {{$label}}
+                </flux:select.option>
+                @endforeach
+            </flux:select>
+            <div class="error-container">
+                <flux:error name="sourceInformation" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Costo unit reposición nuevo<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='unitCostReplacement' />
+            <div class="error-container">
+                <flux:error name="unitCostReplacement" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Avance obra<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='progressWork' />
+            <div class="error-container">
+                <flux:error name="progressWork" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <label for="tipo" class="flux-label text-sm">Estado de conservación<span class="sup-required">*</span></label>
+            <flux:select wire:model="conservationState" class="text-gray-800 [&_option]:text-gray-900">
+                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                @foreach ($construction_conservation_state as $value => $label)
+                <flux:select.option value="{{ $label }}">
+                    {{$label}}
+                </flux:select.option>
+                @endforeach
+            </flux:select>
+            <div class="error-container">
+                <flux:error name="conservationState" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Rango con base en la altura<span class="sup-required">*</span></flux:label>
+            <flux:checkbox wire:model='rangeBasedHeight' class="cursor-pointer" />
+            <div class="error-container">
+                <flux:error name="adjacent" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Avance obra<span class="sup-required">*</span></flux:label>
+            <flux:radio.group wire:model="surfaceVAD">
+                <flux:radio value="superficie vendible" label="Superficie vendible" checked />
+                <flux:radio value="superficie accesoria" label="Superficie accesoria" />
+                <flux:radio value="construccion superficie descubierta" label="Construcción superficie descubierta" />
+            </flux:radio.group>
+            <div class="error-container">
+                <flux:error name="surfaceVAD" />
+            </div>
+        </flux:field>
+        <div class="flex">
+            <flux:spacer />
+
+            <flux:button type="button" class="btn-primary btn-table cursor-pointer" variant="primary" wire:click='editElement'>Editar elemento
+            </flux:button>
+        </div>
+    </div>
+</flux:modal>
+
+
+{{-- MODAL PARA CREAR NUEVO ELEMENTO --}}
+<flux:modal name="add-element" class="md:w-96">
+    <div class="space-y-2">
+        <div class="mb-4">
+            <flux:heading size="lg">Añadir elemento</flux:heading>
+        </div>
+
+        <flux:field class="flux-field">
+            <flux:label>Descripción<span class="sup-required">*</span></flux:label>
+            <flux:input type="text" wire:model='description' />
+            <div class="error-container">
+                <flux:error name="description" />
+            </div>
+        </flux:field>
+        <flux:field class="flux-field">
+            <label for="tipo" class="flux-label text-sm">Clasificación<span class="sup-required">*</span></label>
+            <flux:select wire:model="clasification" class="text-gray-800 [&_option]:text-gray-900">
+                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                @foreach ($construction_classification as $value => $label)
+                <flux:select.option value="{{ $label }}">
+                    {{ $label }}
+                </flux:select.option>
+                @endforeach
+            </flux:select>
+            <div class="error-container">
+                <flux:error name="clasification" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <label for="tipo" class="flux-label text-sm">Uso<span class="sup-required">*</span></label>
+            <flux:select wire:model="use" class="text-gray-800 [&_option]:text-gray-900">
+                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                @foreach ($construction_use as $value => $label)
+                <flux:select.option value="{{ $value }}">
+                    {{ $value }} - {{$label}}
+                </flux:select.option>
+                @endforeach
+            </flux:select>
+            <div class="error-container">
+                <flux:error name="use" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Niveles edificio<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='buildingLevels' />
+            <div class="error-container">
+                <flux:error name="buildingLevels" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Niveles por tipo de construcción<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='levelsConstructionType' />
+            <div class="error-container">
+                <flux:error name="levelsConstructionType" />
+            </div>
+        </flux:field>
+        <flux:field class="flux-field">
+            <flux:label>Edad<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='age' />
+            <div class="error-container">
+                <flux:error name="age" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Superficie<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='surface' />
+            <div class="error-container">
+                <flux:error name="surface" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <label for="tipo" class="flux-label text-sm">Fuente de información<span
+                    class="sup-required">*</span></label>
+            <flux:select wire:model="sourceInformation" class="text-gray-800 [&_option]:text-gray-900">
+                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                @foreach ($construction_source_information as $value => $label)
+                <flux:select.option value="{{ $label }}">
+                    {{$label}}
+                </flux:select.option>
+                @endforeach
+            </flux:select>
+            <div class="error-container">
+                <flux:error name="sourceInformation" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Costo unit reposición nuevo<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='unitCostReplacement' />
+            <div class="error-container">
+                <flux:error name="unitCostReplacement" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Avance obra<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='progressWork' />
+            <div class="error-container">
+                <flux:error name="progressWork" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <label for="tipo" class="flux-label text-sm">Estado de conservación<span
+                    class="sup-required">*</span></label>
+            <flux:select wire:model="conservationState" class="text-gray-800 [&_option]:text-gray-900">
+                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                @foreach ($construction_conservation_state as $value => $label)
+                <flux:select.option value="{{ $label }}">
+                    {{$label}}
+                </flux:select.option>
+                @endforeach
+            </flux:select>
+            <div class="error-container">
+                <flux:error name="conservationState" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Rango con base en la altura<span class="sup-required">*</span></flux:label>
+            <flux:checkbox wire:model='rangeBasedHeight' class="cursor-pointer" />
+            <div class="error-container">
+                <flux:error name="adjacent" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Avance obra<span class="sup-required">*</span></flux:label>
+            <flux:radio.group wire:model="surfaceVAD">
+                <flux:radio value="superficie vendible" label="Superficie vendible" checked />
+                <flux:radio value="superficie accesoria" label="Superficie accesoria" />
+                <flux:radio value="construccion superficie descubierta" label="Construcción superficie descubierta" />
+            </flux:radio.group>
+            <div class="error-container">
+                <flux:error name="surfaceVAD" />
+            </div>
+        </flux:field>
+
+        <div class="flex">
+            <flux:spacer />
+
+            <flux:button type="button" wire:click='addElement' class="btn-primary btn-table cursor-pointer" variant="primary">Guardar
+            </flux:button>
+        </div>
+    </div>
+</flux:modal>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos
 </flux:button>
 </form>

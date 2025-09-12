@@ -56,7 +56,7 @@
                     <div id="mapMicro" class="map-container"></div>
                     <div id="mapPolygon" class="map-container"></div>
                 </div>
-                <flux:button class="mt-4 cursor-pointer btn-intermediary" variant="primary">Localizar
+                <flux:button  class="mt-4 cursor-pointer btn-intermediary" variant="primary">Localizar
                     inmueble en mapa</flux:button>
             </div>
         </div>
@@ -79,7 +79,7 @@
 
     <script>
         // Envolvemos todo en un listener para asegurar que el DOM esté completamente cargado.
-        document.addEventListener('livewire:init', () => {
+        document.addEventListener('livewire:navigated', () => {
 
             // Obtenemos las coordenadas iniciales desde el componente de Livewire.
             const initialLat = @js($latitud);
