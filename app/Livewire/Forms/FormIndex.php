@@ -32,6 +32,7 @@ class FormIndex extends Component
         'echo-technologies',
         'finish-capture',
         'pre-appraisal-considerations',
+        'market-focus',
         'pre-conclusion-considerations',
         'special-installations',
         'd-t-c-infonavit',

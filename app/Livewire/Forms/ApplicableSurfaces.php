@@ -16,15 +16,23 @@ class ApplicableSurfaces extends Component
     public bool $elementApply;
 
     //Variables del único contenedor
-    public $saleableArea, $calculationBuiltArea, $builtArea,
-            $hr_surfaceArea, $hr_informationSource,
-            $ua_surfaceArea, $ua_informationSource,
-            $pl_surfaceArea, $pl_informationSource;
+    public  $calculationBuiltArea,
+             $hr_informationSource,
+             $ua_informationSource,
+             $pl_informationSource;
+
+    public float $saleableArea, $builtArea, $hr_surfaceArea, $ua_surfaceArea, $pl_surfaceArea;
 
     public function mount()
     {
         // Inicializa las variables con los datos del archivo de configuración
         $this->construction_source_information = config('properties_inputs.construction_source_information');
+
+     $this->saleableArea = 100.00;
+     $this->builtArea = 100.00;
+     $this->hr_surfaceArea = 0.00;
+     $this->ua_surfaceArea = 0.00;
+     $this->pl_surfaceArea = 0.00;
     }
 
 
@@ -32,14 +40,14 @@ class ApplicableSurfaces extends Component
     public function save()
     {
         $rules = [
-            'saleableArea' => 'required',
+            'saleableArea' => 'required|numeric',
             /* 'calculationBuiltArea' => 'required', */
-            'builtArea' => 'required',
-            'hr_surfaceArea' => 'required',
+            'builtArea' => 'required|numeric|gt:0',
+            'hr_surfaceArea' => 'required|numeric|gt:0',
             'hr_informationSource' => 'required',
-            'ua_surfaceArea' => 'required',
+            'ua_surfaceArea' => 'required|numeric|between:0,100',
             'ua_informationSource' => 'required',
-            'pl_surfaceArea' => 'required',
+            'pl_surfaceArea' => 'required|numeric|gt:0',
             'pl_informationSource' => 'required',
         ];
 
@@ -64,7 +72,7 @@ class ApplicableSurfaces extends Component
 
 
         Toaster::success('Formulario guardado con éxito');
-        return redirect()->route('form.index', ['section' => 'special-installations']);
+        return redirect()->route('form.index', ['section' => '<special-install></special-install>ations']);
     }
 
     protected function validationAttributes(): array
@@ -75,9 +83,9 @@ class ApplicableSurfaces extends Component
             'builtArea' => 'superficie construida',
             'hr_surfaceArea' => ' ',
             'hr_informationSource' => ' ',
+            'ua_surfaceArea' => ' ',
             'ua_informationSource' => ' ',
-            'ua_informationSource' => ' ',
-            'pl_surfaceArea' => '',
+            'pl_surfaceArea' => ' ',
             'pl_informationSource' => ' ',
         ];
     }

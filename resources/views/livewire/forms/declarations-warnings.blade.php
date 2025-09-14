@@ -378,7 +378,7 @@
                 <br><br>
                 <div>
                     <label class="text-sm">Limitaciones adicionales</label>
-                    <flux:textarea class="h-64" />
+                    <flux:textarea class="h-64" wire:model='additionalLimits'/>
                 </div>
             </div>
         </div>

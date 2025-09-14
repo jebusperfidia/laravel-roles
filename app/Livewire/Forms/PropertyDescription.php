@@ -9,6 +9,8 @@ use Masmerise\Toaster\Toaster;
 class PropertyDescription extends Component
 {
     public $submitted = false;      // ← Arranca en false
+
+    //Valor para obtener datos de archivo de configuración
     public $usages;
   /*   public $selectedClave = ''; */
 

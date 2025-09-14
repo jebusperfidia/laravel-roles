@@ -22,6 +22,7 @@
         ['key' => 'buildings', 'icon' => 'building-office', 'label' => __('Construcciones')],
         ['key' => 'applicable-surfaces', 'icon' => 'rectangle-group', 'label' => __('Superficies aplicables')],
         ['key' => 'special-installations', 'icon' => 'sparkles', 'label' => __('Instalaciones especiales')],
+
       /*   ['key' => 'echo-technologies', 'icon' => 'wifi', 'label' => __('Ecotecnologías vivienda')],
         ['key' => 'd-t-c-infonavit', 'icon' => 'banknotes', 'label' => __('D.T.C. Infonavit')], */
        /*   [
@@ -30,6 +31,7 @@
             'label' => __('Cons previas conclusión'),
         ], */
         ['key' => 'pre-appraisal-considerations', 'icon' => 'printer', 'label' => __('Cons previas avalúo')],
+        ['key' => 'market-focus', 'icon' => 'sparkles', 'label' => __('Enfoque de mercado')],
         ['key' => 'photo-report', 'icon' => 'camera', 'label' => __('Reporte fotográfico')],
         ['key' => 'conclusion', 'icon' => 'document-check', 'label' => __('Conclusión')],
         ['key' => 'finish-capture', 'icon' => 'check-badge', 'label' => __('Finalizar captura')],

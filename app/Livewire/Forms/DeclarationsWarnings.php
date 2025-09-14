@@ -21,6 +21,9 @@ class DeclarationsWarnings extends Component
     //Variables tercer contenedor
     public $cyb_conclusionValue, $cyb_inmediateTypology, $cyb_immediateMarketing, $cyb_surfaceIncludesExtras;
 
+    //Variable cuarto contenedor
+    public $additionalLimits;
+
 
 
     public function mount(){

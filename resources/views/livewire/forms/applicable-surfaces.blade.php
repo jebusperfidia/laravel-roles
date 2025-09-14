@@ -46,7 +46,7 @@
                         <flux:field>
                             <div class="radio-group-horizontal">
                                 <flux:input.group>
-                                    <flux:input type="text" wire:model='saleableArea' />
+                                    <flux:input type="number" wire:model='saleableArea' readonly/>
                                     <flux:button disabled><b>m²</b></flux:button>
                                 </flux:input.group>
                             </div>
@@ -62,7 +62,7 @@
                             <br>construida:</flux:label>
                         <flux:field>
                             <div class="radio-group-horizontal">
-                                <flux:checkbox wire:model='calculationBuiltArea' />
+                                <flux:checkbox wire:model='calculationBuiltArea'/>
                             </div>
                             <small class="text-[12px] text-gray-500">Si la casilla está seleccionada, el valor en la
                                 celda de abajo será siempre igual al la superficie vendible. Si
@@ -81,7 +81,7 @@
                         <flux:field>
                             <div class="radio-group-horizontal">
                                 <flux:input.group>
-                                    <flux:input type="text" wire:model='builtArea' />
+                                    <flux:input type="number" wire:model='builtArea' />
                                     <flux:button disabled><b>m²</b></flux:button>
                                 </flux:input.group>
                             </div>
@@ -119,7 +119,7 @@
                                         <flux:field>
                                             <div class="radio-group-horizontal">
                                                 <flux:input.group>
-                                                    <flux:input type="text" wire:model='hr_surfaceArea' />
+                                                    <flux:input type="number" wire:model='hr_surfaceArea' />
                                                     <flux:button disabled><b>m²</b></flux:button>
                                                 </flux:input.group>
                                             </div>
@@ -143,7 +143,7 @@
                                             <div>
                                                 <flux:error name="hr_informationSource" />
                                             </div>
-                                            </flux:fiel </flux:field>
+                                            </flux:field>
                                     </td>
                                 </tr>
                                 <tr>
@@ -152,7 +152,7 @@
                                         <flux:field>
                                             <div class="radio-group-horizontal">
                                                 <flux:input.group>
-                                                    <flux:input type="text" wire:model='ua_surfaceArea'/>
+                                                    <flux:input type="number" wire:model='ua_surfaceArea'/>
                                                     <flux:button disabled><b>%</b></flux:button>
                                                 </flux:input.group>
                                             </div>
@@ -185,7 +185,7 @@
                                         <flux:field>
                                             <div class="radio-group-horizontal">
                                                 <flux:input.group>
-                                                    <flux:input type="text" wire:model='pl_surfaceArea' />
+                                                    <flux:input type="number" wire:model='pl_surfaceArea' />
                                                     <flux:button disabled><b>m²</b></flux:button>
                                                 </flux:input.group>
                                             </div>
