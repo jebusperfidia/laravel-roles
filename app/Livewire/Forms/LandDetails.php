@@ -33,12 +33,6 @@ class LandDetails extends Component
 
     //SEGUNDO CONTENEDOR
 
-
-
-
-
-
-
     //Vatiable para crear grupo
     public $group;
 
@@ -55,8 +49,22 @@ class LandDetails extends Component
         $ct_borderStreet1, $ct_borderStreetOrientation1, $ct_borderStreet2, $ct_borderStreetOrientation2, $ct_location,
         $ct_configuration, $ct_topography, $ct_typeOfRoad, $ct_panoramicFeatures, $ct_EasementRestrictions;
 
-    public function mount(){
+
+    //CUARTO CONTENEDOR
+    public bool $ls_useExcessCalculation;
+
+    public float $ls_surfacePrivateLot, $ls_surfacePrivateLotType, $ls_undividedOnlyCondominium, $ls_undividedSurfaceLand, $ls_surplusLandArea;
+
+    //Elementos del modal de superficie del terreno
+    public float $modalSurface;
+
+
+
+
+
+        public function mount(){
         $this->extent = 0;
+        $this->ls_useExcessCalculation = false;
     }
 
     public function save()
@@ -138,7 +146,7 @@ class LandDetails extends Component
 
     }
 
-    public function addItem()
+    public function addElement()
     {
         $rules = [
             'orientation' => 'required',
@@ -162,7 +170,7 @@ class LandDetails extends Component
     }
 
 
-    public function editItem(){
+    public function editElement(){
 
 
         $rules = [
@@ -187,9 +195,87 @@ class LandDetails extends Component
     }
 
 
-    public function deleteItem(){
+    public function deleteElement(){
         Toaster::error('Elemento eliminado con éxito');
     }
+
+
+
+
+    public function openAddElementLandSurface()
+    {
+        $this->resetValidation();
+        Flux::modal('add-elementLandSurface')->show();      // 3) Abre el modal
+    }
+
+    public function openEditElementLandSurface()
+    {
+        $this->resetValidation();
+        Flux::modal('edit-elementLandSurface')->show();      // 3) Abre el modal
+
+    }
+
+
+
+
+
+    public function addElementLandSurface()
+    {
+        $rules = [
+            'modalSurface' => 'required',
+        ];
+
+        $this->validate(
+            $rules,
+            [],
+            $this->validationAttributeLandSurface()
+        );
+
+
+        $this->modalSurface = 0;
+
+
+        Toaster::success('Elemento agregado con éxito');
+        $this->modal('add-item')->close();
+    }
+
+
+    public function editElementLandSurface()
+    {
+
+
+        $rules = [
+            'modalSurface' => 'required',
+        ];
+
+        $this->validate(
+            $rules,
+            [],
+            $this->validationAttributeLandSurface()
+        );
+
+
+        $this->modalSurface = 0;
+
+
+        Toaster::success('Elemento editado con éxito');
+        $this->modal('edit-item')->close();
+    }
+
+
+    public function deleteElementLandSurface()
+    {
+        Toaster::error('Elemento eliminado con éxito');
+    }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -290,7 +376,25 @@ class LandDetails extends Component
             'ct_EasementRestrictions' => 'required'
         ];
 
-        $rules = array_merge($container1, $container3);
+
+        //VALIDACIONES CONTAINER 4
+        $container4 = [
+            /* 'ls_useExcessCalculation' => 'boolean', */
+            'ls_undividedOnlyCondominium' => 'required|numeric|min:0|between:0,100',
+        ];
+
+
+        if ($this->ls_useExcessCalculation === true) {
+            $container4 = array_merge($container4, [
+                'ls_surfacePrivateLot' => 'required|numeric|min:0',
+                'ls_surfacePrivateLotType' => 'required|numeric|min:0',
+            ]);
+        }
+
+
+
+
+        $rules = array_merge($container1, $container3, $container4);
 
         return  Validator::make(
             $this->all(),
@@ -362,7 +466,14 @@ class LandDetails extends Component
             'ct_topography' => 'topografia',
             'ct_typeOfRoad' => 'tipo de vialidad',
             'ct_panoramicFeatures' => 'caracteristicas panoramicas',
-            'ct_EasementRestrictions' => 'servidumbre y/o restricciones'
+            'ct_EasementRestrictions' => 'servidumbre y/o restricciones',
+
+
+
+
+            'ls_surfacePrivateLot' => 'superficie lote privado',
+            'ls_surfacePrivateLotType' => 'superficie lote privado tipo',
+            'ls_undividedOnlyCondominium' => 'indiviso'
 
 
         ];
@@ -385,6 +496,14 @@ class LandDetails extends Component
             'adjacent' => 'colindancia',
         ];
     }
+
+    protected function validationAttributeLandSurface(): array
+    {
+        return [
+            'modalSurface' => 'superfcie',
+        ];
+    }
+
 
     //FUNCION PARA LA CARGA DE ARCHIVOS
     public function updatedPhotos()

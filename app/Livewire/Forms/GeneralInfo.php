@@ -9,6 +9,7 @@ use App\Models\Assignment;
 use App\Models\Valuation;
 use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
+use App\Services\DipomexService;
 
 class GeneralInfo extends Component
 {
@@ -17,6 +18,23 @@ class GeneralInfo extends Component
 
     // Arrays públicos para consumir datos para los input select largos
     public array $levels_input, $propertiesTypes_input, $propertiesTypesSigapred_input, $landUse_input;
+
+    //Variables para almacenar los datos obtenidos desde la API de Dipomex
+
+    //Variables para primer contenedor de direcciones
+    public $states = [];
+    public $municipalities = [];
+    public $colonies = [];
+
+    //Variables para primer contenedor de direcciones
+    public $states2 = [];
+    public $municipalities2 = [];
+    public $colonies2 = [];
+
+    //Variables para primer contenedor de direcciones
+    public $states3 = [];
+    public $municipalities3 = [];
+    public $colonies3 = [];
 
     //Variables primer contenedor
     public $gi_folio, $gi_date, $gi_type, $gi_calculationType, $gi_valuator, $gi_preValuation = false;
@@ -43,8 +61,18 @@ class GeneralInfo extends Component
     //Variable quinto contenedor
     public $gi_purpose, $gi_purposeSigapred, $gi_objective, $gi_ownerShipRegime;
 
-    public function mount()
+
+    /**
+     * Usamos inyección de dependencias para obtener nuestro nuevo servicio.
+     */
+    public function mount(DipomexService $dipomex)
     {
+
+        //Obtenemos los estados
+        $this->states = $dipomex->getEstados();
+        $this->states2 = $dipomex->getEstados();
+        $this->states3 = $dipomex->getEstados();
+
         //Obtenemos los datos para diferentes input select, desde el archivo de configuración properties_inputs
         $this->levels_input = config('properties_inputs.levels', []);
         $this->propertiesTypes_input = config('properties_inputs.property_types', []);
@@ -231,24 +259,293 @@ class GeneralInfo extends Component
             [],
             $this->validationAttributes()
         );
-
     }
 
-    public function buscarCP1()
+
+    /**
+     * La lógica de búsqueda ahora adaptada a la respuesta de DIPOMEX.
+     */
+    public function buscarCP1(DipomexService $dipomex)
     {
-        Toaster::success('Hasta aquí todo bien');
+        $this->validate([
+            'gi_ownerCp' => 'required|digits:5'
+        ]);
+
+        $data = $dipomex->buscarPorCodigoPostal($this->gi_ownerCp);
+
+        if (empty($data)) {
+            Toaster::error('No se encontró información para el código postal proporcionado.');
+            $this->reset(['gi_ownerEntity', 'gi_ownerLocality', 'gi_ownerColony', 'municipalities', 'colonies']);
+            return;
+        }
+
+        // Buscar el ID del estado con base en el nombre
+        $estadoId = array_search($data['estado'], $this->states);
+
+        if ($estadoId === false) {
+            Toaster::error('No se encontró el estado correspondiente al código postal.');
+            return;
+        }
+
+        // Setear el id del estado seleccionado
+        $this->gi_ownerEntity = $estadoId;
+
+        // ⚡️ Poblar municipios inmediatamente
+        $this->municipalities = $dipomex->getMunicipiosPorEstado($estadoId);
+        //dd($this->municipalities);
+
+        //Obtenemos el ID del municipio con base en el nombre
+        $municipioId = array_search($data['municipio'], $this->municipalities);
+
+        //Asignamos el valor del municipio
+        $this->gi_ownerLocality = $municipioId;
+
+        //dd($this->gi_ownerLocality);
+
+
+        //dd($municipio);
+
+        // Asignar colonias
+        $this->colonies = $data['colonias'];
+
+        Toaster::success('Información encontrada correctamente.');
     }
 
-    public function buscarCP2()
+
+
+    /**
+     * Este hook funciona igual, pero llamará al método correspondiente del nuevo servicio.
+     */
+    public function updatedGiOwnerEntity($estadoId, DipomexService $dipomex)
     {
-        Toaster::success('Hasta aquí todo bien');
+        $this->reset(['gi_ownerLocality', 'gi_ownerColony', 'municipalities', 'colonies']);
+
+        if ($estadoId) {
+            $this->municipalities = $dipomex->getMunicipiosPorEstado($estadoId);
+        }
     }
 
 
-    public function buscarCP3()
+    public function updatedGiOwnerLocality($municipioId, DipomexService $dipomex)
     {
-        Toaster::success('Hasta aquí todo bien');
+        /* $this->reset(['gi_ownerColony', 'colonies']);
+
+        if ($selectedMunicipio && $this->gi_ownerEntity) {
+
+            $municipios = $dipomex->getMunicipiosPorEstado($this->gi_ownerEntity); // método que devuelve todos
+            $municipio = collect($municipios)->firstWhere('MUNICIPIO', $selectedMunicipio);
+
+            if ($municipio) {
+                $municipioId = $municipio['MUNICIPIO_ID'];
+                $this->colonies = $dipomex->getColoniasPorMunicipio($this->gi_ownerEntity, $municipioId);
+            }
+        } */
+
+        $this->reset(['gi_ownerColony', 'colonies']);
+
+        if ($municipioId && $this->gi_ownerEntity) {
+            // Como ahora gi_ownerLocality tiene el MUNICIPIO_ID, lo pasamos directo
+            $this->colonies = $dipomex->getColoniasPorMunicipio($this->gi_ownerEntity, $municipioId);
+        }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+    /* $gi_applicCp, $gi_applicEntity, $gi_applicLocality, $gi_applicColony */
+    public function buscarCP2(DipomexService $dipomex)
+    {
+
+        $this->validate([
+            'gi_applicCp' => 'required|digits:5'
+        ]);
+
+        $data = $dipomex->buscarPorCodigoPostal($this->gi_applicCp);
+
+        if (empty($data)) {
+            Toaster::error('No se encontró información para el código postal proporcionado.');
+            $this->reset(['gi_applicEntity', 'gi_applicLocality', 'gi_applicColony', 'municipalities2', 'colonies2']);
+            return;
+        }
+
+        // Buscar el ID del estado con base en el nombre
+        $estadoId = array_search($data['estado'], $this->states);
+
+        if ($estadoId === false) {
+            Toaster::error('No se encontró el estado correspondiente al código postal.');
+            return;
+        }
+
+        // Setear el id del estado seleccionado
+        $this->gi_applicEntity = $estadoId;
+
+        // ⚡️ Poblar municipios inmediatamente
+        $this->municipalities2 = $dipomex->getMunicipiosPorEstado($estadoId);
+        //dd($this->municipalities);
+
+        //Obtenemos el ID del municipio con base en el nombre
+        $municipioId = array_search($data['municipio'], $this->municipalities2);
+
+        //Asignamos el valor del municipio
+        $this->gi_applicLocality = $municipioId;
+
+        //dd($this->gi_ownerLocality);
+
+
+        //dd($municipio);
+
+        // Asignar colonias
+        $this->colonies2 = $data['colonias'];
+
+        Toaster::success('Información encontrada correctamente.');
+        //Toaster::success('Hasta aquí todo bien');
+    }
+
+
+
+    /**
+     * Este hook funciona igual, pero llamará al método correspondiente del nuevo servicio.
+     */
+    public function updatedGiApplicEntity($estadoId, DipomexService $dipomex)
+    {
+        $this->reset(['gi_applicLocality', 'gi_applicColony', 'municipalities2', 'colonies2']);
+
+        if ($estadoId) {
+            $this->municipalities2 = $dipomex->getMunicipiosPorEstado($estadoId);
+        }
+    }
+
+
+    public function updatedGiApplicLocality($municipioId, DipomexService $dipomex)
+    {
+
+
+        $this->reset(['gi_applicColony', 'colonies2']);
+
+        if ($municipioId && $this->gi_applicEntity) {
+            // Como ahora gi_ownerLocality tiene el MUNICIPIO_ID, lo pasamos directo
+            $this->colonies2 = $dipomex->getColoniasPorMunicipio($this->gi_applicEntity, $municipioId);
+        }
+    }
+
+
+
+
+
+
+
+/*
+
+$gi_propertyCp, $gi_propertyEntity, $gi_propertyLocality, $gi_propertyCity,
+        $gi_propertyColony */
+
+
+    public function buscarCP3(DipomexService $dipomex)
+    {
+
+        $this->validate([
+            'gi_propertyCp' => 'required|digits:5'
+        ]);
+
+        $data = $dipomex->buscarPorCodigoPostal($this->gi_propertyCp);
+
+        if (empty($data)) {
+            Toaster::error('No se encontró información para el código postal proporcionado.');
+            $this->reset(['gi_propertyEntity', 'gi_propertyLocality', 'gi_propertyColony', 'municipalities3', 'colonies3']);
+            return;
+        }
+
+        // Buscar el ID del estado con base en el nombre
+        $estadoId = array_search($data['estado'], $this->states);
+
+        if ($estadoId === false) {
+            Toaster::error('No se encontró el estado correspondiente al código postal.');
+            return;
+        }
+
+        // Setear el id del estado seleccionado
+        $this->gi_propertyEntity = $estadoId;
+
+        // ⚡️ Poblar municipios inmediatamente
+        $this->municipalities3 = $dipomex->getMunicipiosPorEstado($estadoId);
+        //dd($this->municipalities);
+
+        //Obtenemos el ID del municipio con base en el nombre
+        $municipioId = array_search($data['municipio'], $this->municipalities3);
+
+        //Asignamos el valor del municipio
+        $this->gi_propertyLocality = $municipioId;
+
+        //dd($this->gi_ownerLocality);
+
+
+        //dd($municipio);
+
+        // Asignar colonias
+        $this->colonies3 = $data['colonias'];
+
+        Toaster::success('Información encontrada correctamente.');
+        //Toaster::success('Hasta aquí todo bien');
+    }
+
+
+
+
+    public function updatedGiPropertyEntity($estadoId, DipomexService $dipomex)
+    {
+        $this->reset(['gi_propertyLocality', 'gi_propertyColony', 'municipalities3', 'colonies3']);
+
+        if ($estadoId) {
+            $this->municipalities3 = $dipomex->getMunicipiosPorEstado($estadoId);
+        }
+    }
+
+
+    public function updatedGiPropertyLocality($municipioId, DipomexService $dipomex)
+    {
+
+
+        $this->reset(['gi_propertyColony', 'colonies3']);
+
+        if ($municipioId && $this->gi_propertyEntity) {
+            // Como ahora gi_ownerLocality tiene el MUNICIPIO_ID, lo pasamos directo
+            $this->colonies3 = $dipomex->getColoniasPorMunicipio($this->gi_propertyEntity, $municipioId);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     //Generamos los atributos traducidos para cambiar el valor de los wire:model en los

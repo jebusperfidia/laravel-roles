@@ -176,7 +176,7 @@
 
             <div class="form-grid form-grid--3 form-grid-3-variation">
                 <div class="label-variation">
-                    <flux:label>Cálculo de terrenos</flux:label>
+                    <flux:label>Cálculo de terrenos<span class="sup-required">*</span></flux:label>
                 </div>
                 <div class="radio-input">
                     <flux:field>
@@ -241,7 +241,7 @@
             {{-- Solo se aplica si está seleccionado: No se aplica, no existen comparables debido a... --}}
             <div class="form-grid form-grid--3 form-grid-3-variation">
                 <div class="label-variation">
-                    <flux:label>Debido a </flux:label>
+                    <flux:label>Debido a <span class="sup-required">*</span></flux:label>
                 </div>
                 <div class="radio-input">
                     <flux:field>
@@ -263,7 +263,7 @@
             {{-- ESTOS VALORES SON PARA TODOS LOS INPUT SELECT --}}
             <div class="form-grid form-grid--3 form-grid-3-variation">
                 <div class="label-variation">
-                    <flux:label>Enfoque de costos</flux:label>
+                    <flux:label>Enfoque de costos<span class="sup-required">*</span></flux:label>
                 </div>
                 <div class="radio-input">
                     <flux:field>
@@ -283,12 +283,12 @@
 
             <div class="form-grid form-grid--3 form-grid-3-variation">
                 <div class="label-variation">
-                    <flux:label>Enfoque de ingresos</flux:label>
+                    <flux:label>Enfoque de ingresos<span class="sup-required">*</span></flux:label>
                 </div>
                 <div class="radio-input">
                     <flux:field>
                         <div class="radio-group-horizontal">
-                            <flux:select wire:model="ach_incomeApproach" class=" text-gray-800 [&_option]:text-gray-900">
+                            <flux:select wire:model.live="ach_incomeApproach" class=" text-gray-800 [&_option]:text-gray-900">
                                 <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                                 <flux:select.option value="Si se apllica, usando terrenos directos o residual">Si se apllica, usando
                                     terrenos directos o residual</flux:select.option>
@@ -312,6 +312,25 @@
                     </flux:field>
                 </div>
             </div>
+
+            @if ($ach_incomeApproach == 'No se aplica, no existen comparables debido a...')
+            {{-- Solo se aplica si está seleccionado: No se aplica, no existen comparables debido a... --}}
+            <div class="form-grid form-grid--3 form-grid-3-variation">
+                <div class="label-variation">
+                    <flux:label>Debido a <span class="sup-required">*</span></flux:label>
+                </div>
+                <div class="radio-input">
+                    <flux:field>
+                        <div class="radio-group-horizontal">
+                            <flux:input type='text' wire:model="ach_dueTo2" />
+                        </div>
+                        <div>
+                            <flux:error name="ach_dueTo2" />
+                        </div>
+                    </flux:field>
+                </div>
+            </div>
+            @endif
 
             <div class="form-grid form-grid--3 form-grid-3-variation">
                 <div class="label-variation">

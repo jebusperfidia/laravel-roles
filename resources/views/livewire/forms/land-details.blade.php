@@ -446,7 +446,7 @@
                                                     class="flex justify-end"> --}}
                                                     <flux:button
                                                         onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
-                                                        wire:click="deleteItem" type="button" icon-leading="trash"
+                                                        wire:click="deleteElement" type="button" icon-leading="trash"
                                                         class="cursor-pointer btn-deleted btn-buildings" />
                                                     {{-- </flux:modal-trigger> --}}
                                         </td>
@@ -926,8 +926,14 @@
             </div>
             <div class="form-container__content">
 
-
-                <div class="mt-8">
+                <div class="flex justify-start text-md">
+                    {{-- <flux:modal.trigger name="add-item" class="flex justify-end"> --}}
+                        <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus" wire:click='openAddElementLandSurface'>
+                        </flux:button>
+                        {{--
+                    </flux:modal.trigger> --}}
+                </div>
+                <div class="form-grid form-grid--2 pt-8">
                     <div class="overflow-x-auto max-w-full">
                         <table class="min-w-[550px] table-fixed w-full border-2 ">
                             <thead>
@@ -941,17 +947,16 @@
 
                                 {{-- Valor de ejemplo para usar en los for --}}
                                 <tr>
-                                    <td class="px-2 py-1 text-xs text-center">Vida útil total del inmueble:</td>
-                                    <td class="px-2 py-1 text-xs text-left"></td>
+                                    <td class="px-2 py-1 text-xs text-center">2,000</td>
+                                    <td class="px-2 py-1 text-xs text-center">0</td>
                                     <td class="my-2 flex justify-evenly">
-                                        <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
-                                                class="cursor-pointer btn-intermediary btn-buildins" />
-                                            </flux:modal-trigger>
-                                            <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                                <flux:button type="button" icon-leading="trash"
-                                                    class="cursor-pointer btn-deleted btn-buildings" />
-                                                </flux:modal-trigger>
+                                                class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElementLandSurface'/>
+                                       {{--      </flux:modal-trigger>
+                                            <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
+                                              <flux:button onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
+                                                wire:click="deleteElementLandSurface" type="button" icon-leading="trash" class="cursor-pointer btn-deleted btn-buildings" />
                                     </td>
                                 </tr>
 
@@ -960,6 +965,118 @@
                         </table>
                     </div>
                 </div>
+
+
+
+                <div class="form-grid form-grid--3 form-grid-3-variation pt-8">
+                    <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start">
+                        <flux:label>Utilizar cálculo del terreno excedente</flux:label>
+                    </div>
+                    <div class="radio-input">
+                        <flux:field>
+                            <div class="radio-group-horizontal">
+                               <flux:checkbox wire:model.live="ls_useExcessCalculation"/>
+                            </div>
+                            <div>
+                                <flux:error name="ls_useExcessCalculation"/>
+                            </div>
+                        </flux:field>
+                    </div>
+                </div>
+
+                @if ($ls_useExcessCalculation)
+                <div class="form-grid form-grid--3 form-grid-3-variation pt-8">
+                    <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start">
+                        <flux:label>Superficie del lote privativo</flux:label>
+                    </div>
+                    <div class="radio-input">
+                        <flux:field>
+                            <div class="radio-group-horizontal">
+                                <flux:input.group>
+                                    <flux:input type="number" wire:model='ls_surfacePrivateLot'/>
+                                    <flux:button disabled><b>m²</b></flux:button>
+                                </flux:input.group>
+                            </div>
+                            <div>
+                                <flux:error name="ls_surfacePrivateLot"/>
+                            </div>
+                        </flux:field>
+                    </div>
+                </div>
+
+
+                <div class="form-grid form-grid--3 form-grid-3-variation pt-8">
+                    <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start">
+                        <flux:label>Superficie del lote privativo  tipo</flux:label>
+                    </div>
+                    <div class="radio-input">
+                        <flux:field>
+                            <div class="radio-group-horizontal">
+                                <flux:input.group>
+                                    <flux:input type="number" wire:model='ls_surfacePrivateLotType'/>
+                                    <flux:button disabled><b>m²</b></flux:button>
+                                </flux:input.group>
+                            </div>
+                            <div>
+                                <flux:error name="ls_surfacePrivateLotType"/>
+                            </div>
+                        </flux:field>
+                    </div>
+                </div>
+                @endif
+
+                <div class="form-grid form-grid--3 form-grid-3-variation pt-8">
+                    <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start">
+                        <flux:label>Indiviso (solo en condominio)</flux:label>
+                    </div>
+                    <div class="radio-input">
+                        <flux:field>
+                            <div class="radio-group-horizontal">
+                                <flux:input.group>
+                                    <flux:input type="number" wire:model='ls_undividedOnlyCondominium'/>
+                                    <flux:button disabled><b>%</b></flux:button>
+                                </flux:input.group>
+                            </div>
+                            <div>
+                                <flux:error name="ls_undividedOnlyCondominium"/>
+                            </div>
+                        </flux:field>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid--3 form-grid-3-variation pt-8">
+                    <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start">
+                        <flux:label>Superficie indivisa del terreno</flux:label>
+                    </div>
+                    <div class="radio-input">
+                        <flux:field>
+                            <div class="radio-group-horizontal">
+                                1.98 M²
+                            </div>
+                            <div>
+                                <flux:error name="ls_undividedSurfaceLand"/>
+                            </div>
+                        </flux:field>
+                    </div>
+                </div>
+
+                @if ($ls_useExcessCalculation)
+                <div class="form-grid form-grid--3 form-grid-3-variation pt-8">
+                    <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start">
+                        <flux:label>Superficie de terreno excedente</flux:label>
+                    </div>
+                    <div class="radio-input">
+                        <flux:field>
+                            <div class="radio-group-horizontal">
+                                2 M²
+                            </div>
+                            <div>
+                                <flux:error name="ls_surplusLandArea"/>
+                            </div>
+                        </flux:field>
+                    </div>
+                </div>
+                @endif
 
             </div>
         </div>
@@ -1045,7 +1162,7 @@
                 </flux:field>
                 <div class="flex">
                     <flux:spacer />
-                    <flux:button type="button" wire:click='addItem' class="btn-primary cursor-pointer">Crear elemento
+                    <flux:button type="button" wire:click='addElement' class="btn-primary cursor-pointer">Crear elemento
                     </flux:button>
                 </div>
             </div>
@@ -1083,7 +1200,7 @@
                     </flux:field>
                 <div class="flex">
                     <flux:spacer />
-                    <flux:button type="button" wire:click='editItem' class="btn-primary cursor-pointer">Editar elemento
+                    <flux:button type="button" wire:click='editElement' class="btn-primary cursor-pointer">Editar elemento
                     </flux:button>
                 </div>
             </div>
@@ -1101,7 +1218,52 @@
 
 
 
+{{-- Agregar elemento  --}}
 
+<flux:modal name="add-elementLandSurface" class="md:w-96">
+    <div class="space-y-6">
+        <div>
+            <flux:heading size="lg">Crear elemento</flux:heading>
+            {{-- <flux:text class="mt-2"></flux:text> --}}
+        </div>
+        <flux:field class="flux-field">
+            <flux:label>Superficie en M²<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='modalSurface' />
+            <div class="error-container">
+                <flux:error name="modalSurface" />
+            </div>
+        </flux:field>
+        <div class="flex">
+            <flux:spacer />
+            <flux:button type="button" wire:click='addElementLandSurface' class="btn-primary cursor-pointer">Crear elemento
+            </flux:button>
+        </div>
+    </div>
+</flux:modal>
+
+
+{{-- Editar elemento --}}
+
+<flux:modal name="edit-elementLandSurface" class="md:w-96">
+    <div class="space-y-6">
+        <div>
+            <flux:heading size="lg">Editar elemento</flux:heading>
+            {{-- <flux:text class="mt-2"></flux:text> --}}
+        </div>
+       <flux:field class="flux-field">
+                <flux:label>Superficie en M²<span class="sup-required">*</span></flux:label>
+                <flux:input type="number" wire:model='modalSurface'/>
+                <div class="error-container">
+                    <flux:error name="modalSurface"/>
+                </div>
+        </flux:field>
+        <div class="flex">
+            <flux:spacer />
+            <flux:button type="button" wire:click='editElementLandSurface' class="btn-primary cursor-pointer">Editar elemento
+            </flux:button>
+        </div>
+    </div>
+</flux:modal>
 
 
 

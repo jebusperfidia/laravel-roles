@@ -35,8 +35,7 @@ return [
         ],
     ],
     'dipomex' => [
-        'base_uri' => 'https://api.tau.com.mx/dipomex/v1',
-        'apikey'   => env('DIPOMEX_APIKEY'),
+        'key' => env('DIPOMEX_API_KEY'),
     ],
 
 ];

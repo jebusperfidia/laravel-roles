@@ -14,7 +14,7 @@ class PreAppraisalConsiderations extends Component
            $technicalReportOthersSupport, $technicalReportDescriptionClculations;
 
     //Variables segundo contenedor
-    public $ach_landCalculation, $ahc_costApproach, $ach_incomeApproach, $ach_dueTo;
+    public $ach_landCalculation, $ahc_costApproach, $ach_incomeApproach, $ach_dueTo, $ach_dueTo2;
 
     public bool $ach_comparativeApproachLand, $ach_comparativeSalesApproach, $applyFIC;
 
@@ -87,6 +87,13 @@ class PreAppraisalConsiderations extends Component
             ]);
         }
 
+        //Validaciones específicas si el checkbox de "Si se apllica, usando terrenos directos o residual" está seleccionado
+        if ($this->ach_incomeApproach ===  'No se aplica, no existen comparables debido a...') {
+            $container2 = array_merge($container2, [
+                'ach_dueTo2'  => 'required',
+            ]);
+        }
+
         //Finalmente, añadiremos las reglas del contenedor 4 y 5 en nuestro arreglo general
         $rules = array_merge($container1, $container2);
 
@@ -130,6 +137,7 @@ class PreAppraisalConsiderations extends Component
             /* 'ach_comparativeApproachLand'  => 'comparación de enfoque de terreno',
             'ach_comparativeSalesApproach'   => 'comparación de enfoque de ventas', */
             'ach_dueTo'  => 'debido a, ',
+            'ach_dueTo2'  => 'debido a, ',
         ];
     }
 

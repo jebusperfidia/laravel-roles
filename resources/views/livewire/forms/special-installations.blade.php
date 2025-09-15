@@ -924,6 +924,7 @@
             <div>
                 <flux:error name="descriptionSI" />
             </div>
+          {{--   {{$descriptionSI}} --}}
         </div>
         {{-- Finaliza --}}
         <flux:field class="flux-field pt-4">
@@ -1420,9 +1421,10 @@
                 </flux:menu>
             </flux:dropdown>
             <div>
-                <flux:error name="descriptionSI" />
+                <flux:error name="descriptionAE" />
             </div>
         </div>
+
         {{-- Finaliza --}}
 
        <flux:field class="flux-field pt-4">
