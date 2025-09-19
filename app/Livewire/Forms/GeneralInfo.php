@@ -41,17 +41,17 @@ class GeneralInfo extends Component
 
     //Variables segundo contenedor
     public $gi_ownerTypePerson, $gi_ownerRfc, $gi_ownerCurp, $gi_ownerName, $gi_ownerFirstName, $gi_ownerSecondName,
-        $gi_ownerCompanyName, $gi_ownerCp, $gi_ownerEntity, $gi_ownerLocality, $gi_ownerColony, $gi_ownerStreet,
+        $gi_ownerCompanyName, $gi_ownerCp, $gi_ownerEntity, $gi_ownerLocality, $gi_ownerColony, $gi_ownerOtherColony, $gi_ownerStreet,
         $gi_ownerAbroadNumber, $gi_ownerInsideNumber, $gi_copyFromProperty = false;
 
     //Variables tercer contenedor
     public $gi_applicTypePerson, $gi_applicRfc, $gi_applicCurp ,$gi_applicName, $gi_applicFirstName, $gi_applicSecondName,
-        $gi_applicNss, $gi_applicCp, $gi_applicEntity, $gi_applicLocality, $gi_applicColony,
+        $gi_applicNss, $gi_applicCp, $gi_applicEntity, $gi_applicLocality, $gi_applicColony, $gi_applicOtherColony,
         $gi_applicStreet, $gi_applicAbroadNumber, $gi_applicInsideNumber, $gi_applicPhone, $gi_copyFromProperty2 = false;
 
     //Variables cuarto contenedor
-    public $gi_propertyCp, $gi_propertyEntity, $gi_propertyLocality, $gi_propertyCity,
-        $gi_propertyColony, $gi_propertyStreet, $gi_propertyAbroadNumber, $gi_propertyInsideNumber, $gi_propertyBlock,
+    public $gi_propertyCp, $gi_propertyEntity, $gi_propertyLocality, $gi_propertyCity, $gi_propertyColony, $gi_propertyOtherColony,
+        $gi_propertyStreet, $gi_propertyAbroadNumber, $gi_propertyInsideNumber, $gi_propertyBlock,
         $gi_propertySuperBlock, $gi_propertyLot, $gi_propertyBuilding, $gi_propertyDepartament, $gi_propertyAccess,
         $gi_propertyLevel, $gi_propertyCondominium, $gi_propertyStreetBetween, $gi_propertyAndStreet,
         $gi_propertyHousingComplex, $gi_propertyTax, $gi_propertyWaterAccount, $gi_propertyType, $gi_propertyTypeSigapred, $gi_propertyLandUse,
@@ -68,10 +68,48 @@ class GeneralInfo extends Component
     public function mount(DipomexService $dipomex)
     {
 
+        //Datos para cargar valores en los select de estados, municipios y colonias primer contenedor
+        $this->gi_ownerCp = '37549';
+       /*  $this->gi_ownerEntity = '11';
+        $this->gi_ownerLocality = '13'; */
+        $this->gi_ownerColony = '10 de Mayo';
+        $this->gi_ownerOtherColony = 'La escondida 2';
+
         //Obtenemos los estados
         $this->states = $dipomex->getEstados();
         $this->states2 = $dipomex->getEstados();
         $this->states3 = $dipomex->getEstados();
+
+
+        // 3. VERIFICAMOS SI EXISTE UN CP para buscar la dirección.
+        if ($this->gi_ownerCp  !== '') {
+            $data = $dipomex->buscarPorCodigoPostal($this->gi_ownerCp);
+
+
+            // Buscar el ID del estado con base en el nombre
+            $estadoId = array_search($data['estado'], $this->states);
+
+
+            // Setear el id del estado seleccionado
+            $this->gi_ownerEntity = $estadoId;
+
+            // Poblar municipios inmediatamente
+            $this->municipalities = $dipomex->getMunicipiosPorEstado($estadoId);
+            //dd($this->municipalities);
+
+            //Obtenemos el ID del municipio con base en el nombre
+            $municipioId = array_search($data['municipio'], $this->municipalities);
+
+            //Asignamos el valor del municipio
+            $this->gi_ownerLocality = $municipioId;
+
+            // Asignar colonias
+            $this->colonies = $data['colonias'];
+            //dd($this->colonies);
+        }
+
+
+
 
         //Obtenemos los datos para diferentes input select, desde el archivo de configuración properties_inputs
         $this->levels_input = config('properties_inputs.levels', []);
@@ -117,7 +155,7 @@ class GeneralInfo extends Component
             return;
         }
 
-        //Aquí se ejecutará la lógica de guardado
+        //AQUI SE EJECUTARÁ LA LÓGICA DE GUARDADO
 
 
 
@@ -129,7 +167,7 @@ class GeneralInfo extends Component
     }
 
     //Generamos todas las reglas de validación por contenedor en un solo método, pero que contenga las validaciones condicionales
-    //Las cuales se generan dependiendo los valores definidos en el fonrmulario
+    //Las cuales se generan dependiendo los valores definidos en el formulario
     public function validateAllContainers()
     {
         //VALIDACIONES CONTAINER 1
@@ -148,13 +186,14 @@ class GeneralInfo extends Component
             'gi_ownerRfc' => 'nullable|min:12',
             'gi_ownerCurp' => 'nullable|min:18',
             'gi_ownerCp' => 'required|min:5',
-          /*   'gi_ownerEntity' => 'required',
+            'gi_ownerEntity' => 'required',
             'gi_ownerLocality' => 'required',
-            'gi_ownerColony' => 'required', */
+            'gi_ownerColony' => 'required',
             'gi_ownerStreet' => 'required',
             'gi_ownerAbroadNumber' => 'required|numeric',
             'gi_ownerInsideNumber' => 'nullable|numeric'
         ];
+
 
         //Validaciones Si el tipo de persona es Fisica
         if ($this->gi_ownerTypePerson !== 'Moral') {
@@ -163,10 +202,21 @@ class GeneralInfo extends Component
                 'gi_ownerFirstName'   => 'required|string|max:50',
                 'gi_ownerSecondName' => 'required|string|max:50',
             ]);
-         //Validaciones si el tipo de persona es Moral
+            //Validaciones si el tipo de persona es Moral
         } elseif ($this->gi_ownerTypePerson === 'Moral') {
             $container2['gi_ownerCompanyName'] = 'required|string|max:255';
         }
+
+
+        //Validaciones si la colonia no está listada
+          if ($this->gi_ownerColony === 'no-listada') {
+            $container2 = array_merge($container2, [
+                'gi_ownerOtherColony'  => 'required|string|max:50'
+            ]);
+        }
+
+        //dd($container2);
+
 
         //VALIDACIONES CONTAINER 3
         $container3 = [
@@ -175,14 +225,22 @@ class GeneralInfo extends Component
             'gi_applicCurp' => 'nullable|min:18',
             'gi_applicNss' => 'nullable|min:11',
             'gi_applicCp' => 'required|min:5',
-    /*         'gi_applicEntity' => 'required',
+            'gi_applicEntity' => 'required',
             'gi_applicLocality' => 'required',
-            'gi_applicColony' => 'required', */
+            'gi_applicColony' => 'required',
             'gi_applicStreet' => 'required',
             'gi_applicAbroadNumber' => 'required|numeric',
             'gi_applicInsideNumber' => 'nullable|numeric',
             'gi_applicPhone'    => 'nullable|numeric'
         ];
+
+        //Validaciones si la colonia no está listada
+       /*  if ($this->gi_applicColony === 'no-listada') {
+            $container2 = array_merge($container3, [
+                'gi_applicOtherColony'  => 'required|string|max:50'
+            ]);
+        }
+ */
 
         //Validaciones específicas según tipo de solicitante
         if ($this->gi_applicTypePerson !== 'Moral') {
@@ -195,13 +253,21 @@ class GeneralInfo extends Component
             $container3['gi_applicNameCompany'] = 'required|string|max:255';
         }
 
-    //VALIDACIONES CONTAINER 4
+        //Validaciones si la colonia no está listada
+        if ($this->gi_applicColony === 'no-listada') {
+            $container3 = array_merge($container3, [
+                'gi_applicOtherColony'  => 'required|string|max:50'
+            ]);
+        }
+
+
+        //VALIDACIONES CONTAINER 4
         $container4 = [
             'gi_propertyCp' => 'required|min:5',
-           /*  'gi_propertyEntity' => 'required',
+            'gi_propertyEntity' => 'required',
             'gi_propertyLocality' => 'required',
             'gi_propertyCity' => 'required',
-            'gi_propertyColony' => 'required', */
+            'gi_propertyColony' => 'required',
             'gi_propertyStreet' => 'required',
             'gi_propertyAbroadNumber' => 'required|numeric',
             'gi_propertyInsideNumber' => 'nullable|numeric',
@@ -227,7 +293,15 @@ class GeneralInfo extends Component
             'gi_propertyAdditionalData' => 'nullable'
         ];
 
-    //Variable quinto contenedor
+        //Validaciones si la colonia no está listada
+        if ($this->gi_propertyColony === 'no-listada') {
+            $container4 = array_merge($container4, [
+                'gi_propertyOtherColony'  => 'required|string|max:50'
+            ]);
+        }
+
+
+        //Variable quinto contenedor
 
         $container5 = [
             'gi_purpose' => 'required',
@@ -262,26 +336,28 @@ class GeneralInfo extends Component
     }
 
 
-    /**
-     * La lógica de búsqueda ahora adaptada a la respuesta de DIPOMEX.
-     */
+    //Función para búsqueda del código postal del propietario, usando API Dipomex
+    //Las funciones se repiten para cáda uno, seperando la lógica y evitando que se mezclen los datos
     public function buscarCP1(DipomexService $dipomex)
     {
+        //Validamos que el campo no esté vacío y contenga 5 dígitos
         $this->validate([
             'gi_ownerCp' => 'required|digits:5'
         ]);
 
         $data = $dipomex->buscarPorCodigoPostal($this->gi_ownerCp);
 
+        //Si por alguna razón la respueta está vacía, reseteamos los campos y mostramos un error
         if (empty($data)) {
             Toaster::error('No se encontró información para el código postal proporcionado.');
-            $this->reset(['gi_ownerEntity', 'gi_ownerLocality', 'gi_ownerColony', 'municipalities', 'colonies']);
+            $this->reset(['gi_ownerCp','gi_ownerEntity', 'gi_ownerLocality', 'gi_ownerColony', 'municipalities', 'colonies']);
             return;
         }
 
         // Buscar el ID del estado con base en el nombre
         $estadoId = array_search($data['estado'], $this->states);
 
+        //Si no se encuentra el estado, mostramos un error
         if ($estadoId === false) {
             Toaster::error('No se encontró el estado correspondiente al código postal.');
             return;
@@ -290,7 +366,7 @@ class GeneralInfo extends Component
         // Setear el id del estado seleccionado
         $this->gi_ownerEntity = $estadoId;
 
-        // ⚡️ Poblar municipios inmediatamente
+        // Poblar municipios inmediatamente
         $this->municipalities = $dipomex->getMunicipiosPorEstado($estadoId);
         //dd($this->municipalities);
 
@@ -300,22 +376,17 @@ class GeneralInfo extends Component
         //Asignamos el valor del municipio
         $this->gi_ownerLocality = $municipioId;
 
-        //dd($this->gi_ownerLocality);
-
-
-        //dd($municipio);
-
         // Asignar colonias
         $this->colonies = $data['colonias'];
+        //dd($this->colonies);
 
         Toaster::success('Información encontrada correctamente.');
     }
 
 
 
-    /**
-     * Este hook funciona igual, pero llamará al método correspondiente del nuevo servicio.
-     */
+    //Creamos un watcher para cuando se actualice el valor del select de estados
+    //Este llamará al método del servicio para poblar los municipios
     public function updatedGiOwnerEntity($estadoId, DipomexService $dipomex)
     {
         $this->reset(['gi_ownerLocality', 'gi_ownerColony', 'municipalities', 'colonies']);
@@ -325,7 +396,8 @@ class GeneralInfo extends Component
         }
     }
 
-
+    //Creamos un watcher para cuando se actualice el valor del select de municipios
+    //Este llamará al método del servicio para poblar las colonias
     public function updatedGiOwnerLocality($municipioId, DipomexService $dipomex)
     {
         /* $this->reset(['gi_ownerColony', 'colonies']);
@@ -351,16 +423,7 @@ class GeneralInfo extends Component
 
 
 
-
-
-
-
-
-
-
-
-
-    /* $gi_applicCp, $gi_applicEntity, $gi_applicLocality, $gi_applicColony */
+    //Función para búsqueda del código postal del solicitante, usando API Dipomex
     public function buscarCP2(DipomexService $dipomex)
     {
 
@@ -372,7 +435,7 @@ class GeneralInfo extends Component
 
         if (empty($data)) {
             Toaster::error('No se encontró información para el código postal proporcionado.');
-            $this->reset(['gi_applicEntity', 'gi_applicLocality', 'gi_applicColony', 'municipalities2', 'colonies2']);
+            $this->reset(['gi_applicCp','gi_applicEntity', 'gi_applicLocality', 'gi_applicColony', 'municipalities2', 'colonies2']);
             return;
         }
 
@@ -387,7 +450,7 @@ class GeneralInfo extends Component
         // Setear el id del estado seleccionado
         $this->gi_applicEntity = $estadoId;
 
-        // ⚡️ Poblar municipios inmediatamente
+        //  Poblar municipios inmediatamente
         $this->municipalities2 = $dipomex->getMunicipiosPorEstado($estadoId);
         //dd($this->municipalities);
 
@@ -410,10 +473,7 @@ class GeneralInfo extends Component
     }
 
 
-
-    /**
-     * Este hook funciona igual, pero llamará al método correspondiente del nuevo servicio.
-     */
+    //Creamos un watcher para cuando se actualice el valor del select de estados
     public function updatedGiApplicEntity($estadoId, DipomexService $dipomex)
     {
         $this->reset(['gi_applicLocality', 'gi_applicColony', 'municipalities2', 'colonies2']);
@@ -423,7 +483,7 @@ class GeneralInfo extends Component
         }
     }
 
-
+    //Creamos un watcher para cuando se actualice el valor del select de municipios
     public function updatedGiApplicLocality($municipioId, DipomexService $dipomex)
     {
 
@@ -437,17 +497,7 @@ class GeneralInfo extends Component
     }
 
 
-
-
-
-
-
-/*
-
-$gi_propertyCp, $gi_propertyEntity, $gi_propertyLocality, $gi_propertyCity,
-        $gi_propertyColony */
-
-
+    //Función para búsqueda del código postal del inmueble, usando API Dipomex
     public function buscarCP3(DipomexService $dipomex)
     {
 
@@ -459,7 +509,7 @@ $gi_propertyCp, $gi_propertyEntity, $gi_propertyLocality, $gi_propertyCity,
 
         if (empty($data)) {
             Toaster::error('No se encontró información para el código postal proporcionado.');
-            $this->reset(['gi_propertyEntity', 'gi_propertyLocality', 'gi_propertyColony', 'municipalities3', 'colonies3']);
+            $this->reset(['gi_propertyCp','gi_propertyEntity', 'gi_propertyLocality', 'gi_propertyColony', 'municipalities3', 'colonies3']);
             return;
         }
 
@@ -474,9 +524,8 @@ $gi_propertyCp, $gi_propertyEntity, $gi_propertyLocality, $gi_propertyCity,
         // Setear el id del estado seleccionado
         $this->gi_propertyEntity = $estadoId;
 
-        // ⚡️ Poblar municipios inmediatamente
+        // Poblar municipios inmediatamente
         $this->municipalities3 = $dipomex->getMunicipiosPorEstado($estadoId);
-        //dd($this->municipalities);
 
         //Obtenemos el ID del municipio con base en el nombre
         $municipioId = array_search($data['municipio'], $this->municipalities3);
@@ -484,10 +533,6 @@ $gi_propertyCp, $gi_propertyEntity, $gi_propertyLocality, $gi_propertyCity,
         //Asignamos el valor del municipio
         $this->gi_propertyLocality = $municipioId;
 
-        //dd($this->gi_ownerLocality);
-
-
-        //dd($municipio);
 
         // Asignar colonias
         $this->colonies3 = $data['colonias'];
@@ -498,7 +543,7 @@ $gi_propertyCp, $gi_propertyEntity, $gi_propertyLocality, $gi_propertyCity,
 
 
 
-
+    //Creamos un watcher para cuando se actualice el valor del select de estados
     public function updatedGiPropertyEntity($estadoId, DipomexService $dipomex)
     {
         $this->reset(['gi_propertyLocality', 'gi_propertyColony', 'municipalities3', 'colonies3']);
@@ -508,7 +553,7 @@ $gi_propertyCp, $gi_propertyEntity, $gi_propertyLocality, $gi_propertyCity,
         }
     }
 
-
+    //Creamos un watcher para cuando se actualice el valor del select de municipios
     public function updatedGiPropertyLocality($municipioId, DipomexService $dipomex)
     {
 
@@ -522,29 +567,162 @@ $gi_propertyCp, $gi_propertyEntity, $gi_propertyLocality, $gi_propertyCity,
     }
 
 
+    //Generamos los watcher para los checkbox de copiar direcciones
+    public function updatedGiCopyFromProperty($value){
+        if($value){
+
+            /*  $this->validate([
+                'gi_propertyCp' => 'required|min:5',
+            ]); */
+
+            /* if (
+                !is_string($this->gi_propertyCp) ||
+                strlen($this->gi_propertyCp) !== 5 ||
+                !ctype_digit($this->gi_propertyCp)
+            ) {
+                Toaster::error('El código postal del inmueble es un valor inválido');
+                $this->reset('gi_copyFromProperty');
+                return;
+            } */
+
+            // Ejecutar la validación manual
+            $validator = Validator::make(
+                ['gi_propertyCp' => $this->gi_propertyCp],
+                ['gi_propertyCp' => ['required', 'digits:5']],
+                [],
+                ['gi_propertyCp' => 'código postal']
+            );
+
+            // Comprobar si hubo errores
+            if ($validator->fails()) {
+                // Mostrar mensaje personalizado
+                Toaster::error('El código postal del inmueble es inválido. Debe contener exactamente 5 dígitos.');
+
+                $this->reset('gi_copyFromProperty');
+                // Mostrar los errores en pantalla (Livewire los usa para @error en Blade)
+                $this->setErrorBag($validator->getMessageBag());
+
+                // Detener el flujo
+                return;
+            }
+
+            $this->gi_ownerCp = $this->gi_propertyCp;
+            $this->gi_ownerEntity = $this->gi_propertyEntity;
+            $this->gi_ownerLocality = $this->gi_propertyLocality;
+            $this->gi_ownerColony = $this->gi_propertyColony;
+            //dd($this->gi_ownerColony, $this->gi_propertyColony);
+            $this->gi_ownerStreet = $this->gi_propertyStreet;
+            $this->gi_ownerAbroadNumber = $this->gi_propertyAbroadNumber;
+            $this->gi_ownerInsideNumber = $this->gi_propertyInsideNumber;
+
+            //dd($this->gi_ownerColony, $this->gi_propertyColony);
+            //Llenamos los municipios y colonias para que se muestren correctamente
+            $this->municipalities = $this->municipalities3;
+            $this->colonies = $this->colonies3;
+            $this->reset('gi_copyFromProperty');
+            Toaster::success('Datos copiados correctamente');
+
+        } else {
+           /*  $this->reset(['gi_ownerCp', 'gi_ownerEntity', 'gi_ownerLocality', 'gi_ownerColony', 'gi_ownerStreet', 'gi_ownerAbroadNumber', 'gi_ownerInsideNumber', 'municipalities', 'colonies']); */
+        }
+    }
 
 
+    public function updatedGiCopyFromProperty2($value){
+        if($value){
+
+            /* if(empty($this->gi_propertyCp)){
+                Toaster::error('Primero debe llenar los datos del inmueble');
+                $this->reset('gi_copyFromProperty2');
+                return;
+            } */
+
+            $validator = Validator::make(
+                ['gi_propertyCp' => $this->gi_propertyCp],
+                ['gi_propertyCp' => ['required', 'digits:5']],
+                [],
+                ['gi_propertyCp' => 'código postal']
+            );
+
+            // Comprobar si hubo errores
+            if ($validator->fails()) {
+                // Mostrar mensaje personalizado
+                Toaster::error('El código postal del inmueble es inválido. Debe contener exactamente 5 dígitos.');
+
+                $this->reset('gi_copyFromProperty2');
+                // Mostrar los errores en pantalla (Livewire los usa para @error en Blade)
+                $this->setErrorBag($validator->getMessageBag());
+
+                // Detener el flujo
+                return;
+            }
+
+            $this->gi_applicCp = $this->gi_propertyCp;
+            $this->gi_applicEntity = $this->gi_propertyEntity;
+            $this->gi_applicLocality = $this->gi_propertyLocality;
+            $this->gi_applicColony = $this->gi_propertyColony;
+            $this->gi_applicStreet = $this->gi_propertyStreet;
+            $this->gi_applicAbroadNumber = $this->gi_propertyAbroadNumber;
+            $this->gi_applicInsideNumber = $this->gi_propertyInsideNumber;
+
+            //Llenamos los municipios y colonias para que se muestren correctamente
+            $this->municipalities2 = $this->municipalities3;
+            $this->colonies2 = $this->colonies3;
+            $this->reset('gi_copyFromProperty2');
+            Toaster::success('Datos copiados correctamente');
+
+        } else {
+           /*  $this->reset(['gi_ownerCp', 'gi_ownerEntity', 'gi_ownerLocality', 'gi_ownerColony', 'gi_ownerStreet', 'gi_ownerAbroadNumber', 'gi_ownerInsideNumber', 'municipalities', 'colonies']); */
+        }
+    }
 
 
+    public function updatedGiCopyFromOwner($value){
+        if($value){
+
+            /* if(empty($this->gi_ownerCp)){
+                Toaster::error('Primero debe llenar los datos del propietario');
+                $this->reset('gi_copyFromOwner');
+                return;
+            } */
 
 
+            $validator = Validator::make(
+                ['gi_ownerCp' => $this->gi_ownerCp],
+                ['gi_ownerCp' => ['required', 'digits:5']],
+                [],
+                ['gi_ownerCp' => 'código postal']
+            );
 
+            // Comprobar si hubo errores
+            if ($validator->fails()) {
+                // Mostrar mensaje personalizado
+                Toaster::error('El código postal del propietario es inválido. Debe contener exactamente 5 dígitos.');
 
+                $this->reset('gi_copyFromOwner');
+                // Mostrar los errores en pantalla (Livewire los usa para @error en Blade)
+                $this->setErrorBag($validator->getMessageBag());
 
+                // Detener el flujo
+                return;
+            }
 
+            $this->gi_propertyCp = $this->gi_ownerCp;
+            $this->gi_propertyEntity = $this->gi_ownerEntity;
+            $this->gi_propertyLocality = $this->gi_ownerLocality;
+            $this->gi_propertyColony = $this->gi_ownerColony;
+            $this->gi_propertyStreet = $this->gi_ownerStreet;
+            $this->gi_propertyAbroadNumber = $this->gi_ownerAbroadNumber;
+            $this->gi_propertyInsideNumber = $this->gi_ownerInsideNumber;
 
+            //Llenamos los municipios y colonias para que se muestren correctamente
+            $this->municipalities3 = $this->municipalities;
+            $this->colonies3 = $this->colonies;
+            $this->reset('gi_copyFromOwner');
+            Toaster::success('Datos copiados correctamente');
 
-
-
-
-
-
-
-
-
-
-
-
+        }
+    }
 
 
 
@@ -569,32 +747,34 @@ $gi_propertyCp, $gi_propertyEntity, $gi_propertyLocality, $gi_propertyCity,
             'gi_ownerFirstName'      => 'apellido paterno',
             'gi_ownerSecondName'     => 'apellido materno',
             'gi_ownerCompanyName'    => 'nombre de la empresa',
-            'gi_ownerCp'             => 'Código postal',
-            'gi_ownerEntity'         => 'Entidad',
-            'gi_ownerLocality'       => 'Alcaldía/municipio',
-            'gi_ownerColony'         => 'Colonia',
-            'gi_ownerStreet'         => 'Calle',
-            'gi_ownerAbroadNumber'   => 'Número exterior',
-            'gi_ownerInsideNumber'   => 'Número interior',
+            'gi_ownerCp'             => 'código postal',
+            'gi_ownerEntity'         => 'antidad',
+            'gi_ownerLocality'       => 'alcaldía/municipio',
+            'gi_ownerColony'         => 'colonia',
+            'gi_ownerOtherColony'    => 'otra colonia',
+            'gi_ownerStreet'         => 'calle',
+            'gi_ownerAbroadNumber'   => 'número exterior',
+            'gi_ownerInsideNumber'   => 'número interior',
 
             // Contenedor 3: Datos del solicitante
-            'gi_applicTypePerson'    => 'Tipo de persona',
+            'gi_applicTypePerson'    => 'tipo de persona',
             'gi_applicRfc'           => 'RFC',
             'gi_applicCurp'          => 'CURP',
-            'gi_applicName'          => 'Nombre',
-            'gi_applicFirstName'     => 'Apellido paterno',
-            'gi_applicSecondName'    => 'Apellido materno',
-            'gi_applicCompanyName'   => 'Empresa',
+            'gi_applicName'          => 'nombre',
+            'gi_applicFirstName'     => 'apellido paterno',
+            'gi_applicSecondName'    => 'apellido materno',
+            'gi_applicCompanyName'   => 'empresa',
             'gi_applicNss'           => 'NSS',
-            'gi_copyFromProperty2'   => 'Copiar dirección inmueble',
-            'gi_applicCp'            => 'Código postal',
-            'gi_applicEntity'        => 'Entidad',
-            'gi_applicLocality'      => 'Alcaldía/municipio',
-            'gi_applicColony'        => 'Colonia',
-            'gi_applicStreet'        => 'Calle',
-            'gi_applicAbroadNumber'  => 'Número exterior',
-            'gi_applicInsideNumber'  => 'Número interior',
-            'gi_applicPhone'         => 'Teléfono',
+            'gi_copyFromProperty2'   => 'copiar dirección inmueble',
+            'gi_applicCp'            => 'código postal',
+            'gi_applicEntity'        => 'entidad',
+            'gi_applicLocality'      => 'alcaldía/municipio',
+            'gi_applicColony'        => 'colonia',
+            'gi_applicOtherColony'   => 'otra colonia',
+            'gi_applicStreet'        => 'calle',
+            'gi_applicAbroadNumber'  => 'número exterior',
+            'gi_applicInsideNumber'  => 'número interior',
+            'gi_applicPhone'         => 'teléfono',
 
             // Contenedor 4: Dirección del inmueble
             'gi_propertyCp'          => 'código postal',
@@ -602,6 +782,7 @@ $gi_propertyCp, $gi_propertyEntity, $gi_propertyLocality, $gi_propertyCity,
             'gi_propertyLocality'    => 'alcaldía/municipio',
             'gi_propertyCity'        => 'ciudad',
             'gi_propertyColony'      => 'colonia',
+            'gi_propertyOtherColony' => 'otra colonia',
             'gi_propertyStreet'      => 'calle',
             'gi_propertyAbroadNumber' => 'número exterior',
             'gi_propertyInsideNumber' => 'número interior',

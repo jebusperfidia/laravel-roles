@@ -209,17 +209,32 @@
                 <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Colonia<span class="sup-required">*</span></flux:label>
-                        <flux:select wire:model="gi_ownerColony" class="text-gray-800 [&_option]:text-gray-900"
+                        <flux:select wire:model.live="gi_ownerColony" class="text-gray-800 [&_option]:text-gray-900"
                             :disabled="empty($colonies)">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                           {{--  @foreach($colonies as $colony)
+                            <option value="{{ $colony }}">{{ $colony }}</option>
+                            @endforeach --}}
                             @foreach($colonies as $colony)
-                            <flux:select.option value="{{ $colony }}">{{ $colony }}</flux:select.option>
+                            <option value="{{ $colony }}" {{ $colony===$gi_ownerColony ? 'selected' : '' }}>
+                                {{ $colony }}
+                            </option>
                             @endforeach
+                        <flux:select.option value="no-listada">Colonia no listada</flux:select.option>
                         </flux:select>
                         <div class="error-container">
                             <flux:error name="gi_ownerColony" />
                         </div>
                     </flux:field>
+                    @if ($gi_ownerColony === 'no-listada')
+                    <flux:field class="flux-field">
+                        <flux:label>Otra Colonia<span class="sup-required">*</span></flux:label>
+                        <flux:input type="text" wire:model='gi_ownerOtherColony' />
+                    <div class="error-container">
+                        <flux:error name="gi_ownerOtherColony" />
+                    </div>
+                    </flux:field>
+                    @endif
                     <flux:field class="flux-field">
                         <flux:label>Calle<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_ownerStreet' />
@@ -398,17 +413,33 @@
 
                     <flux:field class="flux-field">
                         <flux:label>Colonia<span class="sup-required">*</span></flux:label>
-                        <flux:select wire:model="gi_applicColony" class="text-gray-800 [&_option]:text-gray-900"
+                        <flux:select wire:model.live="gi_applicColony" class="text-gray-800 [&_option]:text-gray-900"
                             :disabled="empty($colonies2)">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                        {{--     @foreach($colonies2 as $colony)
+                            <option value="{{ $colony }}">{{ $colony }}</option>
+                            @endforeach --}}
                             @foreach($colonies2 as $colony)
-                            <flux:select.option value="{{ $colony }}">{{ $colony }}</flux:select.option>
+                            <option value="{{ $colony }}" {{ $colony===$gi_applicColony ? 'selected' : '' }}>
+                            {{ $colony }}
+                            </option>
                             @endforeach
+                            <flux:select.option value="no-listada">Colonia no listada</flux:select.option>
                         </flux:select>
                         <div class="error-container">
                             <flux:error name="gi_applicColony" />
                         </div>
                     </flux:field>
+                    @if ($gi_applicColony === 'no-listada')
+                    <flux:field class="flux-field">
+                        <flux:label>Otra colonia<span class="sup-required">*</span></flux:label>
+                        <flux:input type="text" wire:model='gi_applicOtherColony' />
+                        <div class="error-container">
+                            <flux:error name="gi_applicOtherColony" />
+                        </div>
+                    </flux:field>
+                    @endif
+
                     <flux:field class="flux-field">
                         <flux:label>Calle<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_applicStreet' />
@@ -416,6 +447,9 @@
                             <flux:error name="gi_applicStreet" />
                         </div>
                     </flux:field>
+
+                </div>
+                <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Número exterior<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_applicAbroadNumber' />
@@ -423,8 +457,6 @@
                             <flux:error name="gi_applicAbroadNumber" />
                         </div>
                     </flux:field>
-                </div>
-                <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Número interior</flux:label>
                         <flux:input type="text" wire:model='gi_applicInsideNumber' />
@@ -527,18 +559,43 @@
                         </div>
                     </flux:field> --}}
                     <flux:field class="flux-field">
+                        <flux:label>Ciudad<span class="sup-required">*</span></flux:label>
+                        <flux:input type="text" wire:model='gi_propertyCity' />
+                        <div class="error-container">
+                            <flux:error name="gi_propertyCity" />
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux-field">
                         <flux:label>Colonia<span class="sup-required">*</span></flux:label>
-                        <flux:select wire:model="gi_propertyColony" class="text-gray-800 [&_option]:text-gray-900"
+                        <flux:select wire:model.live="gi_propertyColony" class="text-gray-800 [&_option]:text-gray-900"
                             :disabled="empty($colonies3)">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                            @foreach($colonies3 as $colony)
-                            <flux:select.option value="{{ $colony }}">{{ $colony }}</flux:select.option>
-                            @endforeach
+                            {{-- @foreach($colonies3 as $colony)
+                            <option value="{{ $colony }}">{{ $colony }}</option>
+                            @endforeach --}}
+                        @foreach($colonies3 as $colony)
+                        <option value="{{ $colony }}" {{ $colony===$gi_propertyColony ? 'selected' : '' }}>
+                            {{ $colony }}
+                        </option>
+                        @endforeach
+                        <flux:select.option value="no-listada">Colonia no listada</flux:select.option>
                         </flux:select>
                         <div class="error-container">
                             <flux:error name="gi_propertyColony" />
                         </div>
                     </flux:field>
+                    @if ($gi_propertyColony === 'no-listada')
+                    <flux:field class="flux-field">
+                        <flux:label>Otra colonia<span class="sup-required">*</span></flux:label>
+                        <flux:input type="text" wire:model='gi_propertyOtherColony' />
+                        <div class="error-container">
+                            <flux:error name="gi_propertyOtherColony" />
+                        </div>
+                    </flux:field>
+                    @endif
+                </div>
+
+                <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Calle<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_propertyStreet' />
@@ -546,9 +603,6 @@
                             <flux:error name="gi_propertyStreet" />
                         </div>
                     </flux:field>
-                </div>
-
-                <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Número exterior<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_propertyAbroadNumber' />
@@ -563,6 +617,10 @@
                             <flux:error name="gi_propertyInsideNumber" />
                         </div>
                     </flux:field>
+
+                </div>
+
+                <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Manzana</flux:label>
                         <flux:input type="text" wire:model='gi_propertyBlock' />
@@ -570,9 +628,6 @@
                             <flux:error name="gi_propertyBlock" />
                         </div>
                     </flux:field>
-                </div>
-
-                <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Super manzana</flux:label>
                         <flux:input type="text" wire:model='gi_propertySuperBlock' />
@@ -587,6 +642,10 @@
                             <flux:error name="gi_propertyLot" />
                         </div>
                     </flux:field>
+
+                </div>
+
+                <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Edificio</flux:label>
                         <flux:input type="text" wire:model='gi_propertyBuilding' />
@@ -594,9 +653,6 @@
                             <flux:error name="gi_propertyBuilding" />
                         </div>
                     </flux:field>
-                </div>
-
-                <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Departamento</flux:label>
                         <flux:input type="text" wire:model='gi_propertyDepartament' />
@@ -611,6 +667,10 @@
                             <flux:error name="gi_propertyAccess" />
                         </div>
                     </flux:field>
+
+                </div>
+
+                <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Nivel</flux:label>
                         <flux:select wire:model.live="gi_propertyLevel" class="text-gray-800 [&_option]:text-gray-900">
@@ -625,9 +685,6 @@
                             <flux:error name="gi_propertyLevel" />
                         </div>
                     </flux:field>
-                </div>
-
-                <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Condominio</flux:label>
                         <flux:input type="text" wire:model='gi_propertyCondominium' />
@@ -642,6 +699,10 @@
                             <flux:error name="gi_propertyStreetBetween" />
                         </div>
                     </flux:field>
+
+                </div>
+
+                <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Y calle</flux:label>
                         <flux:input type="text" wire:model='gi_propertyAndStreet' />
@@ -649,9 +710,6 @@
                             <flux:error name="gi_propertyAndStreet" />
                         </div>
                     </flux:field>
-                </div>
-
-                <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Nombre del conjuto habitacional</flux:label>
                         <flux:input type="text" wire:model='gi_propertyHousingComplex' />
