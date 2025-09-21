@@ -13,7 +13,7 @@
             wire:confirm="¿Estás seguro de que deseas salir? Se borrarán los datos de la sesión actual."
             {{-- <a   onclick="if(confirm('¿Estás seguro de que quieres volver? Se perderán los datos.')){
         Livewire.dispatch('backMain');
-        window.location.href = '/';}" --}} class="cursor-pointer btn-primary">
+        window.location.href = '/';}" --}} class="cursor-pointer btn-deleted">
             Regresar al menú principal
         </a>
     </div>

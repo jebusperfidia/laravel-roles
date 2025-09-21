@@ -1,4 +1,5 @@
 <div>
+    <div class="flex justify-end font-semibold text-sm text-red-600 pt-2 -mb-3"><span>* Campos obligatorios</span></div>
     <form wire:submit='save'>
 
         <div class="form-container">

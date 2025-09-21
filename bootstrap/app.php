@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\CheckValuationFormActive;
 use App\Http\Middleware\CheckValuationId;
+use App\Http\Middleware\CheckComparablesActive;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' =>AdminMiddleware::class,
             'formActive' => CheckValuationFormActive::class,
             'checkValuationId' => CheckValuationId::class,
+            'comparablesActive' => CheckComparablesActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

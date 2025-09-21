@@ -1,4 +1,5 @@
 <div>
+    <div class="flex justify-end font-semibold text-sm text-red-600 pt-2 -mb-3"><span>* Campos obligatorios</span></div>
     <form wire:submit='save'>
 
 
@@ -484,7 +485,7 @@
 
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Fuente de donde se obtuvo el valor de reposición</flux:label>
+                <flux:label>Fuente de donde se obtuvo el valor de reposición<span class="sup-required">*</span></flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
@@ -500,7 +501,8 @@
 
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Estado de conservación</flux:label>
+                <flux:label>Estado de conservación<span class="sup-required">*</span>
+                </flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
@@ -528,7 +530,8 @@
 
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Observaciones al estado de conservación</flux:label>
+                <flux:label>Observaciones al estado de conservación<span class="sup-required">*</span>
+                </flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
@@ -544,7 +547,8 @@
 
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Clase general de los inmuebles en la zona</flux:label>
+                <flux:label>Clase general de los inmuebles en la zona<span class="sup-required">*</span>
+                </flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
@@ -572,7 +576,8 @@
 
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Clase general del inmueble</flux:label>
+                <flux:label>Clase general del inmueble<span class="sup-required">*</span>
+                </flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
@@ -591,7 +596,8 @@
 
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Año de terminación de la obra</flux:label>
+                <flux:label>Año de terminación de la obra<span class="sup-required">*</span>
+                </flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
@@ -606,7 +612,8 @@
         </div>
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Unidades rentables (sujeto)</flux:label>
+                <flux:label>Unidades rentables (sujeto)<span class="sup-required">*</span>
+                </flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
@@ -621,7 +628,8 @@
         </div>
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Unidades rentables (generales)</flux:label>
+                <flux:label>Unidades rentables (generales)<span class="sup-required">*</span>
+                </flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
@@ -636,7 +644,8 @@
         </div>
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Unidades rentables del conjunto (en condominios)</flux:label>
+                <flux:label>Unidades rentables del conjunto (en condominios)<span class="sup-required">*</span>
+                </flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
@@ -651,7 +660,8 @@
         </div>
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Número de niveles del sujeto</flux:label>
+                <flux:label>Número de niveles del sujeto<span class="sup-required">*</span>
+                </flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
@@ -667,7 +677,8 @@
         </div>
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>% Avance de obra general</flux:label>
+                <flux:label>% Avance de obra general<span class="sup-required">*</span>
+                </flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
@@ -682,7 +693,8 @@
         </div>
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Grado de % avance de áreas comunes</flux:label>
+                <flux:label>Grado de % avance de áreas comunes<span class="sup-required">*</span>
+                </flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>

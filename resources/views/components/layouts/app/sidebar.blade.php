@@ -8,7 +8,7 @@
     $formSections = [
         ['key' => 'general-info', 'icon' => 'book-open', 'label' => __('Información general')],
         ['key' => 'property-location', 'icon' => 'map-pin', 'label' => __('Localización del inmueble')],
-        ['key' => 'nerby-valuations', 'icon' => 'map', 'label' => __('Avalúos cercanos')],
+        /* ['key' => 'nerby-valuations', 'icon' => 'map', 'label' => __('Avalúos cercanos')], */
         [
             'key' => 'declarations-warnings',
             'icon' => 'clipboard-document-check',
@@ -73,8 +73,8 @@
                 </flux:navlist.group>
             @endunless
 
-            @if (session()->has('valuation-active-form'))
-                <flux:navlist.group class="grid">
+            @if (session()->has('valuation-active-form') && !session()->has('comparables-active-session'))
+                <flux:navlist.group  :heading="('Formularios')" class="grid">
                     @foreach ($formSections as $item)
                        <flux:navlist.item icon="{{ $item['icon'] }}" :href="route('form.index', ['section' => $item['key']])"
                         :current="request()->routeIs('form.index') && request()->get('section') === $item['key']"
@@ -83,6 +83,11 @@
                     </flux:navlist.item>
                     @endforeach
                 </flux:navlist.group>
+            @endif
+
+            @if (session()->has('comparables-active-session'))
+            <flux:navlist.group :heading="('Comparables')" class="grid">
+            </flux:navlist.group>
             @endif
         </flux:navlist>
 
