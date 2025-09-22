@@ -711,7 +711,8 @@
 
         <flux:field class="flux-field">
             <flux:label>Vida útil<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='usefulLife' />
+            <flux:input type="number" wire:model.live='usefulLife'
+            :disabled="$descriptionSI !== 'IE19'"/>
             <div class="error-container">
                 <flux:error name="usefulLife" />
             </div>
@@ -960,7 +961,8 @@
 
         <flux:field class="flux-field">
             <flux:label>Vida útil<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='usefulLife' />
+            <flux:input type="number" wire:model='usefulLife'
+            :disabled="$descriptionSI !== 'IE19'"/>
             <div class="error-container">
                 <flux:error name="usefulLife" />
             </div>
@@ -1217,7 +1219,8 @@
 
         <flux:field class="flux-field">
             <flux:label>Vida útil<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='usefulLife' />
+            <flux:input type="number" wire:model.live='usefulLife'
+            :disabled="$descriptionAE !== 'EA12'"/>
             <div class="error-container">
                 <flux:error name="usefulLife" />
             </div>
@@ -1460,7 +1463,8 @@
 
     <flux:field class="flux-field">
         <flux:label>Vida útil<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='usefulLife' />
+        <flux:input type="number" wire:model.live='usefulLife'
+        :disabled="$descriptionAE !== 'EA12'"/>
         <div class="error-container">
             <flux:error name="usefulLife" />
         </div>
@@ -1707,7 +1711,8 @@
 
     <flux:field class="flux-field">
         <flux:label>Vida útil<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='usefulLife' />
+        <flux:input type="number" wire:model='usefulLife'
+        :disabled="!in_array($descriptionCW, ['OC17', 'OC06', 'OC18'])"/>
         <div class="error-container">
             <flux:error name="usefulLife" />
         </div>
@@ -1949,7 +1954,8 @@
 
     <flux:field class="flux-field">
         <flux:label>Vida útil<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='usefulLife' />
+        <flux:input type="number" wire:model='usefulLife'
+        :disabled="!in_array($descriptionCW, ['OC17', 'OC06', 'OC18'])"/>
         <div class="error-container">
             <flux:error name="usefulLife" />
         </div>

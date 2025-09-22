@@ -341,9 +341,19 @@ class GeneralInfo extends Component
     public function buscarCP1(DipomexService $dipomex)
     {
         //Validamos que el campo no esté vacío y contenga 5 dígitos
-        $this->validate([
-            'gi_ownerCp' => 'required|digits:5'
-        ]);
+        /*  $this->validate([
+            'gi_ownerCp' => 'required|numeric|digits:5'
+        ]); */
+
+        $this->validate(
+            [
+                'gi_ownerCp' => 'required|integer|digits:5',
+            ],
+            [],
+            [
+                'gi_ownerCp' => 'código postal',
+            ]
+        );
 
         $data = $dipomex->buscarPorCodigoPostal($this->gi_ownerCp);
 
@@ -427,9 +437,20 @@ class GeneralInfo extends Component
     public function buscarCP2(DipomexService $dipomex)
     {
 
-        $this->validate([
+        /*  $this->validate([
             'gi_applicCp' => 'required|digits:5'
-        ]);
+        ]); */
+
+
+        $this->validate(
+            [
+                'gi_applicCp' => 'required|integer|digits:5',
+            ],
+            [],
+            [
+                'gi_applicCp' => 'código postal',
+            ]
+        );
 
         $data = $dipomex->buscarPorCodigoPostal($this->gi_applicCp);
 
@@ -501,9 +522,19 @@ class GeneralInfo extends Component
     public function buscarCP3(DipomexService $dipomex)
     {
 
-        $this->validate([
+        /*  $this->validate([
             'gi_propertyCp' => 'required|digits:5'
-        ]);
+        ]); */
+
+        $this->validate(
+            [
+                'gi_propertyCp' => 'required|integer|digits:5',
+            ],
+            [],
+            [
+                'gi_propertyCp' => 'código postal',
+            ]
+        );
 
         $data = $dipomex->buscarPorCodigoPostal($this->gi_propertyCp);
 

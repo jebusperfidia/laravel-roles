@@ -55,6 +55,7 @@ class SpecialInstallations extends Component
     public function openAddElementSI()
     {
         $this->resetValidation();
+        $this->resetModalsFields();
         Flux::modal('add-elementSI')->show();
     }
 
@@ -163,6 +164,7 @@ class SpecialInstallations extends Component
     public function openAddElementAE()
     {
         $this->resetValidation();
+        $this->resetModalsFields();
         Flux::modal('add-elementAE')->show();
 
     }
@@ -269,6 +271,7 @@ class SpecialInstallations extends Component
     public function openAddElementCW()
     {
         $this->resetValidation();
+        $this->resetModalsFields();
         Flux::modal('add-elementCW')->show();
     }
 
@@ -395,6 +398,83 @@ class SpecialInstallations extends Component
             'amount' => 'importe',
         ];
     }
+
+    public function resetModalsFields(){
+        $this->reset([
+            'key',
+            'descriptionSI',
+            'descriptionAE',
+            'descriptionCW',
+            'unit',
+            'quantity',
+            'age',
+            'usefulLife',
+            'newRepUnitCost',
+            'ageFactor',
+            'conservationFactor',
+            'netRepUnitCost',
+            'undivided',
+            'amount',
+        ]);
+    }
+
+    //Watcher para asignar el valor de descriptionSI
+    public function updatedDescriptionSI($value)
+    {
+
+        if (in_array($value, ['IE12', 'IE18', 'IE09', 'IE01', 'IE05', 'IE16', 'IE04', 'IE03', 'IE02','IE13'])) {
+            $this->usefulLife = 25;
+        }
+
+        if (in_array($value, ['IE10', 'IE17', 'IE15', 'IE07', 'IE08', 'IE06', 'IE11', 'IE14'])) {
+            $this->usefulLife = 15;
+        }
+
+        if($value === 'IE19') $this->usefulLife = null;
+    }
+
+
+    public function updatedDescriptionAE($value){
+
+        if (in_array($value, ['EA08', 'EA02', 'EA10', 'EA03', 'EA07'])) {
+            $this->usefulLife = 15;
+        }
+
+        if (in_array($value, ['EA05', 'EA06', 'EA09', 'EA04'])) {
+            $this->usefulLife = 25;
+        }
+
+        if ($value === 'EA11') $this->usefulLife = 10;
+        if ($value === 'EA01') $this->usefulLife = 50;
+        if ($value === 'EA12') $this->usefulLife = null;
+    }
+
+
+    public function updatedDescriptionCW($value){
+
+
+        if (in_array($value, ['OC11', 'OC01', 'OC16', 'OC10', 'OC14', 'OC03', 'OC12'])) {
+            $this->usefulLife = 90;
+        }
+
+        if (in_array($value, ['OC15', 'OC04', 'OC08'])) {
+            $this->usefulLife = 70;
+        }
+
+        if (in_array($value, ['OC13', 'OC09', 'OC02'])) {
+            $this->usefulLife = 25;
+        }
+
+        if (in_array($value, ['OC06', 'OC18', 'OC17'])) {
+            $this->usefulLife = null;
+        }
+
+        if ($value === 'OC07') $this->usefulLife = 30;
+        if ($value === 'OC05') $this->usefulLife = 50;
+
+    }
+
+
 
 
     public function render()

@@ -74,7 +74,7 @@
 
     {{-- MODAL PARA AGREGAR UN NUEVO COMPARABLE --}}
     <flux:modal name="add-comparable" class="md:w-110">
-        <div class="space-y-2">
+        <div class="space-y-4">
             <div>
                 <flux:heading size="lg"><b>Nuevo comparable</b></flux:heading>
                 <flux:text class="mt-2">Indique los valores solicitados</flux:text>
@@ -129,8 +129,8 @@
                 <label for="tipo" class="flux-label text-sm">Tipo de inmueble<span class="sup-required">*</span></label>
                 <flux:select wire:model="Comparableproperty" class="text-gray-800 [&_option]:text-gray-900">
                     <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                    <flux:select.option value="terreno">Terreno</flux:select.option>
-                    <flux:select.option value="terrenoCondominio">terrenoCondominio</flux:select.option>
+                    <flux:select.option value="Terreno">Terreno</flux:select.option>
+                    <flux:select.option value="Terreno en condominio">Terreno en condominio</flux:select.option>
                 </flux:select>
                 <div class="error-container">
                     <flux:error name="Comparableproperty" />
@@ -195,8 +195,9 @@
                         <flux:error name="comparableColony" />
                     </div>
                 </flux:field>
+            </div>
 
-                @if ($comparableColony === 'no-listada')
+          {{--       @if ($comparableColony === 'no-listada')
                 <flux:field class="flux-field">
                     <flux:label>Otra Colonia<span class="sup-required">*</span></flux:label>
                     <flux:input type="text" wire:model='comparableOtherColony' />
@@ -204,7 +205,7 @@
                         <flux:error name="comparableOtherColony" />
                     </div>
                 </flux:field>
-                @endif
+                @endif --}}
 
                 <flux:field class="flux-field">
                     <flux:label>Calle<span class="sup-required">*</span></flux:label>
@@ -276,6 +277,7 @@
                 <div class="form-grid form-grid--1 mt-3 mb-2 text-md">
                     <h2><span class="border-b-2 border-gray-300">Datos del informante</span></h2>
                 </div>
+
                 <flux:field class="flux-field">
                     <flux:label>Nombre<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
@@ -310,7 +312,7 @@
                     <flux:label>Fuente de información web<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
                         <flux:input type="text" wire:model='comparableUrl' />
-                        <flux:button wire:click='' icon="scissors" class="cursor-pointer">
+                        <flux:button wire:click='shortUrl' icon="scissors" class="cursor-pointer">
                         </flux:button>
                     </flux:input.group>
                     <div class="error-container">
@@ -341,7 +343,7 @@
                 </flux:field>
 
                 <flux:field class="flux-field">
-                    <flux:label>Area libre requerido<span class="sup-required">*</span></flux:label>
+                    <flux:label>Área libre requerido<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
                         <flux:input type="text" wire:model='comparablefreeAreaRequired' />
                     </flux:input.group>
@@ -364,7 +366,7 @@
                 <flux:field class="flux-field">
                     <flux:label>Servicios / infraestructura<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
-                        <flux:select wire:model.live="comparableColony" class="text-gray-800 [&_option]:text-gray-900">
+                        <flux:select wire:model.live="comparableServicesInfraestructure" class="text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                             <flux:select.option value="completes">Completos</flux:select.option>
                             <flux:select.option value="incompletes">Incompletos</flux:select.option>
@@ -433,7 +435,7 @@
                         <flux:input type="text" wire:model='comparableFrontType' />
                     </flux:input.group>
                     <div class="error-container">
-                        <flux:error name="comparableDensity" />
+                        <flux:error name="comparableFrontType" />
                     </div>
                 </flux:field>
 
@@ -607,12 +609,12 @@
                 </flux:field>
 
                 <flux:field class="flux-field">
-                    <flux:label>Clase general de los inmuebles en la zona<span class="sup-required">*</span>
+                    <flux:label>Referencia de proximidad urbana<span class="sup-required">*</span>
                     </flux:label>
                     <flux:input.group>
                         {{--
                         <flux:input type="text" wire:model='comparableGeneralProperties' /> --}}
-                        <flux:select wire:model.live="comparableGeneralProperties"
+                        <flux:select wire:model.live="comparableUrbanProximityReference"
                             class="text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                             <flux:select.option value="Centrica">Céntrica</flux:select.option>
@@ -623,19 +625,10 @@
                         </flux:select>
                     </flux:input.group>
                     <div class="error-container">
-                        <flux:error name="comparableGeneralProperties" />
-                    </div>
-                </flux:field>
-
-                <flux:field class="flux-field">
-                    <flux:label>Referencia de proximidad urbana<span class="sup-required">*</span></flux:label>
-                    <flux:input.group>
-                        <flux:input type="number" wire:model='comparableUrbanProximityReference' />
-                    </flux:input.group>
-                    <div class="error-container">
                         <flux:error name="comparableUrbanProximityReference" />
                     </div>
                 </flux:field>
+
 
                 <flux:field class="flux-field">
                     <flux:label>Número de frentes<span class="sup-required">*</span></flux:label>
