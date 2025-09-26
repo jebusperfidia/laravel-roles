@@ -5,9 +5,11 @@ namespace App\Livewire\Forms;
 use Livewire\Component;
 use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
+use App\Models\UrbanEquipmentModel;
 
 class UrbanEquipment extends Component
 {
+    public $valuation_id;
 
     public int $church, $market, $superMarket, $commercialSpaces, $numberCommercialSpaces, $publicSquare, $parks, $gardens,
     $sportsCourts, $sportsCenter, $primarySchool, $middleSchool, $highSchool, $university, $otherNearbySchools,
@@ -24,40 +26,188 @@ class UrbanEquipment extends Component
     public bool $communityCenterCheckbox = false;
     public bool $transportCheckbox = false;
 
-    public function mount() {
-        //Templos
-        $this->church = 0;
-        //Mercados
-        $this->market = 0;
-        $this->superMarket = 0;
-        $this->commercialSpaces = 0;
-        $this->numberCommercialSpaces = 0;
-        //Plaza pública
-        $this->publicSquare = 0;
-        //Parques y jardines
-        $this->parks = 0;
-        $this->gardens = 0;
-        $this->sportsCourts = 0;
-        $this->sportsCenter = 0;
-        //Escuelas
-        $this->primarySchool = 0;
-        $this->middleSchool = 0;
-        $this->highSchool = 0;
-        $this->university = 0;
-        $this->otherNearbySchools = 0;
-        //Hospitales
-        $this->firstLevel = 0;
-        $this->secondLevel = 0;
-        $this->thirdLevel = 0;
-        //Bancos
-        $this->bank = 0;
-        //Centro comuniatrio
-        $this->communityCenter = 0;
-        //Transporte
-        $this->urbanDistance = 0;
-        $this->urbanFrequency = 0;
-        $this->suburbanDistance = 0;
-        $this->suburbanFrequency = 0;
+    public function mount()
+    {
+
+        $valuationId = session('valuation_id');
+        // Guardar el valuationId en una propiedad pública
+        $this->valuation_id = $valuationId;
+
+        // Asignar el modelo solo si valuationId existe para evitar errores
+        $urbanEquipment = UrbanEquipmentModel::where('valuation_id', $valuationId)->first();
+
+
+        if ($urbanEquipment) {
+
+            //Templos
+            $this->church = $urbanEquipment->church;
+            //Mercados
+            $this->market = $urbanEquipment->market;
+            $this->superMarket = $urbanEquipment->super_market;
+            $this->commercialSpaces = $urbanEquipment->commercial_spaces;
+            $this->numberCommercialSpaces = $urbanEquipment->number_commercial_spaces;
+            //Plaza pública
+            $this->publicSquare = $urbanEquipment->public_square;
+            //Parques y jardines
+            $this->parks = $urbanEquipment->parks;
+            $this->gardens = $urbanEquipment->gardens;
+            $this->sportsCourts = $urbanEquipment->sports_courts;
+            $this->sportsCenter = $urbanEquipment->sports_center;
+            //Escuelas
+            $this->primarySchool = $urbanEquipment->primary_school;
+            $this->middleSchool = $urbanEquipment->middle_school;
+            $this->highSchool = $urbanEquipment->high_school;
+            $this->university = $urbanEquipment->university;
+            $this->otherNearbySchools = $urbanEquipment->other_nearby_schools;
+            //Hospitales
+            $this->firstLevel = $urbanEquipment->first_level;
+            $this->secondLevel = $urbanEquipment->second_level;
+            $this->thirdLevel = $urbanEquipment->third_level;
+            //Bancos
+            $this->bank = $urbanEquipment->bank;
+            //Centro comuniatrio
+            $this->communityCenter = $urbanEquipment->community_center;
+            //Transporte
+            $this->urbanDistance = $urbanEquipment->urban_distance;
+            $this->urbanFrequency = $urbanEquipment->urban_frequency;
+            $this->suburbanDistance = $urbanEquipment->suburban_distance;
+            $this->suburbanFrequency = $urbanEquipment->suburban_frequency;
+        } else {
+
+
+            //Templos
+            $this->church = 0;
+            //Mercados
+            $this->market = 0;
+            $this->superMarket = 0;
+            $this->commercialSpaces = 0;
+            $this->numberCommercialSpaces = 0;
+            //Plaza pública
+            $this->publicSquare = 0;
+            //Parques y jardines
+            $this->parks = 0;
+            $this->gardens = 0;
+            $this->sportsCourts = 0;
+            $this->sportsCenter = 0;
+            //Escuelas
+            $this->primarySchool = 0;
+            $this->middleSchool = 0;
+            $this->highSchool = 0;
+            $this->university = 0;
+            $this->otherNearbySchools = 0;
+            //Hospitales
+            $this->firstLevel = 0;
+            $this->secondLevel = 0;
+            $this->thirdLevel = 0;
+            //Bancos
+            $this->bank = 0;
+            //Centro comuniatrio
+            $this->communityCenter = 0;
+            //Transporte
+            $this->urbanDistance = 0;
+            $this->urbanFrequency = 0;
+            $this->suburbanDistance = 0;
+            $this->suburbanFrequency = 0;
+        }
+
+        $this->updatedTempleCheckbox();
+        $this->updatedMarketCheckbox();
+        $this->updatedPublicSquareCheckbox();
+        $this->updatedParkGardensCheckbox();
+        $this->updatedSchoolsCheckbox();
+        $this->updatedHospitalsCheckbox();
+        $this->updatedBanksCheckbox();
+        $this->updatedCommunityCenterCheckbox();
+        $this->updatedtransportCheckbox();
+    }
+
+    public function save()
+    {
+        $rules = [
+            'church' => 'required',
+            'market' => 'required',
+            'superMarket' => 'required',
+            'commercialSpaces' => 'required',
+            'numberCommercialSpaces' => 'required',
+            'publicSquare' => 'required',
+            'sportsCourts' => 'required',
+            'sportsCenter' => 'required',
+            'primarySchool' => 'required',
+            'middleSchool' => 'required',
+            'highSchool' => 'required',
+            'university' => 'required',
+            'otherNearbySchools' => 'required',
+            'firstLevel' => 'required',
+            'secondLevel' => 'required',
+            'thirdLevel' => 'required',
+            'bank' => 'required',
+            'communityCenter' => 'required',
+            'urbanDistance' => 'required',
+            'urbanFrequency' => 'required',
+            'suburbanDistance' => 'required',
+            'suburbanFrequency' => 'required'
+        ];
+
+        $validator = Validator::make(
+            $this->all(),
+            $rules,
+            [],
+            $this->validationAttributes()
+        );
+
+        /* dd($validator->errors()); */
+        //Comprobamos si se obtuvieron errores de validación
+        if ($validator->fails()) {
+            //Enviamos un mensaje en pantalla indicando que existen errores de validación
+            Toaster::error('Existen errores de validación');
+
+            //Colocamos los errores en pantalla
+            $this->setErrorBag($validator->getMessageBag());
+
+            //Hacemos un return para detener el flujo del sistema
+            return;
+        }
+
+        // Mapea las propiedades del componente a un array con nombres de columnas de la DB
+        $data = [
+            'church' => $this->church,
+            'market' => $this->market,
+            'super_market' => $this->superMarket,
+            'commercial_spaces' => $this->commercialSpaces,
+            'number_commercial_spaces' => $this->numberCommercialSpaces,
+            'public_square' =>$this->publicSquare,
+            'parks' => $this->parks,
+            'gardens' => $this->gardens,
+            'sports_courts' => $this->sportsCourts,
+            'sports_center' => $this->sportsCenter,
+            'primary_school' => $this->primarySchool,
+            'middle_school' => $this->middleSchool,
+            'high_school' => $this->highSchool,
+            'university' => $this->university,
+            'other_nearby_schools' => $this->otherNearbySchools,
+            'first_level' => $this->firstLevel,
+            'second_level' => $this->secondLevel,
+            'third_level' => $this->thirdLevel,
+            'bank' => $this->bank,
+            'community_center' => $this->communityCenter,
+            'urban_distance' => $this->urbanDistance,
+            'urban_frequency' => $this->urbanFrequency,
+            'suburban_distance' => $this->suburbanDistance,
+            'suburban_frequency' => $this->suburbanFrequency
+        ];
+
+        //dd($data);
+
+        // Guardar o actualizar
+        UrbanEquipmentModel::updateOrCreate(
+            ['valuation_id' => $this->valuation_id],
+            $data
+        );
+
+
+
+        Toaster::success('Formulario guardado con éxito');
+        return redirect()->route('form.index', ['section' => 'land-details']);
     }
 
 
@@ -312,59 +462,6 @@ class UrbanEquipment extends Component
         $total = $this->urbanDistance + $this->urbanFrequency + $this->suburbanDistance + $this->suburbanFrequency;
         $this->transportCheckbox = ($total > 0);
     }
-
-
-    public function save(){
-        $rules = [
-            'church' => 'required',
-            'market' => 'required',
-            'superMarket' => 'required',
-            'commercialSpaces' => 'required',
-            'numberCommercialSpaces' => 'required',
-            'publicSquare' => 'required',
-            'sportsCourts' => 'required',
-            'sportsCenter' => 'required',
-            'primarySchool' => 'required',
-            'middleSchool' => 'required',
-            'highSchool' => 'required',
-            'university' => 'required',
-            'otherNearbySchools' => 'required',
-            'firstLevel' => 'required',
-            'secondLevel' => 'required',
-            'thirdLevel' => 'required',
-            'bank' => 'required',
-            'communityCenter' => 'required',
-            'urbanDistance' => 'required',
-            'urbanFrequency' => 'required',
-            'suburbanDistance' => 'required',
-            'suburbanFrequency' => 'required'
-        ];
-
-        $validator = Validator::make(
-            $this->all(),
-            $rules,
-            [],
-            $this->validationAttributes()
-        );
-
-        /* dd($validator->errors()); */
-        //Comprobamos si se obtuvieron errores de validación
-        if ($validator->fails()) {
-            //Enviamos un mensaje en pantalla indicando que existen errores de validación
-            Toaster::error('Existen errores de validación');
-
-            //Colocamos los errores en pantalla
-            $this->setErrorBag($validator->getMessageBag());
-
-            //Hacemos un return para detener el flujo del sistema
-            return;
-        }
-
-        //
-        Toaster::success('Formulario guardado con éxito');
-        return redirect()->route('form.index', ['section' => 'land-details']);
-    }
-
 
 
     protected function validationAttributes(): array
