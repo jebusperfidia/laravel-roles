@@ -1,8 +1,7 @@
-{{-- Componente AlpineJS que gestiona los mapas --}}
-<div x-data="mapManager()" x-init="init()" {{-- Evento personalizado que se lanza desde Livewire para actualizar mapas
-    --}} @locationUpdated.window="initMaps($event.detail[0].lat, $event.detail[0].lon)">
+{{-- **CAMBIO CLAVE:** Se renombra el evento a kebab-case para seguir convenciones --}}
+<div x-data="mapManager()" x-init="init()"
+    @location-updated.window="createOrUpdateMaps($event.detail[0].lat, $event.detail[0].lon)">
 
-    {{-- Estilos y hoja de Leaflet --}}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         .map-container {
@@ -12,52 +11,48 @@
         }
     </style>
 
-    {{-- Formulario Livewire --}}
     <form wire:submit='save'>
         <div class="form-container">
             <div class="form-container__header">Localización del inmueble</div>
             <div class="form-container__content">
-
-                {{-- Campos para coordenadas geográficas --}}
                 <div class="form-grid form-grid--3 mt-3 mb-2 text-lg">
                     <flux:field>
                         <flux:label>Latitud</flux:label>
-                        <flux:input type="text" inputmode="decimal" wire:model.defer='latitud' />
+                        <flux:input type="text" inputmode="decimal" wire:model.defer='latitude' />
                         <div class="error-container">
-                            <flux:error name="latitud" />
+                            <flux:error name="latitude" />
                         </div>
                     </flux:field>
                     <flux:field>
                         <flux:label>Longitud</flux:label>
-                        <flux:input type="text" inputmode="decimal" wire:model.defer='longitud' />
+                        <flux:input type="text" inputmode="decimal" wire:model.defer='longitude' />
                         <div class="error-container">
-                            <flux:error name="longitud" />
+                            <flux:error name="longitude" />
                         </div>
                     </flux:field>
                     <flux:field>
-                        <flux:label>Altitud</flux:label>
-                        <flux:input type="text" inputmode="decimal" wire:model.defer='altitud' />
+                        <flux:label>Altitud (Opcional)</flux:label>
+                        <flux:input type="text" inputmode="decimal" wire:model.defer='altitude' />
                         <div class="error-container">
-                            <flux:error name="altitud" />
+                            <flux:error name="altitude" />
                         </div>
                     </flux:field>
                 </div>
 
-                {{-- Títulos para cada mapa --}}
                 <div class="form-grid form-grid--3 mt-3 mb-2 text-lg">
                     <h2 class="border-b-2 border-gray-300">Croquis macro localización</h2>
                     <h2 class="border-b-2 border-gray-300">Croquis micro localización</h2>
                     <h2 class="border-b-2 border-gray-300">Polígono del inmueble</h2>
                 </div>
 
-                {{-- Contenedores de mapa con wire:ignore para que Livewire no los destruya --}}
+                {{-- **CAMBIO CLAVE:** `wire:ignore` le dice a Livewire que no toque estos divs, dejando que JS los
+                controle --}}
                 <div class="form-grid form-grid--3 mt-3 mb-2 text-lg">
                     <div x-ref="mapMacro" class="map-container" wire:ignore></div>
                     <div x-ref="mapMicro" class="map-container" wire:ignore></div>
                     <div x-ref="mapPolygon" class="map-container" wire:ignore></div>
                 </div>
 
-                {{-- Botón que dispara el método "locate" en Livewire --}}
                 <flux:button type="button" wire:click.prevent="locate" class="mt-4 cursor-pointer btn-intermediary"
                     variant="primary">
                     Localizar inmueble en mapa
@@ -65,7 +60,7 @@
             </div>
         </div>
 
-        {{-- Segundo bloque del formulario con botón de guardar --}}
+        {{-- Resto de tu formulario --}}
         <div class="form-container">
             <div class="form-container__header">Localización geográfica del inmueble</div>
             <div class="form-container__content">
@@ -76,58 +71,59 @@
         </div>
     </form>
 
-    {{-- Script de Leaflet --}}
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    {{-- Componente AlpineJS para gestionar mapas --}}
     <script>
         function mapManager() {
-            return {
-                // Objeto donde se guardan las instancias de los mapas y sus marcadores
-                maps: {
-                    macro: { map: null, marker: null },
-                    micro: { map: null, marker: null },
-                    polygon: { map: null, marker: null }
-                },
+        return {
+            maps: {
+                macro: { map: null, marker: null },
+                micro: { map: null, marker: null },
+                polygon: { map: null, marker: null }
+            },
 
-                // Función que crea o actualiza cada mapa
-                initMaps(lat, lon) {
-                    // Si no se pasan coordenadas, se usan las del componente Livewire
-                    if (lat === undefined || lon === undefined) {
-                        lat = @js($this->latitud);
-                        lon = @js($this->longitud);
-                    }
+            // Función que crea o actualiza los mapas
+            createOrUpdateMaps(lat, lon) {
+                const latitude = parseFloat(lat);
+                const longitude = parseFloat(lon);
 
-                    const tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-                    const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-
-                    // Esta función inicializa o actualiza un mapa específico
-                    const createOrUpdateMap = (ref, mapObj, zoom) => {
-                        if (!mapObj.map) {
-                            // Si el mapa no existe, se crea
-                            const map = L.map(ref).setView([lat, lon], zoom);
-                            L.tileLayer(tileLayerUrl, { attribution }).addTo(map);
-                            const marker = L.marker([lat, lon]).addTo(map);
-                            mapObj.map = map;
-                            mapObj.marker = marker;
-                        } else {
-                            // Si ya existe, se actualiza la vista y el marcador
-                            mapObj.map.setView([lat, lon], zoom);
-                            mapObj.marker.setLatLng([lat, lon]);
-                        }
-                    };
-
-                    // Se actualizan los 3 mapas
-                    createOrUpdateMap(this.$refs.mapMacro, this.maps.macro, 5);
-                    createOrUpdateMap(this.$refs.mapMicro, this.maps.micro, 14);
-                    createOrUpdateMap(this.$refs.mapPolygon, this.maps.polygon, 18);
-                },
-
-                // Inicializa los mapas al cargar el componente
-                init() {
-                    setTimeout(() => this.initMaps(), 0);
+                if (isNaN(latitude) || isNaN(longitude)) {
+                    console.error('Coordenadas inválidas. No se puede actualizar el mapa.');
+                    return;
                 }
+
+                const tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+                const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+                // Función interna para configurar un mapa individual
+                const setupMap = (ref, mapObj, zoom) => {
+                    if (!mapObj.map) { // Si el mapa NO existe, lo creamos
+                        const map = L.map(ref).setView([latitude, longitude], zoom);
+                        L.tileLayer(tileLayerUrl, { attribution }).addTo(map);
+                        mapObj.map = map;
+                        mapObj.marker = L.marker([latitude, longitude]).addTo(map);
+                    } else { // Si YA existe, solo actualizamos su centro y el marcador
+                        mapObj.map.setView([latitude, longitude], zoom);
+                        mapObj.marker.setLatLng([latitude, longitude]);
+                    }
+                };
+
+                // Ejecutamos la configuración para cada mapa
+                setupMap(this.$refs.mapMacro, this.maps.macro, 5);
+                setupMap(this.$refs.mapMicro, this.maps.micro, 14);
+                setupMap(this.$refs.mapPolygon, this.maps.polygon, 18);
+            },
+
+            // La función init se ejecuta al cargar el componente
+            init() {
+                // Obtenemos los valores iniciales del componente Livewire
+                const initialLat = @this.get('latitude');
+                const initialLon = @this.get('longitude');
+
+                // Inicializamos los mapas con un pequeño retraso para asegurar que el DOM esté listo
+                setTimeout(() => this.createOrUpdateMaps(initialLat, initialLon), 50);
             }
         }
+    }
     </script>
 </div>

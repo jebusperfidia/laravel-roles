@@ -29,7 +29,7 @@
                     <flux:field class="flux-field">
                         <flux:label>Tipo de avalúo</flux:label>
                         <flux:select wire:model="gi_type" class="text-gray-800 [&_option]:text-gray-900">
-                            <flux:select.option value="fiscal">Fiscal</flux:select.option>
+                            <flux:select.option value="fiscal">Físcal</flux:select.option>
                             <flux:select.option value="comercial">Comercial</flux:select.option>
                         </flux:select>
                         <div class="error-container">
@@ -86,7 +86,7 @@
 
 
         {{-- SEGUNDO CONTENEDOR CONTENEDOR --}}
-        @if ($gi_preValuation === false)
+        @if (!$gi_preValuation)
         <div class="form-container">
             <div class="form-container__header">
                 Datos del propietario
@@ -911,10 +911,10 @@
                                 class="sup-required">*</span></label>
                         <flux:select wire:model="gi_ownerShipRegime" class="text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                            <flux:select.option value="Fisica">Privada particular</flux:select.option>
-                            <flux:select.option value="Moral">Privada condominal</flux:select.option>
-                            <flux:select.option value="Moral">Privada copropiedad</flux:select.option>
-                            <flux:select.option value="Moral">Pública</flux:select.option>
+                            <flux:select.option value="Privada particular">Privada particular</flux:select.option>
+                            <flux:select.option value="Privada condominal">Privada condominal</flux:select.option>
+                            <flux:select.option value="Privada copropiedad">Privada copropiedad</flux:select.option>
+                            <flux:select.option value="Publica">Pública</flux:select.option>
                         </flux:select>
                         <div class="error-container">
                             <flux:error name="gi_ownerShipRegime" />

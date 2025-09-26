@@ -4,66 +4,86 @@ namespace App\Livewire\Forms;
 
 use Livewire\Component;
 use Masmerise\Toaster\Toaster;
+use App\Models\PropertyLocationModel;
 use Illuminate\Validation\ValidationException;
 
 class PropertyLocation extends Component
 {
-    // Propiedades públicas que se enlazan al formulario (con wire:model)
-    public $latitud;
-    public $longitud;
-    public $altitud;
+    public $latitude;
+    public $longitude;
+    public $altitude;
 
-    // Se ejecuta al cargar el componente
+    /**
+     * Se ejecuta al cargar el componente.
+     */
     public function mount()
     {
-        // Coordenadas por defecto (CDMX)
-        $this->latitud = '19.4326';
-        $this->longitud = '-99.1332';
-        $this->altitud = '2240';
+        $valuationId = session('valuation_id');
+        $propertyLocation = PropertyLocationModel::where('valuation_id', $valuationId)->first();
+
+        if ($propertyLocation) {
+            // Carga los datos existentes
+            $this->latitude  = $propertyLocation->latitude;
+            $this->longitude = $propertyLocation->longitude;
+            $this->altitude  = $propertyLocation->altitude;
+        } else {
+            // **CORRECCIÓN:** Inicializa con coordenadas numéricas válidas si no hay datos.
+            // Los mapas no pueden funcionar con valores nulos o vacíos para latitud/longitud.
+            $this->latitude  = '23.6345';  // Centro geográfico de México
+            $this->longitude = '-102.5528';
+            $this->altitude  = null; // La altitud es opcional, se puede inicializar como null
+        }
     }
 
-    // Método que actualiza los mapas desde el botón "Localizar"
+    /**
+     * Valida y envía las coordenadas al mapa en el frontend.
+     */
     public function locate()
     {
-        // Valida los datos
         $this->validateLocation();
 
-        // Envía un evento personalizado al frontend con las coordenadas
-        $this->dispatch('locationUpdated', [
-            'lat' => $this->latitud,
-            'lon' => $this->longitud
+        // **CORRECCIÓN:** El nombre del evento debe coincidir con el de la vista (kebab-case).
+        $this->dispatch('location-updated', [
+            'lat' => $this->latitude,
+            'lon' => $this->longitude
         ]);
 
-        // Muestra notificación (opcional)
         Toaster::success('Ubicación actualizada en el mapa');
     }
 
-    // Método que guarda el formulario completo
+    /**
+     * Guarda los datos en la base de datos.
+     */
     public function save()
     {
-        // Valida los datos
         $this->validateLocation();
+        $valuationId = session('valuation_id');
 
-        // Guardar en la base de datos (no implementado aquí)
+        PropertyLocationModel::updateOrCreate(
+            ['valuation_id' => $valuationId],
+            [
+                'latitude'  => $this->latitude,
+                'longitude' => $this->longitude,
+                'altitude'  => $this->altitude,
+            ]
+        );
 
-        // Muestra mensaje y redirige
         Toaster::success('Formulario guardado con éxito');
-        return redirect()->route('form.index', ['section' => 'nerby-valuations']);
+        return redirect()->route('form.index', ['section' => 'declarations-warnings']);
     }
 
-    // Valida latitud, longitud y altitud con reglas estrictas
+    /**
+     * Método centralizado para validar.
+     */
     protected function validateLocation()
     {
-        // Limpia y convierte los valores antes de validar
-        $this->latitud = $this->sanitizeDecimal((string) $this->latitud);
-        $this->longitud = $this->sanitizeDecimal((string) $this->longitud);
-        $this->altitud = $this->sanitizeDecimal((string) $this->altitud);
-
+        // El saneamiento se puede omitir si confías en la validación 'numeric'
         try {
+            // **CORRECCIÓN:** Hacemos que la altitud sea opcional (nullable).
             $this->validate([
-                'latitud'  => ['required', 'numeric', 'between:-90,90'],
-                'longitud' => ['required', 'numeric', 'between:-180,180'],
-                'altitud'  => ['required', 'numeric'],
+                'latitude'  => ['required', 'numeric', 'between:-90,90'],
+                'longitude' => ['required', 'numeric', 'between:-180,180'],
+                'altitude'  => ['nullable', 'numeric'], // `nullable` permite que el campo esté vacío
             ]);
         } catch (ValidationException $e) {
             Toaster::error('Hay errores de validación, por favor corrígelos.');
@@ -71,26 +91,9 @@ class PropertyLocation extends Component
         }
     }
 
-    // Limpieza personalizada de campos decimales (quita símbolos y convierte comas a puntos)
-    private function sanitizeDecimal(string $value): string
-    {
-        $hasNegative = str_starts_with($value, '-');
-        $clean = preg_replace('/[^0-9,.]/', '', $value);
-        $clean = str_replace(',', '.', $clean);
+    // Tu función sanitizeDecimal es buena, pero la validación 'numeric' de Laravel
+    // ya maneja la mayoría de los casos, por lo que se puede simplificar el código.
 
-        $parts = explode('.', $clean);
-        if (count($parts) > 1) {
-            $clean = $parts[0] . '.' . implode('', array_slice($parts, 1));
-        }
-
-        if ($hasNegative && $clean !== '' && $clean !== '0') {
-            $clean = '-' . $clean;
-        }
-
-        return $clean;
-    }
-
-    // Renderiza la vista Blade asociada
     public function render()
     {
         return view('livewire.forms.property-location');

@@ -37,7 +37,7 @@ class GeneralInfo extends Component
     public $colonies3 = [];
 
     //Variables primer contenedor
-    public $gi_folio, $gi_date, $gi_type, $gi_calculationType, $gi_valuator, $gi_preValuation = false;
+    public $gi_folio, $gi_date, $gi_type, $gi_calculationType, $gi_valuator, $gi_preValuation;
 
     //Variables segundo contenedor
     public $gi_ownerTypePerson, $gi_ownerRfc, $gi_ownerCurp, $gi_ownerName, $gi_ownerFirstName, $gi_ownerSecondName,
@@ -69,20 +69,127 @@ class GeneralInfo extends Component
     {
 
         //Datos para cargar valores en los select de estados, municipios y colonias primer contenedor
-        $this->gi_ownerCp = '37549';
+        //$this->gi_ownerCp = '37549';
        /*  $this->gi_ownerEntity = '11';
         $this->gi_ownerLocality = '13'; */
-        $this->gi_ownerColony = '10 de Mayo';
-        $this->gi_ownerOtherColony = 'La escondida 2';
+        //$this->gi_ownerColony = '10 de Mayo';
+        //$this->gi_ownerOtherColony = 'La escondida 2';
 
-        //Obtenemos los estados
+
+        //Obtenemos los datos para diferentes input select, desde el archivo de configuración properties_inputs
+        $this->levels_input = config('properties_inputs.levels', []);
+        $this->propertiesTypes_input = config('properties_inputs.property_types', []);
+        $this->propertiesTypesSigapred_input = config('properties_inputs.property_types_sigapred');
+        $this->landUse_input = config('properties_inputs.land_use');
+
+        //Traemos el modelo users para poder mostrar en el select de valuadores
+        $this->users = User::all();
+
+        //Obtenemos los valores deL avalúo a partir de la variable de sesión del ID
+        $valuation = Valuation::find(Session::get('valuation_id'));
+
+        //Obtenemos el valor de la tabla de asignaciones
+        $assignament = Assignment::where('valuation_id', $valuation->id)->first();
+
+
+
+        //  Datos generales
+        $this->gi_folio = $valuation->folio;
+        $this->gi_date = $valuation->date;
+        $this->gi_type = $valuation->type;
+        $this->gi_propertyType = $valuation->property_type;
+        $this->gi_calculationType = $valuation->calculation_type;
+
+        $this->gi_preValuation = $valuation->pre_valuation;
+        //dd($this->gi_preValuation);
+
+        //  Datos del propietario
+        $this->gi_ownerTypePerson = $valuation->owner_type_person;
+        $this->gi_ownerRfc = $valuation->owner_rfc;
+        $this->gi_ownerCurp = $valuation->owner_curp;
+        $this->gi_ownerName = $valuation->owner_name;
+        $this->gi_ownerFirstName = $valuation->owner_first_name;
+        $this->gi_ownerSecondName = $valuation->owner_second_name;
+        $this->gi_ownerCompanyName = $valuation->owner_company_name;
+        $this->gi_ownerCp = $valuation->owner_cp;
+        $this->gi_ownerEntity = $valuation->owner_entity;
+        $this->gi_ownerLocality = $valuation->owner_locality;
+        $this->gi_ownerColony = $valuation->owner_colony;
+        $this->gi_ownerOtherColony = $valuation->owner_other_colony;
+        $this->gi_ownerStreet = $valuation->owner_street;
+        $this->gi_ownerAbroadNumber = $valuation->owner_abroad_number;
+        $this->gi_ownerInsideNumber = $valuation->owner_inside_number;
+
+        //  Datos del solicitante
+        $this->gi_applicTypePerson = $valuation->applic_type_person;
+        $this->gi_applicRfc = $valuation->applic_rfc;
+        $this->gi_applicCurp = $valuation->applic_curp;
+        $this->gi_applicName = $valuation->applic_name;
+        $this->gi_applicFirstName = $valuation->applic_first_name;
+        $this->gi_applicSecondName = $valuation->applic_second_name;
+        $this->gi_applicNss = $valuation->applic_nss;
+        $this->gi_applicCp = $valuation->applic_cp;
+        $this->gi_applicEntity = $valuation->applic_entity;
+        $this->gi_applicLocality = $valuation->applic_locality;
+        $this->gi_applicColony = $valuation->applic_colony;
+        $this->gi_applicOtherColony = $valuation->applic_other_colony;
+        $this->gi_applicStreet = $valuation->applic_street;
+        $this->gi_applicAbroadNumber = $valuation->applic_abroad_number;
+        $this->gi_applicInsideNumber = $valuation->applic_inside_number;
+        $this->gi_applicPhone = $valuation->applic_phone;
+
+        // Datos del inmueble
+        $this->gi_propertyCp = $valuation->property_cp;
+        $this->gi_propertyEntity = $valuation->property_entity;
+        $this->gi_propertyLocality = $valuation->property_locality;
+        $this->gi_propertyCity = $valuation->property_city;
+        $this->gi_propertyColony = $valuation->property_colony;
+        $this->gi_propertyOtherColony = $valuation->property_other_colony;
+        $this->gi_propertyStreet = $valuation->property_street;
+        $this->gi_propertyAbroadNumber = $valuation->property_abroad_number;
+        $this->gi_propertyInsideNumber = $valuation->property_inside_number;
+        $this->gi_propertyBlock = $valuation->property_block;
+        $this->gi_propertySuperBlock = $valuation->property_super_block;
+        $this->gi_propertyLot = $valuation->property_lot;
+        $this->gi_propertyBuilding = $valuation->property_building;
+        $this->gi_propertyDepartament = $valuation->property_departament;
+        $this->gi_propertyAccess = $valuation->property_access;
+        $this->gi_propertyLevel = $valuation->property_level;
+        $this->gi_propertyCondominium = $valuation->property_condominium;
+        $this->gi_propertyStreetBetween = $valuation->property_street_between;
+        $this->gi_propertyAndStreet = $valuation->property_and_street;
+        $this->gi_propertyHousingComplex = $valuation->property_housing_complex;
+        $this->gi_propertyTax = $valuation->property_tax;
+        $this->gi_propertyWaterAccount = $valuation->property_water_account;
+        $this->gi_propertyTypeSigapred = $valuation->property_type_sigapred;
+        $this->gi_propertyLandUse = $valuation->property_land_use;
+        $this->gi_propertyTypeHousing = $valuation->property_type_housing;
+        $this->gi_propertyConstructor = $valuation->property_constructor;
+        $this->gi_propertyRfcConstructor = $valuation->property_rfc_constructor;
+        $this->gi_propertyAdditionalData = $valuation->property_additional_data;
+
+        //  Datos importantes
+        $this->gi_purpose = $valuation->purpose;
+        $this->gi_purposeSigapred = $valuation->purpose_sigapred;
+        $this->gi_objective = $valuation->objective;
+        $this->gi_ownerShipRegime = $valuation->owner_ship_regime;
+
+
+        //Obtenemos el nombre del valuador a partir de las consultas ya generadas
+        $this->gi_valuator = User::where('id', $assignament->appraiser_id)->value('name');
+
+          //Obtenemos los estados
         $this->states = $dipomex->getEstados();
         $this->states2 = $dipomex->getEstados();
         $this->states3 = $dipomex->getEstados();
 
+        //dd($this->gi_ownerCp);
+        //dd($this->gi_propertyCp);
+        //dd($this->gi_applicCp);
 
-        // 3. VERIFICAMOS SI EXISTE UN CP para buscar la dirección.
-        if ($this->gi_ownerCp  !== '') {
+
+        // VERIFICAMOS SI EXISTE UN CP para buscar la dirección.
+        if ($this->gi_ownerCp  !== null) {
             $data = $dipomex->buscarPorCodigoPostal($this->gi_ownerCp);
 
 
@@ -111,30 +218,63 @@ class GeneralInfo extends Component
 
 
 
-        //Obtenemos los datos para diferentes input select, desde el archivo de configuración properties_inputs
-        $this->levels_input = config('properties_inputs.levels', []);
-        $this->propertiesTypes_input = config('properties_inputs.property_types', []);
-        $this->propertiesTypesSigapred_input = config('properties_inputs.property_types_sigapred');
-        $this->landUse_input = config('properties_inputs.land_use');
 
-        //Traemos el modelo users para poder mostrar en el select de valuadores
-        $this->users = User::all();
+        // VERIFICAMOS SI EXISTE UN CP para buscar la dirección.
+        if ($this->gi_applicCp  !== null) {
+            $data = $dipomex->buscarPorCodigoPostal($this->gi_applicCp);
 
-        //Obtenemos los valores deL avalúo a partir de la variable de sesión del ID
-        $valuation = Valuation::find(Session::get('valuation_id'));
 
-        //Obtenemos el valor de la tabla de asignaciones
-        $assignament = Assignment::where('valuation_id', $valuation->id)->first();
+            // Buscar el ID del estado con base en el nombre
+            $estadoId = array_search($data['estado'], $this->states2);
 
-        //Igualamos a las variables públicas para mostrar la información en la vista
-        $this->gi_folio = $valuation->folio;
-        $this->gi_date = $valuation->date;
-        $this->gi_type = $valuation->type;
 
-        $this->gi_propertyType = $valuation->property_type;
+            // Setear el id del estado seleccionado
+            $this->gi_applicEntity = $estadoId;
 
-        //Obtenemos el nombre del valuador a partir de las consultas ya generadas
-        $this->gi_valuator = User::where('id', $assignament->appraiser_id)->value('name');
+            // Poblar municipios inmediatamente
+            $this->municipalities2 = $dipomex->getMunicipiosPorEstado($estadoId);
+            //dd($this->municipalities);
+
+            //Obtenemos el ID del municipio con base en el nombre
+            $municipioId = array_search($data['municipio'], $this->municipalities2);
+
+            //Asignamos el valor del municipio
+            $this->gi_applicLocality = $municipioId;
+
+            // Asignar colonias
+            $this->colonies2 = $data['colonias'];
+            //dd($this->colonies);
+        }
+
+        // VERIFICAMOS SI EXISTE UN CP para buscar la dirección.
+        if ($this->gi_propertyCp  !== null) {
+            $data = $dipomex->buscarPorCodigoPostal($this->gi_propertyCp);
+
+
+            // Buscar el ID del estado con base en el nombre
+            $estadoId = array_search($data['estado'], $this->states3);
+
+
+            // Setear el id del estado seleccionado
+            $this->gi_propertyEntity = $estadoId;
+
+            // Poblar municipios inmediatamente
+            $this->municipalities3 = $dipomex->getMunicipiosPorEstado($estadoId);
+            //dd($this->municipalities);
+
+            //Obtenemos el ID del municipio con base en el nombre
+            $municipioId = array_search($data['municipio'], $this->municipalities3);
+
+            //Asignamos el valor del municipio
+            $this->gi_propertyLocality = $municipioId;
+
+            // Asignar colonias
+            $this->colonies3 = $data['colonias'];
+            //dd($this->colonies);
+        }
+
+
+        //dd($this->gi_preValuation);
     }
 
     public function saveAll()
@@ -156,7 +296,93 @@ class GeneralInfo extends Component
         }
 
         //AQUI SE EJECUTARÁ LA LÓGICA DE GUARDADO
+        // 2) Mapear cada gi_… a su columna correspondiente
+        $data = [
+            // Datos generales
+            'folio'             => $this->gi_folio,
+            //'date'              => $this->gi_date,
+            'type'              => $this->gi_type,
+            'property_type'     => $this->gi_propertyType,
+            'calculation_type'  => $this->gi_calculationType,
+            'pre_valuation'     => $this->gi_preValuation,
 
+            // Datos del propietario
+            'owner_type_person'    => $this->gi_ownerTypePerson,
+            'owner_rfc'            => $this->gi_ownerRfc,
+            'owner_curp'           => $this->gi_ownerCurp,
+            'owner_name'           => $this->gi_ownerName,
+            'owner_first_name'     => $this->gi_ownerFirstName,
+            'owner_second_name'    => $this->gi_ownerSecondName,
+            'owner_company_name'   => $this->gi_ownerCompanyName,
+            'owner_cp'             => $this->gi_ownerCp,
+            'owner_entity'         => $this->gi_ownerEntity,
+            'owner_locality'       => $this->gi_ownerLocality,
+            'owner_colony'         => $this->gi_ownerColony,
+            'owner_other_colony'   => $this->gi_ownerOtherColony,
+            'owner_street'         => $this->gi_ownerStreet,
+            'owner_abroad_number'  => $this->gi_ownerAbroadNumber,
+            'owner_inside_number'  => $this->gi_ownerInsideNumber,
+
+            // Datos del solicitante
+            'applic_type_person'    => $this->gi_applicTypePerson,
+            'applic_rfc'            => $this->gi_applicRfc,
+            'applic_curp'           => $this->gi_applicCurp,
+            'applic_name'           => $this->gi_applicName,
+            'applic_first_name'     => $this->gi_applicFirstName,
+            'applic_second_name'    => $this->gi_applicSecondName,
+            'applic_nss'            => $this->gi_applicNss,
+            'applic_cp'             => $this->gi_applicCp,
+            'applic_entity'         => $this->gi_applicEntity,
+            'applic_locality'       => $this->gi_applicLocality,
+            'applic_colony'         => $this->gi_applicColony,
+            'applic_other_colony'   => $this->gi_applicOtherColony,
+            'applic_street'         => $this->gi_applicStreet,
+            'applic_abroad_number'  => $this->gi_applicAbroadNumber,
+            'applic_inside_number'  => $this->gi_applicInsideNumber,
+            'applic_phone'          => $this->gi_applicPhone,
+
+            // Datos del inmueble
+            'property_cp'               => $this->gi_propertyCp,
+            'property_entity'           => $this->gi_propertyEntity,
+            'property_locality'         => $this->gi_propertyLocality,
+            'property_city'             => $this->gi_propertyCity,
+            'property_colony'           => $this->gi_propertyColony,
+            'property_other_colony'     => $this->gi_propertyOtherColony,
+            'property_street'           => $this->gi_propertyStreet,
+            'property_abroad_number'    => $this->gi_propertyAbroadNumber,
+            'property_inside_number'    => $this->gi_propertyInsideNumber,
+            'property_block'            => $this->gi_propertyBlock,
+            'property_super_block'      => $this->gi_propertySuperBlock,
+            'property_lot'              => $this->gi_propertyLot,
+            'property_building'         => $this->gi_propertyBuilding,
+            'property_departament'      => $this->gi_propertyDepartament,
+            'property_access'           => $this->gi_propertyAccess,
+            'property_level'            => $this->gi_propertyLevel,
+            'property_condominium'      => $this->gi_propertyCondominium,
+            'property_street_between'   => $this->gi_propertyStreetBetween,
+            'property_and_street'       => $this->gi_propertyAndStreet,
+            'property_housing_complex'  => $this->gi_propertyHousingComplex,
+            'property_tax'              => $this->gi_propertyTax,
+            'property_water_account'    => $this->gi_propertyWaterAccount,
+            'property_type_sigapred'    => $this->gi_propertyTypeSigapred,
+            'property_land_use'         => $this->gi_propertyLandUse,
+            'property_type_housing'     => $this->gi_propertyTypeHousing,
+            'property_constructor'      => $this->gi_propertyConstructor,
+            'property_rfc_constructor'  => $this->gi_propertyRfcConstructor,
+            'property_additional_data'  => $this->gi_propertyAdditionalData,
+
+            // Datos importantes
+            'purpose'           => $this->gi_purpose,
+            'purpose_sigapred'  => $this->gi_purposeSigapred,
+            'objective'         => $this->gi_objective,
+            'owner_ship_regime' => $this->gi_ownerShipRegime,
+        ];
+
+        //Obtenemos los valores deL avalúo a partir de la variable de sesión del ID
+        $valuation = Valuation::find(Session::get('valuation_id'));
+
+        // 3) Guardar directamente todos los campos en la BD
+        $valuation->update($data);
 
 
         //Al finalizar, aquí se puede generar un Toaster de guardado o bien, copiar alguna otra función para redireccionar
@@ -185,7 +411,7 @@ class GeneralInfo extends Component
             'gi_ownerTypePerson' => 'required',
             'gi_ownerRfc' => 'nullable|min:12',
             'gi_ownerCurp' => 'nullable|min:18',
-            'gi_ownerCp' => 'required|min:5',
+            'gi_ownerCp' => 'required|integer|min:5',
             'gi_ownerEntity' => 'required',
             'gi_ownerLocality' => 'required',
             'gi_ownerColony' => 'required',
@@ -224,14 +450,14 @@ class GeneralInfo extends Component
             'gi_applicRfc'        => 'nullable|min:12',
             'gi_applicCurp' => 'nullable|min:18',
             'gi_applicNss' => 'nullable|min:11',
-            'gi_applicCp' => 'required|min:5',
+            'gi_applicCp' => 'required|integer|min:5',
             'gi_applicEntity' => 'required',
             'gi_applicLocality' => 'required',
             'gi_applicColony' => 'required',
             'gi_applicStreet' => 'required',
-            'gi_applicAbroadNumber' => 'required|numeric',
-            'gi_applicInsideNumber' => 'nullable|numeric',
-            'gi_applicPhone'    => 'nullable|numeric'
+            'gi_applicAbroadNumber' => 'required|integer',
+            'gi_applicInsideNumber' => 'nullable|integer',
+            'gi_applicPhone'    => 'nullable|integer'
         ];
 
         //Validaciones si la colonia no está listada
@@ -263,7 +489,7 @@ class GeneralInfo extends Component
 
         //VALIDACIONES CONTAINER 4
         $container4 = [
-            'gi_propertyCp' => 'required|min:5',
+            'gi_propertyCp' => 'required|integer|min:5',
             'gi_propertyEntity' => 'required',
             'gi_propertyLocality' => 'required',
             'gi_propertyCity' => 'required',
@@ -282,7 +508,7 @@ class GeneralInfo extends Component
             'gi_propertyStreetBetween' => 'nullable',
             'gi_propertyAndStreet' => 'nullable',
             'gi_propertyHousingComplex' => 'nullable',
-            'gi_propertyTax' => 'required|numeric',
+            'gi_propertyTax' => 'required|integer',
             'gi_propertyWaterAccount' => 'required',
             'gi_propertyType' => 'required',
             'gi_propertyTypeSigapred' => 'required',

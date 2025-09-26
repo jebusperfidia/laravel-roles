@@ -5,10 +5,12 @@ namespace App\Livewire\Forms;
 use Livewire\Component;
 use Masmerise\Toaster\Toaster;
 use Illuminate\Support\Facades\Validator;
+use App\Models\UrbanFeaturesModel;
 
 class UrbanFeatures extends Component
 {
 
+    public $valuation_id;
 
     // Arrays públicos para consumir datos para los input select largos
     public array $zone_classification_input, $zone_saturation_index_input;
@@ -16,26 +18,85 @@ class UrbanFeatures extends Component
 
     //Variables primer contenedor
     public $cu_zoneClassification, $cu_predominantBuildings, $cu_zoneBuildingLevels, $cu_buildingUsage, $cu_zoneSaturationIndex,
-    $cu_populationDensity, $cu_housingDensity, $cu_zoneSocioeconomicLevel, $cu_accessRoutesImportance, $cu_environmentalPollution;
+        $cu_populationDensity, $cu_housingDensity, $cu_zoneSocioeconomicLevel, $cu_accessRoutesImportance, $cu_environmentalPollution;
 
     public bool $inf_allServices = false;
 
     //Variables segundo contenedor
     public $inf_waterDistribution, $inf_wastewaterCollection, $inf_streetStormDrainage, $inf_zoneStormDrainage,
-    $inf_mixedDrainageSystem, $inf_otherWaterDisposal, $inf_electricSupply, $inf_electricalConnection, $inf_publicLighting,
-    $inf_naturalGas, $inf_security, $inf_garbageCollection, $inf_garbageCollectionFrecuency,$inf_telephoneService, $inf_telephoneConnection,
-    $inf_roadSignage, $inf_streetNaming, $inf_roadways, $inf_roadwaysMts, $inf_roadwaysOthers, $inf_sidewalks, $inf_sidewalksMts, $inf_sidewalksOthers, $inf_curbs, $inf_curbsMts, $inf_curbsOthers;
+        $inf_mixedDrainageSystem, $inf_otherWaterDisposal, $inf_electricSupply, $inf_electricalConnection, $inf_publicLighting,
+        $inf_naturalGas, $inf_security, $inf_garbageCollection, $inf_garbageCollectionFrecuency, $inf_telephoneService, $inf_telephoneConnection,
+        $inf_roadSignage, $inf_streetNaming, $inf_roadways, $inf_roadwaysMts, $inf_roadwaysOthers, $inf_sidewalks, $inf_sidewalksMts, $inf_sidewalksOthers, $inf_curbs, $inf_curbsMts, $inf_curbsOthers;
 
     //Variables tercer contenedor
     public $luse_landUse, $luse_descriptionSourceLand;
     public float $luse_mandatoryFreeArea, $luse_allowedLevels, $luse_landCoefficientArea;
 
-    public function mount(){
+    public function mount()
+    {
 
-        //Valores por defecto, posteriormente definiremos regla para obtenerlos solo si no hay
-        //valores guardados en la base de datos
+        //Obtenemos los datos para diferentes input select, desde el archivo de configuración properties_inputs
+        $this->zone_classification_input = config('properties_inputs.zone_classification', []);
+        $this->zone_saturation_index_input = config('properties_inputs.zone_saturation_index', []);
 
-        //Primer contenedor
+        $valuationId = session('valuation_id');
+        // Guardar el valuationId en una propiedad pública
+        $this->valuation_id = $valuationId;
+
+        // Asignar el modelo solo si valuationId existe para evitar errores
+        $urbanFeatures = UrbanFeaturesModel::where('valuation_id', $valuationId)->first();
+
+        if ($urbanFeatures) {
+            // Variables primer contenedor (cu_)
+            $this->cu_zoneClassification = $urbanFeatures->zone_classification;
+            $this->cu_predominantBuildings = $urbanFeatures->predominant_buildings;
+            $this->cu_zoneBuildingLevels = $urbanFeatures->zone_building_levels;
+            $this->cu_buildingUsage = $urbanFeatures->building_usage;
+            $this->cu_zoneSaturationIndex = $urbanFeatures->zone_saturation_index;
+            $this->cu_populationDensity = $urbanFeatures->population_density;
+            $this->cu_housingDensity = $urbanFeatures->housing_density;
+            $this->cu_zoneSocioeconomicLevel = $urbanFeatures->zone_socioeconomic_level;
+            $this->cu_accessRoutesImportance = $urbanFeatures->access_routes_importance;
+            $this->cu_environmentalPollution = $urbanFeatures->environmental_pollution;
+
+            // Variables segundo contenedor (inf_)
+            //$this->inf_allServices = $urbanFeatures->allServices ?? false;
+            $this->inf_waterDistribution = $urbanFeatures->water_distribution;
+            $this->inf_wastewaterCollection = $urbanFeatures->wastewater_collection;
+            $this->inf_streetStormDrainage = $urbanFeatures->street_storm_drainage;
+            $this->inf_zoneStormDrainage = $urbanFeatures->zone_storm_drainage;
+            $this->inf_mixedDrainageSystem = $urbanFeatures->mixed_drainage_system;
+            $this->inf_otherWaterDisposal = $urbanFeatures->other_water_disposal;
+            $this->inf_electricSupply = $urbanFeatures->electric_supply;
+            $this->inf_electricalConnection = $urbanFeatures->electrical_connection;
+            $this->inf_publicLighting = $urbanFeatures->public_lighting;
+            $this->inf_naturalGas = $urbanFeatures->natural_gas;
+            $this->inf_security = $urbanFeatures->security;
+            $this->inf_garbageCollection = $urbanFeatures->garbage_collection;
+            $this->inf_garbageCollectionFrecuency = $urbanFeatures->garbage_collection_frecuency;
+            $this->inf_telephoneService = $urbanFeatures->telephone_service;
+            $this->inf_telephoneConnection = $urbanFeatures->telephone_connection;
+            $this->inf_roadSignage = $urbanFeatures->road_signage;
+            $this->inf_streetNaming = $urbanFeatures->street_naming;
+            $this->inf_roadways = $urbanFeatures->roadways;
+            $this->inf_roadwaysMts = $urbanFeatures->roadways_mts;
+            $this->inf_roadwaysOthers = $urbanFeatures->roadways_others;
+            $this->inf_sidewalks = $urbanFeatures->sidewalks;
+            $this->inf_sidewalksMts = $urbanFeatures->sidewalks_mts;
+            $this->inf_sidewalksOthers = $urbanFeatures->sidewalks_others;
+            $this->inf_curbs = $urbanFeatures->curbs;
+            $this->inf_curbsMts = $urbanFeatures->curbs_mts;
+            $this->inf_curbsOthers = $urbanFeatures->curbs_others;
+
+            // Variables tercer contenedor (luse_)
+            $this->luse_landUse = $urbanFeatures->land_use;
+            $this->luse_descriptionSourceLand = $urbanFeatures->description_source_land;
+            $this->luse_mandatoryFreeArea = $urbanFeatures->mandatory_free_area;
+            $this->luse_allowedLevels = $urbanFeatures->allowed_levels;
+            $this->luse_landCoefficientArea = $urbanFeatures->land_coefficient_area;
+
+        } else {
+            //Primer contenedor
             $this->inf_waterDistribution = 2;
             $this->inf_wastewaterCollection = 3;
             $this->inf_streetStormDrainage = 2;
@@ -57,24 +118,28 @@ class UrbanFeatures extends Component
 
             //Apartado tabla segundo contenedor
             $this->inf_roadways = '1. Terraceria';
+            $this->inf_roadwaysOthers = "";
             $this->inf_roadwaysMts = 0;
             $this->inf_sidewalks = '5. No presenta';
+            $this->inf_sidewalksOthers = "";
             $this->inf_sidewalksMts = 0;
             $this->inf_curbs = '3. No existe';
+            $this->inf_curbsOthers = "";
             $this->inf_curbsMts = 0;
 
             //Variables tercer contenedor:
             $this->luse_mandatoryFreeArea = 0;
             $this->luse_allowedLevels = 0;
             $this->luse_landCoefficientArea = 0;
+        }
 
 
-        //Obtenemos los datos para diferentes input select, desde el archivo de configuración properties_inputs
-        $this->zone_classification_input = config('properties_inputs.zone_classification', []);
-        $this->zone_saturation_index_input = config('properties_inputs.zone_saturation_index', []);
+
+
     }
 
-    public function save(){
+    public function save()
+    {
 
         //Ejecutar función con todas las reglas de validación y validaciones condicionales, guardando todo en una variable
         $validator = $this->validateAllContainers();
@@ -93,11 +158,73 @@ class UrbanFeatures extends Component
             return;
         }
 
+        // Mapea las propiedades del componente a un array con nombres de columnas de la DB
+        $data = [
+            'valuation_id' => $this->valuation_id,
+
+            // Variables primer contenedor (cu_)
+            'zone_classification' => $this->cu_zoneClassification,
+            'predominant_buildings' => $this->cu_predominantBuildings,
+            'zone_building_levels' => $this->cu_zoneBuildingLevels,
+            'building_usage' => $this->cu_buildingUsage,
+            'zone_saturation_index' => $this->cu_zoneSaturationIndex,
+            'population_density' => $this->cu_populationDensity,
+            'housing_density' => $this->cu_housingDensity,
+            'zone_socioeconomic_level' => $this->cu_zoneSocioeconomicLevel,
+            'access_routes_importance' => $this->cu_accessRoutesImportance,
+            'environmental_pollution' => $this->cu_environmentalPollution,
+
+            // Variables segundo contenedor (inf_)
+            //'all_services' => $this->inf_allServices,
+            'water_distribution' => $this->inf_waterDistribution,
+            'wastewater_collection' => $this->inf_wastewaterCollection,
+            'street_storm_drainage' => $this->inf_streetStormDrainage,
+            'zone_storm_drainage' => $this->inf_zoneStormDrainage,
+            'mixed_drainage_system' => $this->inf_mixedDrainageSystem,
+            'other_water_disposal' => $this->inf_otherWaterDisposal,
+            'electric_supply' => $this->inf_electricSupply,
+            'electrical_connection' => $this->inf_electricalConnection,
+            'public_lighting' => $this->inf_publicLighting,
+            'natural_gas' => $this->inf_naturalGas,
+            'security' => $this->inf_security,
+            'garbage_collection' => $this->inf_garbageCollection,
+            'garbage_collection_frecuency' => $this->inf_garbageCollectionFrecuency,
+            'telephone_service' => $this->inf_telephoneService,
+            'telephone_connection' => $this->inf_telephoneConnection,
+            'road_signage' => $this->inf_roadSignage,
+            'street_naming' => $this->inf_streetNaming,
+            'roadways' => $this->inf_roadways,
+            'roadways_mts' => $this->inf_roadwaysMts,
+            'roadways_others' => $this->inf_roadwaysOthers,
+            'sidewalks' => $this->inf_sidewalks,
+            'sidewalks_mts' => $this->inf_sidewalksMts,
+            'sidewalks_others' => $this->inf_sidewalksOthers,
+            'curbs' => $this->inf_curbs,
+            'curbs_mts' => $this->inf_curbsMts,
+            'curbs_others' => $this->inf_curbsOthers,
+
+            // Variables tercer contenedor (luse_)
+            'land_use' => $this->luse_landUse,
+            'description_source_land' => $this->luse_descriptionSourceLand,
+            'mandatory_free_area' => $this->luse_mandatoryFreeArea,
+            'allowed_levels' => $this->luse_allowedLevels,
+            'land_coefficient_area' => $this->luse_landCoefficientArea,
+        ];
+
+        //dd($data);
+
+        // Guardar o actualizar
+        UrbanFeaturesModel::updateOrCreate(
+            ['valuation_id' => $this->valuation_id],
+            $data
+        );
+
         Toaster::success('Formulario guardado con éxito');
         return redirect()->route('form.index', ['section' => 'urban-equipment']);
     }
 
-    public function validateAllContainers(){
+    public function validateAllContainers()
+    {
         $container1 = [
             'cu_zoneClassification'    => 'required',
             'cu_predominantBuildings'  => 'required',
@@ -148,13 +275,15 @@ class UrbanFeatures extends Component
         if ($this->inf_garbageCollection === '1') {
             $container2 = array_merge(
                 $container2,
-        ['inf_garbageCollectionFrecuency' => 'required|numeric|gt:0']);
+                ['inf_garbageCollectionFrecuency' => 'required|numeric|gt:0']
+            );
         }
 
-        if($this->inf_roadways === '6. Otros'){
+        if ($this->inf_roadways === '6. Otros') {
             $container2 = array_merge(
                 $container2,
-                ['inf_roadwaysOthers'  => 'required']);
+                ['inf_roadwaysOthers'  => 'required']
+            );
         }
 
         if ($this->inf_sidewalks === '4. Otros') {
@@ -263,8 +392,9 @@ class UrbanFeatures extends Component
 
 
     //Watcher para asignar todos los servicios
-    public function updatedInfAllServices($value){
-        if($value === true) {
+    public function updatedInfAllServices($value)
+    {
+        if ($value === true) {
             /* dd('si funciona'); */
             $this->inf_waterDistribution = 1;
             $this->inf_wastewaterCollection = 1;
@@ -283,6 +413,8 @@ class UrbanFeatures extends Component
             $this->inf_telephoneConnection = 1;
             $this->inf_roadSignage = 1;
             $this->inf_streetNaming = 1;
+
+            $this->inf_allServices = false;
         }
     }
 
