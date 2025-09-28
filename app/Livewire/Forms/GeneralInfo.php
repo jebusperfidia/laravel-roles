@@ -59,7 +59,7 @@ class GeneralInfo extends Component
         $gi_copyFromOwner = false;
 
     //Variable quinto contenedor
-    public $gi_purpose, $gi_purposeSigapred, $gi_objective, $gi_ownerShipRegime;
+    public $gi_purpose, $gi_purposeOther, $gi_purposeSigapred, $gi_objective, $gi_ownerShipRegime;
 
 
     /**
@@ -170,6 +170,7 @@ class GeneralInfo extends Component
 
         //  Datos importantes
         $this->gi_purpose = $valuation->purpose;
+        $this->gi_purposeOther = $valuation->purpose_other;
         $this->gi_purposeSigapred = $valuation->purpose_sigapred;
         $this->gi_objective = $valuation->objective;
         $this->gi_ownerShipRegime = $valuation->owner_ship_regime;
@@ -373,6 +374,7 @@ class GeneralInfo extends Component
 
             // Datos importantes
             'purpose'           => $this->gi_purpose,
+            'purpose_other'     => $this->gi_purposeOther,
             'purpose_sigapred'  => $this->gi_purposeSigapred,
             'objective'         => $this->gi_objective,
             'owner_ship_regime' => $this->gi_ownerShipRegime,
@@ -510,14 +512,13 @@ class GeneralInfo extends Component
             'gi_propertyHousingComplex' => 'nullable',
             'gi_propertyTax' => 'required|integer',
             'gi_propertyWaterAccount' => 'required',
+
             'gi_propertyType' => 'required',
             'gi_propertyTypeSigapred' => 'required',
             'gi_propertyLandUse' => 'required',
-            'gi_propertyTypeHousing' => 'required',
-            'gi_propertyConstructor' => 'required',
-            'gi_propertyRfcConstructor' => 'required|min:12',
             'gi_propertyAdditionalData' => 'nullable'
         ];
+
 
         //Validaciones si la colonia no está listada
         if ($this->gi_propertyColony === 'no-listada') {
@@ -527,14 +528,39 @@ class GeneralInfo extends Component
         }
 
 
+
+        if (stripos($this->gi_propertyType, 'terreno') === false){
+            $container4 = array_merge($container4, [
+                'gi_propertyTypeHousing' => 'required',
+                'gi_propertyConstructor' => 'required',
+                'gi_propertyRfcConstructor' => 'required|min:12',
+            ]);
+        }
+
+
         //Variable quinto contenedor
 
         $container5 = [
             'gi_purpose' => 'required',
-            'gi_purposeSigapred' => 'required',
             'gi_objective' => 'required',
             'gi_ownerShipRegime' => 'required'
         ];
+
+
+
+        //Validaciones para indicar si el valor de purpose es otro
+        if ($this->gi_purpose === 'Otro') {
+            $container5 = array_merge($container5, [
+                'gi_purposeOther'  => 'required|string|max:100'
+            ]);
+        }
+
+
+        if (stripos($this->gi_propertyType, 'condominio') !== false) {
+            $container5 = array_merge($container5, [
+                'gi_purposeSigapred'  => 'required'
+            ]);
+        }
 
         //Una vez almacenadas todas las reglas de validación, primero guardamos las reglas del contenedor 1
         $rules = $container1;
@@ -1066,6 +1092,7 @@ class GeneralInfo extends Component
 
             // Contenedor 5: Detalles adicionales del inmueble
             'gi_purpose' => 'propósito del avalúo',
+            'gi_purposeOther' => 'otro',
             'gi_purposeSigapred' => 'propósito del avalúo sigapred',
             'gi_objective' => 'Objeto del avalúo',
             'gi_ownerShipRegime' => 'Régimen del avalúo'

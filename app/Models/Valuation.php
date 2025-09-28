@@ -83,6 +83,7 @@ class Valuation extends Model
 
         // Datos importantes
         'purpose',
+        'purpose_other',
         'purpose_sigapred',
         'objective',
         'owner_ship_regime',

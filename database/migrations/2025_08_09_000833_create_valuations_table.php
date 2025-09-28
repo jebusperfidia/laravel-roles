@@ -97,10 +97,11 @@ return new class extends Migration
             $table->string('property_additional_data', 100)->nullable();
 
             //Valores para datos importantes
-            $table->string('purpose', 100)->nullable();
+            $table->string('purpose', 50)->nullable();
+            $table->string('purpose_other', 100)->nullable();
             $table->string('purpose_sigapred', 100)->nullable();
             $table->string('objective', 100)->nullable();
-            $table->string('owner_ship_regime', 100)->nullable();
+            $table->string('owner_ship_regime', 20)->nullable();
 
 
             $table->timestamps();

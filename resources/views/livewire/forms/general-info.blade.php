@@ -783,6 +783,8 @@
                     </flux:field>
                 </div>
 
+
+                @if (stripos($gi_propertyType, 'terreno') === false)
                 <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Tipo de vivienda<span class="sup-required">*</span></flux:label>
@@ -815,10 +817,11 @@
                         </div>
                     </flux:field>
                 </div>
+                @endif
 
                 <div class="form-grid form-grid--1">
                     <flux:field class="flux-field">
-                        <flux:label>Información adicional<span class="sup-required">*</span></flux:label>
+                        <flux:label>Información adicional</flux:label>
                         <flux:input type="text" wire:model='gi_propertyAdditionalData' />
                         <flux:error name="gi_propertyAdditionalData" />
                     </flux:field>
@@ -854,7 +857,7 @@
                 <div class="form-grid form-grid--1">
                     <flux:field class="flux-field">
                         <flux:label>Propósito del avalúo<span class="sup-required">*</span></flux:label>
-                        <flux:select wire:model="gi_purpose" class="text-gray-800 [&_option]:text-gray-900">
+                        <flux:select wire:model.live="gi_purpose" class="text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                             <flux:select.option value="Conocer el valor castral del inmueble">Conocer el valor
                                 castral
@@ -872,28 +875,43 @@
                     </flux:field>
                 </div>
 
+                @if ($gi_purpose === 'Otro')
+                <div class="form-grid form-grid--1">
+                    <flux:field class="flux-field">
+                        <flux:label>Indique otro<span class="sup-required">*</span></flux:label>
+                        <flux:input type="text" wire:model='gi_purposeOther'/>
+                        <div class="error-container">
+                            <flux:error name="gi_purposeOther" />
+                        </div>
+                    </flux:field>
+                </div>
+                @endif
+
+               @if (stripos($gi_propertyType, 'condominio') !== false)
+
                 <div class="form-grid form-grid--1">
                     <div class="error-container">
                         <flux:label>Propósito del avalúo para Sigapred<span class="sup-required">*</span>
-                        </flux:label>
-                        <flux:select wire:model="gi_purposeSigapred" class="text-gray-800 [&_option]:text-gray-900">
-                            <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                    </flux:label>
+                    <flux:select wire:model="gi_purposeSigapred" class="text-gray-800 [&_option]:text-gray-900">
+                        <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                        <flux:select.option
+                        value="Establecer la base gravable para el pago de impuesto sobre adquisición del inmueble (ISAI)">
+                        Establecer la base gravable para el pago de impuesto sobre adquisición del inmueble
+                        (ISAI)</flux:select.option>
+                        <flux:select.option value="Establecer la base gravable para el pago del impuesto predial">
+                            Establecer la base gravable para el pago del impuesto predial</flux:select.option>
                             <flux:select.option
-                                value="Establecer la base gravable para el pago de impuesto sobre adquisición del inmueble (ISAI)">
-                                Establecer la base gravable para el pago de impuesto sobre adquisición del inmueble
-                                (ISAI)</flux:select.option>
-                            <flux:select.option value="Establecer la base gravable para el pago del impuesto predial">
-                                Establecer la base gravable para el pago del impuesto predial</flux:select.option>
-                            <flux:select.option
-                                value="Establecer la base gravable para el pago de derechos y construcciones inmobiliarias">
-                                Establecer la base gravable para el pago de derechos y construcciones inmobiliarias
-                            </flux:select.option>
-                        </flux:select>
-                        <div class="error-container">
-                            <flux:error name="gi_purposeSigapred" />
-                        </div>
+                            value="Establecer la base gravable para el pago de derechos y construcciones inmobiliarias">
+                            Establecer la base gravable para el pago de derechos y construcciones inmobiliarias
+                        </flux:select.option>
+                    </flux:select>
+                    <div class="error-container">
+                        <flux:error name="gi_purposeSigapred" />
                     </div>
                 </div>
+            </div>
+            @endif
 
                 <div class="form-grid form-grid--1">
                     <flux:field class="flux-field">

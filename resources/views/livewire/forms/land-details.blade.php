@@ -721,7 +721,7 @@
                         <flux:label>Configuracion<span class="sup-required">*</span></flux:label>
                         <flux:select wire:model="ct_configuration" class=" text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                            <flux:select.option value="1. Regular">1.Regular</flux:select.option>
+                            <flux:select.option value="1. Regular">1. Regular</flux:select.option>
                             <flux:select.option value="2. Irregular">2. Irregular</flux:select.option>
                         </flux:select>
                         <div>
@@ -746,6 +746,8 @@
                             <flux:error name="ct_topography" />
                         </div>
                     </flux:field>
+
+
                     <div class="relative inline-block w-full">
                         <flux:label>Tipo de vialidad<span class="sup-required">*</span></flux:label>
                         <flux:dropdown inline position="bottom" align="start" class="w-full">
