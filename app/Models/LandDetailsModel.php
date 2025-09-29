@@ -82,6 +82,7 @@ class LandDetailsModel extends Model
         'type_of_road',
         'panoramic_features',
         'easement_restrictions',
+        'easement_restrictions_others',
 
 
 

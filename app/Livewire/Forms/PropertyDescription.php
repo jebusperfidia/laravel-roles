@@ -5,9 +5,16 @@ namespace App\Livewire\Forms;
 use Livewire\Component;
 use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
+use App\Models\Valuation;
+use App\Models\PropertyDescriptionModel;
 
 class PropertyDescription extends Component
 {
+
+    public $valuationId;
+
+    public $propertyType;
+
     public $submitted = false;      // ← Arranca en false
 
     //Valor para obtener datos de archivo de configuración
@@ -24,9 +31,28 @@ class PropertyDescription extends Component
         // Carga la configuración
         $this->usages = config('properties_inputs.proximity_urban_reference', []);
 
-        /* $this->urbanProximity = '2'; */
+        //Recuperamos el id del avaluo desde la variable de sesión
+        $this->valuationId = session('valuation_id');
 
-        $this->resetErrorBag();
+        //Obtenemos el valor del tipo de propiedad para el renderizado y guardado condicional
+        $this->propertyType = Valuation::where('id', $this->valuationId)->value('property_type');
+
+        //Verificamos si existe algún registro en la base de datos
+        $propertyDescription = PropertyDescriptionModel::where('valuation_id', $this->valuationId)->first();
+
+        //Si existe algún registro previo en la base de datos, recuperamos los valores para mostrarlos en la vista
+        if($propertyDescription){
+            $this->urbanProximity = $propertyDescription->urban_proximity;
+            $this->actualUse = $propertyDescription->actual_use;
+
+        if (stripos($this->propertyType, 'condominio') !== false) {
+
+            $this->multipleUseSpace = $propertyDescription->multiple_use_space;
+            $this->levelBuilding = $propertyDescription->level_building;
+            $this->projectQuality = $propertyDescription->project_quality;
+            }
+        }
+
     }
 
     public function save()
@@ -36,13 +62,18 @@ class PropertyDescription extends Component
 
         $rules = [
             "urbanProximity" => 'required',
-            "actualUse" => 'required',
-            "multipleUseSpace" => 'required',
-            "projectQuality" => 'required',
-            "levelBuilding" => 'required'
-           /*  "longitud" => 'required',
-            "altitud" => 'required', */
+            "actualUse" => 'required'
         ];
+
+        //Validaciones si la colonia no está listada
+        if (stripos($this->propertyType, 'condominio') !== false) {
+            $rules = array_merge($rules, [
+                "multipleUseSpace" => 'required',
+                "levelBuilding" => 'required|integer|min:0',
+                "projectQuality" => 'required'
+            ]);
+        }
+
 
         $validator = Validator::make(
             $this->all(),
@@ -63,8 +94,34 @@ class PropertyDescription extends Component
             return;
         }
 
+        $data = [
+            'urban_proximity' => $this->urbanProximity,
+            'actual_use' => $this->actualUse,
+            /* 'multiple_use_space' => $this->multipleUseSpace,
+            'level_building' => $this->levelBuilding,
+            'project_quality' => $this->projectQuality, */
+        ];
+
+
+        //Validaciones si la colonia no está listada
+        if (stripos($this->propertyType, 'condominio') !== false) {
+            $data = array_merge($data, [
+            'multiple_use_space' => $this->multipleUseSpace,
+            'level_building' => $this->levelBuilding,
+            'project_quality' => $this->projectQuality,
+            ]);
+        }
+
+
+
+        PropertyDescriptionModel::updateOrCreate(
+            ['valuation_id' => $this->valuationId],
+            $data
+        );
+
 
         Toaster::success('Datos guardados con éxito');
+        return redirect()->route('form.index', ['section' => 'construction-elements']);
     }
 
     public function updatedLevelBuilding($value)

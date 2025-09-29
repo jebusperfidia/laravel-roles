@@ -965,7 +965,7 @@
 
                     <flux:field class="flux-field">
                         <flux:label>Servimbre y/o restricciones<span class="sup-required">*</span></flux:label>
-                        <flux:select wire:model="ct_EasementRestrictions"
+                        <flux:select wire:model.live="ct_EasementRestrictions"
                             class=" text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                             <flux:select.option value="No existen restricciones de construccion en el terreno">No
@@ -988,6 +988,18 @@
                         </div>
                     </flux:field>
                 </div>
+
+                @if ($ct_EasementRestrictions === 'Otras')
+                <div class="form-grid form-grid--2">
+                    <flux:field class="flux-field">
+                        <flux:label>Especifique otras (servimbre y/o restricciones)<span class="sup-required">*</span></flux:label>
+                        <flux:input type="text" wire:model='ct_EasementRestrictionsOthers' />
+                        <div class="error-container">
+                            <flux:error name="ct_EasementRestrictionsOthers" />
+                        </div>
+                    </flux:field>
+                </div>
+                @endif
 
             </div>
         </div>
@@ -1392,29 +1404,33 @@
 
         <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos</flux:button>
     </form>
-    <script>
-        document.addEventListener('livewire:navigated', () => {
-
-    // Coordenadas
-    const lat = 19.4326;
-    const lng = -99.1332;
+<script>
+    document.addEventListener('livewire:navigated', () => {
+    const lat = @js($propertyLocation->latitude);
+    const lng = @js($propertyLocation->longitude);
+    const alt = @js($propertyLocation->altitude);
     const coords = [lat, lng];
 
+    // Evita reinicializar si los mapas ya están montados
+    if (document.getElementById('map-macro').innerHTML.trim() !== '') return;
+
     // Mapa Macro (vista amplia)
-    const mapMacro = L.map('map-macro').setView(coords, 12);
+    const mapMacro = L.map('map-macro').setView(coords, 6); // Zoom bajo para vista lejana
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(mapMacro);
-    L.marker(coords).addTo(mapMacro).bindPopup('Tu ubicación').openPopup();
+    L.marker(coords).addTo(mapMacro)
+        .bindPopup(`<strong>Vista general</strong><br>Lat: ${lat}<br>Lng: ${lng}`)
+        .openPopup();
 
-    // Mapa Micro (vista de calle)
-    const mapMicro = L.map('map-micro').setView(coords, 18);
+    // Mapa Micro (vista cercana)
+    const mapMicro = L.map('map-micro').setView(coords, 18); // Zoom alto para vista detallada
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(mapMicro);
-    L.marker(coords).addTo(mapMicro).bindPopup('Tu ubicación').openPopup();
-    });
-
-
-    </script>
+    L.marker(coords).addTo(mapMicro)
+        .bindPopup(`<strong>Vista detallada</strong><br>Lat: ${lat}<br>Lng: ${lng}<br>Alt: ${alt} m`)
+        .openPopup();
+});
+</script>
 </div>

@@ -31,7 +31,7 @@ class PropertyLocation extends Component
             // Los mapas no pueden funcionar con valores nulos o vacíos para latitud/longitud.
             $this->latitude  = '23.6345';  // Centro geográfico de México
             $this->longitude = '-102.5528';
-            $this->altitude  = null; // La altitud es opcional, se puede inicializar como null
+            $this->altitude  = '0'; // La altitud es opcional, se puede inicializar como null
         }
     }
 
@@ -83,8 +83,16 @@ class PropertyLocation extends Component
             $this->validate([
                 'latitude'  => ['required', 'numeric', 'between:-90,90'],
                 'longitude' => ['required', 'numeric', 'between:-180,180'],
-                'altitude'  => ['nullable', 'numeric'], // `nullable` permite que el campo esté vacío
-            ]);
+                'altitude'  => ['required', 'numeric'],
+            ],
+            [],
+            [
+                'latitude' => 'latitud',
+                'longitude' => 'longitud',
+                'altitude' => 'altitud'
+            ]
+
+        );
         } catch (ValidationException $e) {
             Toaster::error('Hay errores de validación, por favor corrígelos.');
             throw $e;

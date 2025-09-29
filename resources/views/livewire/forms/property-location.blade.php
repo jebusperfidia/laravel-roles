@@ -31,7 +31,7 @@
                         </div>
                     </flux:field>
                     <flux:field>
-                        <flux:label>Altitud (Opcional)</flux:label>
+                        <flux:label>Altitud</flux:label>
                         <flux:input type="text" inputmode="decimal" wire:model.defer='altitude' />
                         <div class="error-container">
                             <flux:error name="altitude" />

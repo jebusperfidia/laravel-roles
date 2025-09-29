@@ -10,6 +10,7 @@ use Livewire\WithFileUploads;
 use Flux\Flux;
 use App\Models\Valuation;
 use App\Models\LandDetailsModel;
+use App\Models\PropertyLocationModel;
 use App\Models\GroupsNeighborsModel;
 use App\Models\GroupNeighborDetailsModel;
 use App\Models\LandSurfaceModel;
@@ -39,6 +40,8 @@ class LandDetails extends Component
     //Variable para asignar el id del detalle para un grupo, utilizado para editar o eliminar un elemento
     public $groupDetailId;
 
+    //Obtenemos de propertyLocation para renderizar los valores en el componente
+    public $propertyLocation;
 
     //Lista de elementos de superficie del terreno ligados al land_details
     public $landSurfaces = [];
@@ -82,7 +85,7 @@ class LandDetails extends Component
     //TERCER CONTENEDOR
     public $ct_streetWithFront, $ct_CrossStreet1, $ct_crossStreetOrientation1, $ct_CrossStreet2, $ct_crossStreetOrientation2,
         $ct_borderStreet1, $ct_borderStreetOrientation1, $ct_borderStreet2, $ct_borderStreetOrientation2, $ct_location,
-        $ct_configuration, $ct_topography, $ct_typeOfRoad, $ct_panoramicFeatures, $ct_EasementRestrictions;
+        $ct_configuration, $ct_topography, $ct_typeOfRoad, $ct_panoramicFeatures, $ct_EasementRestrictions, $ct_EasementRestrictionsOthers;
 
 
     //CUARTO CONTENEDOR
@@ -108,7 +111,10 @@ class LandDetails extends Component
         //Obtenemos los valores deL avalúo a partir de la variable de sesión del ID
         $this->valuation = Valuation::find(Session::get('valuation_id'));
 
-        //dd($valuation->property_type);
+        //obtenemos los valores de propertyLocation
+        $this->propertyLocation = PropertyLocationModel::where('valuation_id', $valuationId)->first();
+
+        //dd($this->propertyLocation);
 
         // Asignar el modelo solo si valuationId existe para evitar errores
         $this->landDetail = LandDetailsModel::where('valuation_id', $valuationId)->first();
@@ -183,6 +189,7 @@ class LandDetails extends Component
             $this->ct_typeOfRoad = $this->landDetail->type_of_road;
             $this->ct_panoramicFeatures = $this->landDetail->panoramic_features;
             $this->ct_EasementRestrictions = $this->landDetail->easement_restrictions;
+            $this->ct_EasementRestrictionsOthers = $this->landDetail->easement_restrictions_others;
 
             // CUARTO CONTENEDOR - Situación del Terreno
             $this->ls_useExcessCalculation = $this->landDetail->use_excess_calculation;
@@ -233,6 +240,7 @@ class LandDetails extends Component
             return;
         }
 
+        //dd($this->ct_EasementRestrictionsOthers);
         //Aquí se ejecutará la lógica de guardado
         // Mapea las propiedades del componente a un array con nombres de columnas de la DB
         $data = [
@@ -295,6 +303,7 @@ class LandDetails extends Component
             'type_of_road' => $this->ct_typeOfRoad,
             'panoramic_features' => $this->ct_panoramicFeatures,
             'easement_restrictions' => $this->ct_EasementRestrictions,
+            'easement_restrictions_others' => $this->ct_EasementRestrictionsOthers,
 
             // CUARTO CONTENEDOR - Situación del Terreno
             'use_excess_calculation' => $this->ls_useExcessCalculation,
@@ -304,6 +313,8 @@ class LandDetails extends Component
             'undivided_surface_land' => $this->ls_undividedSurfaceLand,
             'surplus_land_area' => $this->ls_surplusLandArea,
         ];
+
+        //dd($data);
 
             LandDetailsModel::updateOrCreate(
             ['valuation_id' => $this->valuation_id],
@@ -725,6 +736,12 @@ class LandDetails extends Component
             'ct_EasementRestrictions' => 'required'
         ];
 
+        if ($this->ct_EasementRestrictions === 'Otras') {
+            $container3 = array_merge($container3, [
+                'ct_EasementRestrictionsOthers' => 'required',
+            ]);
+        }
+
 
         //VALIDACIONES CONTAINER 4
         $container4 = [
@@ -824,6 +841,7 @@ class LandDetails extends Component
             'ct_typeOfRoad' => 'tipo de vialidad',
             'ct_panoramicFeatures' => 'caracteristicas panoramicas',
             'ct_EasementRestrictions' => 'servidumbre y/o restricciones',
+            'ct_EasementRestrictionsOthers' => 'otras (servidumbre y/o restricciones)',
 
 
 

@@ -96,8 +96,9 @@ return new class extends Migration
             */
             $table->integer('type_of_road');
 
-            $table->string('panoramic_features',100);
+            $table->text('panoramic_features');
             $table->string('easement_restrictions',200);
+            $table->string('easement_restrictions_others',200)->nullable();
 
 
 

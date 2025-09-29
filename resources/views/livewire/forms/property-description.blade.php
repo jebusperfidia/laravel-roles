@@ -10,7 +10,7 @@
 
                 <div class="form-grid form-grid--3 form-grid-3-variation">
                     <div class="label-variation">
-                        <flux:label>Referencia de <br>proximidad urbana</flux:label>
+                        <flux:label>Referencia de <br>proximidad urbana<span class="sup-required">*</span></flux:label>
                     </div>
 
 
@@ -46,7 +46,7 @@
                                         d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-
+                            <small>Depende de la infraestructura de la zona</small>
                             {{-- MENÚ --}}
                             <flux:menu class="absolute left-0 top-full mt-1 w-3/5 bg-white
                                border border-gray-200 rounded-md shadow-lg z-10">
@@ -96,7 +96,7 @@
 
                 <div class="form-grid form-grid--3 form-grid-3-variation">
                     <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start">
-                        <flux:label>Uso actual</flux:label>
+                        <flux:label>Uso actual<span class="sup-required">*</span></flux:label>
                     </div>
                     <div class="radio-input">
                         <flux:field>
@@ -110,9 +110,10 @@
                     </div>
                 </div>
 
+                @if (stripos($propertyType, 'condominio') !== false)
                 <div class="form-grid form-grid--3 form-grid-3-variation">
                     <div class="label-variation">
-                        <flux:label>Espacio de uso múltiple</flux:label>
+                        <flux:label>Espacio de uso múltiple<span class="sup-required">*</span></flux:label>
                     </div>
                     <div class="radio-input">
                         <flux:field>
@@ -127,27 +128,30 @@
                                 <flux:error name="multipleUseSpace"/>
                             </div>
                         </flux:field>
+                        <small>Se refiere a si el inmueble a valuar es un pie de casa donde todas las actividades se desarrollan en un solo espacio.
+                        Sólo hay muros divisorios para el baño</small>
                     </div>
                 </div>
 
                 <div class="form-grid form-grid--3 form-grid-3-variation">
                     <div class="label-variation">
-                        <flux:label>Nivel de edicificio <br>(condominio)</flux:label>
+                        <flux:label>Nivel de edicificio <br>(condominio)<span class="sup-required">*</span></flux:label>
                     </div>
                     <div class="radio-input">
                         <flux:field>
                             <div class="radio-group-horizontal">
-                                <flux:input type="number" wire:model.live='levelBuilding' />
+                                <flux:input type="number" wire:model.lazy='levelBuilding' />
                             </div>
                             <div>
                                 <flux:error name="levelBuilding"/>
                             </div>
                         </flux:field>
+                        <small>Nivel en el que se encuentra el departamento dentro del edificio</small>
                     </div>
                 </div>
                 <div class="form-grid form-grid--3 form-grid-3-variation">
                     <div class="label-variation">
-                        <flux:label>Calidad del proyecto</flux:label>
+                        <flux:label>Calidad del proyecto<span class="sup-required">*</span></flux:label>
                     </div>
                     <div class="radio-input">
                         <flux:field>
@@ -165,7 +169,7 @@
                         </flux:field>
                     </div>
                 </div>
-
+                @endif
             </div>
         </div>
         <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos</flux:button>
