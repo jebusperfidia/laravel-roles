@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('group_neighbor_details', function (Blueprint $table) {
+        Schema::create('land_surfaces', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('group_neighbor_id')
-                ->constrained('groups_neighbors')
+
+            $table->foreignId('land_detail_id')
+                ->constrained('land_details')
                 ->cascadeOnDelete();
 
-            $table->string('orientation',50);
-            $table->decimal('extent', 9, 4);
-            $table->string('adjacent',150);
+            $table->decimal('surface', 9,4);
+            $table->string('value_area');
 
 
             $table->timestamps();
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('group_neighbor_details');
+        Schema::dropIfExists('land_surfaces');
     }
 };

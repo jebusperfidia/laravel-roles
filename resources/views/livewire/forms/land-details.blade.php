@@ -327,7 +327,12 @@
             </div>
             <div class="form-container__content">
 
-
+                @if (!$landDetail)
+                {{-- <small>Debes guardar los datos principales para poder usar esta opción</small> --}}
+                <div class="font-semibold text-sm text-red-600 mb-2"><span>Debes guardar los datos principales para
+                        poder usar esta opción</span></div>
+                {{-- <br><br> --}}
+                @endif
                 <div class="form-grid form-grid--3 form-grid-3-variation">
 
                     {{-- Primer elemento hijo: el label --}}
@@ -337,7 +342,7 @@
                     <div>
                         <div class="flex items-center gap-4">
                             {{-- Input de archivo oculto para múltiples selecciones --}}
-                            <input type="file" wire:model="photos" class="sr-only" id="file-upload" multiple>
+                            <input type="file" wire:model="photos" class="sr-only" id="file-upload" multiple @if(!$landDetail) disabled @endif>
 
                             {{-- Botón estilizado para seleccionar archivos --}}
                             <label for="file-upload"
@@ -381,81 +386,160 @@
                         </div>
 
                         {{-- Muestra un mensaje de éxito cuando la carga es correcta --}}
-                        @if (session()->has('message'))
+                        {{-- @if (session()->has('message'))
                         <div class="mt-4 text-green-600 text-sm font-semibold">
                             {{ session('message') }}
                         </div>
-                        @endif
+                        @endif --}}
+                        <div wire:loading wire:target="photos"
+                            class="mt-2 text-sm text-blue-600 flex items-center gap-2">
+                            <svg class="animate-spin h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                            </svg>
+                            Subiendo archivos...
+                        </div>
                     </div>
                 </div>
 
 
                 <div class="form-grid form-grid--3 form-grid-3-variation mb-4">
-                    <flux:label class="label-variation">Imágenes cargadas</flux:label>
+                    <flux:label class="label-variation">Archivos cargados</flux:label>
+                    <div class="grid grid-cols-3 gap-4">
+                        @forelse ($measureBoundaries as $file)
+                        <div class="relative border p-2 rounded shadow bg-white">
+
+                            @if ($file->file_type === 'image')
+                            {{-- Miniatura para imagen --}}
+                            <img src="{{ asset('storage/' . $file->file_path) }}" alt="{{ $file->original_name }}"
+                                class="w-full h-32 object-cover rounded">
+
+                            {{-- Botón para ver en nueva pestaña --}}
+                            <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank"
+                                class="block mt-2 text-xs text-center text-blue-600 hover:underline">
+                                Ver imagen completa
+                            </a>
+
+                            {{-- @elseif ($file->file_type === 'pdf')
+
+                            <div class="flex flex-col items-center justify-center h-32">
+
+                                <svg class="w-10 h-10 text-red-500 mb-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V7.828A2 2 0 0017.414 7L13 2.586A2 2 0 0011.586 2H4z" />
+                                </svg>
+                                <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank"
+                                    class="text-xs text-blue-600 hover:underline text-center">
+                                    Ver PDF
+                                </a>
+                            </div>
+                            @endif --}}
+
+
+                            @elseif ($file->file_type === 'pdf')
+                            <div class="w-full">
+                                <embed src="{{ asset('storage/' . $file->file_path) }}" type="application/pdf"
+                                    width="100%" height="250px" />
+
+                                <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank"
+                                    class="text-xs text-blue-600 hover:underline block mt-1 text-center">
+                                    Ver en otra pestaña
+                                </a>
+                            </div>
+                            @endif
+
+                            {{-- Botón eliminar --}}
+                            <button type="button" wire:click="deleteFile({{ $file->id }})"
+                                class="absolute top-1 right-1 text-white bg-red-600 rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700 cursor-pointer"
+                                onclick="confirm('¿Seguro que deseas eliminar este archivo?') || event.stopImmediatePropagation()">
+                                ×
+                            </button>
+                        </div>
+                        @empty
+                        <p class="text-sm col-span-3 text-gray-500">No hay archivos cargados aún.</p>
+                        @endforelse
+                    </div>
                 </div>
 
 
+                @if (!$landDetail)
+                <div class="font-semibold text-sm text-red-600"><span>Debes guardar los datos principales para poder
+                        usar esta
+                        opción</span></div>
+                @endif
                 <div class="flex justify-between text-lg border-b-2 border-gray-300 mt-8">
                     <h2>Grupos de colindancias</h2>
                     {{-- <flux:modal.trigger name="add-group" class="flex justify-end mb-2"> --}}
-                        <flux:button class="btn-primary btn-table cursor-pointer mb-2" wire:click='openAddGroup'>Agregar grupo</flux:button>
-                    {{-- </flux:modal.trigger> --}}
+                        <flux:button class="btn-primary btn-table cursor-pointer mb-2" wire:click='openAddGroup'>Agregar
+                            grupo</flux:button>
+                        {{--
+                    </flux:modal.trigger> --}}
                 </div>
                 <br>
-                <div class="border-2 p-4">
+                @forelse ($groupsWithNeighbors as $index => $group)
+                <div class="border-2 p-4 mt-4">
                     <div class="flex justify-between text-md mt-2">
-                        <h3>Grupos 1</h3>
+                        <h3>Grupo {{ $group->name }}</h3>
                         <flux:button
-                            onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
-                            wire:click="deleteGroup" type="button" class="btn-deleted btn-files cursor-pointer mr-2">
-                            Eliminar grupo</flux:button>
+                            onclick="confirm('¿Estás seguro de que deseas eliminar este grupo?') || event.stopImmediatePropagation()"
+                            wire:click="deleteGroup({{ $group->id }})" type="button"
+                            class="btn-deleted btn-files cursor-pointer mr-2">
+                            Eliminar grupo
+                        </flux:button>
                     </div>
-                    <div class="flex justify-between text-md">
-                        {{-- <flux:modal.trigger name="add-item" class="flex justify-end"> --}}
-                            <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus" wire:click='openAddElement'></flux:button>
-                        {{-- </flux:modal.trigger> --}}
+
+                    <div class="flex justify-between text-md mb-2">
+                        <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
+                            wire:click='openAddElement({{ $group->id }})'>
+                        </flux:button>
                     </div>
-                    {{-- TABLA DE ELEMENTOS --}}
+
                     <div class="mt-2">
                         <div class="overflow-x-auto max-w-full">
-                            <table class="min-w-[550px] table-fixed w-full border-2 ">
+                            <table class="min-w-[550px] table-fixed w-full border-2">
                                 <thead>
                                     <tr class="bg-gray-100">
-                                        <th class="px-2 py-1 border whitespace-nowrap">Orientacion</th>
+                                        <th class="px-2 py-1 border whitespace-nowrap">Orientación</th>
                                         <th class="py-1 border">Medida</th>
                                         <th class="px-2 py-1 border">Colindancia</th>
                                         <th class="w-[100px] py-1 border">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-
-                                    {{-- Valor de ejemplo para usar en los for --}}
+                                    @forelse ($group->neighbors as $neighbor)
                                     <tr>
-                                        <td class="px-2 py-1 border text-xs text-center">Casa habitación
+                                        <td class="px-2 py-1 border text-xs text-center">{{ $neighbor->orientation }}
                                         </td>
-                                        <td class="px-2 py-1 border text-sm text-center">1</td>
-                                        <td class="px-2 py-1 border text-sm text-center">1</td>
-
-
+                                        <td class="px-2 py-1 border text-sm text-center">{{ $neighbor->extent }}</td>
+                                        <td class="px-2 py-1 border text-sm text-center">{{ $neighbor->adjacent }}</td>
                                         <td class="my-2 flex justify-evenly">
-                                            {{-- <flux:modal.trigger name="edit-item" class="flex justify-end"> --}}
-                                                <flux:button type="button" icon-leading="pencil"
-                                                    class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElement'/>
-                                                {{-- </flux:modal-trigger> --}}
-                                                {{-- <flux:modal.trigger name="edit-construction"
-                                                    class="flex justify-end"> --}}
-                                                    <flux:button
-                                                        onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
-                                                        wire:click="deleteElement" type="button" icon-leading="trash"
-                                                        class="cursor-pointer btn-deleted btn-buildings" />
-                                                    {{-- </flux:modal-trigger> --}}
+                                            <flux:button type="button" icon-leading="pencil"
+                                                class="cursor-pointer btn-intermediary btn-buildins"
+                                                wire:click='openEditElement({{ $neighbor->id }})' />
+                                            <flux:button
+                                                onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
+                                                wire:click="deleteElement({{ $neighbor->id }})" type="button"
+                                                icon-leading="trash" class="cursor-pointer btn-deleted btn-buildings" />
                                         </td>
                                     </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center py-2 text-gray-500">No hay elementos en este
+                                            grupo.</td>
+                                    </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+                @empty
+                <div class="text-center py-6 text-gray-500 text-sm border border-dashed rounded-md mt-6">
+                    No hay grupos registrados.
+                </div>
+                @endforelse
             </div>
         </div>
 
@@ -878,13 +962,7 @@
                             <flux:error name="ct_panoramicFeatures" />
                         </div>
                     </flux:field>
-                    {{-- <flux:field class="flux-field">
-                        <flux:label>Servimbre y/o restricciones<span class="sup-required">*</span></flux:label>
-                        <flux:input type="text" wire:model='ct_EasementRestrictions' />
-                        <div class="error-container">
-                            <flux:error name="ct_EasementRestrictions" />
-                        </div>
-                    </flux:field> --}}
+
                     <flux:field class="flux-field">
                         <flux:label>Servimbre y/o restricciones<span class="sup-required">*</span></flux:label>
                         <flux:select wire:model="ct_EasementRestrictions"
@@ -927,15 +1005,21 @@
                 Superficie del terreno
             </div>
             <div class="form-container__content">
-
+                @if (!$landDetail)
+                <div class="font-semibold text-sm text-red-600"><span>Debes guardar los datos principales para poder
+                        usar esta
+                        opción</span></div>
+                <br><br>
+                @endif
                 <div class="flex justify-start text-md">
                     {{-- <flux:modal.trigger name="add-item" class="flex justify-end"> --}}
-                        <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus" wire:click='openAddElementLandSurface'>
+                        <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
+                            wire:click='openAddLandSurface'>
                         </flux:button>
                         {{--
                     </flux:modal.trigger> --}}
                 </div>
-                <div class="form-grid form-grid--2 pt-8">
+                <div class="form-grid form-grid--2 pt-4">
                     <div class="overflow-x-auto max-w-full">
                         <table class="min-w-[550px] table-fixed w-full border-2 ">
                             <thead>
@@ -946,23 +1030,29 @@
                                 </tr>
                             </thead>
                             <tbody>
-
-                                {{-- Valor de ejemplo para usar en los for --}}
+                                @forelse ($landSurfaces as $surface)
                                 <tr>
-                                    <td class="px-2 py-1 text-xs text-center">2,000</td>
-                                    <td class="px-2 py-1 text-xs text-center">0</td>
+                                    <td class="px-2 py-1 text-xs text-center">{{ number_format($surface->surface, 2) }}
+                                    </td>
+                                    <td class="px-2 py-1 text-xs text-center">{{ number_format($surface->value_area, 2)
+                                        }}</td>
                                     <td class="my-2 flex justify-evenly">
-                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
-                                            <flux:button type="button" icon-leading="pencil"
-                                                class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElementLandSurface'/>
-                                       {{--      </flux:modal-trigger>
-                                            <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
-                                              <flux:button onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
-                                                wire:click="deleteElementLandSurface" type="button" icon-leading="trash" class="cursor-pointer btn-deleted btn-buildings" />
+                                        <flux:button type="button" icon-leading="pencil"
+                                            class="cursor-pointer btn-intermediary btn-buildins"
+                                            wire:click="openEditLandSurface({{ $surface->id }})" />
+                                        <flux:button
+                                            onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
+                                            wire:click="deleteLandSurface({{ $surface->id }})" type="button"
+                                            icon-leading="trash" class="cursor-pointer btn-deleted btn-buildings" />
                                     </td>
                                 </tr>
-
-
+                                @empty
+                                <tr>
+                                    <td colspan="3" class="text-center text-gray-500 py-2">
+                                        No hay elementos registrados.
+                                    </td>
+                                </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -977,10 +1067,10 @@
                     <div class="radio-input">
                         <flux:field>
                             <div class="radio-group-horizontal">
-                               <flux:checkbox wire:model.live="ls_useExcessCalculation"/>
+                                <flux:checkbox wire:model.live="ls_useExcessCalculation" />
                             </div>
                             <div>
-                                <flux:error name="ls_useExcessCalculation"/>
+                                <flux:error name="ls_useExcessCalculation" />
                             </div>
                         </flux:field>
                     </div>
@@ -995,12 +1085,12 @@
                         <flux:field>
                             <div class="radio-group-horizontal">
                                 <flux:input.group>
-                                    <flux:input type="number" wire:model='ls_surfacePrivateLot'/>
+                                    <flux:input type="text" wire:model='ls_surfacePrivateLot' />
                                     <flux:button disabled><b>m²</b></flux:button>
                                 </flux:input.group>
                             </div>
                             <div>
-                                <flux:error name="ls_surfacePrivateLot"/>
+                                <flux:error name="ls_surfacePrivateLot" />
                             </div>
                         </flux:field>
                     </div>
@@ -1009,24 +1099,26 @@
 
                 <div class="form-grid form-grid--3 form-grid-3-variation pt-8">
                     <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start">
-                        <flux:label>Superficie del lote privativo  tipo</flux:label>
+                        <flux:label>Superficie del lote privativo tipo</flux:label>
                     </div>
                     <div class="radio-input">
                         <flux:field>
                             <div class="radio-group-horizontal">
                                 <flux:input.group>
-                                    <flux:input type="number" wire:model='ls_surfacePrivateLotType'/>
+                                    <flux:input type="text" wire:model='ls_surfacePrivateLotType' />
                                     <flux:button disabled><b>m²</b></flux:button>
                                 </flux:input.group>
                             </div>
                             <div>
-                                <flux:error name="ls_surfacePrivateLotType"/>
+                                <flux:error name="ls_surfacePrivateLotType" />
                             </div>
                         </flux:field>
                     </div>
                 </div>
                 @endif
 
+
+                @if (stripos($valuation->property_type, 'condominio') !== false)
                 <div class="form-grid form-grid--3 form-grid-3-variation pt-8">
                     <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start">
                         <flux:label>Indiviso (solo en condominio)</flux:label>
@@ -1035,12 +1127,12 @@
                         <flux:field>
                             <div class="radio-group-horizontal">
                                 <flux:input.group>
-                                    <flux:input type="number" wire:model='ls_undividedOnlyCondominium'/>
+                                    <flux:input type="number" wire:model='ls_undividedOnlyCondominium' />
                                     <flux:button disabled><b>%</b></flux:button>
                                 </flux:input.group>
                             </div>
                             <div>
-                                <flux:error name="ls_undividedOnlyCondominium"/>
+                                <flux:error name="ls_undividedOnlyCondominium" />
                             </div>
                         </flux:field>
                     </div>
@@ -1053,14 +1145,16 @@
                     <div class="radio-input">
                         <flux:field>
                             <div class="radio-group-horizontal">
-                                1.98 M²
+                                <div>{{$ls_undividedSurfaceLand}} <b>M²</b></div>
+                                {{-- 1.98 M² --}}
                             </div>
                             <div>
-                                <flux:error name="ls_undividedSurfaceLand"/>
+                                <flux:error name="ls_undividedSurfaceLand" />
                             </div>
                         </flux:field>
                     </div>
                 </div>
+                @endif
 
                 @if ($ls_useExcessCalculation)
                 <div class="form-grid form-grid--3 form-grid-3-variation pt-8">
@@ -1070,10 +1164,11 @@
                     <div class="radio-input">
                         <flux:field>
                             <div class="radio-group-horizontal">
-                                2 M²
+                                <div>{{$ls_surplusLandArea}}<b> M²</b></div>
+                                {{-- 2 M² --}}
                             </div>
                             <div>
-                                <flux:error name="ls_surplusLandArea"/>
+                                <flux:error name="ls_surplusLandArea" />
                             </div>
                         </flux:field>
                     </div>
@@ -1114,7 +1209,6 @@
             <div class="space-y-6">
                 <div>
                     <flux:heading size="lg">Crear grupo</flux:heading>
-                    {{-- <flux:text class="mt-2"></flux:text> --}}
                 </div>
                 <flux:field class="flux-field">
                     <flux:label>Nombre del grupo</flux:label>
@@ -1143,23 +1237,23 @@
                 </div>
                 <flux:field class="flux-field">
                     <flux:label>Orientación<span class="sup-required">*</span></flux:label>
-                    <flux:input type="text" wire:model='orientation'/>
+                    <flux:input type="text" wire:model='orientation' />
                     <div class="error-container">
-                        <flux:error name="orientation"/>
+                        <flux:error name="orientation" />
                     </div>
                 </flux:field>
                 <flux:field class="flux-field">
                     <flux:label>Medida<span class="sup-required">*</span></flux:label>
-                    <flux:input type="number" wire:model='extent'/>
+                    <flux:input type="number" wire:model='extent' />
                     <div class="error-container">
-                        <flux:error name="extent"/>
+                        <flux:error name="extent" />
                     </div>
                 </flux:field>
                 <flux:field class="flux-field">
                     <flux:label>Colindancia<span class="sup-required">*</span></flux:label>
-                    <flux:input type="text" wire:model='adjacent'/>
+                    <flux:input type="text" wire:model='adjacent' />
                     <div class="error-container">
-                        <flux:error name="adjacent"/>
+                        <flux:error name="adjacent" />
                     </div>
                 </flux:field>
                 <div class="flex">
@@ -1171,6 +1265,7 @@
         </flux:modal>
 
 
+
         {{-- Editar elemento --}}
 
         <flux:modal name="edit-element" class="md:w-96">
@@ -1179,30 +1274,31 @@
                     <flux:heading size="lg">Editar elemento</flux:heading>
                     {{-- <flux:text class="mt-2"></flux:text> --}}
                 </div>
-               <flux:field class="flux-field">
-                        <flux:label>Orientación<span class="sup-required">*</span></flux:label>
-                        <flux:input type="text" wire:model='orientation' />
-                        <div class="error-container">
-                            <flux:error name="orientation" />
-                        </div>
-                    </flux:field>
-                    <flux:field class="flux-field">
-                        <flux:label>Medida<span class="sup-required">*</span></flux:label>
-                        <flux:input type="number" wire:model='extent' />
-                        <div class="error-container">
-                            <flux:error name="extent" />
-                        </div>
-                    </flux:field>
-                    <flux:field class="flux-field">
-                        <flux:label>Colindancia<span class="sup-required">*</span></flux:label>
-                        <flux:input type="text" wire:model='adjacent' />
-                        <div class="error-container">
-                            <flux:error name="adjacent" />
-                        </div>
-                    </flux:field>
+                <flux:field class="flux-field">
+                    <flux:label>Orientación<span class="sup-required">*</span></flux:label>
+                    <flux:input type="text" wire:model='orientation' />
+                    <div class="error-container">
+                        <flux:error name="orientation" />
+                    </div>
+                </flux:field>
+                <flux:field class="flux-field">
+                    <flux:label>Medida<span class="sup-required">*</span></flux:label>
+                    <flux:input type="number" wire:model='extent' />
+                    <div class="error-container">
+                        <flux:error name="extent" />
+                    </div>
+                </flux:field>
+                <flux:field class="flux-field">
+                    <flux:label>Colindancia<span class="sup-required">*</span></flux:label>
+                    <flux:input type="text" wire:model='adjacent' />
+                    <div class="error-container">
+                        <flux:error name="adjacent" />
+                    </div>
+                </flux:field>
                 <div class="flex">
                     <flux:spacer />
-                    <flux:button type="button" wire:click='editElement' class="btn-primary cursor-pointer">Editar elemento
+                    <flux:button type="button" wire:click='editElement' class="btn-primary cursor-pointer">Editar
+                        elemento
                     </flux:button>
                 </div>
             </div>
@@ -1220,52 +1316,55 @@
 
 
 
-{{-- Agregar elemento  --}}
 
-<flux:modal name="add-elementLandSurface" class="md:w-96">
-    <div class="space-y-6">
-        <div>
-            <flux:heading size="lg">Crear elemento</flux:heading>
-            {{-- <flux:text class="mt-2"></flux:text> --}}
-        </div>
-        <flux:field class="flux-field">
-            <flux:label>Superficie en M²<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='modalSurface' />
-            <div class="error-container">
-                <flux:error name="modalSurface" />
-            </div>
-        </flux:field>
-        <div class="flex">
-            <flux:spacer />
-            <flux:button type="button" wire:click='addElementLandSurface' class="btn-primary cursor-pointer">Crear elemento
-            </flux:button>
-        </div>
-    </div>
-</flux:modal>
+        {{-- Agregar elemento --}}
 
-
-{{-- Editar elemento --}}
-
-<flux:modal name="edit-elementLandSurface" class="md:w-96">
-    <div class="space-y-6">
-        <div>
-            <flux:heading size="lg">Editar elemento</flux:heading>
-            {{-- <flux:text class="mt-2"></flux:text> --}}
-        </div>
-       <flux:field class="flux-field">
-                <flux:label>Superficie en M²<span class="sup-required">*</span></flux:label>
-                <flux:input type="number" wire:model='modalSurface'/>
-                <div class="error-container">
-                    <flux:error name="modalSurface"/>
+        <flux:modal name="add-LandSurface" class="md:w-96">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg">Crear elemento</flux:heading>
+                    {{-- <flux:text class="mt-2"></flux:text> --}}
                 </div>
-        </flux:field>
-        <div class="flex">
-            <flux:spacer />
-            <flux:button type="button" wire:click='editElementLandSurface' class="btn-primary cursor-pointer">Editar elemento
-            </flux:button>
-        </div>
-    </div>
-</flux:modal>
+                <flux:field class="flux-field">
+                    <flux:label>Superficie en M²<span class="sup-required">*</span></flux:label>
+                    <flux:input type="number" wire:model='modalSurface' />
+                    <div class="error-container">
+                        <flux:error name="modalSurface" />
+                    </div>
+                </flux:field>
+                <div class="flex">
+                    <flux:spacer />
+                    <flux:button type="button" wire:click='addLandSurface' class="btn-primary cursor-pointer">Crear
+                        elemento
+                    </flux:button>
+                </div>
+            </div>
+        </flux:modal>
+
+
+        {{-- Editar elemento --}}
+
+        <flux:modal name="edit-LandSurface" class="md:w-96">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg">Editar elemento</flux:heading>
+                    {{-- <flux:text class="mt-2"></flux:text> --}}
+                </div>
+                <flux:field class="flux-field">
+                    <flux:label>Superficie en M²<span class="sup-required">*</span></flux:label>
+                    <flux:input type="number" wire:model='modalSurface' />
+                    <div class="error-container">
+                        <flux:error name="modalSurface" />
+                    </div>
+                </flux:field>
+                <div class="flex">
+                    <flux:spacer />
+                    <flux:button type="button" wire:click="editLandSurface" class="btn-primary cursor-pointer">Editar
+                        elemento
+                    </flux:button>
+                </div>
+            </div>
+        </flux:modal>
 
 
 

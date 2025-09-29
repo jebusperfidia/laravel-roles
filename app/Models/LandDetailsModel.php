@@ -124,7 +124,7 @@ class LandDetailsModel extends Model
      */
     public function groupsNeighbors()
     {
-        return $this->hasMany(GroupNeighborModel::class);
+        return $this->hasMany(GroupsNeighborsModel::class, 'land_detail_id');
     }
 
     /**
@@ -132,6 +132,18 @@ class LandDetailsModel extends Model
      */
     public function measureBoundaries()
     {
-        return $this->hasMany(MeasureBoundaryModel::class);
+        return $this->hasMany(MeasureBoundaryModel::class, 'land_detail_id');
     }
+
+
+    /**
+     * Un LandDetail tiene muchas superficies de terreno.
+     */
+    public function landSurfaces()
+    {
+        return $this->hasMany(LandSurfaceModel::class, 'land_detail_id');
+    }
+
+
+
 }

@@ -4,12 +4,50 @@ namespace App\Livewire\Forms;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Session;
 use Masmerise\Toaster\Toaster;
 use Livewire\WithFileUploads;
 use Flux\Flux;
+use App\Models\Valuation;
+use App\Models\LandDetailsModel;
+use App\Models\GroupsNeighborsModel;
+use App\Models\GroupNeighborDetailsModel;
+use App\Models\LandSurfaceModel;
+use App\Models\MeasureBoundaryModel;
+use Illuminate\Support\Facades\Storage;
+
 
 class LandDetails extends Component
 {
+
+    //Variable para obtener los valores del avaluo
+    public $valuation;
+
+    //Valor para asignar el ID del avaluo para funciones de creación o edición
+    public $valuation_id;
+
+    //Variable para obtener los datos del formulario de terreno
+    //Además de otras obtenr valores para funciones de creación o edición
+    public $landDetail;
+
+    //Se obtienen los grupos asignados al registro de la tabla land_details
+    public $groupsWithNeighbors = [];
+
+    //Variable para asignar el ID de grupo, utilizado para generar los detalles de cada tabla
+    public $groupId;
+
+    //Variable para asignar el id del detalle para un grupo, utilizado para editar o eliminar un elemento
+    public $groupDetailId;
+
+
+    //Lista de elementos de superficie del terreno ligados al land_details
+    public $landSurfaces = [];
+
+    //Variable para guardar el id del landSurface seleccionado para editar o eliminar
+    public $landSurfaceId;
+
+    //Cargamos la lista de archivos ligados al land_details
+    public $measureBoundaries = [];
 
     use WithFileUploads;
     public $photos = []; // Propiedad para almacenar múltiples archivos
@@ -41,9 +79,6 @@ class LandDetails extends Component
     public float $extent;
 
 
-
-
-
     //TERCER CONTENEDOR
     public $ct_streetWithFront, $ct_CrossStreet1, $ct_crossStreetOrientation1, $ct_CrossStreet2, $ct_crossStreetOrientation2,
         $ct_borderStreet1, $ct_borderStreetOrientation1, $ct_borderStreet2, $ct_borderStreetOrientation2, $ct_location,
@@ -63,13 +98,125 @@ class LandDetails extends Component
 
 
         public function mount(){
-        $this->extent = 0;
-        $this->ls_useExcessCalculation = false;
+
+
+        $valuationId = session('valuation_id');
+
+        // Guardar el valuationId en una propiedad pública
+        $this->valuation_id = $valuationId;
+
+        //Obtenemos los valores deL avalúo a partir de la variable de sesión del ID
+        $this->valuation = Valuation::find(Session::get('valuation_id'));
+
+        //dd($valuation->property_type);
+
+        // Asignar el modelo solo si valuationId existe para evitar errores
+        $this->landDetail = LandDetailsModel::where('valuation_id', $valuationId)->first();
+
+        if ($this->landDetail) {
+
+            //Obtenemos el valor de los grupos ligados al landDetail
+            $this->groupsWithNeighbors = $this->landDetail->groupsNeighbors()->with('neighbors')->get();
+
+            //Obtenemos el valor de los landSurfaces ligados al LandDetail
+            $this->landSurfaces = $this->landDetail->landSurfaces()->get();
+
+            //Obtenemos el valor de los archivos ligados al LandDetail
+            $this->measureBoundaries = $this->landDetail->measureBoundaries()->get();
+
+            // PRIMER CONTENEDOR - Información Legal
+            $this->sli_sourceLegalInformation = $this->landDetail->source_legal_information;
+
+            // Escritura
+            $this->sli_notaryOfficeDeed = $this->landDetail->notary_office_deed;
+            $this->sli_deedDeed = $this->landDetail->deed_deed;
+            $this->sli_volumeDeed = $this->landDetail->volume_deed;
+            $this->sli_dateDeed = $this->landDetail->date_deed;
+            $this->sli_notaryDeed = $this->landDetail->notary_deed;
+            $this->sli_judicialDistricDeed = $this->landDetail->judicial_distric_deed;
+
+            // Sentencia
+            $this->sli_fileJudgment = $this->landDetail->file_judgment;
+            $this->sli_dateJudgment = $this->landDetail->date_judgment;
+            $this->sli_courtJudgment = $this->landDetail->court_judgment;
+            $this->sli_municipalityJudgment = $this->landDetail->municipality_judgment;
+
+            // Contrato Privado
+            $this->sli_datePrivCont = $this->landDetail->date_priv_cont;
+            $this->sli_namePrivContAcq = $this->landDetail->name_priv_cont_acq;
+            $this->sli_firstNamePrivContAcq = $this->landDetail->first_name_priv_cont_acq;
+            $this->sli_secondNamePrivContAcq = $this->landDetail->second_name_priv_cont_acq;
+            $this->sli_namePrivContAlt = $this->landDetail->name_priv_cont_alt;
+            $this->sli_firstNamePrivContAlt = $this->landDetail->first_name_priv_cont_alt;
+            $this->sli_secondNamePrivContAlt = $this->landDetail->second_name_priv_cont_alt;
+
+            // Alineamiento y Número Oficial
+            $this->sli_folioAon = $this->landDetail->folio_aon;
+            $this->sli_dateAon = $this->landDetail->date_aon;
+            $this->sli_municipalityAon = $this->landDetail->municipality_aon;
+
+            // Título de Propiedad
+            $this->sli_recordPropReg = $this->landDetail->record_prop_reg;
+            $this->sli_datePropReg = $this->landDetail->date_prop_reg;
+            $this->sli_instrumentPropReg = $this->landDetail->instrument_prop_reg;
+            $this->sli_placePropReg = $this->landDetail->place_prop_reg;
+
+            // Otra fuente de información legal
+            $this->sli_especifyAsli = $this->landDetail->especify_asli;
+            $this->sli_dateAsli = $this->landDetail->date_asli;
+            $this->sli_emittedByAsli = $this->landDetail->emitted_by_asli;
+            $this->sli_folioAsli = $this->landDetail->folio_asli;
+
+            // TERCER CONTENEDOR - Circulación y tráfico
+            $this->ct_streetWithFront = $this->landDetail->street_with_front;
+            $this->ct_CrossStreet1 = $this->landDetail->cross_street_1;
+            $this->ct_crossStreetOrientation1 = $this->landDetail->cross_street_orientation_1;
+            $this->ct_CrossStreet2 = $this->landDetail->cross_street_2;
+            $this->ct_crossStreetOrientation2 = $this->landDetail->cross_street_orientation_2;
+            $this->ct_borderStreet1 = $this->landDetail->border_street_1;
+            $this->ct_borderStreetOrientation1 = $this->landDetail->border_street_orientation_1;
+            $this->ct_borderStreet2 = $this->landDetail->border_street_2;
+            $this->ct_borderStreetOrientation2 = $this->landDetail->border_street_orientation_2;
+            $this->ct_location = $this->landDetail->location;
+            $this->ct_configuration = $this->landDetail->configuration;
+            $this->ct_topography = $this->landDetail->topography;
+            $this->ct_typeOfRoad = $this->landDetail->type_of_road;
+            $this->ct_panoramicFeatures = $this->landDetail->panoramic_features;
+            $this->ct_EasementRestrictions = $this->landDetail->easement_restrictions;
+
+            // CUARTO CONTENEDOR - Situación del Terreno
+            $this->ls_useExcessCalculation = $this->landDetail->use_excess_calculation;
+
+            $this->ls_surfacePrivateLot = $this->landDetail->surface_private_lot;
+            $this->ls_surfacePrivateLotType = $this->landDetail->surface_private_lot_type;
+            $this->ls_undividedOnlyCondominium = $this->landDetail->undivided_only_condominium;
+            $this->ls_undividedSurfaceLand = $this->landDetail->undivided_surface_land;
+            $this->ls_surplusLandArea = $this->landDetail->surplus_land_area;
+
+            if (stripos($this->valuation->property_type, 'condominio') !== false) {
+                $this->ls_undividedOnlyCondominium = 0;
+                $this->ls_undividedSurfaceLand = 0;
+            }
+
+        } else {
+            $this->ls_useExcessCalculation = false;
+            $this->ls_surfacePrivateLot = 0;
+            $this->ls_surfacePrivateLotType = 0;
+            $this->ls_undividedOnlyCondominium = 0;
+            $this->ls_undividedSurfaceLand = 0;
+            $this->ls_surplusLandArea = 0;
+        }
+
+
+
+        //$this->extent = 0;
+        //$this->ls_useExcessCalculation = false;
     }
 
     public function save()
     {
 
+        //dd($this->ls_surfacePrivateLot);
         //Ejecutar función con todas las reglas de validación y validaciones condicionales, guardando todo en una variable
         $validator = $this->validateAllContainers();
 
@@ -78,6 +225,7 @@ class LandDetails extends Component
             //Enviamos un mensaje en pantalla indicando que existen errores de validación
             Toaster::error('Existen errores de validación');
 
+            //dd($validator);
             //Colocamos los errores en pantalla
             $this->setErrorBag($validator->getMessageBag());
 
@@ -86,13 +234,88 @@ class LandDetails extends Component
         }
 
         //Aquí se ejecutará la lógica de guardado
+        // Mapea las propiedades del componente a un array con nombres de columnas de la DB
+        $data = [
+            // PRIMER CONTENEDOR - Información Legal
+            'source_legal_information' => $this->sli_sourceLegalInformation,
+
+            // Escritura
+            'notary_office_deed' => $this->sli_notaryOfficeDeed,
+            'deed_deed' => $this->sli_deedDeed,
+            'volume_deed' => $this->sli_volumeDeed,
+            'date_deed' => $this->sli_dateDeed,
+            'notary_deed' => $this->sli_notaryDeed,
+            'judicial_distric_deed' => $this->sli_judicialDistricDeed,
+
+            // Sentencia
+            'file_judgment' => $this->sli_fileJudgment,
+            'date_judgment' => $this->sli_dateJudgment,
+            'court_judgment' => $this->sli_courtJudgment,
+            'municipality_judgment' => $this->sli_municipalityJudgment,
+
+            // Contrato privado
+            'date_priv_cont' => $this->sli_datePrivCont,
+            'name_priv_cont_acq' => $this->sli_namePrivContAcq,
+            'first_name_priv_cont_acq' => $this->sli_firstNamePrivContAcq,
+            'second_name_priv_cont_acq' => $this->sli_secondNamePrivContAcq,
+            'name_priv_cont_alt' => $this->sli_namePrivContAlt,
+            'first_name_priv_cont_alt' => $this->sli_firstNamePrivContAlt,
+            'second_name_priv_cont_alt' => $this->sli_secondNamePrivContAlt,
+
+            // Alineamiento y número oficial
+            'folio_aon' => $this->sli_folioAon,
+            'date_aon' => $this->sli_dateAon,
+            'municipality_aon' => $this->sli_municipalityAon,
+
+            // Título de propiedad
+            'record_prop_reg' => $this->sli_recordPropReg,
+            'date_prop_reg' => $this->sli_datePropReg,
+            'instrument_prop_reg' => $this->sli_instrumentPropReg,
+            'place_prop_reg' => $this->sli_placePropReg,
+
+            // Otra fuente de información legal
+            'especify_asli' => $this->sli_especifyAsli,
+            'date_asli' => $this->sli_dateAsli,
+            'emitted_by_asli' => $this->sli_emittedByAsli,
+            'folio_asli' => $this->sli_folioAsli,
+
+            // TERCER CONTENEDOR - Circulación y tráfico
+            'street_with_front' => $this->ct_streetWithFront,
+            'cross_street_1' => $this->ct_CrossStreet1,
+            'cross_street_orientation_1' => $this->ct_crossStreetOrientation1,
+            'cross_street_2' => $this->ct_CrossStreet2,
+            'cross_street_orientation_2' => $this->ct_crossStreetOrientation2,
+            'border_street_1' => $this->ct_borderStreet1,
+            'border_street_orientation_1' => $this->ct_borderStreetOrientation1,
+            'border_street_2' => $this->ct_borderStreet2,
+            'border_street_orientation_2' => $this->ct_borderStreetOrientation2,
+            'location' => $this->ct_location,
+            'configuration' => $this->ct_configuration,
+            'topography' => $this->ct_topography,
+            'type_of_road' => $this->ct_typeOfRoad,
+            'panoramic_features' => $this->ct_panoramicFeatures,
+            'easement_restrictions' => $this->ct_EasementRestrictions,
+
+            // CUARTO CONTENEDOR - Situación del Terreno
+            'use_excess_calculation' => $this->ls_useExcessCalculation,
+            'surface_private_lot' => $this->ls_surfacePrivateLot,
+            'surface_private_lot_type' => $this->ls_surfacePrivateLotType,
+            'undivided_only_condominium' => $this->ls_undividedOnlyCondominium,
+            'undivided_surface_land' => $this->ls_undividedSurfaceLand,
+            'surplus_land_area' => $this->ls_surplusLandArea,
+        ];
+
+            LandDetailsModel::updateOrCreate(
+            ['valuation_id' => $this->valuation_id],
+            $data
+        );
 
 
 
         //Al finalizar, aquí se puede generar un Toaster de guardado o bien, copiar alguna otra función para redireccionar
         //y a la vez enviar un toaster
         Toaster::success('Formulario guardado con éxito');
-        return redirect()->route('form.index', ['section' => 'property-description']);
+        return redirect()->route('form.index', ['section' => 'land-details']);
     }
 
 
@@ -100,32 +323,60 @@ class LandDetails extends Component
 
     //FUNCIONES PARA GRUPOS Y ELEMENTOS DEL MISMO
 
+
+    //Abrir modal para crear grupo
     public function openAddGroup()
     {
+
+        if(!$this->landDetail){
+            Toaster::error('Primero debes guardar los datos principales');
+            return;
+        }
+
         $this->resetValidation();
-        Flux::modal('add-group')->show();      // 3) Abre el modal
+        Flux::modal('add-group')->show();
 
     }
 
-    public function openAddElement()
+
+    //Abrir modal para crear elemento
+    public function openAddElement($groupId)
     {
+        $this->groupId = $groupId;
         $this->resetValidation();
-        Flux::modal('add-element')->show();      // 3) Abre el modal
+        Flux::modal('add-element')->show();
     }
 
-    public function openEditElement()
+
+
+    //Abrir modal para editar elemento
+    public function openEditElement($groupDetailId)
     {
-        $this->resetValidation();
-        Flux::modal('edit-element')->show();      // 3) Abre el modal
+
+
+        // Carga el detalle desde BD
+        $detail = GroupNeighborDetailsModel::findOrFail($groupDetailId);
+
+        // Asigna los datos a las propiedades del componente
+        $this->groupDetailId = $groupDetailId; // necesitas esta propiedad para el update luego
+        $this->orientation = $detail->orientation;
+        $this->extent = $detail->extent;
+        $this->adjacent = $detail->adjacent;
+
+       /*  $this->$groupDetailId = $groupDetailId; */
+        //$this->resetValidation();
+        Flux::modal('edit-element')->show();
 
     }
 
 
+
+    //Función para crear grupo
     public function addGroup(){
 
 
         $rules = [
-            'group' => 'required'
+            'group' => 'required|unique:groups_neighbors,name'
         ];
 
         $this->validate(
@@ -134,18 +385,45 @@ class LandDetails extends Component
             $this->validationAttributeGroup()
         );
 
+        GroupsNeighborsModel::create([
+            'land_detail_id' => $this->landDetail->id,
+            'name' => $this->group,
+        ]);
+
+
+        // Recarga los grupos para que aparezca el nuevo en la vista
+        $this->groupsWithNeighbors = $this->landDetail
+            ->groupsNeighbors()
+            ->with('neighbors')
+            ->get();
+
         Toaster::success('Grupo agregado con éxito');
         $this->modal('add-group')->close();
+
+        $this->reset('group');
     }
 
 
+    //Función para eliminar un grupo
+    public function deleteGroup($groupId){
 
-    public function deleteGroup(){
+        // Buscar el grupo por ID
+        $group = GroupsNeighborsModel::findOrFail($groupId);
+
+        // Eliminar el grupo (esto también debería eliminar sus vecinos si tienes ON DELETE CASCADE)
+        $group->delete();
+
+        // Recargar la lista de grupos
+        $this->groupsWithNeighbors = $this->landDetail
+            ->groupsNeighbors()
+            ->with('neighbors')
+            ->get();
 
         Toaster::error('Grupo eliminado con éxito');
 
     }
 
+    //Función para crear elemento
     public function addElement()
     {
         $rules = [
@@ -160,19 +438,27 @@ class LandDetails extends Component
             $this->validationAttributesItem()
         );
 
+        GroupNeighborDetailsModel::create([
+            'group_neighbor_id' => $this->groupId,
+            'orientation' => $this->orientation,
+            'extent' => $this->extent,
+            'adjacent' => $this->adjacent,
+        ]);
 
-        $this->orientation = '';
-        $this->extent = 0;
-        $this->orientation = '';
+        // Recargar la lista de grupos
+        $this->groupsWithNeighbors = $this->landDetail
+            ->groupsNeighbors()
+            ->with('neighbors')
+            ->get();
 
+        $this->reset('orientation', 'extent', 'adjacent');
         Toaster::success('Elemento agregado con éxito');
-        $this->modal('add-item')->close();
+        $this->modal('add-element')->close();
     }
 
-
-    public function editElement(){
-
-
+    //Función para editar un elemento
+    public function editElement()
+    {
         $rules = [
             'orientation' => 'required',
             'extent' => 'required',
@@ -185,33 +471,76 @@ class LandDetails extends Component
             $this->validationAttributesItem()
         );
 
+        $detail = GroupNeighborDetailsModel::findOrFail($this->groupDetailId);
 
-        $this->orientation = '';
-        $this->extent = 0;
-        $this->orientation = '';
+        $detail->update([
+            'orientation' => $this->orientation,
+            'extent' => $this->extent,
+            'adjacent' => $this->adjacent,
+        ]);
+
+        // Recargar los datos actualizados en la vista
+        $this->groupsWithNeighbors = $this->landDetail
+            ->groupsNeighbors()
+            ->with('neighbors')
+            ->get();
+
 
         Toaster::success('Elemento editado con éxito');
-        $this->modal('edit-item')->close();
+        $this->modal('edit-element')->close();
     }
 
+    //Función para editar un elemento
+    public function deleteElement($groupDetailId){
 
-    public function deleteElement(){
+        // Buscar el registro y eliminarlo
+        $detail = GroupNeighborDetailsModel::findOrFail($groupDetailId);
+        $detail->delete();
+
+        // Recargar los grupos con sus vecinos actualizados
+        $this->groupsWithNeighbors = $this->landDetail
+            ->groupsNeighbors()
+            ->with('neighbors')
+            ->get();
+
         Toaster::error('Elemento eliminado con éxito');
     }
 
 
 
 
-    public function openAddElementLandSurface()
+
+
+
+
+
+
+
+
+
+    //ELEMENTOS PARA AGREGAR ELEMENTOS A SUPERFICIES DEL TERRENO
+    public function openAddLandSurface()
     {
+
+        if (!$this->landDetail) {
+            Toaster::error('Primero debes guardar los datos principales');
+            return;
+        }
         $this->resetValidation();
-        Flux::modal('add-elementLandSurface')->show();      // 3) Abre el modal
+        Flux::modal('add-LandSurface')->show();
     }
 
-    public function openEditElementLandSurface()
+
+
+    public function openEditLandSurface($landSurfaceId)
     {
-        $this->resetValidation();
-        Flux::modal('edit-elementLandSurface')->show();      // 3) Abre el modal
+        $landSurface = LandSurfaceModel::findOrFail($landSurfaceId);
+
+        $this->landSurfaceId = $landSurfaceId;
+        $this->modalSurface = $landSurface->surface;
+
+        //$this->resetValidation();
+        Flux::modal('edit-LandSurface')->show();
 
     }
 
@@ -219,10 +548,11 @@ class LandDetails extends Component
 
 
 
-    public function addElementLandSurface()
+    public function addLandSurface()
     {
+        $this->resetValidation();
         $rules = [
-            'modalSurface' => 'required',
+            'modalSurface' => 'required|numeric|between:0,99999',
         ];
 
         $this->validate(
@@ -231,21 +561,27 @@ class LandDetails extends Component
             $this->validationAttributeLandSurface()
         );
 
+        LandSurfaceModel::create([
+            'land_detail_id' => $this->landDetail->id,
+            'surface' => $this->modalSurface,
+            'value_area' => 0, // Aquí colocas el valor adecuado si aplica
+        ]);
 
-        $this->modalSurface = 0;
+        $this->reset('modalSurface');
+        //$this->modalSurface = 0;
 
+        // Recargar las superficies
+        $this->landSurfaces = $this->landDetail->landSurfaces()->get();
 
         Toaster::success('Elemento agregado con éxito');
-        $this->modal('add-item')->close();
+        $this->modal('add-elementLandSurface')->close();
     }
 
 
-    public function editElementLandSurface()
+    public function editLandSurface()
     {
-
-
         $rules = [
-            'modalSurface' => 'required',
+            'modalSurface' => 'required|numeric|between:0,99999',
         ];
 
         $this->validate(
@@ -254,17 +590,30 @@ class LandDetails extends Component
             $this->validationAttributeLandSurface()
         );
 
+        $landSurface = LandSurfaceModel::findOrFail($this->landSurfaceId);
+        //dd("si llega");
 
-        $this->modalSurface = 0;
+        //dd($landSurface);
+
+        $landSurface->update([
+            'surface' => $this->modalSurface
+        ]);
+
+        $this->landSurfaces = $this->landDetail->landSurfaces()->get();
 
 
         Toaster::success('Elemento editado con éxito');
-        $this->modal('edit-item')->close();
+        $this->modal('edit-LandSurface')->close();
     }
 
 
-    public function deleteElementLandSurface()
+    public function deleteLandSurface($landSurfaceId)
     {
+        $landSurface = LandSurfaceModel::findOrFail($landSurfaceId);
+        $landSurface->delete();
+
+        $this->landSurfaces = $this->landDetail->landSurfaces()->get();
+
         Toaster::error('Elemento eliminado con éxito');
     }
 
@@ -380,14 +729,22 @@ class LandDetails extends Component
         //VALIDACIONES CONTAINER 4
         $container4 = [
             /* 'ls_useExcessCalculation' => 'boolean', */
-            'ls_undividedOnlyCondominium' => 'required|numeric|min:0|between:0,100',
+            'ls_useExcessCalculation' => 'required',
         ];
-
 
         if ($this->ls_useExcessCalculation === true) {
             $container4 = array_merge($container4, [
                 'ls_surfacePrivateLot' => 'required|numeric|min:0',
                 'ls_surfacePrivateLotType' => 'required|numeric|min:0',
+                'ls_surplusLandArea' => 'required'
+            ]);
+        }
+
+
+        if (stripos($this->valuation->property_type, 'condominio') !== false) {
+            $container4 = array_merge($container4, [
+                'ls_undividedOnlyCondominium'  => 'required|numeric|min:0',
+                'ls_undividedSurfaceLand' => 'required|numeric|min:0'
             ]);
         }
 
@@ -506,13 +863,13 @@ class LandDetails extends Component
 
 
     //FUNCION PARA LA CARGA DE ARCHIVOS
-    public function updatedPhotos()
+ /*    public function updatedPhotos()
     {
         $this->validate([
-            'photos.*' => 'required|mimes:pdf,jpg,jpeg|max:2048', // Valida cada archivo en el array
+            'photos.*' => 'required|mimes:pdf,jpg,jpeg|max:2048',
         ]);
     }
-
+ */
 
     /**
      * Función principal para cargar y guardar los archivos en el servidor.
@@ -520,34 +877,92 @@ class LandDetails extends Component
      */
     public function uploadFiles()
     {
-        // 3: Validación para el campo vacío: se utiliza 'required' en la propiedad 'photos'.
+
+
+
+        if (!$this->landDetail) {
+            Toaster::error('Primero debes guardar los datos principales');
+            return;
+        }
+
+
         $this->validate([
             'photos' => 'required', // Se asegura de que al menos un archivo haya sido seleccionado.
-            'photos.*' => 'mimes:pdf,jpg,jpeg|max:2048',
+            'photos.*' => 'file|mimes:pdf,jpg,jpeg|max:2048',
         ], [
             // Mensaje de error personalizado para la validación del campo vacío
             'photos.required' => 'Por favor, selecciona al menos un archivo para cargar.',
+            'photos.*.mimes' => 'Solo se permiten archivos en formato PDF, JPG o JPEG.',
+            'photos.*.max' => 'Cada archivo no debe superar los 2MB.',
+        ], [
+            'photos' => 'foto',
+            'photos.*' => 'foto',
         ]);
 
         // Itera sobre cada archivo en el array de 'photos'.
         foreach ($this->photos as $photo) {
-            // Guarda cada archivo en el disco 'public' dentro de la carpeta 'attachments'.
-            $path = $photo->store('attachments', 'public');
+            $originalName = $photo->getClientOriginalName();
+            $extension = $photo->getClientOriginalExtension();
+            $type = $extension === 'pdf' ? 'pdf' : 'image';
 
-            // TODO: Aquí debes agregar la lógica para guardar la ruta del archivo ($path) en tu base de datos.
-            // Por ejemplo:
-            // Attachment::create([
-            //     'file_name' => $photo->getClientOriginalName(),
-            //     'path' => $path,
-            //     'user_id' => auth()->id(),
-            // ]);
+            // Guarda el archivo
+            $path = $photo->store('land_details', 'public');
+
+         /*    if (!$path) {
+                dd("Fallo al guardar el archivo.");
+            }
+ */
+            MeasureBoundaryModel::create([
+                'land_detail_id' => $this->landDetail->id,
+                'file_path' => $path,
+                'original_name' => $originalName,
+                'file_type' => $type,
+            ]);
         }
 
         // Limpia el array de archivos para resetear el input.
         $this->photos = [];
 
+        // Recarga archivos (opcional, si los estás listando en pantalla)
+        //$this->loadMeasureBoundaries();
+
+        // Recarga la lista de archivos
+        $this->measureBoundaries = $this->landDetail->measureBoundaries()->get();
+
         // Muestra un mensaje de éxito que se puede mostrar en la vista.
-        session()->flash('message', '¡Archivos cargados correctamente!');
+        Toaster::success('Archivo(s) cargado con éxito.');
+        //session()->flash('message', '¡Archivos cargados correctamente!');
+    }
+
+
+
+    public function deleteFile($id)
+    {
+        $file = MeasureBoundaryModel::find($id);
+
+        if (!$file) {
+            Toaster::error('Archivo no encontrado.');
+            return;
+        }
+
+        // Elimina el archivo físico si existe
+        if (Storage::disk('public')->exists($file->file_path)) {
+            Storage::disk('public')->delete($file->file_path);
+        }
+
+        // Elimina el registro de base de datos
+        $file->delete();
+
+        // Recarga la lista de archivos
+        $this->measureBoundaries = $this->landDetail->measureBoundaries()->get();
+
+        Toaster::error('Archivo eliminado con éxito.');
+    }
+
+    public function updatedPhotos()
+    {
+        // Limpia todos los errores relacionados con 'photos' y sus índices.
+        $this->resetErrorBag();
     }
 
 

@@ -4,12 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 //use App\Models\LandDetailsModel;
+use App\Models\GroupNeighborDetailsModel;
 
-class GroupNeighborModel extends Model
+
+class GroupsNeighborsModel extends Model
 {
 
     // Define la tabla si no sigue la convención de pluralización (Laravel lo infiere bien en este caso)
-    protected $table = 'group_neighbor';
+    protected $table = 'groups_neighbors';
 
     protected $fillable = [
         'land_detail_id',
@@ -21,14 +23,16 @@ class GroupNeighborModel extends Model
      */
     public function landDetail()
     {
-        return $this->belongsTo(LandDetailsModel::class);
+        /* return $this->belongsTo(LandDetailsModel::class); */
+        return $this->belongsTo(LandDetailsModel::class, 'land_detail_id');
     }
 
     /**
      * Un grupo tiene muchos detalles.
      */
-    public function details()
-    {
-        return $this->hasMany(GroupNeighborDetailModel::class);
-    }
+    public function neighbors()
+{
+    return $this->hasMany(GroupNeighborDetailsModel::class, 'group_neighbor_id');
+}
+
 }

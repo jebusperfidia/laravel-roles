@@ -9,7 +9,7 @@ class MeasureBoundaryModel extends Model
 {
 
     // Define la tabla si no sigue la convención de pluralización (Laravel lo infiere bien en este caso)
-    protected $table = 'measure_boundary';
+    protected $table = 'measures_boundaries';
 
 
     protected $fillable = [
@@ -24,6 +24,6 @@ class MeasureBoundaryModel extends Model
      */
     public function landDetail()
     {
-        return $this->belongsTo(LandDetailsModel::class);
+        return $this->belongsTo(LandDetailsModel::class, 'land_detail_id');
     }
 }
