@@ -3,7 +3,7 @@
 namespace App\Livewire\Valuations;
 
 use Livewire\Component;
-use App\Models\User;
+use App\Models\Users\User;
 
 class Assigned extends Component
 {

@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Valuations;
 
-use App\Models\Valuation;
-use App\Models\Assignment;
+use App\Models\Valuations\Valuation;
+use App\Models\Users\Assignment;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use PowerComponents\LivewirePowerGrid\Button;

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Forms\PropertyLocation;
 
+use App\Models\Valuations\Valuation;
 use Illuminate\Database\Eloquent\Model;
 
 class PropertyLocationModel extends Model

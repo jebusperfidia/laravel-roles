@@ -11,16 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('land_surfaces', function (Blueprint $table) {
+        Schema::create('carpentry', function (Blueprint $table) {
             $table->id();
 
-
-            $table->foreignId('land_detail_id')
-                ->constrained('land_details')
+            $table->foreignId('construction_elements_id')
+                ->constrained('construction_elements')
                 ->cascadeOnDelete();
-
-            $table->decimal('surface', 9,4);
-            $table->string('value_area');
 
 
             $table->timestamps();
@@ -32,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('land_surfaces');
+        Schema::dropIfExists('carpentry');
     }
 };

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Settings;
 
-use App\Models\User;
+use App\Models\Users\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;

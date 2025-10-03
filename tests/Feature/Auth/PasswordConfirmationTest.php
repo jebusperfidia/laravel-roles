@@ -1,7 +1,7 @@
 <?php
 
 use App\Livewire\Auth\ConfirmPassword;
-use App\Models\User;
+use App\Models\Users\User;
 use Livewire\Livewire;
 
 test('confirm password screen can be rendered', function () {

@@ -4,9 +4,9 @@ namespace App\Livewire\Forms;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Session;
-use App\Models\User;
-use App\Models\Assignment;
-use App\Models\Valuation;
+use App\Models\Users\User;
+use App\Models\Users\Assignment;
+use App\Models\Valuations\Valuation;
 use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
 use App\Services\DipomexService;

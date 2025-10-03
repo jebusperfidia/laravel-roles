@@ -8,13 +8,13 @@ use Illuminate\Support\Facades\Session;
 use Masmerise\Toaster\Toaster;
 use Livewire\WithFileUploads;
 use Flux\Flux;
-use App\Models\Valuation;
-use App\Models\LandDetailsModel;
-use App\Models\PropertyLocationModel;
-use App\Models\GroupsNeighborsModel;
-use App\Models\GroupNeighborDetailsModel;
-use App\Models\LandSurfaceModel;
-use App\Models\MeasureBoundaryModel;
+use App\Models\Valuations\Valuation;
+use App\Models\Forms\LandDetails\LandDetailsModel;
+use App\Models\Forms\PropertyLocation\PropertyLocationModel;
+use App\Models\Forms\LandDetails\GroupsNeighborsModel;
+use App\Models\Forms\LandDetails\GroupNeighborDetailsModel;
+use App\Models\Forms\LandDetails\LandSurfaceModel;
+use App\Models\Forms\LandDetails\MeasureBoundaryModel;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -114,7 +114,14 @@ class LandDetails extends Component
         //obtenemos los valores de propertyLocation
         $this->propertyLocation = PropertyLocationModel::where('valuation_id', $valuationId)->first();
 
-        //dd($this->propertyLocation);
+        if (!$this->propertyLocation) {
+            // Asignar coordenadas por defecto (centro de México)
+            $this->propertyLocation = (object)[
+                'latitude' => '23.6345',
+                'longitude' => '-102.5528',
+                'altitude' => '0'
+            ];
+        }
 
         // Asignar el modelo solo si valuationId existe para evitar errores
         $this->landDetail = LandDetailsModel::where('valuation_id', $valuationId)->first();
@@ -205,15 +212,7 @@ class LandDetails extends Component
                 $this->ls_undividedSurfaceLand = 0;
             }
 
-        } else {
-            $this->ls_useExcessCalculation = false;
-            $this->ls_surfacePrivateLot = 0;
-            $this->ls_surfacePrivateLotType = 0;
-            $this->ls_undividedOnlyCondominium = 0;
-            $this->ls_undividedSurfaceLand = 0;
-            $this->ls_surplusLandArea = 0;
         }
-
 
 
         //$this->extent = 0;
@@ -326,7 +325,7 @@ class LandDetails extends Component
         //Al finalizar, aquí se puede generar un Toaster de guardado o bien, copiar alguna otra función para redireccionar
         //y a la vez enviar un toaster
         Toaster::success('Formulario guardado con éxito');
-        return redirect()->route('form.index', ['section' => 'land-details']);
+        return redirect()->route('form.index', ['section' => 'property-description']);
     }
 
 
@@ -574,8 +573,8 @@ class LandDetails extends Component
 
         LandSurfaceModel::create([
             'land_detail_id' => $this->landDetail->id,
-            'surface' => $this->modalSurface,
-            'value_area' => 0, // Aquí colocas el valor adecuado si aplica
+            'surface' => $this->modalSurface
+            /* 'value_area' => 0, */
         ]);
 
         $this->reset('modalSurface');
@@ -585,7 +584,7 @@ class LandDetails extends Component
         $this->landSurfaces = $this->landDetail->landSurfaces()->get();
 
         Toaster::success('Elemento agregado con éxito');
-        $this->modal('add-elementLandSurface')->close();
+        $this->modal('add-LandSurface')->close();
     }
 
 
@@ -924,12 +923,12 @@ class LandDetails extends Component
             $type = $extension === 'pdf' ? 'pdf' : 'image';
 
             // Guarda el archivo
-            $path = $photo->store('land_details', 'public');
+            $path = $photo->store('/', 'land_details_public');
 
-         /*    if (!$path) {
+               if (!$path) {
                 dd("Fallo al guardar el archivo.");
             }
- */
+
             MeasureBoundaryModel::create([
                 'land_detail_id' => $this->landDetail->id,
                 'file_path' => $path,
@@ -964,8 +963,8 @@ class LandDetails extends Component
         }
 
         // Elimina el archivo físico si existe
-        if (Storage::disk('public')->exists($file->file_path)) {
-            Storage::disk('public')->delete($file->file_path);
+        if (Storage::disk('land_details_public')->exists($file->file_path)) {
+            Storage::disk('land_details_public')->delete($file->file_path);
         }
 
         // Elimina el registro de base de datos

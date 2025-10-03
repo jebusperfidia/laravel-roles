@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Forms\LandDetails;
 
 use Illuminate\Database\Eloquent\Model;
 //use App\Models\LandDetailsModel;
-use App\Models\GroupNeighborDetailsModel;
+/* use App\Models\Forms\LandDetails\GroupNeighborDetailsModel; */
 
 
 class GroupsNeighborsModel extends Model

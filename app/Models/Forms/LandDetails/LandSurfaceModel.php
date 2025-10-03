@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Forms\LandDetails;
 
 use Illuminate\Database\Eloquent\Model;
+/* use App\Models\Forms\LandDetails\LandDetailsModel; */
 
 class LandSurfaceModel extends Model
 {
@@ -10,8 +11,7 @@ class LandSurfaceModel extends Model
 
     protected $fillable = [
         'land_detail_id',
-        'surface',
-        'value_area',
+        'surface'
     ];
 
     /**

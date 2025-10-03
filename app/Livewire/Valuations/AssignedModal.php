@@ -3,9 +3,9 @@
 namespace App\Livewire\Valuations;
 
 use Livewire\Component;
-use App\Models\User;
-use App\Models\Valuation;
-use App\Models\Assignment;
+use App\Models\Users\User;
+use App\Models\Valuations\Valuation;
+use App\Models\Users\Assignment;
 use Masmerise\Toaster\Toaster;
 
 class AssignedModal extends Component

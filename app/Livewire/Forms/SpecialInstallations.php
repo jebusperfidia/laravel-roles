@@ -3,7 +3,7 @@
 namespace App\Livewire\Forms;
 
 use Livewire\Component;
-use App\Models\Valuation;
+use App\Models\Valuations\Valuation;
 use Illuminate\Support\Facades\Session;
 use Masmerise\Toaster\Toaster;
 use Flux\Flux;

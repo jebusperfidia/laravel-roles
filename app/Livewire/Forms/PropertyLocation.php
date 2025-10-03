@@ -4,7 +4,7 @@ namespace App\Livewire\Forms;
 
 use Livewire\Component;
 use Masmerise\Toaster\Toaster;
-use App\Models\PropertyLocationModel;
+use App\Models\Forms\PropertyLocation\PropertyLocationModel;
 use Illuminate\Validation\ValidationException;
 
 class PropertyLocation extends Component

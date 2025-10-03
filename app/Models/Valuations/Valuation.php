@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Valuations;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\PropertyLocationModel;
@@ -112,9 +112,9 @@ class Valuation extends Model
     ];
 
 
-        public function location()
+    /*     public function location()
     {
         // Ahora apunta al nuevo nombre de la clase
         return $this->hasOne(PropertyLocationModel::class);
-    }
+    } */
 }

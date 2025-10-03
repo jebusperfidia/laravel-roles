@@ -5,8 +5,8 @@ namespace App\Livewire\Forms;
 use Livewire\Component;
 use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
-use App\Models\Valuation;
-use App\Models\PropertyDescriptionModel;
+use App\Models\Valuations\Valuation;
+use App\Models\Forms\PropertyDescription\PropertyDescriptionModel;
 
 class PropertyDescription extends Component
 {

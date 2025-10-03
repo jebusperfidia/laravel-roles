@@ -1,7 +1,7 @@
 <?php
 
 use App\Livewire\Auth\Login;
-use App\Models\User;
+use App\Models\Users\User;
 use Livewire\Livewire;
 
 test('login screen can be rendered', function () {

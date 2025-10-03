@@ -3,7 +3,8 @@
 namespace App\Livewire\Valuations;
 
 use Livewire\Component;
-use App\Models\Valuation;
+use App\Models\Valuations\Valuation;
+use App\Models\Forms\LandDetails\LandDetailsModel;
 
 class ValuationCreate extends Component
 {
@@ -27,7 +28,9 @@ class ValuationCreate extends Component
 
         $rules = [
             "type" => 'required',
-            "folio" => 'required|unique:valuations|regex:/^[A-Za-z0-9\-]+$/',
+            // asignar un guion y espacios en blanco
+            'folio' => 'required|unique:valuations|regex:/^[a-zA-Z0-9\- ]*$/',
+
             "date" => 'required',
             "property_type" => 'required'
         ];
@@ -38,13 +41,18 @@ class ValuationCreate extends Component
             $this->validationAttributes()
         );
 
-        Valuation::create([
+        $newValuation =Valuation::create([
             "type" => $this->type,
             "folio" => $this->folio,
             "date" => $this->date,
             "property_type" => $this->property_type
         ]);
 
+        $idValuation = $newValuation->id;
+
+        LandDetailsModel::updateOrCreate(
+            ['valuation_id' => $idValuation]
+        );
 
         /* $this->reset(); */
         /* return redirect()->route('dashboard', ['currentView' => 'assigned']); */

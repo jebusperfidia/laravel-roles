@@ -5,7 +5,7 @@ namespace App\Livewire\Forms;
 use Livewire\Component;
 use Masmerise\Toaster\Toaster;
 use Illuminate\Support\Facades\Validator;
-use App\Models\UrbanFeaturesModel;
+use App\Models\Forms\UrbanFeatures\UrbanFeaturesModel;
 
 class UrbanFeatures extends Component
 {

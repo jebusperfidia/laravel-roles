@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Forms\UrbanEquipment;
 
+use App\Models\Valuations\Valuation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

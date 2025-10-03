@@ -1,7 +1,7 @@
 <?php
 
 use App\Livewire\Settings\Password;
-use App\Models\User;
+use App\Models\Users\User;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
 

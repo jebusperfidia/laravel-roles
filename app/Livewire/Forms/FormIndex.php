@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Forms;
 
-use App\Models\Valuation;
+use App\Models\Valuations\Valuation;
 use Livewire\Component;
 use Illuminate\Support\Facades\Session;
 

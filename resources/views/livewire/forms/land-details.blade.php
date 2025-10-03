@@ -413,11 +413,11 @@
 
                             @if ($file->file_type === 'image')
                             {{-- Miniatura para imagen --}}
-                            <img src="{{ asset('storage/' . $file->file_path) }}" alt="{{ $file->original_name }}"
+                            <img src="{{ asset('land_details/' . $file->file_path) }}" alt="{{ $file->original_name }}"
                                 class="w-full h-32 object-cover rounded">
 
                             {{-- Botón para ver en nueva pestaña --}}
-                            <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank"
+                            <a href="{{ asset('land_details/' . $file->file_path) }}" target="_blank"
                                 class="block mt-2 text-xs text-center text-blue-600 hover:underline">
                                 Ver imagen completa
                             </a>
@@ -440,10 +440,10 @@
 
                             @elseif ($file->file_type === 'pdf')
                             <div class="w-full">
-                                <embed src="{{ asset('storage/' . $file->file_path) }}" type="application/pdf"
+                                <embed src="{{ asset('land_details/' . $file->file_path) }}" type="application/pdf"
                                     width="100%" height="250px" />
 
-                                <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank"
+                                <a href="{{ asset('land_details/' . $file->file_path) }}" target="_blank"
                                     class="text-xs text-blue-600 hover:underline block mt-1 text-center">
                                     Ver en otra pestaña
                                 </a>
@@ -1037,7 +1037,7 @@
                             <thead>
                                 <tr class="bg-gray-100">
                                     <th class="px-2 py-1 ">Superficie en M²</th>
-                                    <th class="px-2 py-1 ">Área de valor</th>
+                                    {{-- <th class="px-2 py-1 ">Área de valor</th> --}}
                                     <th class="px-2 py-1 ">Acciones</th>
                                 </tr>
                             </thead>
@@ -1046,8 +1046,8 @@
                                 <tr>
                                     <td class="px-2 py-1 text-xs text-center">{{ number_format($surface->surface, 2) }}
                                     </td>
-                                    <td class="px-2 py-1 text-xs text-center">{{ number_format($surface->value_area, 2)
-                                        }}</td>
+                                 {{--    <td class="px-2 py-1 text-xs text-center">{{ number_format($surface->value_area, 2)
+                                        }}</td> --}}
                                     <td class="my-2 flex justify-evenly">
                                         <flux:button type="button" icon-leading="pencil"
                                             class="cursor-pointer btn-intermediary btn-buildins"
@@ -1392,45 +1392,54 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
         <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos</flux:button>
     </form>
 <script>
+    function initializeMaps() {
+        const lat = @js($propertyLocation->latitude);
+        const lon = @js($propertyLocation->longitude);
+
+        if (lat === null || lon === null) {
+            console.error('Latitud o Longitud son nulas. No se puede inicializar el mapa.');
+            return;
+        }
+
+        const coords = [parseFloat(lat), parseFloat(lon)];
+
+        const tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
+        // Macro
+        const macroDiv = document.getElementById('map-macro');
+        if (macroDiv) {
+            if (macroDiv._leaflet_id) {
+                macroDiv._leaflet_map.remove();
+            }
+            const mapMacro = L.map(macroDiv).setView(coords, 6);
+            macroDiv._leaflet_map = mapMacro; // Guardamos referencia
+            L.tileLayer(tileLayerUrl, { attribution }).addTo(mapMacro);
+            L.marker(coords).addTo(mapMacro);
+        }
+
+        // Micro
+        const microDiv = document.getElementById('map-micro');
+        if (microDiv) {
+            if (microDiv._leaflet_id) {
+                microDiv._leaflet_map.remove();
+            }
+            const mapMicro = L.map(microDiv).setView(coords, 18);
+            microDiv._leaflet_map = mapMicro;
+            L.tileLayer(tileLayerUrl, { attribution }).addTo(mapMicro);
+            L.marker(coords).addTo(mapMicro);
+        }
+
+        console.log('Mapas inicializados con éxito');
+    }
+
+    document.addEventListener('DOMContentLoaded', initializeMaps);
+
     document.addEventListener('livewire:navigated', () => {
-    const lat = @js($propertyLocation->latitude);
-    const lng = @js($propertyLocation->longitude);
-    const alt = @js($propertyLocation->altitude);
-    const coords = [lat, lng];
-
-    // Evita reinicializar si los mapas ya están montados
-    if (document.getElementById('map-macro').innerHTML.trim() !== '') return;
-
-    // Mapa Macro (vista amplia)
-    const mapMacro = L.map('map-macro').setView(coords, 6); // Zoom bajo para vista lejana
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(mapMacro);
-    L.marker(coords).addTo(mapMacro)
-        .bindPopup(`<strong>Vista general</strong><br>Lat: ${lat}<br>Lng: ${lng}`)
-        .openPopup();
-
-    // Mapa Micro (vista cercana)
-    const mapMicro = L.map('map-micro').setView(coords, 18); // Zoom alto para vista detallada
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(mapMicro);
-    L.marker(coords).addTo(mapMicro)
-        .bindPopup(`<strong>Vista detallada</strong><br>Lat: ${lat}<br>Lng: ${lng}<br>Alt: ${alt} m`)
-        .openPopup();
-});
+        setTimeout(initializeMaps, 0); // Espera al DOM completo
+    });
 </script>
 </div>

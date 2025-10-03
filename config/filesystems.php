@@ -46,6 +46,12 @@ return [
             'throw' => false,
             'report' => false,
         ],
+        'land_details_public' => [
+            'driver' => 'local',
+            'root' => public_path('land_details'), // <-- AHORA apunta directamente a public/land_details
+            'url' => env('APP_URL') . '/land_details',
+            'visibility' => 'public',
+        ],
 
         's3' => [
             'driver' => 's3',

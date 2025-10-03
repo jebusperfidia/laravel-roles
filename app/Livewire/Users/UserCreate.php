@@ -3,7 +3,7 @@
 namespace App\Livewire\Users;
 
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
+use App\Models\Users\User;
 use Livewire\Component;
 
 

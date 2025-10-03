@@ -3,7 +3,7 @@
 namespace App\Livewire\Valuations;
 
 use Livewire\Component;
-use App\Models\Valuation;
+use App\Models\Valuations\Valuation;
 use Livewire\Attributes\On;
 
 class ValuationsIndex extends Component
