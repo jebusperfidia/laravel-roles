@@ -18,6 +18,15 @@ return new class extends Migration
                 ->constrained('construction_elements')
                 ->cascadeOnDelete();
 
+            $table->text('structure');
+            $table->text('shallow_fundation');
+            $table->text('intermeediate_floor');
+            $table->text('ceiling');
+            $table->text('walls');
+            $table->text('beams_columns');
+            $table->text('roof');
+            $table->text('fences');
+
             $table->timestamps();
         });
     }

@@ -6,6 +6,10 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
 use Flux\Flux;
+use Illuminate\Support\Facades\DB;
+
+
+use App\Models\Forms\ConstructionElements\ConstructionElementModel;
 
 class ConstructionElements extends Component
 {
@@ -57,12 +61,145 @@ class ConstructionElements extends Component
     public function mount()
     {
 
-        //Inicializamos los valores de los input radio en caso de que no se tenga asignado un valor en la bd
-        $this->hs_hiddenApparentHydraulicBranches = 'Oculta';
-        $this->hs_hiddenApparentSanitaryBranches = 'Oculta';
-        $this->hs_hiddenApparentElectrics = 'Oculta';
 
-        $this->oe_elevator = 'Si cuenta';
+        $constructionElement = ConstructionElementModel::where('valuation_id', session('valuation_id'))->first();
+
+        if($constructionElement){
+            // 1. Obra Estructural (StructuralWork)
+            if ($structuralWork = $constructionElement->structuralWork) {
+                $this->sc_structure = $structuralWork->structure;
+                $this->sc_shallowFoundation = $structuralWork->shallow_fundation;
+                $this->sc_intermediateFloor = $structuralWork->intermeediate_floor;
+                $this->sc_ceiling = $structuralWork->ceiling;
+                $this->sc_walls = $structuralWork->walls;
+                $this->sc_beamsColumns = $structuralWork->beams_columns;
+                $this->sc_roof = $structuralWork->roof;
+                $this->sc_fences = $structuralWork->fences;
+            }
+
+            // 2. Acabados 1 (Finishing1)
+            if ($finishing1 = $constructionElement->finishing1) {
+                // Campos numéricos
+                $this->fn1_bedroomsNumber = $finishing1->bedrooms_number;
+                $this->fn1_bathroomsNumber = $finishing1->bathrooms_number;
+                $this->fn1_halfBathroomsNumber = $finishing1->half_bathrooms_number;
+                $this->fn1_copaNumber = $finishing1->copa_number;
+                $this->fn1_unpaNumber = $finishing1->unpa_number;
+
+
+                // --- B. SALA (Hall) ---
+                $this->fn1_hallFlats = $finishing1->hall_flats;
+                $this->fn1_hallWalls = $finishing1->hall_walls;
+                $this->fn1_hallCeilings = $finishing1->hall_ceilings;
+
+                // --- C. COMEDOR (Stdr) ---
+                $this->fn1_stdrFlats = $finishing1->stdr_flats;
+                $this->fn1_stdrWalls = $finishing1->stdr_walls;
+                $this->fn1_stdrCeilings = $finishing1->stdr_ceilings;
+
+                // --- D. COCINA (Kitchen) ---
+                $this->fn1_kitchenFlats = $finishing1->kitchen_flats;
+                $this->fn1_kitchenWalls = $finishing1->kitchen_walls;
+                $this->fn1_kitchenCeilings = $finishing1->kitchen_ceilings;
+
+                // --- E. RECÁMARAS (Bedrooms) ---
+                $this->fn1_bedroomsFlats = $finishing1->bedrooms_flats;
+                $this->fn1_bedroomsWalls = $finishing1->bedrooms_walls;
+                $this->fn1_bedroomsCeilings = $finishing1->bedrooms_ceilings;
+
+                // --- F. BAÑOS (Bathrooms) ---
+                $this->fn1_bathroomsFlats = $finishing1->bathrooms_flats;
+                $this->fn1_bathroomsWalls = $finishing1->bathrooms_walls;
+                $this->fn1_bathroomsCeilings = $finishing1->bathrooms_ceilings;
+
+                // --- G. MEDIOS BAÑOS (Half Bathrooms) ---
+                $this->fn1_halfBathroomsFlats = $finishing1->half_bathrooms_flats;
+                $this->fn1_halfBathroomsWalls = $finishing1->half_bathrooms_walls;
+                $this->fn1_halfBathroomsCeilings = $finishing1->half_bathrooms_ceilings;
+
+                // --- H. CUARTO DE SERVICIO/LAVADO (Utyr) ---
+                $this->fn1_utyrFlats = $finishing1->utyr_flats;
+                $this->fn1_utyrWalls = $finishing1->utyr_walls;
+                $this->fn1_utyrCeilings = $finishing1->utyr_ceilings;
+
+                // --- I. ESCALERAS (Stairs) ---
+                $this->fn1_stairsFlats = $finishing1->stairs_flats;
+                $this->fn1_stairsWalls = $finishing1->stairs_walls;
+                $this->fn1_stairsCeilings = $finishing1->stairs_ceilings;
+
+                // --- J. COPA (Copa) ---
+                $this->fn1_copaFlats = $finishing1->copa_flats;
+                $this->fn1_copaWalls = $finishing1->copa_walls;
+                $this->fn1_copaCeilings = $finishing1->copa_ceilings;
+
+                // --- K. ESPACIOS SIN PISOS (Unpa) ---
+                $this->fn1_unpaFlats = $finishing1->unpa_flats;
+                $this->fn1_unpaWalls = $finishing1->unpa_walls;
+                $this->fn1_unpaCeilings = $finishing1->unpa_ceilings;
+            }
+
+            // 3. Acabados 2 (Finishing2)
+            if ($finishing2 = $constructionElement->finishing2) {
+                $this->fn2_cementPlaster = $finishing2->cement_plaster;
+                $this->fn2_ceilings = $finishing2->ceilings;
+                $this->fn2_furredWalls = $finishing2->furred_walls;
+                $this->fn2_stairs = $finishing2->stairs;
+                $this->fn2_flats = $finishing2->flats;
+                $this->fn2_plinths = $finishing2->plinths;
+                $this->fn2_paint = $finishing2->paint;
+                $this->fn2_specialCoating = $finishing2->special_coating;
+            }
+
+            // 4. Carpintería (Carpentry)
+            if ($carpentry = $constructionElement->carpentry) {
+                $this->car_doorsAccess = $carpentry->doors_access;
+                $this->car_insideDoors = $carpentry->inside_doors;
+                $this->car_fixedFurnitureBedrooms = $carpentry->fixed_furniture_bedrooms;
+                $this->car_fixedFurnitureInsideBedrooms = $carpentry->fixed_furniture_inside_bedrooms;
+            }
+
+            // 5. Hidráulicas y Sanitarias (Hydraulic)
+            if ($hydraulic = $constructionElement->hydraulic) { // Usando el método 'hydraulic()'
+                $this->hs_bathroomFurniture = $hydraulic->bathroom_furniture;
+                $this->hs_hiddenApparentHydraulicBranches = $hydraulic->hidden_apparent_hydraulic_branches;
+                $this->hs_hydraulicBranches = $hydraulic->hydraulic_branches;
+                $this->hs_hiddenApparentSanitaryBranches = $hydraulic->hidden_apparent_sanitary_branches;
+                $this->hs_SanitaryBranches = $hydraulic->sanitary_branches;
+                $this->hs_hiddenApparentElectrics = $hydraulic->hidden_apparent_electrics;
+                $this->hs_electrics = $hydraulic->electrics;
+            }
+
+            // 6. Herrería (Ironwork)
+            if ($ironwork = $constructionElement->ironwork) {
+                $this->sm_serviceDoor = $ironwork->service_door;
+                $this->sm_windows = $ironwork->windows;
+                $this->sm_others = $ironwork->others;
+            }
+
+            // 7. Otros Elementos (OtherElement)
+            if ($otherElement = $constructionElement->otherElements) { // Usando el método 'otherElements()'
+                $this->oe_structure = $otherElement->structure;
+                $this->oe_locksmith = $otherElement->locksmith;
+                $this->oe_facades = $otherElement->facades;
+                $this->oe_elevator = $otherElement->elevator;
+            }
+        } else {
+            //Inicializamos los valores de los input radio en caso de que no se tenga asignado un valor en la bd
+            $this->fn1_bedroomsNumber = 0;
+            $this->fn1_bathroomsNumber = 0;
+            $this->fn1_halfBathroomsNumber = 0;
+            $this->fn1_copaNumber = 0;
+            $this->fn1_unpaNumber = 0;
+
+            $this->hs_hiddenApparentHydraulicBranches = 'Oculta';
+            $this->hs_hiddenApparentSanitaryBranches = 'Oculta';
+            $this->hs_hiddenApparentElectrics = 'Oculta';
+
+            $this->oe_elevator = 'Si cuenta';
+
+        }
+
+
 
 
         //Inicializamos el valor de la ventana que se abrirá por defecto
@@ -76,6 +213,9 @@ class ConstructionElements extends Component
     }
 
     public function save(){
+
+
+        //Validación de datos
         $validator = $this->validateAll();
 
         if ($validator->fails()) {
@@ -89,7 +229,175 @@ class ConstructionElements extends Component
             return;
         }
 
-        Toaster::success('Archivos guardados con éxito con éxito');
+        //Generación de arreglos de datos para cada tabla
+
+        $dataStructuralWork = [
+            'structure'             => $this->sc_structure,
+            'shallow_fundation'     => $this->sc_shallowFoundation,
+            'intermeediate_floor'   => $this->sc_intermediateFloor,
+            'ceiling'               => $this->sc_ceiling,
+            'walls'                 => $this->sc_walls,
+            'beams_columns'         => $this->sc_beamsColumns,
+            'roof'                  => $this->sc_roof,
+            'fences'                => $this->sc_fences,
+        ];
+
+        $dataFinishing1 = [
+            'bedrooms_number'           => $this->fn1_bedroomsNumber,
+            'bathrooms_number'          => $this->fn1_bathroomsNumber,
+            'half_bathrooms_number'     => $this->fn1_halfBathroomsNumber,
+            'copa_number'               => $this->fn1_copaNumber,
+            'unpa_number'               => $this->fn1_unpaNumber,
+
+            'hall_flats'                => $this->fn1_hallFlats,
+            'hall_walls'                => $this->fn1_hallWalls,
+            'hall_ceilings'             => $this->fn1_hallCeilings,
+
+            'stdr_flats'                => $this->fn1_stdrFlats,
+            'stdr_walls'                => $this->fn1_stdrWalls,
+            'stdr_ceilings'             => $this->fn1_stdrCeilings,
+
+            'kitchen_flats'             => $this->fn1_kitchenFlats,
+            'kitchen_walls'             => $this->fn1_kitchenWalls,
+            'kitchen_ceilings'          => $this->fn1_kitchenCeilings,
+
+            'bedrooms_flats'            => $this->fn1_bedroomsFlats,
+            'bedrooms_walls'            => $this->fn1_bedroomsWalls,
+            'bedrooms_ceilings'         => $this->fn1_bedroomsCeilings,
+
+            'bathrooms_flats'           => $this->fn1_bathroomsFlats,
+            'bathrooms_walls'           => $this->fn1_bathroomsWalls,
+            'bathrooms_ceilings'        => $this->fn1_bathroomsCeilings,
+
+            'half_bathrooms_flats'      => $this->fn1_halfBathroomsFlats,
+            'half_bathrooms_walls'      => $this->fn1_halfBathroomsWalls,
+            'half_bathrooms_ceilings'   => $this->fn1_halfBathroomsCeilings,
+
+            'utyr_flats'                => $this->fn1_utyrFlats,
+            'utyr_walls'                => $this->fn1_utyrWalls,
+            'utyr_ceilings'             => $this->fn1_utyrCeilings,
+
+            'stairs_flats'              => $this->fn1_stairsFlats,
+            'stairs_walls'              => $this->fn1_stairsWalls,
+            'stairs_ceilings'           => $this->fn1_stairsCeilings,
+
+            'copa_flats'                => $this->fn1_copaFlats,
+            'copa_walls'                => $this->fn1_copaWalls,
+            'copa_ceilings'             => $this->fn1_copaCeilings,
+
+            'unpa_flats'                => $this->fn1_unpaFlats,
+            'unpa_walls'                => $this->fn1_unpaWalls,
+            'unpa_ceilings'             => $this->fn1_unpaCeilings,
+        ];
+
+        $dataFinishing2 = [
+            'cement_plaster'    => $this->fn2_cementPlaster,
+            'ceilings'          => $this->fn2_ceilings,
+            'furred_walls'      => $this->fn2_furredWalls,
+            'stairs'            => $this->fn2_stairs,
+            'flats'             => $this->fn2_flats,
+            'plinths'           => $this->fn2_plinths,
+            'paint'             => $this->fn2_paint,
+            'special_coating'   => $this->fn2_specialCoating,
+        ];
+
+        $dataCarpentry = [
+            'doors_access'                  => $this->car_doorsAccess,
+            'inside_doors'                  => $this->car_insideDoors,
+            'fixed_furniture_bedrooms'      => $this->car_fixedFurnitureBedrooms,
+            'fixed_furniture_inside_bedrooms' => $this->car_fixedFurnitureInsideBedrooms,
+        ];
+
+        $dataHydraulicSanitary = [
+            'bathroom_furniture'                => $this->hs_bathroomFurniture,
+            'hidden_apparent_hydraulic_branches' => $this->hs_hiddenApparentHydraulicBranches,
+            'hydraulic_branches'                => $this->hs_hydraulicBranches,
+            'hidden_apparent_sanitary_branches'  => $this->hs_hiddenApparentSanitaryBranches,
+            'sanitary_branches'                 => $this->hs_SanitaryBranches,
+            'hidden_apparent_electrics'         => $this->hs_hiddenApparentElectrics,
+            'electrics'                         => $this->hs_electrics,
+        ];
+
+        $dataIronwork = [
+            'service_door'  => $this->sm_serviceDoor,
+            'windows'       => $this->sm_windows,
+            'others'        => $this->sm_others,
+        ];
+
+        $dataOtherElement = [
+            'structure'     => $this->oe_structure,
+            'locksmith'     => $this->oe_locksmith,
+            'facades'       => $this->oe_facades,
+            'elevator'      => $this->oe_elevator,
+        ];
+
+
+
+        //Transacción de datos
+        // ... después de la validación exitosa y la preparación de las 8 variables $data...
+
+        try {
+            // INICIO DE LA TRANSACCIÓN:
+            // 1. Laravel llama al comando "START TRANSACTION" en la base de datos (MySQL, PostgreSQL, etc.).
+            // 2. A partir de aquí, todas las operaciones de INSERT/UPDATE están "pendientes" y pueden ser deshechas.
+            /* Las variables $data... se hacen accesibles dentro de esta función anónima (closure). */
+            DB::transaction(function () use (
+                $dataStructuralWork,
+                $dataFinishing1,
+                $dataFinishing2,
+                $dataCarpentry,
+                $dataIronwork,
+                $dataHydraulicSanitary,
+                $dataOtherElement,
+
+            ) {
+                // Si ConstructionElementModel SÓLO tiene la clave foránea y timestamps:
+                $dataConstructionElement = [];
+                // 1. CREAR/OBTENER EL ELEMENTO PADRE (construction_elements)
+                // Esta es la tabla que actuará como "llave maestra" para el resto.
+                $constructionElement = ConstructionElementModel::firstOrCreate(
+                    ['valuation_id' => session('valuation_id')], // Criterio de búsqueda: Encuentra un registro con este ID de avalúo.
+                    $dataConstructionElement               // Datos para usar SI el registro NO existe.
+                );
+                // Si el elemento ya existe, se obtiene. Si no, se crea y SE GENERA EL ID.
+                // Este ID (ej. 150) es ahora el que se usará en todas las tablas auxiliares.
+
+                // 2. GUARDAR RELACIONES 1:1 (HasOne)
+                // Para cada tabla auxiliar que debe tener UN solo registro por elemento de construcción:
+
+                // updateOrCreate: Busca un registro hijo ligado a $constructionElement.
+                // Si existe, lo actualiza. Si NO existe, LO CREA.
+                // 🔑 Eloquent INYECTA AUTOMÁTICAMENTE: 'construction_elements_id' => $constructionElement->id
+
+                $constructionElement->structuralWork()->updateOrCreate([], $dataStructuralWork);
+                $constructionElement->finishing1()->updateOrCreate([], $dataFinishing1);
+                $constructionElement->finishing2()->updateOrCreate([], $dataFinishing2);
+                $constructionElement->carpentry()->updateOrCreate([], $dataCarpentry);
+                $constructionElement->ironwork()->updateOrCreate([], $dataIronwork);
+                $constructionElement->hydraulic()->updateOrCreate([], $dataHydraulicSanitary);
+                $constructionElement->otherElements()->updateOrCreate([], $dataOtherElement);
+                // Todas estas operaciones están AHORA pendientes dentro de la transacción.
+
+
+
+                // FIN DE LA FUNCIÓN ANÓNIMA: Si llegamos aquí sin errores...
+                // 4. Se ejecuta el comando "COMMIT" en la base de datos.
+                // Todos los INSERTs, UPDATEs y DELETEs pendientes se confirman y se vuelven permanentes.
+
+            }); // Cierre de DB::transaction()
+
+            // Éxito: Solo se llega aquí si el COMMIT fue exitoso.
+            Toaster::success('Datos guardados con éxito.');
+            return redirect()->route('form.index', ['section' => 'buildings']);
+        } catch (\Exception $e) {
+            // CUALQUIER ERROR: Si falla la validación, la base de datos (ej. un campo NOT NULL) o el PHP...
+            // 5. Se ejecuta automáticamente el "ROLLBACK".
+            // Todos los cambios realizados (INSERTs, UPDATEs, DELETEs) en las 8 tablas se deshacen.
+           //  Toaster::error('Error al guardar los datos: ' . $e->getMessage());
+            //dd($e->getMessage());
+        }
+
+        //Toaster::success('Archivos guardados con éxito con éxito');
     }
 
 

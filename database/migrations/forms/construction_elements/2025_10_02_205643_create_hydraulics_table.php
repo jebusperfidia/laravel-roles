@@ -19,6 +19,18 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
 
+            // Campos Hidráulicos y Sanitarios (Todos Requeridos, tipo TEXT)
+            $table->text('bathroom_furniture');
+
+            $table->string('hidden_apparent_hydraulic_branches', 15);
+            $table->text('hydraulic_branches');
+
+            $table->string('hidden_apparent_sanitary_branches', 15);
+            $table->text('sanitary_branches');
+
+            $table->string('hidden_apparent_electrics', 15);
+            $table->text('electrics');
+
             $table->timestamps();
         });
     }

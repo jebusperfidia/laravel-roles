@@ -18,6 +18,15 @@ return new class extends Migration
                 ->constrained('construction_elements')
                 ->cascadeOnDelete();
 
+            // Campos de Acabados 2 (Todos Requeridos, tipo TEXT)
+            $table->text('cement_plaster');
+            $table->text('ceilings');
+            $table->text('furred_walls');
+            $table->text('stairs');
+            $table->text('flats');
+            $table->text('plinths');
+            $table->text('paint');
+            $table->text('special_coating');
 
             $table->timestamps();
         });

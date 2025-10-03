@@ -14,10 +14,17 @@ return new class extends Migration
         Schema::create('finishings_others', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('finishings_1_id')
-                ->constrained('finishings_1')
+            // 🔑 CLAVE FORÁNEA CORREGIDA: LIGADA A 'construction_elements'
+            $table->foreignId('construction_elements_id')
+                ->constrained('construction_elements')
                 ->cascadeOnDelete();
 
+            // Campos de Acabados Adicionales (Todos Requeridos)
+            $table->string('space'); // Asumo string para el nombre del espacio
+            $table->integer('amount'); // Asumo tinyInteger para la cantidad de elementos/áreas
+            $table->string('floors');
+            $table->string('walls');
+            $table->string('ceilings');
 
             $table->timestamps();
         });

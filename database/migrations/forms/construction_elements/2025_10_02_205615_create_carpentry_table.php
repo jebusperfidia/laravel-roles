@@ -18,6 +18,12 @@ return new class extends Migration
                 ->constrained('construction_elements')
                 ->cascadeOnDelete();
 
+            // Campos de Carpintería (Todos Requeridos, tipo TEXT)
+            $table->text('doors_access');
+            $table->text('inside_doors');
+            $table->text('fixed_furniture_bedrooms');
+            $table->text('fixed_furniture_inside_bedrooms');
+
 
             $table->timestamps();
         });

@@ -18,6 +18,11 @@ return new class extends Migration
                 ->constrained('construction_elements')
                 ->cascadeOnDelete();
 
+            // Campos de Herrería (Todos Requeridos, tipo TEXT)
+            $table->text('service_door');
+            $table->text('windows');
+            $table->text('others');
+
 
             $table->timestamps();
         });
