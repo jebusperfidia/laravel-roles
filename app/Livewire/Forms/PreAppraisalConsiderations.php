@@ -6,19 +6,59 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
 
+use App\Models\Forms\AppraisalConsideration\AppraisalConsiderationModel;
+
+
 class PreAppraisalConsiderations extends Component
 {
+    public $valuationId;
+
+    //Generamos una variable para obtener los datos del modelo
+    public $appConElement;
 
     //Variables primer contenedor
     public $additionalConsiderations, $technicalMemory, $technicalReportBreakdownInformation,
-           $technicalReportOthersSupport, $technicalReportDescriptionClculations;
+           $technicalReportOthersSupport, $technicalReportDescriptionCalculations;
 
     //Variables segundo contenedor
-    public $ach_landCalculation, $ahc_costApproach, $ach_incomeApproach, $ach_dueTo, $ach_dueTo2;
+    public $ach_landCalculation, $ahc_costApproach, $ach_incomeApproach, $ach_dueTo1, $ach_dueTo2;
 
     public bool $ach_comparativeApproachLand, $ach_comparativeSalesApproach, $applyFIC;
 
 
+
+
+
+
+    public function mount()
+    {
+
+        $this->valuationId = session('valuation_id');
+        $this->appConElement = AppraisalConsiderationModel::where('valuation_id', $this->valuationId)->first();
+        //dd($this->valuationId);
+
+        //dd($this->appConElement);
+
+        if($this->appConElement){
+            $this->additionalConsiderations = $this->appConElement->additional_considerations;
+            $this->technicalMemory = $this->appConElement->technical_memory;
+            $this->technicalReportBreakdownInformation = $this->appConElement->technical_report_breakdown_information;
+            $this->technicalReportOthersSupport = $this->appConElement->technical_report_other_support;
+            $this->technicalReportDescriptionCalculations = $this->appConElement->technical_report_description_calculations;
+            $this->ach_landCalculation = $this->appConElement->land_calculation;
+            $this->ahc_costApproach = $this->appConElement->cost_approach;
+            $this->ach_incomeApproach = $this->appConElement->income_approach;
+            $this->ach_dueTo1 = $this->appConElement->due_to_1;
+            $this->ach_dueTo2 = $this->appConElement->due_to_2;
+            $this->ach_comparativeApproachLand = $this->appConElement->comparative_approach_land;
+            $this->ach_comparativeSalesApproach = $this->appConElement->comparative_sales_approach;
+            $this->applyFIC = $this->appConElement->apply_fic;
+        } else {
+            $this->ach_comparativeApproachLand = false;
+            $this->ach_comparativeSalesApproach = false;
+            $this->applyFIC = false;
+        }
+    }
 
 
 
@@ -41,7 +81,26 @@ class PreAppraisalConsiderations extends Component
         }
 
         //Aquí se ejecutará la lógica de guardado
+        $data = [
+            'additional_considerations' => $this->additionalConsiderations,
+            'technical_memory' => $this->technicalMemory,
+            'technical_report_breakdown_information' => $this->technicalReportBreakdownInformation,
+            'technical_report_other_support' => $this->technicalReportOthersSupport,
+            'technical_report_description_calculations' => $this->technicalReportDescriptionCalculations,
+            'land_calculation' => $this->ach_landCalculation,
+            'cost_approach' => $this->ahc_costApproach,
+            'income_approach' => $this->ach_incomeApproach,
+            'due_to_1' => $this->ach_dueTo1,
+            'due_to_2' => $this->ach_dueTo2,
+            'comparative_approach_land' => $this->ach_comparativeApproachLand,
+            'comparative_sales_approach' => $this->ach_comparativeSalesApproach,
+            'apply_fic' => $this->applyFIC
+        ];
 
+        AppraisalConsiderationModel::updateOrCreate([
+            'valuation_id' => $this->valuationId],
+             $data
+        );
 
 
         //Al finalizar, aquí se puede generar un Toaster de guardado o bien, copiar alguna otra función para redireccionar
@@ -83,7 +142,7 @@ class PreAppraisalConsiderations extends Component
         //Validaciones específicas si el checkbox de "Si se apllica, usando terrenos directos o residual" está seleccionado
         if ($this->ach_landCalculation ===  'No se aplica, no existen comparables debido a...') {
             $container2 = array_merge($container2, [
-                'ach_dueTo'  => 'required',
+                'ach_dueTo1'  => 'required',
             ]);
         }
 
@@ -114,13 +173,6 @@ class PreAppraisalConsiderations extends Component
 
 
 
-
-
-
-
-
-
-
     protected function validationAttributes(){
         return [
             'additionalConsiderations' => ' ',
@@ -136,7 +188,7 @@ class PreAppraisalConsiderations extends Component
             /*  'applyFIC' => 'regla FIC', */
             /* 'ach_comparativeApproachLand'  => 'comparación de enfoque de terreno',
             'ach_comparativeSalesApproach'   => 'comparación de enfoque de ventas', */
-            'ach_dueTo'  => 'debido a, ',
+            'ach_dueTo1'  => 'debido a, ',
             'ach_dueTo2'  => 'debido a, ',
         ];
     }

@@ -88,12 +88,14 @@
                 {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
                 {{-- <flux:modal.trigger name="add-element" class="flex justify-end pt-8"> --}}
                     <div class="flex justify-end pt-4">
-                        <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus" wire:click='openAddElement'></flux:button>
+                        <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
+                            wire:click="openAddElement('private')"></flux:button>
                     </div>
-               {{--  </flux:modal.trigger> --}}
+                    {{--
+                </flux:modal.trigger> --}}
 
                 {{-- TABLA DE ELEMENTOS --}}
-                <div class="mt-2">
+                {{-- <div class="mt-2">
                     <div class="overflow-x-auto max-w-full">
                         <table class="min-w-[550px] table-fixed w-full border-2 ">
                             <thead>
@@ -119,7 +121,7 @@
                             </thead>
                             <tbody>
 
-                                {{-- Valor de ejemplo para usar en los for --}}
+
                                 <tr>
                                     <td class="px-2 py-1 border text-xs text-center">Casa habitación
                                     </td>
@@ -138,7 +140,7 @@
                                     <td class="px-2 py-1 border text-sm text-center">100%</td>
                                     <td class="px-2 py-1 border text-sm text-center">1.0 Bueno</td>
                                     <td class="px-2 py-1 flex justify-center">
-                                        <flux:checkbox wire:model='data' disabled/>
+                                        <flux:checkbox wire:model='data' disabled />
                                     </td>
                                     <td class="px-2 py-1 border text-sm text-center">
                                         <input type="radio" wire:model="respuesta" name="opcion_unica" value="A"
@@ -153,19 +155,164 @@
                                             class="w-4 h-4 text-blue-500" disabled>
                                     </td>
                                     <td class="my-2 flex justify-evenly">
-                                        {{-- <flux:modal.trigger name="edit-element" class="flex justify-end"> --}}
-                                            <flux:button type="button" icon-leading="pencil"
-                                                class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElement'/>
-                                            {{-- </flux:modal-trigger> --}}
-                                            {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
-                                                --}}
-                                                <flux:button
-                                                    onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
-                                                    wire:click="deleteElement" type="button" icon-leading="trash"
-                                                    class="cursor-pointer btn-deleted btn-buildings" />
-                                                {{-- </flux:modal-trigger> --}}
+
+                                        <flux:button type="button" icon-leading="pencil"
+                                            class="cursor-pointer btn-intermediary btn-buildins"
+                                            wire:click='openEditElement' />
+
+                                        <flux:button
+                                            onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
+                                            wire:click="deleteElement" type="button" icon-leading="trash"
+                                            class="cursor-pointer btn-deleted btn-buildings" />
+
                                     </td>
                                 </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div> --}}
+
+
+                <div class="mt-2">
+                    <div class="overflow-x-auto max-w-full">
+                        <table class="min-w-[550px] table-fixed w-full border-2 ">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="px-2 py-1 border whitespace-nowrap">Descripcion</th>
+                                    <th class="w-[120px] px-2 py-1 border whitespace-nowrap">Clasificación</th>
+                                    <th class="w-[32px] px-2 py-1 border">Uso</th>
+                                    <th class="w-[5%] px-2 py-1 border">Niveles edificio</th>
+                                    <th class="w-[5%] px-2 py-1 border">Niveles por tipo de construcción</th>
+                                    <th class="w-[5%] px-2 py-1 border">Rango niveles TGDF</th>
+                                    <th class="w-[5%] px-2 py-1 border">Edad</th>
+                                    <th class="w-[5%] px-2 py-1 border">Superficie</th>
+                                    <th class="w-[5%] px-2 py-1 border">Fuente de información</th>
+                                    <th class="w-[5%] px-2 py-1 border">Costo unit reposición nuevo</th>
+                                    <th class="w-[5%] px-2 py-1 border">Avance obra</th>
+                                    <th class="w-[5%] px-2 py-1 border">Estado de conservación</th>
+                                    <th class="w-[5%] px-2 py-1 border">RA</th>
+                                    <th class="w-[5%] px-2 py-1 border">Vend</th>
+                                    <th class="w-[5%] px-2 py-1 border">Acc</th>
+                                    <th class="w-[5%] px-2 py-1 border">Desc</th>
+                                    <th class="w-[100px] py-1 border">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if ($buildingConstructionsPrivate->isEmpty())
+                                <tr>
+                                    <td colspan="18" class="px-2 py-4 text-center text-gray-500">
+                                        No hay elementos registrados
+                                    </td>
+                                </tr>
+                                @else
+                                @foreach ($buildingConstructionsPrivate as $item)
+                                <tr wire:key="private-{{ $item->id }}">
+                                    <td class="px-2 py-1 border text-xs text-center">{{ $item->description }}</td>
+                                    <td class="px-2 py-1 border text-xs text-left">
+                                        <span>{{ $item->clasification }}</span><br>
+                                        {{-- Si tienes un segundo nivel de clasificación, agrégalo aquí --}}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->use }}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->building_levels }}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->levels_construction_type
+                                        }}</td>
+
+                                    {{-- Rango niveles TGDF: Asumo que esto es un campo, si no lo es, usa N/A --}}
+                                    <td class="px-2 py-1 border text-sm text-center">{{ 'N/A' }}</td>
+
+                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->age }}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{ number_format($item->surface, 2)
+                                        }}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->source_information }}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">${{
+                                        number_format($item->unit_cost_replacement, 2)
+                                        }}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->progress_work }}%</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->conservation_state }}
+                                    </td>
+
+                                    {{-- RA (Range Based Height) --}}
+                                    <td class="px-2 py-1 border">
+                                        {{--
+                                        <flux:checkbox :checked="(bool) $item->range_based_height" disabled /> --}}
+                                        {{-- <input type="checkbox" disabled {{ $item->range_based_height ? 'checked' :
+                                        '' }}> --}}
+                                        <!-- Componente Flux UI para mostrar un checkbox de solo lectura -->
+                                        <div class="flex justify-center">
+                                            <flux:checkbox :checked="(bool) $item->range_based_height" {{-- Establece si el
+                                                checkbox debe estar marcado. Convertimos el valor a booleano explícito para
+                                                asegurar compatibilidad con Flux UI. Si $item->
+                                                range_based_height es true, el checkbox aparece marcado.
+                                                --}}
+
+                                                disabled
+                                                {{--
+                                                Evita que el usuario interactúe con el checkbox.
+                                                Es útil cuando solo quieres mostrar el estado, sin permitir cambios.
+                                                --}}
+
+                                                wire:key="checkbox-{{ $item->id }}-{{ (int) $item->range_based_height
+                                                }}"
+                                                {{--
+                                                Esta es la parte más importante.
+
+                                                Livewire usa wire:key para identificar elementos únicos en el DOM.
+
+                                                Aquí generamos una clave única combinando:
+                                                - El ID del elemento ($item->id)
+                                                - El valor actual del campo ($item->range_based_height convertido a
+                                                entero)
+
+                                                Ejemplo:
+                                                Si el ID es 12 y el valor es true, la clave será: "checkbox-12-1"
+                                                Si luego cambia a false, será: "checkbox-12-0"
+
+                                                Como cambia el valor de wire:key, Livewire forzará el re-render del
+                                                checkbox
+                                                en lugar de intentar "reutilizar" el anterior, asegurando que se
+                                                actualice visualmente.
+                                                --}}
+                                                />
+                                        </div>
+                                    </td>
+
+                                    {{-- Vend, Acc, Desc: Asumo que estos son campos de lógica/radio específicos. Aquí
+                                    están los
+                                    placeholders --}}
+                                    {{-- Columna VEND --}}
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        <input type="radio" name="surface_vad_group_{{ $item->id }}" {{-- NOMBRE UNIFICADO --}} value="superficie vendible"
+                                            class="w-4 h-4 text-blue-500" disabled {{ $item->surface_vad === 'superficie vendible' ? 'checked' : '' }}
+                                        >
+                                    </td>
+
+                                    {{-- Columna ACC --}}
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        <input type="radio" name="surface_vad_group_{{ $item->id }}" {{-- NOMBRE UNIFICADO --}} value="superficie accesoria"
+                                            class="w-4 h-4 text-blue-500" disabled {{ $item->surface_vad === 'superficie accesoria' ? 'checked' : '' }}
+                                        >
+                                    </td>
+
+                                    {{-- Columna DESC --}}
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        <input type="radio" name="surface_vad_group_{{ $item->id }}" {{-- NOMBRE UNIFICADO --}}
+                                            value="construccion superficie descubierta" class="w-4 h-4 text-blue-500" disabled {{ $item->surface_vad ===
+                                        'construccion superficie descubierta' ? 'checked' : '' }}
+                                        >
+                                    </td>
+                                    <td class="my-2 flex justify-evenly border">
+                                        <flux:button type="button" icon-leading="pencil"
+                                            class="cursor-pointer btn-intermediary btn-buildins"
+                                            wire:click="openEditElement({{ $item->id }})" />
+                                        <flux:button
+                                            onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
+                                            wire:click="deleteElement({{ $item->id }})" type="button"
+                                            icon-leading="trash" class="cursor-pointer btn-deleted btn-buildings" />
+                                    </td>
+                                </tr>
+                                @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -228,88 +375,154 @@
 
                 {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
                 {{-- <flux:modal.trigger name="add-element" class="flex justify-end pt-8"> --}}
-                   <div class="flex justify-end pt-4">
-                    <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus" wire:click='openAddElement'>
-                    </flux:button>
-                </div>
-                {{-- </flux:modal.trigger> --}}
+                    <div class="flex justify-end pt-4">
+                        <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
+                            wire:click="openAddElement('common')">
+                        </flux:button>
+                    </div>
+                    {{--
+                </flux:modal.trigger> --}}
 
                 {{-- TABLA DE ELEMENTOS --}}
                 <div class="mt-2">
                     <div class="overflow-x-auto max-w-full">
-                   <table class="min-w-[550px] table-fixed w-full border-2 ">
-                    <thead>
-                        <tr class="bg-gray-100">
-                            <th class="px-2 py-1 border whitespace-nowrap">Descripcion</th>
-                            <th class="w-[120px] px-2 py-1 border whitespace-nowrap">Clasificación</th>
-                            <th class="w-[32px] px-2 py-1 border">Uso</th>
-                            <th class="w-[5%] px-2 py-1 border">Niveles edificio</th>
-                            <th class="w-[5%] px-2 py-1 border">Niveles por tipo de construcción</th>
-                            <th class="w-[5%] px-2 py-1 border">Rango niveles TGDF</th>
-                            <th class="w-[5%] px-2 py-1 border">Edad</th>
-                            <th class="w-[5%] px-2 py-1 border">Superficie</th>
-                            <th class="w-[5%] px-2 py-1 border">Fuente de información</th>
-                            <th class="w-[5%] px-2 py-1 border">Costo unit reposición nuevo</th>
-                            <th class="w-[5%] px-2 py-1 border">Avance obra</th>
-                            <th class="w-[5%] px-2 py-1 border">Estado de conservación</th>
-                            <th class="w-[5%] px-2 py-1 border">RA</th>
-                            <th class="w-[5%] px-2 py-1 border">Vend</th>
-                            <th class="w-[5%] px-2 py-1 border">Acc</th>
-                            <th class="w-[5%] px-2 py-1 border">Desc</th>
-                            <th class="w-[100px] py-1 border">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                        <table class="min-w-[550px] table-fixed w-full border-2 ">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="px-2 py-1 border whitespace-nowrap">Descripcion</th>
+                                    <th class="w-[120px] px-2 py-1 border whitespace-nowrap">Clasificación</th>
+                                    <th class="w-[32px] px-2 py-1 border">Uso</th>
+                                    <th class="w-[5%] px-2 py-1 border">Niveles edificio</th>
+                                    <th class="w-[5%] px-2 py-1 border">Niveles por tipo de construcción</th>
+                                    <th class="w-[5%] px-2 py-1 border">Rango niveles TGDF</th>
+                                    <th class="w-[5%] px-2 py-1 border">Edad</th>
+                                    <th class="w-[5%] px-2 py-1 border">Superficie</th>
+                                    <th class="w-[5%] px-2 py-1 border">Fuente de información</th>
+                                    <th class="w-[5%] px-2 py-1 border">Costo unit reposición nuevo</th>
+                                    <th class="w-[5%] px-2 py-1 border">Avance obra</th>
+                                    <th class="w-[5%] px-2 py-1 border">Estado de conservación</th>
+                                    <th class="w-[5%] px-2 py-1 border">RA</th>
+                                    <th class="w-[5%] px-2 py-1 border">Vend</th>
+                                    <th class="w-[5%] px-2 py-1 border">Acc</th>
+                                    <th class="w-[5%] px-2 py-1 border">Desc</th>
+                                    <th class="w-[100px] py-1 border">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if ($buildingConstructionsCommon->isEmpty())
+                                <tr>
+                                    <td colspan="18" class="px-2 py-4 text-center text-gray-500">
+                                        No hay elementos registrados
+                                    </td>
+                                </tr>
+                                @else
+                                @foreach ($buildingConstructionsCommon as $item)
+                                <tr wire:key="private-{{ $item->id }}">
+                                    <td class="px-2 py-1 border text-xs text-center">{{ $item->description }}</td>
+                                    <td class="px-2 py-1 border text-xs text-left">
+                                        <span>{{ $item->clasification }}</span><br>
+                                        {{-- Si tienes un segundo nivel de clasificación, agrégalo aquí --}}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->use }}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->building_levels }}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->levels_construction_type
+                                        }}</td>
 
-                        {{-- Valor de ejemplo para usar en los for --}}
-                        <tr>
-                            <td class="px-2 py-1 border text-xs text-center">Casa club
-                            </td>
-                            <td class="px-2 py-1 border text-xs text-left">
-                                <span>7. Residencial plus</span><br>
-                                <span>6. Lujo</span>
-                            </td>
-                            <td class="px-2 py-1 border text-sm text-center">H</td>
-                            <td class="px-2 py-1 border text-sm text-center">1</td>
-                            <td class="px-2 py-1 border text-sm text-center">1</td>
-                            <td class="px-2 py-1 border text-sm text-center">02</td>
-                            <td class="px-2 py-1 border text-sm text-center">1</td>
-                            <td class="px-2 py-1 border text-sm text-center">100.00</td>
-                            <td class="px-2 py-1 border text-sm text-center">Escrituras</td>
-                            <td class="px-2 py-1 border text-sm text-center">$1,000</td>
-                            <td class="px-2 py-1 border text-sm text-center">100%</td>
-                            <td class="px-2 py-1 border text-sm text-center">1.0 Bueno</td>
-                            <td class="px-2 py-1 flex justify-center">
-                                <flux:checkbox wire:model='data' disabled />
-                            </td>
-                            <td class="px-2 py-1 border text-sm text-center">
-                                <input type="radio" wire:model="respuesta" name="opcion_unica" value="A" class="w-4 h-4 text-blue-500"
-                                    disabled>
-                            </td>
-                            <td class="px-2 py-1 border text-sm text-center">
-                                <input type="radio" wire:model="respuesta" name="opcion_unica" value="B" class="w-4 h-4 text-blue-500"
-                                    disabled>
-                            </td>
-                            <td class="px-2 py-1 border text-sm text-center">
-                                <input type="radio" wire:model="respuesta" name="opcion_unica" value="C" class="w-4 h-4 text-blue-500"
-                                    disabled>
-                            </td>
-                            <td class="my-2 flex justify-evenly">
-                                {{-- <flux:modal.trigger name="edit-element" class="flex justify-end"> --}}
-                                    <flux:button type="button" icon-leading="pencil"
-                                        class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElement'/>
-                                    {{-- </flux:modal-trigger> --}}
-                                    {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                    {{-- Rango niveles TGDF: Asumo que esto es un campo, si no lo es, usa N/A --}}
+                                    <td class="px-2 py-1 border text-sm text-center">{{ 'N/A' }}</td>
+
+                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->age }}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{ number_format($item->surface, 2)
+                                        }}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->source_information }}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">${{
+                                        number_format($item->unit_cost_replacement, 2)
+                                        }}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->progress_work }}%</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->conservation_state }}
+                                    </td>
+
+                                    {{-- RA (Range Based Height) --}}
+                               <td class="px-2 py-1 border">
+                                {{--
+                                <flux:checkbox :checked="(bool) $item->range_based_height" disabled /> --}}
+                                {{-- <input type="checkbox" disabled {{ $item->range_based_height ? 'checked' :
+                                '' }}> --}}
+                                <!-- Componente Flux UI para mostrar un checkbox de solo lectura -->
+                                <div class="flex justify-center">
+                                    <flux:checkbox :checked="(bool) $item->range_based_height" {{-- Establece si el checkbox debe estar marcado.
+                                        Convertimos el valor a booleano explícito para asegurar compatibilidad con Flux UI. Si $item->
+                                        range_based_height es true, el checkbox aparece marcado.
                                         --}}
-                                        <flux:button
-                                            onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
-                                            wire:click="deleteElement" type="button" icon-leading="trash"
-                                            class="cursor-pointer btn-deleted btn-buildings" />
-                                        {{-- </flux:modal-trigger> --}}
+
+                                        disabled
+                                        {{--
+                                        Evita que el usuario interactúe con el checkbox.
+                                        Es útil cuando solo quieres mostrar el estado, sin permitir cambios.
+                                        --}}
+
+                                        wire:key="checkbox-{{ $item->id }}-{{ (int) $item->range_based_height
+                                        }}"
+                                        {{--
+                                        Esta es la parte más importante.
+
+                                        Livewire usa wire:key para identificar elementos únicos en el DOM.
+
+                                        Aquí generamos una clave única combinando:
+                                        - El ID del elemento ($item->id)
+                                        - El valor actual del campo ($item->range_based_height convertido a
+                                        entero)
+
+                                        Ejemplo:
+                                        Si el ID es 12 y el valor es true, la clave será: "checkbox-12-1"
+                                        Si luego cambia a false, será: "checkbox-12-0"
+
+                                        Como cambia el valor de wire:key, Livewire forzará el re-render del
+                                        checkbox
+                                        en lugar de intentar "reutilizar" el anterior, asegurando que se
+                                        actualice visualmente.
+                                        --}}
+                                        />
+                                </div>
                             </td>
-                        </tr>
-                    </tbody>
-                </table>
+
+                                    {{-- Columna VEND --}}
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        <input type="radio" name="surface_vad_group_{{ $item->id }}" {{-- NOMBRE UNIFICADO --}} value="superficie vendible"
+                                            class="w-4 h-4 text-blue-500" disabled {{ $item->surface_vad === 'superficie vendible' ? 'checked' : '' }}
+                                        >
+                                    </td>
+
+                                    {{-- Columna ACC --}}
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        <input type="radio" name="surface_vad_group_{{ $item->id }}" {{-- NOMBRE UNIFICADO --}} value="superficie accesoria"
+                                            class="w-4 h-4 text-blue-500" disabled {{ $item->surface_vad === 'superficie accesoria' ? 'checked' : '' }}
+                                        >
+                                    </td>
+
+                                    {{-- Columna DESC --}}
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        <input type="radio" name="surface_vad_group_{{ $item->id }}" {{-- NOMBRE UNIFICADO --}}
+                                            value="construccion superficie descubierta" class="w-4 h-4 text-blue-500" disabled {{ $item->surface_vad ===
+                                        'construccion superficie descubierta' ? 'checked' : '' }}
+                                        >
+                                    </td>
+
+                                    <td class="my-2 flex justify-evenly border">
+                                        <flux:button type="button" icon-leading="pencil"
+                                            class="cursor-pointer btn-intermediary btn-buildins"
+                                            wire:click="openEditElement({{ $item->id }})" />
+                                        <flux:button
+                                            onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
+                                            wire:click="deleteElement({{ $item->id }})" type="button"
+                                            icon-leading="trash" class="cursor-pointer btn-deleted btn-buildings" />
+                                    </td>
+                                </tr>
+                                @endforeach
+                                @endif
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -323,42 +536,42 @@
                 {{-- TABLA DE ELEMENTOS --}}
                 <div class="mt-2">
                     <div class="overflow-x-auto max-w-full">
-                      <table class="min-w-[550px] table-fixed w-full border-2 ">
-                        <thead>
-                            <tr class="bg-gray-100">
-                                <th class="w-[20%] px-2 py-1 border">Descripcion</th>
-                                <th class="w-[5%] px-2 py-1 border">Edad</th>
-                                <th class="w-[5%] py-1 border">Vida útil</th>
-                                <th class="w-[5%] px-2 py-1 border">Vida útil remanente</th>
-                                <th class="w-[5%] px-2 py-1 border">Superficie</th>
-                                <th class="w-[5%] px-2 py-1 border">Costo unitario reposición nuevo</th>
-                                <th class="w-[5%] px-2 py-1 border">Factor edad</th>
-                                <th class="w-[5%] px-2 py-1 border">Factor conservación</th>
-                                <th class="w-[5%] px-2 py-1 border">Avance obra</th>
-                                <th class="w-[5%] px-2 py-1 border">Factor resultante</th>
-                                <th class="w-[5%] px-2 py-1 border">Costo unitario neto de reposición</th>
-                                <th class="w-[5%] px-2 py-1 border">Valor total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                        <table class="min-w-[550px] table-fixed w-full border-2 ">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="w-[20%] px-2 py-1 border">Descripcion</th>
+                                    <th class="w-[5%] px-2 py-1 border">Edad</th>
+                                    <th class="w-[5%] py-1 border">Vida útil</th>
+                                    <th class="w-[5%] px-2 py-1 border">Vida útil remanente</th>
+                                    <th class="w-[5%] px-2 py-1 border">Superficie</th>
+                                    <th class="w-[5%] px-2 py-1 border">Costo unitario reposición nuevo</th>
+                                    <th class="w-[5%] px-2 py-1 border">Factor edad</th>
+                                    <th class="w-[5%] px-2 py-1 border">Factor conservación</th>
+                                    <th class="w-[5%] px-2 py-1 border">Avance obra</th>
+                                    <th class="w-[5%] px-2 py-1 border">Factor resultante</th>
+                                    <th class="w-[5%] px-2 py-1 border">Costo unitario neto de reposición</th>
+                                    <th class="w-[5%] px-2 py-1 border">Valor total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
 
-                            {{-- Valor de ejemplo para usar en los for --}}
-                            <tr>
-                                <td class="px-2 py-1 border text-xs text-center">Casa club</td>
-                                <td class="px-2 py-1 border text-xs text-center">1</td>
-                                <td class="px-2 py-1 border text-xs text-center">90</td>
-                                <td class="px-2 py-1 border text-sm text-center">89</td>
-                                <td class="px-2 py-1 border text-sm text-center">100</td>
-                                <td class="px-2 py-1 border text-sm text-center">$100000</td>
-                                <td class="px-2 py-1 border text-sm text-center">0.9900</td>
-                                <td class="px-2 py-1 border text-sm text-center">1.0</td>
-                                <td class="px-2 py-1 border text-sm text-center">100.00%</td>
-                                <td class="px-2 py-1 border text-sm text-center">0.9900</td>
-                                <td class="px-2 py-1 border text-sm text-center">$0.990</td>
-                                <td class="px-2 py-1 border text-sm text-center">$99.0000</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                {{-- Valor de ejemplo para usar en los for --}}
+                                <tr>
+                                    <td class="px-2 py-1 border text-xs text-center">Casa club</td>
+                                    <td class="px-2 py-1 border text-xs text-center">1</td>
+                                    <td class="px-2 py-1 border text-xs text-center">90</td>
+                                    <td class="px-2 py-1 border text-sm text-center">89</td>
+                                    <td class="px-2 py-1 border text-sm text-center">100</td>
+                                    <td class="px-2 py-1 border text-sm text-center">$100000</td>
+                                    <td class="px-2 py-1 border text-sm text-center">0.9900</td>
+                                    <td class="px-2 py-1 border text-sm text-center">1.0</td>
+                                    <td class="px-2 py-1 border text-sm text-center">100.00%</td>
+                                    <td class="px-2 py-1 border text-sm text-center">0.9900</td>
+                                    <td class="px-2 py-1 border text-sm text-center">$0.990</td>
+                                    <td class="px-2 py-1 border text-sm text-center">$99.0000</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 @endif
@@ -381,7 +594,8 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td class="border px-2 py-1 text-xs text-center">Superficie total de construcciones:</td>
+                                    <td class="border px-2 py-1 text-xs text-center">Superficie total de construcciones:
+                                    </td>
                                     <td class="border px-2 py-1 text-xs text-center">1</td>
                                     <td class="border px-2 py-1 text-sm text-center">1</td>
                                 </tr>
@@ -396,7 +610,7 @@
                 </div>
 
 
-               <div class="mt-2 form-grid form-grid--3">
+                <div class="mt-2 form-grid form-grid--3">
                     <div class="overflow-x-auto">
                         <table class="border-2 ">
                             <thead>
@@ -410,7 +624,8 @@
 
                                 {{-- Valor de ejemplo para usar en los for --}}
                                 <tr>
-                                    <td class="border px-2 py-1 text-xs text-center">Superficie total de construcciones:</td>
+                                    <td class="border px-2 py-1 text-xs text-center">Superficie total de construcciones:
+                                    </td>
                                     <td class="border px-2 py-1 text-xs text-center">1</td>
                                     <td class="border px-2 py-1 text-sm text-center">1</td>
                                 </tr>
@@ -441,7 +656,7 @@
     <div class="form-container__content">
 
 
-      <div class="mt-2 form-grid form-grid--3">
+        <div class="mt-2 form-grid form-grid--3">
             <div class="overflow-x-auto">
                 <table class="border-2 ">
                     <thead>
@@ -485,7 +700,8 @@
 
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
-                <flux:label>Fuente de donde se obtuvo el valor de reposición<span class="sup-required">*</span></flux:label>
+                <flux:label>Fuente de donde se obtuvo el valor de reposición<span class="sup-required">*</span>
+                </flux:label>
             </div>
             <div class="radio-input">
                 <flux:field>
@@ -510,7 +726,7 @@
                         <flux:select wire:model="conservationStatus" class=" text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                             <flux:select.option value="Ruidoso">Ruidoso</flux:select.option>
-                            <flux:select.option value="Malo">Mali</flux:select.option>
+                            <flux:select.option value="Malo">Malo</flux:select.option>
                             <flux:select.option value="Normal">Normal</flux:select.option>
                             <flux:select.option value="Bueno">Bueno</flux:select.option>
                             <flux:select.option value="Muy bueno">Muy bueno</flux:select.option>
@@ -584,7 +800,15 @@
                     <div class="radio-group-horizontal">
                         <flux:select wire:model="generalClassProperty" class=" text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                            <flux:select.option value="Ruidoso">Residencial plus</flux:select.option>
+                            <flux:select.option value="Minima">Mínima</flux:select.option>
+                            <flux:select.option value="Economica">Económica</flux:select.option>
+                            <flux:select.option value="Interes social">Interes social</flux:select.option>
+                            <flux:select.option value="Media">Media</flux:select.option>
+                            <flux:select.option value="Semilujo">Semilujo</flux:select.option>
+                            <flux:select.option value="Residencial">Residencial</flux:select.option>
+                            <flux:select.option value="Residencial plus">Residencial plus </flux:select.option>
+                            <flux:select.option value="Residencial plus +">Residencial plus +</flux:select.option>
+                            <flux:select.option value="Unica">Unica</flux:select.option>
                         </flux:select>
                     </div>
                     <div>
@@ -717,154 +941,8 @@
 
 
 
-{{-- MODAL PARA EDITAR ELEMENTO --}}
-<flux:modal name="edit-element" class="md:w-96">
-    <div class="space-y-2">
-        <div>
-            <flux:heading size="lg">Editar elemento</flux:heading>
-        </div>
 
-        <flux:field class="flux-field">
-            <flux:label>Descripción<span class="sup-required">*</span></flux:label>
-            <flux:input type="text" wire:model='description' />
-            <div class="error-container">
-                <flux:error name="description" />
-            </div>
-        </flux:field>
-        <flux:field class="flux-field">
-            <label for="tipo" class="flux-label text-sm">Clasificación<span class="sup-required">*</span></label>
-            <flux:select wire:model="clasification" class="text-gray-800 [&_option]:text-gray-900">
-                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                @foreach ($construction_classification as $value => $label)
-                <flux:select.option value="{{ $label }}">
-                    {{ $label }}
-                </flux:select.option>
-                @endforeach
-            </flux:select>
-            <div class="error-container">
-                <flux:error name="clasification" />
-            </div>
-        </flux:field>
 
-        <flux:field class="flux-field">
-            <label for="tipo" class="flux-label text-sm">Uso<span class="sup-required">*</span></label>
-            <flux:select wire:model="use" class="text-gray-800 [&_option]:text-gray-900">
-                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                @foreach ($construction_use as $value => $label)
-                <flux:select.option value="{{ $value }}">
-                    {{ $value }} - {{$label}}
-                </flux:select.option>
-                @endforeach
-            </flux:select>
-            <div class="error-container">
-                <flux:error name="use" />
-            </div>
-        </flux:field>
-
-        <flux:field class="flux-field">
-            <flux:label>Niveles edificio<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='buildingLevels' />
-            <div class="error-container">
-                <flux:error name="buildingLevels" />
-            </div>
-        </flux:field>
-
-        <flux:field class="flux-field">
-            <flux:label>Niveles por tipo de construcción<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='levelsConstructionType' />
-            <div class="error-container">
-                <flux:error name="levelsConstructionType" />
-            </div>
-        </flux:field>
-        <flux:field class="flux-field">
-            <flux:label>Edad<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='age' />
-            <div class="error-container">
-                <flux:error name="age" />
-            </div>
-        </flux:field>
-
-        <flux:field class="flux-field">
-            <flux:label>Superficie<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='surface' />
-            <div class="error-container">
-                <flux:error name="surface" />
-            </div>
-        </flux:field>
-
-        <flux:field class="flux-field">
-            <label for="tipo" class="flux-label text-sm">Fuente de información<span class="sup-required">*</span></label>
-            <flux:select wire:model="sourceInformation" class="text-gray-800 [&_option]:text-gray-900">
-                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                @foreach ($construction_source_information as $value => $label)
-                <flux:select.option value="{{ $label }}">
-                    {{$label}}
-                </flux:select.option>
-                @endforeach
-            </flux:select>
-            <div class="error-container">
-                <flux:error name="sourceInformation" />
-            </div>
-        </flux:field>
-
-        <flux:field class="flux-field">
-            <flux:label>Costo unit reposición nuevo<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='unitCostReplacement' />
-            <div class="error-container">
-                <flux:error name="unitCostReplacement" />
-            </div>
-        </flux:field>
-
-        <flux:field class="flux-field">
-            <flux:label>Avance obra<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='progressWork' />
-            <div class="error-container">
-                <flux:error name="progressWork" />
-            </div>
-        </flux:field>
-
-        <flux:field class="flux-field">
-            <label for="tipo" class="flux-label text-sm">Estado de conservación<span class="sup-required">*</span></label>
-            <flux:select wire:model="conservationState" class="text-gray-800 [&_option]:text-gray-900">
-                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                @foreach ($construction_conservation_state as $value => $label)
-                <flux:select.option value="{{ $label }}">
-                    {{$label}}
-                </flux:select.option>
-                @endforeach
-            </flux:select>
-            <div class="error-container">
-                <flux:error name="conservationState" />
-            </div>
-        </flux:field>
-
-        <flux:field class="flux-field">
-            <flux:label>Rango con base en la altura<span class="sup-required">*</span></flux:label>
-            <flux:checkbox wire:model='rangeBasedHeight' class="cursor-pointer" />
-            <div class="error-container">
-                <flux:error name="adjacent" />
-            </div>
-        </flux:field>
-
-        <flux:field class="flux-field">
-            <flux:label>Avance obra<span class="sup-required">*</span></flux:label>
-            <flux:radio.group wire:model="surfaceVAD">
-                <flux:radio value="superficie vendible" label="Superficie vendible" checked />
-                <flux:radio value="superficie accesoria" label="Superficie accesoria" />
-                <flux:radio value="construccion superficie descubierta" label="Construcción superficie descubierta" />
-            </flux:radio.group>
-            <div class="error-container">
-                <flux:error name="surfaceVAD" />
-            </div>
-        </flux:field>
-        <div class="flex">
-            <flux:spacer />
-
-            <flux:button type="button" class="btn-primary btn-table cursor-pointer" variant="primary" wire:click='editElement'>Editar elemento
-            </flux:button>
-        </div>
-    </div>
-</flux:modal>
 
 
 {{-- MODAL PARA CREAR NUEVO ELEMENTO --}}
@@ -1013,11 +1091,186 @@
         <div class="flex">
             <flux:spacer />
 
-            <flux:button type="button" wire:click='addElement' class="btn-primary btn-table cursor-pointer" variant="primary">Guardar
+            <flux:button type="button" wire:click='addElement' class="btn-primary btn-table cursor-pointer"
+                variant="primary">Guardar
             </flux:button>
         </div>
     </div>
 </flux:modal>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{{-- MODAL PARA EDITAR ELEMENTO --}}
+<flux:modal name="edit-element" class="md:w-96">
+    <div class="space-y-2">
+        <div>
+            <flux:heading size="lg">Editar elemento</flux:heading>
+        </div>
+
+        <flux:field class="flux-field">
+            <flux:label>Descripción<span class="sup-required">*</span></flux:label>
+            <flux:input type="text" wire:model='description' />
+            <div class="error-container">
+                <flux:error name="description" />
+            </div>
+        </flux:field>
+        <flux:field class="flux-field">
+            <label for="tipo" class="flux-label text-sm">Clasificación<span class="sup-required">*</span></label>
+            <flux:select wire:model="clasification" class="text-gray-800 [&_option]:text-gray-900">
+                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                @foreach ($construction_classification as $value => $label)
+                <flux:select.option value="{{ $label }}">
+                    {{ $label }}
+                </flux:select.option>
+                @endforeach
+            </flux:select>
+            <div class="error-container">
+                <flux:error name="clasification" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <label for="tipo" class="flux-label text-sm">Uso<span class="sup-required">*</span></label>
+            <flux:select wire:model="use" class="text-gray-800 [&_option]:text-gray-900">
+                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                @foreach ($construction_use as $value => $label)
+                <flux:select.option value="{{ $value }}">
+                    {{ $value }} - {{$label}}
+                </flux:select.option>
+                @endforeach
+            </flux:select>
+            <div class="error-container">
+                <flux:error name="use" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Niveles edificio<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='buildingLevels' />
+            <div class="error-container">
+                <flux:error name="buildingLevels" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Niveles por tipo de construcción<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='levelsConstructionType' />
+            <div class="error-container">
+                <flux:error name="levelsConstructionType" />
+            </div>
+        </flux:field>
+        <flux:field class="flux-field">
+            <flux:label>Edad<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='age' />
+            <div class="error-container">
+                <flux:error name="age" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Superficie<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='surface' />
+            <div class="error-container">
+                <flux:error name="surface" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <label for="tipo" class="flux-label text-sm">Fuente de información<span
+                    class="sup-required">*</span></label>
+            <flux:select wire:model="sourceInformation" class="text-gray-800 [&_option]:text-gray-900">
+                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                @foreach ($construction_source_information as $value => $label)
+                <flux:select.option value="{{ $label }}">
+                    {{$label}}
+                </flux:select.option>
+                @endforeach
+            </flux:select>
+            <div class="error-container">
+                <flux:error name="sourceInformation" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Costo unit reposición nuevo<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='unitCostReplacement' />
+            <div class="error-container">
+                <flux:error name="unitCostReplacement" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Avance obra<span class="sup-required">*</span></flux:label>
+            <flux:input type="number" wire:model='progressWork' />
+            <div class="error-container">
+                <flux:error name="progressWork" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <label for="tipo" class="flux-label text-sm">Estado de conservación<span
+                    class="sup-required">*</span></label>
+            <flux:select wire:model="conservationState" class="text-gray-800 [&_option]:text-gray-900">
+                <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                @foreach ($construction_conservation_state as $value => $label)
+                <flux:select.option value="{{ $label }}">
+                    {{$label}}
+                </flux:select.option>
+                @endforeach
+            </flux:select>
+            <div class="error-container">
+                <flux:error name="conservationState" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Rango con base en la altura<span class="sup-required">*</span></flux:label>
+            <flux:checkbox wire:model='rangeBasedHeight' class="cursor-pointer" />
+            <div class="error-container">
+                <flux:error name="adjacent" />
+            </div>
+        </flux:field>
+
+        <flux:field class="flux-field">
+            <flux:label>Superficie<span class="sup-required">*</span></flux:label>
+            <flux:radio.group wire:model="surfaceVAD">
+                <flux:radio value="superficie vendible" label="Superficie vendible" checked />
+                <flux:radio value="superficie accesoria" label="Superficie accesoria" />
+                <flux:radio value="construccion superficie descubierta" label="Construcción superficie descubierta" />
+            </flux:radio.group>
+            <div class="error-container">
+                <flux:error name="surfaceVAD" />
+            </div>
+        </flux:field>
+        <div class="flex">
+            <flux:spacer />
+
+            <flux:button type="button" class="btn-primary btn-table cursor-pointer" variant="primary"
+                wire:click='editElement'>Editar elemento
+            </flux:button>
+        </div>
+    </div>
+</flux:modal>
+
+
+
+
+
+
+
 
 
 

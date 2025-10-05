@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 
 use App\Models\Forms\ConstructionElements\ConstructionElementModel;
+use App\Models\Forms\ConstructionElements\FinishingOtherModel;
 
 class ConstructionElements extends Component
 {
@@ -53,9 +54,20 @@ class ConstructionElements extends Component
     // Estado del tab activo
     public string $activeTab;
 
-    //Variables para agregar elemento a tabla de acabados 1
+    //Variables para agregar elemento a tabla de otros acabados
     public $space, $amount, $floors, $walls, $ceilings;
 
+    // Variables para obtener la lista de otros acabados
+    public $finishingOthersList = [];
+
+    public $finishingOtherElement;
+
+    public $finishingOtherId;
+
+    //Valor para obtener el ID del construction element
+    public $constructionElementId;
+
+    public $constructionElement;
 
     //  Inicializar con el tab por defecto
     public function mount()
@@ -63,6 +75,17 @@ class ConstructionElements extends Component
 
 
         $constructionElement = ConstructionElementModel::where('valuation_id', session('valuation_id'))->first();
+
+        $this->constructionElement = $constructionElement;
+
+        $this->constructionElementId = $constructionElement->id;
+        //dd($this->constructionElementId);
+
+        $this->finishingOthersList = $constructionElement->finishingOtherElements;
+
+        //dd($this->finishingOthersList);
+
+        //dd($this->finishingOthersList);
 
         if($constructionElement){
             // 1. Obra Estructural (StructuralWork)
@@ -136,6 +159,12 @@ class ConstructionElements extends Component
                 $this->fn1_unpaFlats = $finishing1->unpa_flats;
                 $this->fn1_unpaWalls = $finishing1->unpa_walls;
                 $this->fn1_unpaCeilings = $finishing1->unpa_ceilings;
+            } else {
+                $this->fn1_bedroomsNumber = 0;
+                $this->fn1_bathroomsNumber = 0;
+                $this->fn1_halfBathroomsNumber = 0;
+                $this->fn1_copaNumber = 0;
+                $this->fn1_unpaNumber = 0;
             }
 
             // 3. Acabados 2 (Finishing2)
@@ -167,6 +196,10 @@ class ConstructionElements extends Component
                 $this->hs_SanitaryBranches = $hydraulic->sanitary_branches;
                 $this->hs_hiddenApparentElectrics = $hydraulic->hidden_apparent_electrics;
                 $this->hs_electrics = $hydraulic->electrics;
+            } else {
+                $this->hs_hiddenApparentHydraulicBranches = 'Oculta';
+                $this->hs_hiddenApparentSanitaryBranches = 'Oculta';
+                $this->hs_hiddenApparentElectrics = 'Oculta';
             }
 
             // 6. Herrería (Ironwork)
@@ -182,21 +215,9 @@ class ConstructionElements extends Component
                 $this->oe_locksmith = $otherElement->locksmith;
                 $this->oe_facades = $otherElement->facades;
                 $this->oe_elevator = $otherElement->elevator;
+            } else {
+                $this->oe_elevator = 'Si cuenta';
             }
-        } else {
-            //Inicializamos los valores de los input radio en caso de que no se tenga asignado un valor en la bd
-            $this->fn1_bedroomsNumber = 0;
-            $this->fn1_bathroomsNumber = 0;
-            $this->fn1_halfBathroomsNumber = 0;
-            $this->fn1_copaNumber = 0;
-            $this->fn1_unpaNumber = 0;
-
-            $this->hs_hiddenApparentHydraulicBranches = 'Oculta';
-            $this->hs_hiddenApparentSanitaryBranches = 'Oculta';
-            $this->hs_hiddenApparentElectrics = 'Oculta';
-
-            $this->oe_elevator = 'Si cuenta';
-
         }
 
 
@@ -407,13 +428,22 @@ class ConstructionElements extends Component
     public function openAddElement()
     {
         $this->resetValidation();
-        Flux::modal('add-element')->show();      // 3) Abre el modal
+        Flux::modal('add-element')->show();
     }
 
-    public function openEditElement()
+    public function openEditElement($finishingOtherId)
     {
+
+        $this->finishingOtherElement = FinishingOtherModel::findOrFail($finishingOtherId);
+        $this->finishingOtherId = $finishingOtherId;
+        $this->space = $this->finishingOtherElement->space;
+        $this->amount = $this->finishingOtherElement->amount;
+        $this->floors = $this->finishingOtherElement->floors;
+        $this->walls = $this->finishingOtherElement->walls;
+        $this->ceilings = $this->finishingOtherElement->ceilings;
+
         $this->resetValidation();
-        Flux::modal('edit-element')->show();      // 3) Abre el modal
+        Flux::modal('edit-element')->show();
 
     }
 
@@ -422,8 +452,8 @@ class ConstructionElements extends Component
     {
         $rules = [
             'space' => 'required',
-            'amount' => 'required',
-            'floors' => 'required',
+            'amount' => 'required|numeric',
+            'floors' => 'required|numeric',
             'walls' => 'required',
             'ceilings' => 'required'
         ];
@@ -434,33 +464,36 @@ class ConstructionElements extends Component
             $this->validationAttributesItems()
         );
 
+        FinishingOtherModel::create([
+            'construction_elements_id' => $this->constructionElementId,
+            'space' => $this->space,
+            'amount' => $this->amount,
+            'floors' => $this->floors,
+            'walls' => $this->walls,
+            'ceilings' => $this->ceilings,
+        ]);
 
-        $this->space = '';
-        $this->amount = '';
-        $this->floors = '';
-        $this->walls = '';
-        $this->ceilings = '';
+        //dd($this->constructionElement);
+
+        $this->finishingOthersList = $this->constructionElement
+            ->finishingOtherElements()
+            ->get();
 
         Toaster::success('Elemento agregado con éxito');
-        $this->modal('add-item')->close();
-    }
-
-
-
-    public function deleteItem()
-    {
-
-        Toaster::error('Elemento eliminado con éxito');
+        $this->reset('space','amount', 'floors', 'walls', 'ceilings');
+        $this->modal('add-element')->close();
     }
 
 
 
     public function editItem()
     {
-         $rules = [
+
+
+        $rules = [
             'space' => 'required',
-            'amount' => 'required',
-            'floors' => 'required',
+            'amount' => 'required|numeric',
+            'floors' => 'required|numeric',
             'walls' => 'required',
             'ceilings' => 'required'
         ];
@@ -471,16 +504,39 @@ class ConstructionElements extends Component
             $this->validationAttributesItems()
         );
 
+        $this->finishingOtherElement->update([
+            'space' => $this->space,
+            'amount' => $this->amount,
+            'floors' => $this->floors,
+            'walls' => $this->walls,
+            'ceilings' => $this->ceilings
+        ]);
 
-        $this->space = '';
-        $this->amount = '';
-        $this->floors = '';
-        $this->walls = '';
-        $this->ceilings = '';
+        $this->finishingOthersList = $this->constructionElement
+            ->finishingOtherElements()
+            ->get();
 
+        $this->reset('space', 'amount', 'floors', 'walls', 'ceilings','finishingOtherElement', 'finishingOtherId');
         Toaster::success('Elemento editado con éxito');
-        $this->modal('edit-item')->close();
+        $this->modal('edit-element')->close();
     }
+
+
+    public function deleteItem($finishingOtherId)
+    {
+        $finishingOtherElement = FinishingOtherModel::findOrFail($finishingOtherId);
+
+        $finishingOtherElement->delete();
+
+        $this->finishingOthersList = $this->constructionElement
+            ->finishingOtherElements()
+            ->get();
+
+        Toaster::error('Elemento eliminado con éxito');
+    }
+
+
+
 
 
 

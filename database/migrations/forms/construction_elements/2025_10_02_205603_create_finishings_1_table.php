@@ -19,11 +19,11 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             // Campos Numéricos (Requeridos)
-            $table->tinyInteger('bedrooms_number')->default(0);
-            $table->tinyInteger('bathrooms_number')->default(0);
-            $table->tinyInteger('half_bathrooms_number')->default(0);
-            $table->tinyInteger('copa_number')->default(0);
-            $table->tinyInteger('unpa_number')->default(0);
+            $table->tinyInteger('bedrooms_number');
+            $table->tinyInteger('bathrooms_number');
+            $table->tinyInteger('half_bathrooms_number');
+            $table->tinyInteger('copa_number');
+            $table->tinyInteger('unpa_number');
 
             // Acabados (Textos Descriptivos - Requeridos)
             $table->text('hall_flats');

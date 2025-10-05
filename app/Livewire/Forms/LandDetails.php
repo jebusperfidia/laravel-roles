@@ -337,11 +337,11 @@ class LandDetails extends Component
     //Abrir modal para crear grupo
     public function openAddGroup()
     {
-
+/*
         if(!$this->landDetail){
             Toaster::error('Primero debes guardar los datos principales');
             return;
-        }
+        } */
 
         $this->resetValidation();
         Flux::modal('add-group')->show();

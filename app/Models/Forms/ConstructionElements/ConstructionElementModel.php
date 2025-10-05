@@ -22,9 +22,11 @@ class ConstructionElementModel extends Model
         'valuation_id',
     ];
 
+
+/*
     protected $casts = [
         'valuation_id' => 'integer',
-    ];
+    ]; */
 
     /*
     |--------------------------------------------------------------------------
@@ -86,7 +88,7 @@ class ConstructionElementModel extends Model
     */
 
     // Relación 1:N con Otros Elementos
-    public function FinishingOtherElements()
+    public function finishingOtherElements()
     {
         return $this->hasMany(FinishingOtherModel::class, 'construction_elements_id');
     }

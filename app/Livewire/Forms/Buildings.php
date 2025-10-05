@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\Forms\Building\BuildingModel;
+use App\Models\Forms\Building\BuildingConstructionModel;
 use Livewire\Component;
 use App\Models\Valuations\Valuation;
 use Illuminate\Support\Facades\Session;
@@ -10,7 +12,6 @@ use Flux\Flux;
 
 class Buildings extends Component
 {
-
 
 
     // Arrays públicos para consumir datos para los input select largos
@@ -23,6 +24,17 @@ class Buildings extends Component
     //Generamos una variable para guardar la información del avaluo
     public $valuation;
 
+    //Obtenemos el valor del building
+    public $building;
+
+    public $modalType; // 'privativa' o 'comun'
+    public $constructionId;
+
+
+    //Obtenemos los valores de las construcciones privativas y comunes
+    public $buildingConstructionsCommon = [];
+    public $buildingConstructionsPrivate = [];
+
     //Variables del tercer contenedor
     public $sourceReplacementObtained, $conservationStatus, $observationsStateConservation,
            $generalTypePropertiesZone, $generalClassProperty, $yearCompletedWork;
@@ -33,35 +45,80 @@ class Buildings extends Component
     public float  $progressGeneralWorks, $degreeProgressCommonAreas;
 
 
-    //Variables para generar elementos en tablas
-    public $description, $clasification, $use, $sourceInformation, $conservationState, $surfaceVAD;
+    //Variables para generar elementos en tablas, el valor type nos ayudará a saber en qué tabla renderizarse
+    public $description, $clasification, $use, $sourceInformation, $conservationState, $surfaceVAD, $type;
 
     public int $buildingLevels, $levelsConstructionType, $age;
 
     public float $surface, $unitCostReplacement, $progressWork;
 
-    public bool $rangeBasedHeight;
+    public bool $rangeBasedHeight = false;
 
 
     public function mount(){
         //Inicializamos el valor de la pestaña que se abrirá por defecto
         $this->activeTab = 'privativas';
 
-        //Obtenemos los valores deL avalúo a partir de la variable de sesión del ID
-        $this->valuation = Valuation::find(Session::get('valuation_id'));
-
-        //Inicialización dato año de terminación
-        $this->yearCompletedWork = 2024;
-
-        $this->progressGeneralWorks = 100;
-
-
-
         //Obtenemos los datos para diferentes input select, desde el archivo de configuración properties_inputs
         $this->construction_classification = config('properties_inputs.construction_classification', []);
         $this->construction_use = config('properties_inputs.construction_use', []);
         $this->construction_source_information = config('properties_inputs.construction_source_information', []);
         $this->construction_conservation_state = config('properties_inputs.construction_conservation_state', []);
+
+
+
+        //Obtenemos los valores deL avalúo a partir de la variable de sesión del ID
+        $this->valuation = Valuation::find(session('valuation_id'));
+        //dd($this->valuation);
+
+
+
+        //Obtenemos el valor del building
+        $this->building = BuildingModel::where('valuation_id', $this->valuation->id)->first();
+
+        //Hacemos la asignación a los valores
+
+        // Variables tercer contenedor
+        $this->sourceReplacementObtained = $this->building->source_replacement_obtained;
+        $this->conservationStatus = $this->building->conservation_status;
+        $this->observationsStateConservation = $this->building->observations_state_conservation;
+        $this->generalTypePropertiesZone = $this->building->general_type_properties_zone;
+        $this->generalClassProperty = $this->building->general_class_property;
+        $this->yearCompletedWork = $this->building->year_completed_work;
+
+        // Variables enteras
+        $this->profitableUnitsSubject = $this->building->profitable_units_subject;
+        $this->profitableUnitsGeneral = $this->building->profitable_units_general;
+        $this->profitableUnitsCondominiums = $this->building->profitable_units_condominiums;
+        $this->numberSubjectLevels = $this->building->number_subject_levels;
+
+        // Variables flotantes
+        $this->progressGeneralWorks = $this->building->progress_general_works;
+        $this->degreeProgressCommonAreas = $this->building->degree_progress_common_areas;
+
+        //Obtenemos los valores para building construction tipo privadas
+        /* $this->buildingConstructionsPrivate = $this->building->privates()->get(); */
+
+        $this->loadPrivateConstructions();
+
+
+        if (stripos($this->valuation->property_type, 'condominio') !== false) {
+            //Obtenemos los valores para building construction tipo comun
+            /* $this->buildingConstructionsCommon = $this->building->commons()->get(); */
+            $this->loadCommonConstructions();
+        }
+
+
+
+        //dd($this->buildingConstructionsPrivate);
+
+
+        //Inicialización dato año de terminación
+      /*   $this->yearCompletedWork = 2024;
+
+        $this->progressGeneralWorks = 100; */
+
+
     }
 
 
@@ -83,12 +140,48 @@ class Buildings extends Component
             'degreeProgressCommonAreas' => 'required',
         ];
 
-
         $this->validate(
             $rules,
             [],
             $this->validationAttributes()
         );
+
+
+        $data = [
+            'source_replacement_obtained' => $this->sourceReplacementObtained,
+            'conservation_status' => $this->conservationStatus,
+            'observations_state_conservation' => $this->observationsStateConservation,
+            'general_type_properties_zone' => $this->generalTypePropertiesZone,
+            'general_class_property' => $this->generalClassProperty,
+            'year_completed_work' => $this->yearCompletedWork,
+            'profitable_units_subject' => $this->profitableUnitsSubject,
+            'profitable_units_general' => $this->profitableUnitsGeneral,
+            'profitable_units_condominiums' => $this->profitableUnitsCondominiums,
+            'number_subject_levels' => $this->numberSubjectLevels,
+            'progress_general_works' => $this->progressGeneralWorks,
+            'degree_progress_common_areas' => $this->degreeProgressCommonAreas,
+        ];
+
+        //Actualizamos los datos en la tabla
+        $this->building->update($data);
+
+        Toaster::success('Formulario guardado con éxito');
+        return redirect()->route('form.index', ['section' => 'property-description']);
+    }
+
+
+    //Funciones auxiliares para actualizar los valores de cada tabla
+    public function loadPrivateConstructions()
+    {
+
+        $this->buildingConstructionsPrivate = $this->building->privates()->get();
+    }
+
+    public function loadCommonConstructions()
+    {
+
+        $this->buildingConstructionsCommon = $this->building->commons()->get();
+
     }
 
 
@@ -96,16 +189,43 @@ class Buildings extends Component
 
     //FUNCIONES PARA ELEMENTOS DE TABLAS
 
-    public function openAddElement()
+    public function openAddElement($type)
     {
+        $this->modalType = $type;
         $this->resetValidation();
-        Flux::modal('add-element')->show();      // 3) Abre el modal
+        Flux::modal('add-element')->show();
     }
 
-    public function openEditElement()
+
+
+    public function openEditElement($constructionId)
     {
+
+        $construction = BuildingConstructionModel::findOrFail($constructionId);
+
+
+        $this->constructionId = $construction->id;
+        $this->modalType = $construction->type;
+
+
+        $this->description = $construction->description;
+        $this->clasification = $construction->clasification;
+        $this->use = $construction->use;
+        $this->sourceInformation = $construction->source_information;
+        $this->conservationState = $construction->conservation_state;
+        $this->surfaceVAD = $construction->surface_vad;
+        $this->buildingLevels = $construction->building_levels;
+        $this->levelsConstructionType = $construction->levels_construction_type;
+        $this->age = $construction->age;
+        $this->surface = $construction->surface;
+        $this->unitCostReplacement = $construction->unit_cost_replacement;
+        $this->progressWork = $construction->progress_work;
+        $this->rangeBasedHeight = $construction->range_based_height;
+
+
+
         $this->resetValidation();
-        Flux::modal('edit-element')->show();      // 3) Abre el modal
+        Flux::modal('edit-element')->show();
 
     }
 
@@ -142,31 +262,66 @@ class Buildings extends Component
             $this->validationAttributesItems()
         );
 
-        $this->description = '';
-        $this->clasification = '';
-        $this->use = '';
-        $this->sourceInformation = '';
-        $this->conservationState = '';
-        $this->surfaceVAD = '';
+        $data = [
+            // CLAVES: Relación y Tipo
+            'building_id' => $this->building->id,
+            'type' => $this->modalType,
 
-        // Enteros
-        $this->buildingLevels = 0;
-        $this->levelsConstructionType = 0;
-        $this->age = 0;
+            // Mapeo de variables públicas a columnas de la DB (snake_case)
+            'description' => $this->description,
+            'clasification' => $this->clasification,
+            'use' => $this->use,
+            'source_information' => $this->sourceInformation,
+            'conservation_state' => $this->conservationState,
+            'surface_vad' => $this->surfaceVAD,
 
-        // Flotantes
-        $this->surface = 0;
-        $this->unitCostReplacement = 0;
-        $this->progressWork = 0;
+            'building_levels' => $this->buildingLevels,
+            'levels_construction_type' => $this->levelsConstructionType,
+            'age' => $this->age,
 
+            'surface' => $this->surface,
+            'unit_cost_replacement' => $this->unitCostReplacement,
+            'progress_work' => $this->progressWork,
+            'range_based_height' => (bool) $this->rangeBasedHeight,
+        ];
 
-        Toaster::error("Elemento creado con éxito");
+        //Guardamos la información en la base de datos
+        BuildingConstructionModel::create($data);
+
+        // Solo recarga la tabla que fue modificada, usando el tipo definido al abrir el modal.
+        if ($this->modalType === 'private') {
+            $this->loadPrivateConstructions();
+        } elseif ($this->modalType === 'common') {
+            $this->loadCommonConstructions();
+        }
+
+        //Reseteamos los valores para el próximo save
+        $this->reset([
+            'description',
+            'clasification',
+            'use',
+            'sourceInformation',
+            'conservationState',
+            'surfaceVAD',
+            'buildingLevels',
+            'levelsConstructionType',
+            'age',
+            'surface',
+            'unitCostReplacement',
+            'progressWork',
+            'modalType'
+        ]);
+
+        $this->loadPrivateConstructions();
+
+        Toaster::success("Elemento creado con éxito");
         $this->modal('add-element')->close();
     }
 
 
     public function editElement()
     {
+        //dd($this->constructionId);
         $rules = [
             // Strings
             'description' => 'required',
@@ -196,29 +351,77 @@ class Buildings extends Component
             $this->validationAttributesItems()
         );
 
-        $this->description = '';
-        $this->clasification = '';
-        $this->use = '';
-        $this->sourceInformation = '';
-        $this->conservationState = '';
-        $this->surfaceVAD = '';
 
-        // Enteros
-        $this->buildingLevels = 0;
-        $this->levelsConstructionType = 0;
-        $this->age = 0;
 
-        // Flotantes
-        $this->surface = 0;
-        $this->unitCostReplacement = 0;
-        $this->progressWork = 0;
 
-        Toaster::error("Elemento editado con éxito");
+        $data = [
+            /* 'building_id' => $buildingConstruction->id, */
+            //'type' => $this->modalType,
+
+            'description' => $this->description,
+            'clasification' => $this->clasification,
+            'use' => $this->use,
+            'source_information' => $this->sourceInformation,
+            'conservation_state' => $this->conservationState,
+            'surface_vad' => $this->surfaceVAD,
+            'building_levels' => $this->buildingLevels,
+            'levels_construction_type' => $this->levelsConstructionType,
+            'age' => $this->age,
+            'surface' => $this->surface,
+            'unit_cost_replacement' => $this->unitCostReplacement,
+            'progress_work' => $this->progressWork,
+            'range_based_height' => (bool) $this->rangeBasedHeight,
+        ];
+
+        $buildingConstruction = BuildingConstructionModel::find($this->constructionId);
+
+        $buildingConstruction->update($data);
+
+        if ($this->modalType === 'private') {
+            $this->loadPrivateConstructions();
+        } elseif ($this->modalType === 'common') {
+            $this->loadCommonConstructions();
+        }
+
+        $this->reset([
+            'description',
+            'clasification',
+            'use',
+            'sourceInformation',
+            'conservationState',
+            'surfaceVAD',
+            'buildingLevels',
+            'levelsConstructionType',
+            'age',
+            'surface',
+            'unitCostReplacement',
+            'progressWork',
+            'constructionId',
+            'modalType'
+        ]);
+
+        Toaster::success("Elemento editado con éxito");
         $this->modal('edit-element')->close();
     }
 
 
-    public function deleteElement(){
+    public function deleteElement($constructionId){
+
+
+        $construction = BuildingConstructionModel::findOrFail($constructionId);
+
+        // Obtenemos el tipo antes de que se elimine el registro.
+        $type = $construction->type;
+
+        $construction->delete();
+
+        // Recarga de la tabla dependiendo del tipo
+        if ($type === 'private') {
+            $this->loadPrivateConstructions();
+        } elseif ($type === 'common') {
+            $this->loadCommonConstructions();
+        }
+
         Toaster::error("Elemento eliminado con éxito");
     }
 

@@ -5,6 +5,8 @@ namespace App\Livewire\Valuations;
 use Livewire\Component;
 use App\Models\Valuations\Valuation;
 use App\Models\Forms\LandDetails\LandDetailsModel;
+use App\Models\Forms\ConstructionElements\ConstructionElementModel;
+use App\Models\Forms\Building\BuildingModel;
 
 class ValuationCreate extends Component
 {
@@ -50,9 +52,20 @@ class ValuationCreate extends Component
 
         $idValuation = $newValuation->id;
 
-        LandDetailsModel::updateOrCreate(
+        //Creamos un registro en la tabla land_details
+        LandDetailsModel::create(
             ['valuation_id' => $idValuation]
         );
+
+        //Creamos un registro en la tabla construction_elements
+        ConstructionElementModel::create([
+            'valuation_id' => $idValuation
+        ]);
+
+        //Creamos un registro en la tabla buildings
+        BuildingModel::create([
+            'valuation_id' => $idValuation
+        ]);
 
         /* $this->reset(); */
         /* return redirect()->route('dashboard', ['currentView' => 'assigned']); */

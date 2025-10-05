@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Forms\DeclarationWarnings;
+namespace App\Models\Forms\DeclarationWarning;
 
 use App\Models\Valuations\Valuation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

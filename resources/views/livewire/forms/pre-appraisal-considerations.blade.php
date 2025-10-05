@@ -147,7 +147,7 @@
 
         <div>
             <label class="text-sm">Señale otras en su caso</label>
-            <flux:textarea class="h-64" wire:model='technicalReportDescriptionClculations'/>
+            <flux:textarea class="h-64" wire:model='technicalReportDescriptionCalculations'/>
         </div>
 
         </div>
@@ -247,10 +247,10 @@
                 <div class="radio-input">
                     <flux:field>
                         <div class="radio-group-horizontal">
-                            <flux:input type='text' wire:model="ach_dueTo" />
+                            <flux:input type='text' wire:model="ach_dueTo1" />
                         </div>
                         <div>
-                            <flux:error name="ach_dueTo" />
+                            <flux:error name="ach_dueTo1" />
                         </div>
                     </flux:field>
                 </div>

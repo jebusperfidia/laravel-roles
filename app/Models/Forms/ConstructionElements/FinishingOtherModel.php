@@ -16,6 +16,11 @@ class FinishingOtherModel extends Model
     protected $fillable = [
         'construction_elements_id',
 
+        'space',
+        'amount',
+        'floors',
+        'walls',
+        'ceilings'
 
     ];
 

@@ -606,7 +606,7 @@
                     </div>
 
 
-
+                    {{-- TABLA PARA OTROS ACABADOS --}}
 
                     <div class="mt-8 mb-4">
                         <h3>Si el inmueble cuenta con más espacios no listados en la tabla anterior, por favor
@@ -636,34 +636,41 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-
-                                    {{-- Valor de ejemplo para usar en los for --}}
+                                    @forelse ($finishingOthersList as $finishingOther)
+                                    {{-- @foreach ($finishingOthersList as $index => $item) --}}
                                     <tr>
-                                        <td class="px-2 py-1 border text-xs text-center">Terraza
-                                        </td>
-                                        <td class="px-2 py-1 border text-xs text-center">1</td>
-                                        <td class="px-2 py-1 border text-sm text-center">a</td>
-                                        <td class="px-2 py-1 border text-sm text-center">a</td>
-                                        <td class="px-2 py-1 border text-sm text-center">a</td>
+                                        <td class="px-2 py-1 border text-xs text-center">{{ $finishingOther->space }}</td>
+                                        <td class="px-2 py-1 border text-xs text-center">{{ $finishingOther->amount }}</td>
+                                        <td class="px-2 py-1 border text-sm text-center">{{ $finishingOther->floors }}</td>
+                                        <td class="px-2 py-1 border text-sm text-center">{{ $finishingOther->walls }}</td>
+                                        <td class="px-2 py-1 border text-sm text-center">{{ $finishingOther->ceilings }}</td>
 
 
-                                        <td class="my-2 flex justify-evenly">
-                                            {{-- <flux:modal.trigger name="edit-item" class="flex justify-end"> --}}
+                                        <td class="px-2 py-1 border flex justify-evenly">
+
                                                 <flux:button type="button" icon-leading="pencil"
-                                                    class="cursor-pointer btn-intermediary btn-buildins" wire:click='openEditElement' />
-                                                {{-- </flux:modal-trigger> --}}
-                                                {{-- <flux:modal.trigger class="flex justify-end"> --}}
+                                                    class="cursor-pointer btn-intermediary btn-buildins" wire:click="openEditElement({{ $finishingOther->id }})" />
+
                                                     <flux:button
                                                         onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
-                                                        wire:click="deleteItem" type="button" icon-leading="trash"
+                                                        wire:click="deleteItem({{ $finishingOther->id }})" type="button" icon-leading="trash"
                                                         class="cursor-pointer btn-deleted btn-buildings" />
-                                                    {{-- </flux:modal-trigger> --}}
                                         </td>
                                     </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center text-gray-500 py-2">
+                                            No hay elementos registrados.
+                                        </td>
+                                    </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
                     </div>
+
+
+
                     @endif
 
 
@@ -905,13 +912,15 @@
                             <flux:field class="flux_field pt2">
                                 <div class="flex justify-between mb-3">
                                     <flux:label>Ramaleos hidráulicos<span class="sup-required">*</span></flux:label>
+                                <flux:radio.group wire:model="hs_hiddenApparentHydraulicBranches"
+                                    class="flex items-center gap-4" size="sm">
                                     <div>
-                                        <flux:radio.group class="flex justify-end items-baseline gap-2"
-                                            wire:model="hs_hiddenApparentHydraulicBranches" size="sm">
-                                            <flux:radio label="Oculta" value="Oculta" />
-                                            <flux:radio label="Aparente" value="Aparente" />
-                                        </flux:radio.group>
+                                        <flux:radio label="Oculta" value="Oculta" />
                                     </div>
+                                    <div>
+                                        <flux:radio label="Aparente" value="Aparente" />
+                                    </div>
+                                </flux:radio.group>
                                 </div>
                                 <flux:textarea wire:model='hs_hydraulicBranches' />
                                 <div class="error-container">
@@ -923,13 +932,15 @@
                             <flux:field class="flux_field pt2">
                                 <div class="flex justify-between mb-3">
                                     <flux:label>Ramaleos sanitarios<span class="sup-required">*</span></flux:label>
-                                    <div>
-                                        <flux:radio.group class="flex justify-end items-baseline gap-2"
+                                        <flux:radio.group class="flex items-center gap-4"
                                             wire:model="hs_hiddenApparentSanitaryBranches" size="sm">
-                                            <flux:radio label="Oculta" value="Oculta" />
-                                            <flux:radio label="Aparente" value="Aparente" />
+                                            <div>
+                                                <flux:radio label="Oculta" value="Oculta" />
+                                            </div>
+                                            <div>
+                                                <flux:radio label="Aparente" value="Aparente" />
+                                            </div>
                                         </flux:radio.group>
-                                    </div>
                                 </div>
                                 <flux:textarea wire:model='hs_SanitaryBranches' />
                                 <div class="error-container">
@@ -939,13 +950,15 @@
                             <flux:field class="flux_field pt2">
                                 <div class="flex justify-between mb-3">
                                     <flux:label>Eléctricas<span class="sup-required">*</span></flux:label>
-                                    <div>
-                                        <flux:radio.group class="flex justify-end items-baseline gap-2"
+                                        <flux:radio.group class="flex items-center gap-4"
                                             wire:model="hs_hiddenApparentElectrics" size="sm">
-                                            <flux:radio label="Oculta" value="Oculta" />
-                                            <flux:radio label="Aparente" value="Aparente" />
+                                            <div>
+                                                <flux:radio label="Oculta" value="Oculta" />
+                                            </div>
+                                            <div>
+                                                <flux:radio label="Aparente" value="Aparente" />
+                                            </div>
                                         </flux:radio.group>
-                                    </div>
                                 </div>
                                 <flux:textarea wire:model='hs_electrics' />
                                 <div class="error-container">
@@ -1099,7 +1112,7 @@
 
                 <flux:field class="flux-field">
                     <flux:label>Pisos<span class="sup-required">*</span></flux:label>
-                    <flux:input type="text" wire:model='floors' />
+                    <flux:input type="number" wire:model='floors' />
                     <div class="error-container">
                         <flux:error name="floors" />
                     </div>
