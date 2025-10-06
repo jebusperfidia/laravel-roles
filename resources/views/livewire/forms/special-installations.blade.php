@@ -1,5 +1,5 @@
 <div>
-    <form wire:submit=''>
+{{--     <form wire:submit=''> --}}
 
 
         <div class="form-container">
@@ -93,7 +93,7 @@
                 {{-- <flux:modal.trigger name="add-construction" class="flex justify-end"> --}}
                     <div class="flex justify-end">
                         <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
-                            wire:click='openAddElementSI'></flux:button>
+                            wire:click="openAddElement('private','installations')"></flux:button>
                     </div>
                     {{--
                 </flux:modal.trigger> --}}
@@ -122,34 +122,44 @@
                             <tbody>
 
                                 {{-- Valor de ejemplo para usar en los for --}}
+                                @if ($privateInstallations->isEmpty())
                                 <tr>
-                                    <td class="px-2 py-1 border text-sm text-center">IE40</td>
-                                    <td class="px-2 py-1 border text-sm text-center">IE10. Antena parabolica</td>
-                                    <td class="px-2 py-1 border text-sm text-center">PIEZA</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">25</td>
-                                    <td class="px-2 py-1 border text-sm text-center">$1000.000</td>
-                                    <td class="px-2 py-1 border text-sm text-center">0.9600</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1.0 Bueno</td>
-                                    <td class="px-2 py-1 border text-sm text-center">$0.9600</td>
-                                    <td class="px-2 py-1 border text-sm text-center">N/A</td>
-                                    <td class="px-2 py-1 border text-sm text-center">99</td>
+                                    <td colspan="18" class="px-2 py-4 text-center text-gray-500">
+                                        No hay elementos registrados
+                                    </td>
+                                </tr>
+                                @else
+                                @foreach ($privateInstallations as $item)
+                                <tr>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->key.'-'.$item->description}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->quantity}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->new_rep_unit_cost}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->net_rep_unit_cost}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->amount}}</td>
                                     <td class="my-2 flex justify-evenly">
                                         {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
                                                 class="cursor-pointer btn-intermediary btn-buildins"
-                                                wire:click='openEditElementSI' />
+                                                wire:click="openEditElement('private','installations',{{$item->id}})" />
                                             {{-- </flux:modal-trigger> --}}
                                             {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
                                                 --}}
                                                 <flux:button
                                                     onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
-                                                    wire:click="deleteElementSI" icon-leading="trash"
+                                                    wire:click="deleteElement('private','installations',{{$item->id}})" icon-leading="trash"
                                                     class="cursor-pointer btn-deleted btn-buildings" />
                                                 {{-- </flux:modal-trigger> --}}
                                     </td>
                                 </tr>
+                                @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -162,7 +172,7 @@
                 {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
                 <div class="flex justify-end">
                     <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
-                        wire:click='openAddElementAE'>
+                        wire:click="openAddElement('private','accessories')">
                     </flux:button>
                 </div>
 
@@ -191,34 +201,44 @@
                             <tbody>
 
                                 {{-- Valor de ejemplo para usar en los for --}}
+                                @if ($privateAccessories->isEmpty())
                                 <tr>
-                                    <td class="px-2 py-1 border text-sm text-center">IE40</td>
-                                    <td class="px-2 py-1 border text-sm text-center">IE10. Antena parabolica</td>
-                                    <td class="px-2 py-1 border text-sm text-center">PIEZA</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">25</td>
-                                    <td class="px-2 py-1 border text-sm text-center">$1000.000</td>
-                                    <td class="px-2 py-1 border text-sm text-center">0.9600</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1.0 Bueno</td>
-                                    <td class="px-2 py-1 border text-sm text-center">$0.9600</td>
-                                    <td class="px-2 py-1 border text-sm text-center">N/A</td>
-                                    <td class="px-2 py-1 border text-sm text-center">99</td>
+                                    <td colspan="18" class="px-2 py-4 text-center text-gray-500">
+                                        No hay elementos registrados
+                                    </td>
+                                </tr>
+                                @else
+                                @foreach ($privateAccessories as $item)
+                                <tr>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->key.'-'.$item->description}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->quantity}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->new_rep_unit_cost}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->net_rep_unit_cost}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->amount}}</td>
                                     <td class="my-2 flex justify-evenly">
                                         {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
                                                 class="cursor-pointer btn-intermediary btn-buildins"
-                                                wire:click='openEditElementAE' />
+                                                wire:click="openEditElement('private','accessories',{{$item->id}})" />
                                             {{-- </flux:modal-trigger> --}}
                                             {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
                                                 --}}
                                                 <flux:button
                                                     onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
-                                                    wire:click="deleteElementAE" icon-leading="trash"
+                                                    wire:click="deleteElement('private','accessories',{{$item->id}})" icon-leading="trash"
                                                     class="cursor-pointer btn-deleted btn-buildings" />
                                                 {{-- </flux:modal-trigger> --}}
                                     </td>
                                 </tr>
+                                @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -233,7 +253,7 @@
                 {{-- <flux:modal.trigger name="add-construction" class="flex justify-end"> --}}
                     <div class="flex justify-end">
                         <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
-                            wire:click='openAddElementCW'>
+                            wire:click="openAddElement('private','works')">
                         </flux:button>
                     </div>
                     {{--
@@ -263,34 +283,44 @@
                             <tbody>
 
                                 {{-- Valor de ejemplo para usar en los for --}}
+                                @if ($privateWorks->isEmpty())
                                 <tr>
-                                    <td class="px-2 py-1 border text-sm text-center">IE40</td>
-                                    <td class="px-2 py-1 border text-sm text-center">IE10. Antena parabolica</td>
-                                    <td class="px-2 py-1 border text-sm text-center">PIEZA</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">25</td>
-                                    <td class="px-2 py-1 border text-sm text-center">$1000.000</td>
-                                    <td class="px-2 py-1 border text-sm text-center">0.9600</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1.0 Bueno</td>
-                                    <td class="px-2 py-1 border text-sm text-center">$0.9600</td>
-                                    <td class="px-2 py-1 border text-sm text-center">N/A</td>
-                                    <td class="px-2 py-1 border text-sm text-center">99</td>
+                                    <td colspan="18" class="px-2 py-4 text-center text-gray-500">
+                                        No hay elementos registrados
+                                    </td>
+                                </tr>
+                                @else
+                                @foreach ($privateWorks as $item)
+                                <tr>
+                                  <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->key.'-'.$item->description}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->quantity}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->new_rep_unit_cost}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->net_rep_unit_cost}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->amount}}</td>
                                     <td class="my-2 flex justify-evenly">
                                         {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
                                                 class="cursor-pointer btn-intermediary btn-buildins"
-                                                wire:click='openEditElementCW' />
+                                                wire:click="openEditElement('private','works',{{$item->id}})" />
                                             {{-- </flux:modal-trigger> --}}
                                             {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
                                                 --}}
                                                 <flux:button
                                                     onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
-                                                    wire:click="deleteElementCW" type="button" icon-leading="trash"
+                                                    wire:click="deleteElement('private','works',{{$item->id}})" type="button" icon-leading="trash"
                                                     class="cursor-pointer btn-deleted btn-buildings" />
                                                 {{-- </flux:modal-trigger> --}}
                                     </td>
                                 </tr>
+                                @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -311,7 +341,7 @@
                 {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
                 <div class="flex justify-end">
                     <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
-                        wire:click='openAddElementSI'>
+                        wire:click="openAddElement('common','installations')">
                     </flux:button>
                 </div>
 
@@ -339,34 +369,44 @@
                             <tbody>
 
                                 {{-- Valor de ejemplo para usar en los for --}}
+                                @if ($commonInstallations->isEmpty())
                                 <tr>
-                                    <td class="px-2 py-1 border text-sm text-center">IE40</td>
-                                    <td class="px-2 py-1 border text-sm text-center">IE10. Antena parabolica</td>
-                                    <td class="px-2 py-1 border text-sm text-center">PIEZA</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">25</td>
-                                    <td class="px-2 py-1 border text-sm text-center">$1000.000</td>
-                                    <td class="px-2 py-1 border text-sm text-center">0.9600</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1.0 Bueno</td>
-                                    <td class="px-2 py-1 border text-sm text-center">$0.9600</td>
-                                    <td class="px-2 py-1 border text-sm text-center">N/A</td>
-                                    <td class="px-2 py-1 border text-sm text-center">99</td>
+                                    <td colspan="18" class="px-2 py-4 text-center text-gray-500">
+                                        No hay elementos registrados
+                                    </td>
+                                </tr>
+                                @else
+                                @foreach ($commonInstallations as $item)
+                                <tr>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->key.'-'.$item->description}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->quantity}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->new_rep_unit_cost}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->net_rep_unit_cost}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->amount}}</td>
                                     <td class="my-2 flex justify-evenly">
                                         {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
                                                 class="cursor-pointer btn-intermediary btn-buildins"
-                                                wire:click='openEditElementSI' />
+                                                wire:click="openEditElement('common','installations',{{$item->id}})" />
                                             {{-- </flux:modal-trigger> --}}
                                             {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
                                                 --}}
                                                 <flux:button
                                                     onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
-                                                    wire:click="deleteElementSI" type="button" icon-leading="trash"
+                                                    wire:click="deleteElement('common','installations',{{$item->id}})" type="button" icon-leading="trash"
                                                     class="cursor-pointer btn-deleted btn-buildings" />
                                                 {{-- </flux:modal-trigger> --}}
                                     </td>
                                 </tr>
+                                @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -381,7 +421,7 @@
                 {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
                 <div class="flex justify-end">
                     <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
-                        wire:click='openAddElementAE'>
+                        wire:click="openAddElement('common','accessories')">
                     </flux:button>
                 </div>
 
@@ -409,34 +449,44 @@
                             <tbody>
 
                                 {{-- Valor de ejemplo para usar en los for --}}
+                                @if ($commonAccessories->isEmpty())
                                 <tr>
-                                    <td class="px-2 py-1 border text-sm text-center">IE40</td>
-                                    <td class="px-2 py-1 border text-sm text-center">IE10. Antena parabolica</td>
-                                    <td class="px-2 py-1 border text-sm text-center">PIEZA</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">25</td>
-                                    <td class="px-2 py-1 border text-sm text-center">$1000.000</td>
-                                    <td class="px-2 py-1 border text-sm text-center">0.9600</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1.0 Bueno</td>
-                                    <td class="px-2 py-1 border text-sm text-center">$0.9600</td>
-                                    <td class="px-2 py-1 border text-sm text-center">N/A</td>
-                                    <td class="px-2 py-1 border text-sm text-center">99</td>
+                                    <td colspan="18" class="px-2 py-4 text-center text-gray-500">
+                                        No hay elementos registrados
+                                    </td>
+                                </tr>
+                                @else
+                                @foreach ($commonAccessories as $item)
+                                <tr>
+                                   <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->key.'-'.$item->description}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->quantity}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->new_rep_unit_cost}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->net_rep_unit_cost}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->amount}}</td>
                                     <td class="my-2 flex justify-evenly">
                                         {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
                                                 class="cursor-pointer btn-intermediary btn-buildins"
-                                                wire:click='openEditElementAE' />
+                                                wire:click="openEditElement('common','accessories',{{$item->id}})" />
                                             {{-- </flux:modal-trigger> --}}
                                             {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
                                                 --}}
                                                 <flux:button
                                                     onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
-                                                    wire:click="deleteElementAE" type="button" icon-leading="trash"
+                                                    wire:click="deleteElement('common','accessories',{{$item->id}})" type="button" icon-leading="trash"
                                                     class="cursor-pointer btn-deleted btn-buildings" />
                                                 {{-- </flux:modal-trigger> --}}
                                     </td>
                                 </tr>
+                                @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -450,7 +500,7 @@
                 {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
                 <div class="flex justify-end">
                     <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
-                        wire:click='openAddElementCW'>
+                        wire:click="openAddElement('common','works')">
                     </flux:button>
                 </div>
                 {{-- TABLA DE ELEMENTOS --}}
@@ -477,34 +527,44 @@
                             <tbody>
 
                                 {{-- Valor de ejemplo para usar en los for --}}
+                                @if ($commonWorks->isEmpty())
                                 <tr>
-                                    <td class="px-2 py-1 border text-sm text-center">IE40</td>
-                                    <td class="px-2 py-1 border text-sm text-center">IE10. Antena parabolica</td>
-                                    <td class="px-2 py-1 border text-sm text-center">PIEZA</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1</td>
-                                    <td class="px-2 py-1 border text-sm text-center">25</td>
-                                    <td class="px-2 py-1 border text-sm text-center">$1000.000</td>
-                                    <td class="px-2 py-1 border text-sm text-center">0.9600</td>
-                                    <td class="px-2 py-1 border text-sm text-center">1.0 Bueno</td>
-                                    <td class="px-2 py-1 border text-sm text-center">$0.9600</td>
-                                    <td class="px-2 py-1 border text-sm text-center">N/A</td>
-                                    <td class="px-2 py-1 border text-sm text-center">99</td>
+                                    <td colspan="18" class="px-2 py-4 text-center text-gray-500">
+                                        No hay elementos registrados
+                                    </td>
+                                </tr>
+                                @else
+                                @foreach ($commonWorks as $item)
+                                <tr>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->key.'-'.$item->description}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->quantity}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->new_rep_unit_cost}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->net_rep_unit_cost}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->amount}}</td>
                                     <td class="my-2 flex justify-evenly">
                                         {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
                                                 class="cursor-pointer btn-intermediary btn-buildins"
-                                                wire:click='openEditElementCW' />
+                                                wire:click="openEditElement('common','works',{{$item->id}})" />
                                             {{-- </flux:modal-trigger> --}}
                                             {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
                                                 --}}
                                                 <flux:button
                                                     onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
-                                                    wire:click="deleteElementCW" type="button" icon-leading="trash"
+                                                    wire:click="deleteElement('common','works',{{$item->id}})" type="button" icon-leading="trash"
                                                     class="cursor-pointer btn-deleted btn-buildings" />
                                                 {{-- </flux:modal-trigger> --}}
                                     </td>
                                 </tr>
+                                @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -589,24 +649,33 @@
 </div>
 
 
-
+{{--
 <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos
-</flux:button>
+</flux:button> --}}
 
 
 {{-- MODALES PARA INSTALACIONES ESPECIALES --}}
 
+{{-- AHORA SERÁ EL MODAL PRINCIPAL PARA EDITAR TODOS LOS ELEMENTOS --}}
+
 {{-- MODAL PARA EDITAR ELEMENTO --}}
-<flux:modal name="edit-elementSI" class="md:w-96">
+<flux:modal name="edit-element" class="md:w-96">
     <div class="space-y-6">
         <div>
+            @if($elementType === 'installations')
             <flux:heading size="lg">Instalaciones especiales</flux:heading>
+            @endif
+            @if($elementType === 'accessories')
+            <flux:heading size="lg">Elementos accesorios</flux:heading>
+            @endif
+            @if($elementType === 'works')
+            <flux:heading size="lg">Obras complementarias</flux:heading>
+            @endif
             <flux:subheading size="lg">Editar elemento</flux:subheading>
         </div>
         <flux:spacer />
 
-
-
+        @if($elementType === 'installations')
         {{-- Inicia --}}
         <div class="relative inline-block w-full">
             <div class="pb-2">
@@ -630,8 +699,8 @@
                         -- Selecciona una opción --
                         @endif
                     </span>
-                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
@@ -675,8 +744,176 @@
             <div>
                 <flux:error name="descriptionSI" />
             </div>
+            {{-- {{$descriptionSI}} --}}
         </div>
         {{-- Finaliza --}}
+        @endif
+
+
+
+
+
+
+
+
+
+
+
+
+        @if($elementType === 'accessories')
+        {{-- Inicia --}}
+        <div class="relative inline-block w-full">
+            <div class="pb-2">
+                <flux:label>Descripción</flux:label>
+            </div>
+            <flux:dropdown inline position="bottom" align="start" class="w-full">
+
+                {{-- BOTÓN --}}
+                <button @click.stop.prevent
+                    @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
+                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionSI'),
+                    'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
+                    $errors->has('descriptionSI'),
+                    ])>
+                    <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
+                    <span class="flex-1 text-left text-gray-700 truncate">
+                        @if($descriptionAE)
+                        {{ $descriptionAE}} –
+                        {{ collect($select_AE)->firstWhere('clave', $descriptionAE)['descripcion'] }}
+                        @else
+                        -- Selecciona una opción --
+                        @endif
+                    </span>
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                {{-- MENÚ --}}
+                <!-- CAMBIO 2: Se cambió w-3/5 por w-full para que el menú ocupe todo el ancho por defecto -->
+                <flux:menu
+                    class="absolute left-0 top-full mt-1 md:w-96 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+
+                    <flux:menu.item disabled>
+                        <div class="w-full grid grid-cols-[30%_70%] px-2 py-1 text-gray-600 font-medium">
+                            <span>Clave</span>
+                            <span>Descripción</span>
+                        </div>
+                    </flux:menu.item>
+                    <flux:menu.separator />
+
+                    {{-- “Ninguno” --}}
+                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
+                    <flux:menu.item wire:click="$set('descriptionAE','')"
+                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized">
+                        <div class="w-full grid grid-cols-[30%_70%]">
+                            <span class="text-left">0</span>
+                            <span class="text-left">Ninguna</span>
+                        </div>
+                    </flux:menu.item>
+
+                    @foreach($select_AE as $item)
+                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
+                    <flux:menu.item wire:click="$set('descriptionAE','{{ $item['clave'] }}')"
+                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized {{ $descriptionAE == $item['clave'] ? 'bg-gray-100' : '' }}">
+                        <div class="w-full grid grid-cols-[30%_70%]">
+                            <span class="text-left">{{ $item['clave'] }}</span>
+                            <span class="text-left">{{ $item['descripcion'] }}</span>
+                        </div>
+                    </flux:menu.item>
+                    @endforeach
+
+                </flux:menu>
+            </flux:dropdown>
+            <div>
+                <flux:error name="descriptionAE" />
+            </div>
+        </div>
+        @endif
+
+
+
+
+
+
+
+
+        @if($elementType === 'works')
+        {{-- Inicia --}}
+        <div class="relative inline-block w-full">
+            <div class="pb-2">
+                <flux:label>Descripción</flux:label>
+            </div>
+            <flux:dropdown inline position="bottom" align="start" class="w-full">
+
+                {{-- BOTÓN --}}
+                <button @click.stop.prevent
+                    @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
+                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionSI'),
+                    'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
+                    $errors->has('descriptionSI'),
+                    ])>
+                    <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
+                    <span class="flex-1 text-left text-gray-700 truncate">
+                        @if($descriptionCW)
+                        {{ $descriptionCW}} –
+                        {{ collect($select_CW)->firstWhere('clave', $descriptionCW)['descripcion'] }}
+                        @else
+                        -- Selecciona una opción --
+                        @endif
+                    </span>
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                {{-- MENÚ --}}
+                <!-- CAMBIO 2: Se cambió w-3/5 por w-full para que el menú ocupe todo el ancho por defecto -->
+                <flux:menu
+                    class="absolute left-0 top-full mt-1 md:w-96 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+
+                    <flux:menu.item disabled>
+                        <div class="w-full grid grid-cols-[30%_70%] px-2 py-1 text-gray-600 font-medium">
+                            <span>Clave</span>
+                            <span>Descripción</span>
+                        </div>
+                    </flux:menu.item>
+                    <flux:menu.separator />
+
+                    {{-- “Ninguno” --}}
+                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
+                    <flux:menu.item wire:click="$set('descriptionCW','')"
+                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized">
+                        <div class="w-full grid grid-cols-[30%_70%]">
+                            <span class="text-left">0</span>
+                            <span class="text-left">Ninguna</span>
+                        </div>
+                    </flux:menu.item>
+
+                    @foreach($select_CW as $item)
+                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
+                    <flux:menu.item wire:click="$set('descriptionCW','{{ $item['clave'] }}')"
+                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized {{ $descriptionCW == $item['clave'] ? 'bg-gray-100' : '' }}">
+                        <div class="w-full grid grid-cols-[30%_70%]">
+                            <span class="text-left">{{ $item['clave'] }}</span>
+                            <span class="text-left">{{ $item['descripcion'] }}</span>
+                        </div>
+                    </flux:menu.item>
+                    @endforeach
+
+                </flux:menu>
+            </flux:dropdown>
+            <div>
+                <flux:error name="descriptionCW" />
+            </div>
+        </div>
+        {{-- Finaliza --}}
+
+        @endif
+
+
 
         <flux:field class="flux-field pt-4">
             <flux:label>Unidad</flux:label>
@@ -837,7 +1074,7 @@
             <flux:spacer />
 
             <flux:button type="button" class="btn-primary btn-table cursor-pointer" variant="primary"
-                wire:click='editElementSI'>Guardar
+                wire:click='editElement'>Editar elemento
             </flux:button>
         </div>
     </div>
@@ -847,16 +1084,26 @@
 
 
 
-
+{{-- AHORA ESTE SERÁ EL MODAL PRINCIPAL PARA CREAR TODOS LOS ELEMENTOS --}}
 
 
 {{-- MODAL PARA CREAR NUEVO ELEMENTO --}}
-<flux:modal name="add-elementSI" class="md:w-96">
+<flux:modal name="add-element" class="md:w-96">
     <div class="space-y-6">
         <div>
+            @if($elementType === 'installations')
             <flux:heading size="lg">Instalaciones especiales</flux:heading>
+            @endif
+            @if($elementType === 'accessories')
+            <flux:heading size="lg">Elementos accesorios</flux:heading>
+            @endif
+            @if($elementType === 'works')
+            <flux:heading size="lg">Obras complementarias</flux:heading>
+            @endif
             <flux:subheading size="lg">Añadir elemento</flux:subheading>
         </div>
+
+        @if($elementType === 'installations')
         {{-- Inicia --}}
         <div class="relative inline-block w-full">
             <div class="pb-2">
@@ -928,6 +1175,182 @@
           {{--   {{$descriptionSI}} --}}
         </div>
         {{-- Finaliza --}}
+        @endif
+
+
+
+
+
+
+
+
+
+
+
+
+        @if($elementType === 'accessories')
+        {{-- Inicia --}}
+        <div class="relative inline-block w-full">
+            <div class="pb-2">
+                <flux:label>Descripción</flux:label>
+            </div>
+            <flux:dropdown inline position="bottom" align="start" class="w-full">
+
+                {{-- BOTÓN --}}
+                <button @click.stop.prevent
+                    @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
+                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionSI'),
+                    'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
+                    $errors->has('descriptionAW'),
+                    ])>
+                    <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
+                    <span class="flex-1 text-left text-gray-700 truncate">
+                        @if($descriptionAE)
+                        {{ $descriptionAE}} –
+                        {{ collect($select_AE)->firstWhere('clave', $descriptionAE)['descripcion'] }}
+                        @else
+                        -- Selecciona una opción --
+                        @endif
+                    </span>
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                {{-- MENÚ --}}
+                <!-- CAMBIO 2: Se cambió w-3/5 por w-full para que el menú ocupe todo el ancho por defecto -->
+                <flux:menu
+                    class="absolute left-0 top-full mt-1 md:w-96 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+
+                    <flux:menu.item disabled>
+                        <div class="w-full grid grid-cols-[30%_70%] px-2 py-1 text-gray-600 font-medium">
+                            <span>Clave</span>
+                            <span>Descripción</span>
+                        </div>
+                    </flux:menu.item>
+                    <flux:menu.separator />
+
+                    {{-- “Ninguno” --}}
+                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
+                    <flux:menu.item wire:click="$set('descriptionAE','')"
+                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized">
+                        <div class="w-full grid grid-cols-[30%_70%]">
+                            <span class="text-left">0</span>
+                            <span class="text-left">Ninguna</span>
+                        </div>
+                    </flux:menu.item>
+
+                    @foreach($select_AE as $item)
+                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
+                    <flux:menu.item wire:click="$set('descriptionAE','{{ $item['clave'] }}')"
+                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized {{ $descriptionAE == $item['clave'] ? 'bg-gray-100' : '' }}">
+                        <div class="w-full grid grid-cols-[30%_70%]">
+                            <span class="text-left">{{ $item['clave'] }}</span>
+                            <span class="text-left">{{ $item['descripcion'] }}</span>
+                        </div>
+                    </flux:menu.item>
+                    @endforeach
+
+                </flux:menu>
+            </flux:dropdown>
+            <div>
+                <flux:error name="descriptionAE" />
+            </div>
+        </div>
+        @endif
+
+
+
+
+
+
+
+
+        @if($elementType === 'works')
+        {{-- Inicia --}}
+        <div class="relative inline-block w-full">
+            <div class="pb-2">
+                <flux:label>Descripción</flux:label>
+            </div>
+            <flux:dropdown inline position="bottom" align="start" class="w-full">
+
+                {{-- BOTÓN --}}
+                <button @click.stop.prevent
+                    @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
+                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionSI'),
+                    'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
+                    $errors->has('descriptionCW'),
+                    ])>
+                    <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
+                    <span class="flex-1 text-left text-gray-700 truncate">
+                        @if($descriptionCW)
+                        {{ $descriptionCW}} –
+                        {{ collect($select_CW)->firstWhere('clave', $descriptionCW)['descripcion'] }}
+                        @else
+                        -- Selecciona una opción --
+                        @endif
+                    </span>
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                {{-- MENÚ --}}
+                <!-- CAMBIO 2: Se cambió w-3/5 por w-full para que el menú ocupe todo el ancho por defecto -->
+                <flux:menu
+                    class="absolute left-0 top-full mt-1 md:w-96 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+
+                    <flux:menu.item disabled>
+                        <div class="w-full grid grid-cols-[30%_70%] px-2 py-1 text-gray-600 font-medium">
+                            <span>Clave</span>
+                            <span>Descripción</span>
+                        </div>
+                    </flux:menu.item>
+                    <flux:menu.separator />
+
+                    {{-- “Ninguno” --}}
+                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
+                    <flux:menu.item wire:click="$set('descriptionCW','')"
+                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized">
+                        <div class="w-full grid grid-cols-[30%_70%]">
+                            <span class="text-left">0</span>
+                            <span class="text-left">Ninguna</span>
+                        </div>
+                    </flux:menu.item>
+
+                    @foreach($select_CW as $item)
+                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
+                    <flux:menu.item wire:click="$set('descriptionCW','{{ $item['clave'] }}')"
+                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized {{ $descriptionCW == $item['clave'] ? 'bg-gray-100' : '' }}">
+                        <div class="w-full grid grid-cols-[30%_70%]">
+                            <span class="text-left">{{ $item['clave'] }}</span>
+                            <span class="text-left">{{ $item['descripcion'] }}</span>
+                        </div>
+                    </flux:menu.item>
+                    @endforeach
+
+                </flux:menu>
+            </flux:dropdown>
+            <div>
+                <flux:error name="descriptionCW" />
+            </div>
+        </div>
+        {{-- Finaliza --}}
+
+        @endif
+
+
+
+
+
+
+
+
+
+
+
         <flux:field class="flux-field pt-4">
             <flux:label>Unidad</flux:label>
             <flux:select wire:model.live="unit" class="text-gray-800 [&_option]:text-gray-900">
@@ -962,7 +1385,7 @@
         <flux:field class="flux-field">
             <flux:label>Vida útil<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model='usefulLife'
-            :disabled="$descriptionSI !== 'IE19'"/>
+            :disabled="!($descriptionSI === 'IE19' || $descriptionAE === 'EA12' || $descriptionCW === 'OC17')"/>
             <div class="error-container">
                 <flux:error name="usefulLife" />
             </div>
@@ -1087,7 +1510,7 @@
             <flux:spacer />
 
             <flux:button type="button" class="btn-primary btn-table cursor-pointer" variant="primary"
-                wire:click='addElementSI'>Guardar
+                wire:click='addElement'>Guardar elemento
             </flux:button>
         </div>
     </div>
@@ -1105,994 +1528,12 @@
 
 
 
-{{-- MODALES PARA ELEMENTOS ACCESORIOS --}}
 
-{{-- MODAL PARA EDITAR ELEMENTO --}}
-<flux:modal name="edit-elementAE" class="md:w-96">
-    <div class="space-y-6">
-        <div>
-            <flux:heading size="lg">Elementos accesorios</flux:heading>
-            <flux:subheading size="lg">Editar elemento</flux:subheading>
-        </div>
 
-        {{-- Inicia --}}
-        <div class="relative inline-block w-full">
-            <div class="pb-2">
-                <flux:label>Descripción</flux:label>
-            </div>
-            <flux:dropdown inline position="bottom" align="start" class="w-full">
 
-                {{-- BOTÓN --}}
-                <button @click.stop.prevent
-                    @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionSI'),
-                    'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
-                    $errors->has('descriptionSI'),
-                    ])>
-                    <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
-                    <span class="flex-1 text-left text-gray-700 truncate">
-                        @if($descriptionAE)
-                        {{ $descriptionAE}} –
-                        {{ collect($select_AE)->firstWhere('clave', $descriptionAE)['descripcion'] }}
-                        @else
-                        -- Selecciona una opción --
-                        @endif
-                    </span>
-                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
 
-                {{-- MENÚ --}}
-                <!-- CAMBIO 2: Se cambió w-3/5 por w-full para que el menú ocupe todo el ancho por defecto -->
-                <flux:menu
-                    class="absolute left-0 top-full mt-1 md:w-96 bg-white border border-gray-200 rounded-md shadow-lg z-10">
 
-                    <flux:menu.item disabled>
-                        <div class="w-full grid grid-cols-[30%_70%] px-2 py-1 text-gray-600 font-medium">
-                            <span>Clave</span>
-                            <span>Descripción</span>
-                        </div>
-                    </flux:menu.item>
-                    <flux:menu.separator />
 
-                    {{-- “Ninguno” --}}
-                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                    <flux:menu.item wire:click="$set('descriptionAE','')"
-                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized">
-                        <div class="w-full grid grid-cols-[30%_70%]">
-                            <span class="text-left">0</span>
-                            <span class="text-left">Ninguna</span>
-                        </div>
-                    </flux:menu.item>
 
-                    @foreach($select_AE as $item)
-                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                    <flux:menu.item wire:click="$set('descriptionAE','{{ $item['clave'] }}')"
-                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized {{ $descriptionAE == $item['clave'] ? 'bg-gray-100' : '' }}">
-                        <div class="w-full grid grid-cols-[30%_70%]">
-                            <span class="text-left">{{ $item['clave'] }}</span>
-                            <span class="text-left">{{ $item['descripcion'] }}</span>
-                        </div>
-                    </flux:menu.item>
-                    @endforeach
-
-                </flux:menu>
-            </flux:dropdown>
-            <div>
-                <flux:error name="descriptionAE" />
-            </div>
-        </div>
-        {{-- Finaliza --}}
-
-        <flux:field class="flux-field pt-4">
-            <flux:label>Unidad</flux:label>
-            <flux:select wire:model.live="unit" class="text-gray-800 [&_option]:text-gray-900">
-                <flux:select.option value="a">-- Selecciona una opción --</flux:select.option>
-                @foreach ($select_units as $value => $label)
-                <flux:select.option value="{{ $label }}">
-                    {{ $label }}
-                </flux:select.option>
-                @endforeach
-            </flux:select>
-            <div class="error-container">
-                <flux:error name="unit" />
-            </div>
-        </flux:field>
-
-        <flux:field class="flux-field">
-            <flux:label>Cantidad</flux:label>
-            <flux:input type="number" wire:model='quantity' />
-            <div class="error-container">
-                <flux:error name="quantity" />
-            </div>
-        </flux:field>
-
-        <flux:field class="flux-field">
-            <flux:label>Edad<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='age' />
-            <div class="error-container">
-                <flux:error name="age" />
-            </div>
-        </flux:field>
-
-        <flux:field class="flux-field">
-            <flux:label>Vida útil<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model.live='usefulLife'
-            :disabled="$descriptionAE !== 'EA12'"/>
-            <div class="error-container">
-                <flux:error name="usefulLife" />
-            </div>
-        </flux:field>
-        <flux:field class="flux-field">
-            <flux:label>Costo unit rep nuevo<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='newRepUnitCost' />
-            <div class="error-container">
-                <flux:error name="newRepUnitCost" />
-            </div>
-        </flux:field>
-
-        <flux:field class="flux-field">
-            <flux:label>Factor de edad<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='ageFactor' />
-            <div class="error-container">
-                <flux:error name="ageFactor" />
-            </div>
-        </flux:field>
-
-
-        {{-- Inicia --}}
-        <div class="relative inline-block w-full">
-            <div class="pb-2">
-                <flux:label>Factor conservación</flux:label>
-            </div>
-            <flux:dropdown inline position="bottom" align="start" class="w-full">
-
-                {{-- BOTÓN --}}
-                <button @click.stop.prevent
-                    @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('conservationFactor'),
-                    'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
-                    $errors->has('conservationFactor'),
-                    ])>
-                    <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
-                    <span class="flex-1 text-left text-gray-700 truncate">
-                        @if($conservationFactor)
-                        {{ $conservationFactor}} –
-                        {{ collect($select_conservation_factor)->firstWhere('clave', $conservationFactor)['nombre'] }}
-                        @else
-                        -- Selecciona una opción --
-                        @endif
-                    </span>
-                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-
-                {{-- MENÚ --}}
-                <!-- CAMBIO 2: Se cambió w-3/5 por w-full para que el menú ocupe todo el ancho por defecto -->
-                <flux:menu
-                    class="absolute left-0 top-full mt-1 md:w-96 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-
-                    <flux:menu.item disabled>
-                        <div class="w-full grid grid-cols-[30%_40%_30%] px-2 py-1 text-gray-600 font-medium">
-                            <span>Clave</span>
-                            <span>Nombre</span>
-                            <span>Factor</span>
-                        </div>
-                    </flux:menu.item>
-                    <flux:menu.separator />
-
-                    {{-- “Ninguno” --}}
-                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                    <flux:menu.item wire:click="$set('conservationFactor','')"
-                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized">
-                        <div class="w-full grid grid-cols-[30%_40%_30%]">
-                            <span class="text-left">0</span>
-                            <span class="text-left">Ninguna</span>
-                            <span class="text-left">Ninguna</span>
-                        </div>
-                    </flux:menu.item>
-
-                    @foreach($select_conservation_factor as $item)
-                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                    <flux:menu.item wire:click="$set('conservationFactor','{{ $item['clave'] }}')"
-                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized {{ $conservationFactor == $item['clave'] ? 'bg-gray-100' : '' }}">
-                        <div class="w-full grid grid-cols-[30%_40%_30%]">
-                            <span class="text-left">{{ $item['clave'] }}</span>
-                            <span class="text-left">{{ $item['nombre'] }}</span>
-                            <span class="text-left">{{ $item['factor'] }}</span>
-                        </div>
-                    </flux:menu.item>
-                    @endforeach
-
-                </flux:menu>
-            </flux:dropdown>
-            <div>
-                <flux:error name="conservationFactor" />
-            </div>
-        </div>
-        {{-- Finaliza --}}
-
-        <flux:field class="flux-field pt-4">
-            <flux:label>Costo Unit Neto Rep<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='netRepUnitCost' />
-            <div class="error-container">
-                <flux:error name="netRepUnitCost" />
-            </div>
-        </flux:field>
-
-        <flux:field class="flux-field">
-            <flux:label>%Indiviso<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='undivided' />
-            <div class="error-container">
-                <flux:error name="undivided" />
-            </div>
-        </flux:field>
-
-        <flux:field class="flux-field">
-            <flux:label>Importe<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='amount' />
-            <div class="error-container">
-                <flux:error name="amount" />
-            </div>
-        </flux:field>
-
-        <div class="flex">
-            <flux:spacer />
-
-            <flux:button type="button" class="btn-primary btn-table" variant="primary" wire:click='editElementAE'>Guardar
-            </flux:button>
-        </div>
-    </div>
-</flux:modal>
-
-
-{{-- MODAL PARA CREAR NUEVO ELEMENTO --}}
-<flux:modal name="add-elementAE" class="md:w-96">
-    <div class="space-y-6">
-        <div>
-            <flux:heading size="lg">Elementos accesorios</flux:heading>
-            <flux:subheading size="lg">Añadir elemento</flux:subheading>
-        </div>
-
-        {{-- Inicia --}}
-        <div class="relative inline-block w-full">
-            <div class="pb-2">
-                <flux:label>Descripción</flux:label>
-            </div>
-            <flux:dropdown inline position="bottom" align="start" class="w-full">
-
-                {{-- BOTÓN --}}
-                <button @click.stop.prevent
-                    @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionSI'),
-                    'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
-                    $errors->has('descriptionAE'),
-                    ])>
-                    <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
-                    <span class="flex-1 text-left text-gray-700 truncate">
-                        @if($descriptionAE)
-                        {{ $descriptionAE}} –
-                        {{ collect($select_AE)->firstWhere('clave', $descriptionAE)['descripcion'] }}
-                        @else
-                        -- Selecciona una opción --
-                        @endif
-                    </span>
-                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-
-                {{-- MENÚ --}}
-                <!-- CAMBIO 2: Se cambió w-3/5 por w-full para que el menú ocupe todo el ancho por defecto -->
-                <flux:menu
-                    class="absolute left-0 top-full mt-1 md:w-96 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-
-                    <flux:menu.item disabled>
-                        <div class="w-full grid grid-cols-[30%_70%] px-2 py-1 text-gray-600 font-medium">
-                            <span>Clave</span>
-                            <span>Descripción</span>
-                        </div>
-                    </flux:menu.item>
-                    <flux:menu.separator />
-
-                    {{-- “Ninguno” --}}
-                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                    <flux:menu.item wire:click="$set('descriptionAE','')"
-                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized">
-                        <div class="w-full grid grid-cols-[30%_70%]">
-                            <span class="text-left">0</span>
-                            <span class="text-left">Ninguna</span>
-                        </div>
-                    </flux:menu.item>
-
-                    @foreach($select_AE as $item)
-                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                    <flux:menu.item wire:click="$set('descriptionAE','{{ $item['clave'] }}')"
-                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized {{ $descriptionAE == $item['clave'] ? 'bg-gray-100' : '' }}">
-                        <div class="w-full grid grid-cols-[30%_70%]">
-                            <span class="text-left">{{ $item['clave'] }}</span>
-                            <span class="text-left">{{ $item['descripcion'] }}</span>
-                        </div>
-                    </flux:menu.item>
-                    @endforeach
-
-                </flux:menu>
-            </flux:dropdown>
-            <div>
-                <flux:error name="descriptionAE" />
-            </div>
-        </div>
-
-        {{-- Finaliza --}}
-
-       <flux:field class="flux-field pt-4">
-        <flux:label>Unidad</flux:label>
-        <flux:select wire:model.live="unit" class="text-gray-800 [&_option]:text-gray-900">
-            <flux:select.option value="a">-- Selecciona una opción --</flux:select.option>
-            @foreach ($select_units as $value => $label)
-            <flux:select.option value="{{ $label }}">
-                {{ $label }}
-            </flux:select.option>
-            @endforeach
-        </flux:select>
-        <div class="error-container">
-            <flux:error name="unit" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>Cantidad</flux:label>
-        <flux:input type="number" wire:model='quantity' />
-        <div class="error-container">
-            <flux:error name="quantity" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>Edad<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='age' />
-        <div class="error-container">
-            <flux:error name="age" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>Vida útil<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model.live='usefulLife'
-        :disabled="$descriptionAE !== 'EA12'"/>
-        <div class="error-container">
-            <flux:error name="usefulLife" />
-        </div>
-    </flux:field>
-    <flux:field class="flux-field">
-        <flux:label>Costo unit rep nuevo<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='newRepUnitCost' />
-        <div class="error-container">
-            <flux:error name="newRepUnitCost" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>Factor de edad<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='ageFactor' />
-        <div class="error-container">
-            <flux:error name="ageFactor" />
-        </div>
-    </flux:field>
-
-
-    {{-- Inicia --}}
-    <div class="relative inline-block w-full">
-        <div class="pb-2">
-            <flux:label>Factor conservación</flux:label>
-        </div>
-        <flux:dropdown inline position="bottom" align="start" class="w-full">
-
-            {{-- BOTÓN --}}
-            <button @click.stop.prevent
-                @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('conservationFactor'),
-                'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
-                $errors->has('conservationFactor'),
-                ])>
-                <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
-                <span class="flex-1 text-left text-gray-700 truncate">
-                    @if($conservationFactor)
-                    {{ $conservationFactor}} –
-                    {{ collect($select_conservation_factor)->firstWhere('clave', $conservationFactor)['nombre'] }}
-                    @else
-                    -- Selecciona una opción --
-                    @endif
-                </span>
-                <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
-
-            {{-- MENÚ --}}
-            <!-- CAMBIO 2: Se cambió w-3/5 por w-full para que el menú ocupe todo el ancho por defecto -->
-            <flux:menu
-                class="absolute left-0 top-full mt-1 md:w-96 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-
-                <flux:menu.item disabled>
-                    <div class="w-full grid grid-cols-[30%_40%_30%] px-2 py-1 text-gray-600 font-medium">
-                        <span>Clave</span>
-                        <span>Nombre</span>
-                        <span>Factor</span>
-                    </div>
-                </flux:menu.item>
-                <flux:menu.separator />
-
-                {{-- “Ninguno” --}}
-                <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                <flux:menu.item wire:click="$set('conservationFactor','')"
-                    class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized">
-                    <div class="w-full grid grid-cols-[30%_40%_30%]">
-                        <span class="text-left">0</span>
-                        <span class="text-left">Ninguna</span>
-                        <span class="text-left">Ninguna</span>
-                    </div>
-                </flux:menu.item>
-
-                @foreach($select_conservation_factor as $item)
-                <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                <flux:menu.item wire:click="$set('conservationFactor','{{ $item['clave'] }}')"
-                    class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized {{ $conservationFactor == $item['clave'] ? 'bg-gray-100' : '' }}">
-                    <div class="w-full grid grid-cols-[30%_40%_30%]">
-                        <span class="text-left">{{ $item['clave'] }}</span>
-                        <span class="text-left">{{ $item['nombre'] }}</span>
-                        <span class="text-left">{{ $item['factor'] }}</span>
-                    </div>
-                </flux:menu.item>
-                @endforeach
-
-            </flux:menu>
-        </flux:dropdown>
-        <div>
-            <flux:error name="conservationFactor" />
-        </div>
-    </div>
-    {{-- Finaliza --}}
-
-    <flux:field class="flux-field pt-4">
-        <flux:label>Costo Unit Neto Rep<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='netRepUnitCost' />
-        <div class="error-container">
-            <flux:error name="netRepUnitCost" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>%Indiviso<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='undivided' />
-        <div class="error-container">
-            <flux:error name="undivided" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>Importe<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='amount' />
-        <div class="error-container">
-            <flux:error name="amount" />
-        </div>
-    </flux:field>
-
-        <div class="flex">
-            <flux:spacer />
-
-            <flux:button type="button" class="btn-primary btn-table" variant="primary" wire:click='addElementAE'>Guardar
-            </flux:button>
-        </div>
-    </div>
-</flux:modal>
-
-
-
-
-
-
-{{-- MODALES PARA OBRAS COMPLEMENTARIAS --}}
-
-{{-- MODAL PARA EDITAR ELEMENTO --}}
-<flux:modal name="edit-elementCW" class="md:w-96">
-    <div class="space-y-6">
-        <div>
-            <flux:heading size="lg">Obras complementarias</flux:heading>
-            <flux:subheading size="lg">Editar elemento</flux:subheading>
-        </div>
-        {{-- Inicia --}}
-        <div class="relative inline-block w-full">
-            <div class="pb-2">
-                <flux:label>Descripción</flux:label>
-            </div>
-            <flux:dropdown inline position="bottom" align="start" class="w-full">
-
-                {{-- BOTÓN --}}
-                <button @click.stop.prevent
-                    @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionSI'),
-                    'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
-                    $errors->has('descriptionSI'),
-                    ])>
-                    <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
-                    <span class="flex-1 text-left text-gray-700 truncate">
-                        @if($descriptionCW)
-                        {{ $descriptionCW}} –
-                        {{ collect($select_CW)->firstWhere('clave', $descriptionCW)['descripcion'] }}
-                        @else
-                        -- Selecciona una opción --
-                        @endif
-                    </span>
-                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-
-                {{-- MENÚ --}}
-                <!-- CAMBIO 2: Se cambió w-3/5 por w-full para que el menú ocupe todo el ancho por defecto -->
-                <flux:menu
-                    class="absolute left-0 top-full mt-1 md:w-96 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-
-                    <flux:menu.item disabled>
-                        <div class="w-full grid grid-cols-[30%_70%] px-2 py-1 text-gray-600 font-medium">
-                            <span>Clave</span>
-                            <span>Descripción</span>
-                        </div>
-                    </flux:menu.item>
-                    <flux:menu.separator />
-
-                    {{-- “Ninguno” --}}
-                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                    <flux:menu.item wire:click="$set('descriptionCW','')"
-                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized">
-                        <div class="w-full grid grid-cols-[30%_70%]">
-                            <span class="text-left">0</span>
-                            <span class="text-left">Ninguna</span>
-                        </div>
-                    </flux:menu.item>
-
-                    @foreach($select_CW as $item)
-                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                    <flux:menu.item wire:click="$set('descriptionCW','{{ $item['clave'] }}')"
-                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized {{ $descriptionCW == $item['clave'] ? 'bg-gray-100' : '' }}">
-                        <div class="w-full grid grid-cols-[30%_70%]">
-                            <span class="text-left">{{ $item['clave'] }}</span>
-                            <span class="text-left">{{ $item['descripcion'] }}</span>
-                        </div>
-                    </flux:menu.item>
-                    @endforeach
-
-                </flux:menu>
-            </flux:dropdown>
-            <div>
-                <flux:error name="descriptionCW" />
-            </div>
-        </div>
-        {{-- Finaliza --}}
-
-      <flux:field class="flux-field pt-4">
-        <flux:label>Unidad</flux:label>
-        <flux:select wire:model.live="unit" class="text-gray-800 [&_option]:text-gray-900">
-            <flux:select.option value="a">-- Selecciona una opción --</flux:select.option>
-            @foreach ($select_units as $value => $label)
-            <flux:select.option value="{{ $label }}">
-                {{ $label }}
-            </flux:select.option>
-            @endforeach
-        </flux:select>
-        <div class="error-container">
-            <flux:error name="unit" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>Cantidad</flux:label>
-        <flux:input type="number" wire:model='quantity' />
-        <div class="error-container">
-            <flux:error name="quantity" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>Edad<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='age' />
-        <div class="error-container">
-            <flux:error name="age" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>Vida útil<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='usefulLife'
-        :disabled="!in_array($descriptionCW, ['OC17', 'OC06', 'OC18'])"/>
-        <div class="error-container">
-            <flux:error name="usefulLife" />
-        </div>
-    </flux:field>
-    <flux:field class="flux-field">
-        <flux:label>Costo unit rep nuevo<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='newRepUnitCost' />
-        <div class="error-container">
-            <flux:error name="newRepUnitCost" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>Factor de edad<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='ageFactor' />
-        <div class="error-container">
-            <flux:error name="ageFactor" />
-        </div>
-    </flux:field>
-
-
-    {{-- Inicia --}}
-    <div class="relative inline-block w-full">
-        <div class="pb-2">
-            <flux:label>Factor conservación</flux:label>
-        </div>
-        <flux:dropdown inline position="bottom" align="start" class="w-full">
-
-            {{-- BOTÓN --}}
-            <button @click.stop.prevent
-                @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('conservationFactor'),
-                'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
-                $errors->has('conservationFactor'),
-                ])>
-                <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
-                <span class="flex-1 text-left text-gray-700 truncate">
-                    @if($conservationFactor)
-                    {{ $conservationFactor}} –
-                    {{ collect($select_conservation_factor)->firstWhere('clave', $conservationFactor)['nombre'] }}
-                    @else
-                    -- Selecciona una opción --
-                    @endif
-                </span>
-                <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
-
-            {{-- MENÚ --}}
-            <!-- CAMBIO 2: Se cambió w-3/5 por w-full para que el menú ocupe todo el ancho por defecto -->
-            <flux:menu
-                class="absolute left-0 top-full mt-1 md:w-96 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-
-                <flux:menu.item disabled>
-                    <div class="w-full grid grid-cols-[30%_40%_30%] px-2 py-1 text-gray-600 font-medium">
-                        <span>Clave</span>
-                        <span>Nombre</span>
-                        <span>Factor</span>
-                    </div>
-                </flux:menu.item>
-                <flux:menu.separator />
-
-                {{-- “Ninguno” --}}
-                <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                <flux:menu.item wire:click="$set('conservationFactor','')"
-                    class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized">
-                    <div class="w-full grid grid-cols-[30%_40%_30%]">
-                        <span class="text-left">0</span>
-                        <span class="text-left">Ninguna</span>
-                        <span class="text-left">Ninguna</span>
-                    </div>
-                </flux:menu.item>
-
-                @foreach($select_conservation_factor as $item)
-                <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                <flux:menu.item wire:click="$set('conservationFactor','{{ $item['clave'] }}')"
-                    class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized {{ $conservationFactor == $item['clave'] ? 'bg-gray-100' : '' }}">
-                    <div class="w-full grid grid-cols-[30%_40%_30%]">
-                        <span class="text-left">{{ $item['clave'] }}</span>
-                        <span class="text-left">{{ $item['nombre'] }}</span>
-                        <span class="text-left">{{ $item['factor'] }}</span>
-                    </div>
-                </flux:menu.item>
-                @endforeach
-
-            </flux:menu>
-        </flux:dropdown>
-        <div>
-            <flux:error name="conservationFactor" />
-        </div>
-    </div>
-    {{-- Finaliza --}}
-
-    <flux:field class="flux-field pt-4">
-        <flux:label>Costo Unit Neto Rep<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='netRepUnitCost' />
-        <div class="error-container">
-            <flux:error name="netRepUnitCost" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>%Indiviso<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='undivided' />
-        <div class="error-container">
-            <flux:error name="undivided" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>Importe<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='amount' />
-        <div class="error-container">
-            <flux:error name="amount" />
-        </div>
-    </flux:field>
-
-        <div class="flex">
-            <flux:spacer />
-
-            <flux:button class="btn-primary btn-table" variant="primary" wire:click='editElementCW'>Guardar
-            </flux:button>
-        </div>
-    </div>
-</flux:modal>
-
-
-{{-- MODAL PARA CREAR NUEVO ELEMENTO --}}
-<flux:modal name="add-elementCW" class="md:w-96">
-    <div class="space-y-6">
-        <div>
-            <flux:heading size="lg">Obras complementarias</flux:heading>
-            <flux:subheading size="lg">Añadir elemento</flux:subheading>
-        </div>
-
-        {{-- Inicia --}}
-        <div class="relative inline-block w-full">
-            <div class="pb-2">
-                <flux:label>Descripción</flux:label>
-            </div>
-            <flux:dropdown inline position="bottom" align="start" class="w-full">
-
-                {{-- BOTÓN --}}
-                <button @click.stop.prevent
-                    @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionSI'),
-                    'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
-                    $errors->has('descriptionSI'),
-                    ])>
-                    <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
-                    <span class="flex-1 text-left text-gray-700 truncate">
-                        @if($descriptionCW)
-                        {{ $descriptionCW}} –
-                        {{ collect($select_CW)->firstWhere('clave', $descriptionCW)['descripcion'] }}
-                        @else
-                        -- Selecciona una opción --
-                        @endif
-                    </span>
-                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-
-                {{-- MENÚ --}}
-                <!-- CAMBIO 2: Se cambió w-3/5 por w-full para que el menú ocupe todo el ancho por defecto -->
-                <flux:menu
-                    class="absolute left-0 top-full mt-1 md:w-96 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-
-                    <flux:menu.item disabled>
-                        <div class="w-full grid grid-cols-[30%_70%] px-2 py-1 text-gray-600 font-medium">
-                            <span>Clave</span>
-                            <span>Descripción</span>
-                        </div>
-                    </flux:menu.item>
-                    <flux:menu.separator />
-
-                    {{-- “Ninguno” --}}
-                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                    <flux:menu.item wire:click="$set('descriptionCW','')"
-                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized">
-                        <div class="w-full grid grid-cols-[30%_70%]">
-                            <span class="text-left">0</span>
-                            <span class="text-left">Ninguna</span>
-                        </div>
-                    </flux:menu.item>
-
-                    @foreach($select_CW as $item)
-                    <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                    <flux:menu.item wire:click="$set('descriptionCW','{{ $item['clave'] }}')"
-                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized {{ $descriptionCW == $item['clave'] ? 'bg-gray-100' : '' }}">
-                        <div class="w-full grid grid-cols-[30%_70%]">
-                            <span class="text-left">{{ $item['clave'] }}</span>
-                            <span class="text-left">{{ $item['descripcion'] }}</span>
-                        </div>
-                    </flux:menu.item>
-                    @endforeach
-
-                </flux:menu>
-            </flux:dropdown>
-            <div>
-                <flux:error name="descriptionCW" />
-            </div>
-        </div>
-        {{-- Finaliza --}}
-
-       <flux:field class="flux-field pt-4">
-        <flux:label>Unidad</flux:label>
-        <flux:select wire:model.live="unit" class="text-gray-800 [&_option]:text-gray-900">
-            <flux:select.option value="a">-- Selecciona una opción --</flux:select.option>
-            @foreach ($select_units as $value => $label)
-            <flux:select.option value="{{ $label }}">
-                {{ $label }}
-            </flux:select.option>
-            @endforeach
-        </flux:select>
-        <div class="error-container">
-            <flux:error name="unit" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>Cantidad</flux:label>
-        <flux:input type="number" wire:model='quantity' />
-        <div class="error-container">
-            <flux:error name="quantity" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>Edad<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='age' />
-        <div class="error-container">
-            <flux:error name="age" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>Vida útil<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='usefulLife'
-        :disabled="!in_array($descriptionCW, ['OC17', 'OC06', 'OC18'])"/>
-        <div class="error-container">
-            <flux:error name="usefulLife" />
-        </div>
-    </flux:field>
-    <flux:field class="flux-field">
-        <flux:label>Costo unit rep nuevo<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='newRepUnitCost' />
-        <div class="error-container">
-            <flux:error name="newRepUnitCost" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>Factor de edad<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='ageFactor' />
-        <div class="error-container">
-            <flux:error name="ageFactor" />
-        </div>
-    </flux:field>
-
-
-    {{-- Inicia --}}
-    <div class="relative inline-block w-full">
-        <div class="pb-2">
-            <flux:label>Factor conservación</flux:label>
-        </div>
-        <flux:dropdown inline position="bottom" align="start" class="w-full">
-
-            {{-- BOTÓN --}}
-            <button @click.stop.prevent
-                @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('conservationFactor'),
-                'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
-                $errors->has('conservationFactor'),
-                ])>
-                <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
-                <span class="flex-1 text-left text-gray-700 truncate">
-                    @if($conservationFactor)
-                    {{ $conservationFactor}} –
-                    {{ collect($select_conservation_factor)->firstWhere('clave', $conservationFactor)['nombre'] }}
-                    @else
-                    -- Selecciona una opción --
-                    @endif
-                </span>
-                <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
-
-            {{-- MENÚ --}}
-            <!-- CAMBIO 2: Se cambió w-3/5 por w-full para que el menú ocupe todo el ancho por defecto -->
-            <flux:menu
-                class="absolute left-0 top-full mt-1 md:w-96 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-
-                <flux:menu.item disabled>
-                    <div class="w-full grid grid-cols-[30%_40%_30%] px-2 py-1 text-gray-600 font-medium">
-                        <span>Clave</span>
-                        <span>Nombre</span>
-                        <span>Factor</span>
-                    </div>
-                </flux:menu.item>
-                <flux:menu.separator />
-
-                {{-- “Ninguno” --}}
-                <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                <flux:menu.item wire:click="$set('conservationFactor','')"
-                    class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized">
-                    <div class="w-full grid grid-cols-[30%_40%_30%]">
-                        <span class="text-left">0</span>
-                        <span class="text-left">Ninguna</span>
-                        <span class="text-left">Ninguna</span>
-                    </div>
-                </flux:menu.item>
-
-                @foreach($select_conservation_factor as $item)
-                <!-- CAMBIO 3: Se unificó la variable a 'descriptionSI' para consistencia -->
-                <flux:menu.item wire:click="$set('conservationFactor','{{ $item['clave'] }}')"
-                    class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors menu-item-personalized {{ $conservationFactor == $item['clave'] ? 'bg-gray-100' : '' }}">
-                    <div class="w-full grid grid-cols-[30%_40%_30%]">
-                        <span class="text-left">{{ $item['clave'] }}</span>
-                        <span class="text-left">{{ $item['nombre'] }}</span>
-                        <span class="text-left">{{ $item['factor'] }}</span>
-                    </div>
-                </flux:menu.item>
-                @endforeach
-
-            </flux:menu>
-        </flux:dropdown>
-        <div>
-            <flux:error name="conservationFactor" />
-        </div>
-    </div>
-    {{-- Finaliza --}}
-
-    <flux:field class="flux-field pt-4">
-        <flux:label>Costo Unit Neto Rep<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='netRepUnitCost' />
-        <div class="error-container">
-            <flux:error name="netRepUnitCost" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>%Indiviso<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='undivided' />
-        <div class="error-container">
-            <flux:error name="undivided" />
-        </div>
-    </flux:field>
-
-    <flux:field class="flux-field">
-        <flux:label>Importe<span class="sup-required">*</span></flux:label>
-        <flux:input type="number" wire:model='amount' />
-        <div class="error-container">
-            <flux:error name="amount" />
-        </div>
-    </flux:field>
-
-        <div class="flex">
-            <flux:spacer />
-
-            <flux:button class="btn-primary btn-table" variant="primary" wire:click='addElementCW'>Guardar
-            </flux:button>
-        </div>
-    </div>
-</flux:modal>
-
-
-
-
-
-
-
-
-
-
-
-</form>
+{{-- </form> --}}
 </div>

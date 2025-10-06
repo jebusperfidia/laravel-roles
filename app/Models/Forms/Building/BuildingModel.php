@@ -47,9 +47,7 @@ class BuildingModel extends Model
     }
 
 
-
-
-
+    //Generamos una función para obtener los valores por diferentes tipos
     public function privates()
     {
         return $this->buildingConstructions()->where('type', 'private');

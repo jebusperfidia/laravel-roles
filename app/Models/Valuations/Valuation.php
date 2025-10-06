@@ -2,6 +2,7 @@
 
 namespace App\Models\Valuations;
 
+use App\Models\Forms\Specialnstallation\SpecialInstallationModel;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\PropertyLocationModel;
 
@@ -111,6 +112,61 @@ class Valuation extends Model
         'pre_valuation' => 'boolean', // <--- AÑADE ESTA LÍNEA
     ];
 
+
+    public function specialInstallations()
+    {
+        // Retorna todos los elementos ligados a este avalúo
+        return $this->hasMany(SpecialInstallationModel::class);
+    }
+
+
+    //Tablas privativas
+    public function privateInstallations()
+    {
+        return $this->specialInstallations()
+            ->where('classification_type', 'private')
+            ->where('element_type', 'installations');
+    }
+
+
+    public function privateAccessories()
+    {
+        return $this->specialInstallations()
+            ->where('classification_type', 'private')
+            ->where('element_type', 'accessories');
+    }
+
+
+    public function privateWorks()
+    {
+        return $this->specialInstallations()
+            ->where('classification_type', 'private')
+            ->where('element_type', 'works');
+    }
+
+    //Tablas comunes
+    public function commonInstallations()
+    {
+        return $this->specialInstallations()
+            ->where('classification_type', 'common')
+            ->where('element_type', 'installations');
+    }
+
+
+    public function commonAccessories()
+    {
+        return $this->specialInstallations()
+            ->where('classification_type', 'common')
+            ->where('element_type', 'accessories');
+    }
+
+
+    public function commonWorks()
+    {
+        return $this->specialInstallations()
+            ->where('classification_type', 'common')
+            ->where('element_type', 'works');
+    }
 
     /*     public function location()
     {
