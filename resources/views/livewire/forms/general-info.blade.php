@@ -351,7 +351,7 @@
                     </flux:field>
                 </div>
                 @endif
-                <div class="form-grid form-grid--3">
+              {{--   <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Número de seguridad social<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_applicNss' />
@@ -359,7 +359,7 @@
                             <flux:error name="gi_applicNss" />
                         </div>
                     </flux:field>
-                </div>
+                </div> --}}
 
                 <div class="form-grid form-grid--3 mt-3 mb-2 text-lg">
                     <h2 class="border-b-2 border-gray-300">Dirección del solicitante</h2>
@@ -734,9 +734,7 @@
                             <flux:error name="gi_propertyWaterAccount" />
                         </div>
                     </flux:field>
-                </div>
 
-                <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Tipo de inmueble<span class="sup-required">*</span></flux:label>
                         <flux:select wire:model.live="gi_propertyType" class="text-gray-800 [&_option]:text-gray-900">
@@ -751,7 +749,12 @@
                             <flux:error name="gi_propertyType" />
                         </div>
                     </flux:field>
-                    <flux:field class="flux-field">
+
+                </div>
+
+                <div class="form-grid form-grid--3">
+
+                  {{--   <flux:field class="flux-field">
                         <flux:label>Tipo de inmueble SIGAPRED<span class="sup-required">*</span></flux:label>
                         <flux:select wire:model.live="gi_propertyTypeSigapred"
                             class="text-gray-800 [&_option]:text-gray-900">
@@ -765,7 +768,7 @@
                         <div class="error-container">
                             <flux:error name="gi_propertyTypeSigapred" />
                         </div>
-                    </flux:field>
+                    </flux:field> --}}
                     <flux:field class="flux-field">
                         <flux:label>Uso de suelo<span class="sup-required">*</span></flux:label>
                         <flux:select wire:model.live="gi_propertyLandUse"
@@ -781,15 +784,10 @@
                             <flux:error name="gi_propertyLandUse" />
                         </div>
                     </flux:field>
-                </div>
-
-
-                @if (stripos($gi_propertyType, 'terreno') === false)
-                <div class="form-grid form-grid--3">
+                    @if (stripos($gi_propertyType, 'terreno') === false)
                     <flux:field class="flux-field">
                         <flux:label>Tipo de vivienda<span class="sup-required">*</span></flux:label>
-                        <flux:select wire:model.live="gi_propertyTypeHousing"
-                            class="text-gray-800 [&_option]:text-gray-900">
+                        <flux:select wire:model.live="gi_propertyTypeHousing" class="text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                             <flux:select.option value="Nueva, sin escrituración previa">Nueva, sin escrituración
                                 previa
@@ -809,6 +807,13 @@
                             <flux:error name="gi_propertyConstructor" />
                         </div>
                     </flux:field>
+                    @endif
+                </div>
+
+
+
+                <div class="form-grid form-grid--3">
+
                     <flux:field class="flux-field">
                         <flux:label>RFC constructor (vivienda nueva)<span class="sup-required">*</span></flux:label>
                         <flux:input type="text" wire:model='gi_propertyRfcConstructor' />
@@ -816,15 +821,16 @@
                             <flux:error name="gi_propertyRfcConstructor" />
                         </div>
                     </flux:field>
-                </div>
-                @endif
-
-                <div class="form-grid form-grid--1">
                     <flux:field class="flux-field">
                         <flux:label>Información adicional</flux:label>
                         <flux:input type="text" wire:model='gi_propertyAdditionalData' />
                         <flux:error name="gi_propertyAdditionalData" />
                     </flux:field>
+                </div>
+
+
+                <div class="form-grid form-grid--1">
+
                 </div>
 
             </div>
@@ -887,7 +893,7 @@
                 </div>
                 @endif
 
-               @if (stripos($gi_propertyType, 'condominio') !== false)
+            {{--    @if (stripos($gi_propertyType, 'condominio') !== false)
 
                 <div class="form-grid form-grid--1">
                     <div class="error-container">
@@ -911,7 +917,7 @@
                     </div>
                 </div>
             </div>
-            @endif
+            @endif --}}
 
                 <div class="form-grid form-grid--1">
                     <flux:field class="flux-field">

@@ -18,6 +18,8 @@ return new class extends Migration
                 ->constrained('valuations')
                 ->cascadeOnDelete();
 
+            $table->text('summary')->nullable(); // Nuevo campo para el resumen del pre-avaluo
+
             $table->timestamps();
         });
     }

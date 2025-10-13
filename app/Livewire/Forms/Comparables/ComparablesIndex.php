@@ -4,7 +4,7 @@ namespace App\Livewire\Forms\Comparables;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Session;
-use App\Models\Valuation;
+use App\Models\Valuations\Valuation;
 use Flux\Flux;
 use Masmerise\Toaster\Toaster;
 use Illuminate\Support\Facades\Validator;

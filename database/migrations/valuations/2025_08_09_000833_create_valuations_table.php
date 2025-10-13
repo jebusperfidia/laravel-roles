@@ -39,9 +39,9 @@ return new class extends Migration
             $table->string('owner_locality', 100)->nullable();
             $table->string('owner_colony', 100)->nullable();
             $table->string('owner_other_colony', 100)->nullable();
-            $table->string('owner_street', 20)->nullable();
-            $table->string('owner_abroad_number', 20)->nullable();
-            $table->string('owner_inside_number', 20)->nullable();
+            $table->string('owner_street', 50)->nullable();
+            $table->string('owner_abroad_number', 50)->nullable();
+            $table->string('owner_inside_number', 50)->nullable();
             //$table->boolean('owner_copy_from_property')->default(false);
 
 
@@ -52,7 +52,6 @@ return new class extends Migration
             $table->string('applic_name', 100)->nullable();
             $table->string('applic_first_name', 100)->nullable();
             $table->string('applic_second_name', 100)->nullable();
-            $table->string('applic_nss', 11)->nullable();
             $table->string('applic_cp', 5)->nullable();
             $table->string('applic_entity', 100)->nullable();
             $table->string('applic_locality', 100)->nullable();
@@ -89,7 +88,6 @@ return new class extends Migration
             $table->string('property_tax', 100)->nullable();
             $table->string('property_water_account', 100)->nullable();
             /* $table->string('property_type')->nullable(); */
-            $table->string('property_type_sigapred', 100)->nullable();
             $table->string('property_land_use', 100)->nullable();
             $table->string('property_type_housing', 100)->nullable();
             $table->string('property_constructor', 100)->nullable();
@@ -97,9 +95,9 @@ return new class extends Migration
             $table->string('property_additional_data', 100)->nullable();
 
             //Valores para datos importantes
-            $table->string('purpose', 50)->nullable();
             $table->string('purpose_other', 100)->nullable();
-            $table->string('purpose_sigapred', 100)->nullable();
+            $table->string('purpose', 100)->nullable();
+            /* $table->string('purpose_sigapred', 100)->nullable(); */
             $table->string('objective', 100)->nullable();
             $table->string('owner_ship_regime', 20)->nullable();
 

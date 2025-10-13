@@ -8,7 +8,7 @@ use App\Models\Forms\ConstructionElements\Finishing1Model;
 use App\Models\Forms\ConstructionElements\Finishing2Model;
 use App\Models\Forms\ConstructionElements\FinishingOtherModel;
 use App\Models\Forms\ConstructionElements\CarpentryModel;
-use App\Models\Forms\ConstructionElements\IronworkModel;
+use App\Models\Forms\ConstructionElements\IronWorkModel;
 use App\Models\Forms\ConstructionElements\HydraulicModel;
 use App\Models\Forms\ConstructionElements\OtherElementModel; // Usamos el nombre corregido
 
@@ -60,9 +60,9 @@ class ConstructionElementModel extends Model
     }
 
     // Relación 1:1 con Herrería
-    public function ironwork()
+    public function ironWork()
     {
-        return $this->hasOne(IronworkModel::class, 'construction_elements_id');
+        return $this->hasOne(IronWorkModel::class, 'construction_elements_id');
     }
 
 

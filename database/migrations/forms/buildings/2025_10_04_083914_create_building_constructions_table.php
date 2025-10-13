@@ -32,7 +32,10 @@ return new class extends Migration
             $table->boolean('range_based_height')->nullable();
             $table->string('surface_vad')->nullable();
 
+
             $table->string('type', 12)->nullable();
+
+            $table->boolean('surfaceApply')->default(false);
 
 
 

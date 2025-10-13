@@ -5,6 +5,10 @@
             <div class="form-container__header">
                 Elementos de la construcción
             </div>
+
+
+            @unless ($preValuation)
+
             <div class="form-container__content">
                 <div class="flex flex-col w-full h-full">
 
@@ -1080,6 +1084,23 @@
             </div>
         </div>
 
+
+
+
+
+        @else
+        <div class="form-container__content">
+            <div class="form-grid form-grid--1">
+                <flux:field class="flux-field">
+                    <flux:label>Resumen<span class="sup-required">*</span></flux:label>
+                    <flux:textarea wire:model='summary'/>
+                    <div class="error-container">
+                        <flux:error name="summary" />
+                    </div>
+                </flux:field>
+            </div>
+
+        @endunless
 
 
 

@@ -17,7 +17,7 @@ class GeneralInfo extends Component
     public $users;
 
     // Arrays públicos para consumir datos para los input select largos
-    public array $levels_input, $propertiesTypes_input, $propertiesTypesSigapred_input, $landUse_input;
+    public array $levels_input, $propertiesTypes_input, $landUse_input;
 
     //Variables para almacenar los datos obtenidos desde la API de Dipomex
 
@@ -46,7 +46,7 @@ class GeneralInfo extends Component
 
     //Variables tercer contenedor
     public $gi_applicTypePerson, $gi_applicRfc, $gi_applicCurp ,$gi_applicName, $gi_applicFirstName, $gi_applicSecondName,
-        $gi_applicNss, $gi_applicCp, $gi_applicEntity, $gi_applicLocality, $gi_applicColony, $gi_applicOtherColony,
+        $gi_applicCp, $gi_applicEntity, $gi_applicLocality, $gi_applicColony, $gi_applicOtherColony,
         $gi_applicStreet, $gi_applicAbroadNumber, $gi_applicInsideNumber, $gi_applicPhone, $gi_copyFromProperty2 = false;
 
     //Variables cuarto contenedor
@@ -54,12 +54,12 @@ class GeneralInfo extends Component
         $gi_propertyStreet, $gi_propertyAbroadNumber, $gi_propertyInsideNumber, $gi_propertyBlock,
         $gi_propertySuperBlock, $gi_propertyLot, $gi_propertyBuilding, $gi_propertyDepartament, $gi_propertyAccess,
         $gi_propertyLevel, $gi_propertyCondominium, $gi_propertyStreetBetween, $gi_propertyAndStreet,
-        $gi_propertyHousingComplex, $gi_propertyTax, $gi_propertyWaterAccount, $gi_propertyType, $gi_propertyTypeSigapred, $gi_propertyLandUse,
+        $gi_propertyHousingComplex, $gi_propertyTax, $gi_propertyWaterAccount, $gi_propertyType, $gi_propertyLandUse,
         $gi_propertyTypeHousing, $gi_propertyConstructor, $gi_propertyRfcConstructor, $gi_propertyAdditionalData,
         $gi_copyFromOwner = false;
 
     //Variable quinto contenedor
-    public $gi_purpose, $gi_purposeOther, $gi_purposeSigapred, $gi_objective, $gi_ownerShipRegime;
+    public  $gi_purpose, $gi_purposeOther, $gi_objective, $gi_ownerShipRegime;
 
 
     /**
@@ -79,7 +79,7 @@ class GeneralInfo extends Component
         //Obtenemos los datos para diferentes input select, desde el archivo de configuración properties_inputs
         $this->levels_input = config('properties_inputs.levels', []);
         $this->propertiesTypes_input = config('properties_inputs.property_types', []);
-        $this->propertiesTypesSigapred_input = config('properties_inputs.property_types_sigapred');
+       /*  $this->propertiesTypesSigapred_input = config('properties_inputs.property_types_sigapred'); */
         $this->landUse_input = config('properties_inputs.land_use');
 
         //Traemos el modelo users para poder mostrar en el select de valuadores
@@ -127,7 +127,6 @@ class GeneralInfo extends Component
         $this->gi_applicName = $valuation->applic_name;
         $this->gi_applicFirstName = $valuation->applic_first_name;
         $this->gi_applicSecondName = $valuation->applic_second_name;
-        $this->gi_applicNss = $valuation->applic_nss;
         $this->gi_applicCp = $valuation->applic_cp;
         $this->gi_applicEntity = $valuation->applic_entity;
         $this->gi_applicLocality = $valuation->applic_locality;
@@ -161,7 +160,6 @@ class GeneralInfo extends Component
         $this->gi_propertyHousingComplex = $valuation->property_housing_complex;
         $this->gi_propertyTax = $valuation->property_tax;
         $this->gi_propertyWaterAccount = $valuation->property_water_account;
-        $this->gi_propertyTypeSigapred = $valuation->property_type_sigapred;
         $this->gi_propertyLandUse = $valuation->property_land_use;
         $this->gi_propertyTypeHousing = $valuation->property_type_housing;
         $this->gi_propertyConstructor = $valuation->property_constructor;
@@ -171,7 +169,7 @@ class GeneralInfo extends Component
         //  Datos importantes
         $this->gi_purpose = $valuation->purpose;
         $this->gi_purposeOther = $valuation->purpose_other;
-        $this->gi_purposeSigapred = $valuation->purpose_sigapred;
+        /* $this->gi_purposeSigapred = $valuation->purpose_sigapred; */
         $this->gi_objective = $valuation->objective;
         $this->gi_ownerShipRegime = $valuation->owner_ship_regime;
 
@@ -331,7 +329,6 @@ class GeneralInfo extends Component
             'applic_name'           => $this->gi_applicName,
             'applic_first_name'     => $this->gi_applicFirstName,
             'applic_second_name'    => $this->gi_applicSecondName,
-            'applic_nss'            => $this->gi_applicNss,
             'applic_cp'             => $this->gi_applicCp,
             'applic_entity'         => $this->gi_applicEntity,
             'applic_locality'       => $this->gi_applicLocality,
@@ -365,17 +362,17 @@ class GeneralInfo extends Component
             'property_housing_complex'  => $this->gi_propertyHousingComplex,
             'property_tax'              => $this->gi_propertyTax,
             'property_water_account'    => $this->gi_propertyWaterAccount,
-            'property_type_sigapred'    => $this->gi_propertyTypeSigapred,
             'property_land_use'         => $this->gi_propertyLandUse,
             'property_type_housing'     => $this->gi_propertyTypeHousing,
             'property_constructor'      => $this->gi_propertyConstructor,
             'property_rfc_constructor'  => $this->gi_propertyRfcConstructor,
             'property_additional_data'  => $this->gi_propertyAdditionalData,
 
+
             // Datos importantes
-            'purpose'           => $this->gi_purpose,
-            'purpose_other'     => $this->gi_purposeOther,
-            'purpose_sigapred'  => $this->gi_purposeSigapred,
+            'purpose'  => $this->gi_purpose,
+            'purpose_other'  => $this->gi_purposeOther,
+            /* 'purpose_sigapred'  => $this->gi_purposeSigapred, */
             'objective'         => $this->gi_objective,
             'owner_ship_regime' => $this->gi_ownerShipRegime,
         ];
@@ -418,8 +415,8 @@ class GeneralInfo extends Component
             'gi_ownerLocality' => 'required',
             'gi_ownerColony' => 'required',
             'gi_ownerStreet' => 'required',
-            'gi_ownerAbroadNumber' => 'required|numeric',
-            'gi_ownerInsideNumber' => 'nullable|numeric'
+            'gi_ownerAbroadNumber' => 'required',
+            'gi_ownerInsideNumber' => 'nullable'
         ];
 
 
@@ -451,14 +448,13 @@ class GeneralInfo extends Component
             'gi_applicTypePerson' => 'required|in:Fisica,Moral',
             'gi_applicRfc'        => 'nullable|min:12',
             'gi_applicCurp' => 'nullable|min:18',
-            'gi_applicNss' => 'nullable|min:11',
             'gi_applicCp' => 'required|integer|min:5',
             'gi_applicEntity' => 'required',
             'gi_applicLocality' => 'required',
             'gi_applicColony' => 'required',
             'gi_applicStreet' => 'required',
-            'gi_applicAbroadNumber' => 'required|integer',
-            'gi_applicInsideNumber' => 'nullable|integer',
+            'gi_applicAbroadNumber' => 'required',
+            'gi_applicInsideNumber' => 'nullable',
             'gi_applicPhone'    => 'nullable|integer'
         ];
 
@@ -497,8 +493,8 @@ class GeneralInfo extends Component
             'gi_propertyCity' => 'required',
             'gi_propertyColony' => 'required',
             'gi_propertyStreet' => 'required',
-            'gi_propertyAbroadNumber' => 'required|numeric',
-            'gi_propertyInsideNumber' => 'nullable|numeric',
+            'gi_propertyAbroadNumber' => 'required',
+            'gi_propertyInsideNumber' => 'nullable',
             'gi_propertyBlock' => 'nullable',
             'gi_propertySuperBlock' => 'nullable',
             'gi_propertyLot' => 'nullable',
@@ -510,11 +506,10 @@ class GeneralInfo extends Component
             'gi_propertyStreetBetween' => 'nullable',
             'gi_propertyAndStreet' => 'nullable',
             'gi_propertyHousingComplex' => 'nullable',
-            'gi_propertyTax' => 'required|integer',
+            'gi_propertyTax' => 'required',
             'gi_propertyWaterAccount' => 'required',
 
             'gi_propertyType' => 'required',
-            'gi_propertyTypeSigapred' => 'required',
             'gi_propertyLandUse' => 'required',
             'gi_propertyAdditionalData' => 'nullable'
         ];
@@ -533,7 +528,7 @@ class GeneralInfo extends Component
             $container4 = array_merge($container4, [
                 'gi_propertyTypeHousing' => 'required',
                 'gi_propertyConstructor' => 'required',
-                'gi_propertyRfcConstructor' => 'required|min:12',
+                'gi_propertyRfcConstructor' => 'required',
             ]);
         }
 
@@ -556,11 +551,11 @@ class GeneralInfo extends Component
         }
 
 
-        if (stripos($this->gi_propertyType, 'condominio') !== false) {
+      /*   if (stripos($this->gi_propertyType, 'condominio') !== false) {
             $container5 = array_merge($container5, [
                 'gi_purposeSigapred'  => 'required'
             ]);
-        }
+        } */
 
         //Una vez almacenadas todas las reglas de validación, primero guardamos las reglas del contenedor 1
         $rules = $container1;
@@ -1047,7 +1042,6 @@ class GeneralInfo extends Component
             'gi_applicFirstName'     => 'apellido paterno',
             'gi_applicSecondName'    => 'apellido materno',
             'gi_applicCompanyName'   => 'empresa',
-            'gi_applicNss'           => 'NSS',
             'gi_copyFromProperty2'   => 'copiar dirección inmueble',
             'gi_applicCp'            => 'código postal',
             'gi_applicEntity'        => 'entidad',
@@ -1083,7 +1077,6 @@ class GeneralInfo extends Component
             'gi_propertyTax'             => 'cuenta predial',
             'gi_propertyWaterAccount'    => 'cuenta de agua',
             'gi_propertyType'            => 'tipo de inmueble',
-            'gi_propertyTypeSigapred'    => 'tipo SIGAPRED',
             'gi_propertyLandUse'         => 'uso de suelo',
             'gi_propertyTypeHousing'     => 'tipo de vivienda',
             'gi_propertyConstructor'     => 'constructor',
@@ -1093,7 +1086,7 @@ class GeneralInfo extends Component
             // Contenedor 5: Detalles adicionales del inmueble
             'gi_purpose' => 'propósito del avalúo',
             'gi_purposeOther' => 'otro',
-            'gi_purposeSigapred' => 'propósito del avalúo sigapred',
+           /*  'gi_purposeSigapred' => 'propósito del avalúo sigapred', */
             'gi_objective' => 'Objeto del avalúo',
             'gi_ownerShipRegime' => 'Régimen del avalúo'
         ];

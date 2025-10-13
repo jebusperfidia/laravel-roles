@@ -13,6 +13,17 @@ use Flux\Flux;
 class Buildings extends Component
 {
 
+    // Variable para saber si la clasificación ya fue asignada
+    public bool $isClassificationAssigned;
+
+    //Estos valores los usaremos para obtener el total de las superficies en privativas y comunes
+    public float $totalSurfacePrivate;
+    public float $totalSurfaceCommon;
+
+
+    //Usaremos estos valores para asignar la cantidad de superficie accesoria y vendible y accesoria
+    public float $totalSurfacePrivateVendible;
+    public float $totalSurfacePrivateAccesoria;
 
     // Arrays públicos para consumir datos para los input select largos
     public array $construction_classification, $construction_use, $construction_source_information,
@@ -39,10 +50,18 @@ class Buildings extends Component
     public $sourceReplacementObtained, $conservationStatus, $observationsStateConservation,
            $generalTypePropertiesZone, $generalClassProperty, $yearCompletedWork;
 
-    public int $profitableUnitsSubject, $profitableUnitsGeneral, $profitableUnitsCondominiums,
-           $numberSubjectLevels;
+
+
+    /* public int $profitableUnitsSubject, $profitableUnitsGeneral, $profitableUnitsCondominiums,
+        $numberSubjectLevels;
 
     public float  $progressGeneralWorks, $degreeProgressCommonAreas;
+ */
+
+    public $profitableUnitsSubject, $profitableUnitsGeneral, $profitableUnitsCondominiums,
+           $numberSubjectLevels;
+
+    public $progressGeneralWorks, $degreeProgressCommonAreas;
 
 
     //Variables para generar elementos en tablas, el valor type nos ayudará a saber en qué tabla renderizarse
@@ -109,6 +128,11 @@ class Buildings extends Component
         }
 
 
+        $this->assignInputPrivateValues();
+
+        //dd($this->totalSurfacePrivate);
+
+
 
         //dd($this->buildingConstructionsPrivate);
 
@@ -173,8 +197,34 @@ class Buildings extends Component
     //Funciones auxiliares para actualizar los valores de cada tabla
     public function loadPrivateConstructions()
     {
+/*
+        $this->buildingConstructionsPrivate = collect($this->building->privates()->get());
+
+
+        $this->assignInputPrivateValues(); */
+
 
         $this->buildingConstructionsPrivate = $this->building->privates()->get();
+
+
+        $this->assignInputPrivateValues();
+
+        // ✅ Cálculo y asignación de la superficie total privada
+        $this->totalSurfacePrivate = collect($this->buildingConstructionsPrivate)->sum('surface');
+
+
+
+        // Subtotal para 'superficie vendible'
+        $this->totalSurfacePrivateVendible = collect($this->buildingConstructionsPrivate)
+            ->filter(fn($item) => $item->surface_vad === 'superficie vendible')
+            ->sum('surface');
+
+        // Subtotal para 'superficie accesoria'
+        $this->totalSurfacePrivateAccesoria = collect($this->buildingConstructionsPrivate)
+            ->filter(fn($item) => $item->surface_vad === 'superficie accesoria')
+            ->sum('surface');
+
+        //dd($this->totalSurfacePrivateVendible, $this->totalSurfacePrivateAccesoria);
     }
 
     public function loadCommonConstructions()
@@ -182,6 +232,67 @@ class Buildings extends Component
 
         $this->buildingConstructionsCommon = $this->building->commons()->get();
 
+        $this->totalSurfaceCommon = collect($this->buildingConstructionsCommon)->sum('surface');
+
+    }
+
+
+
+
+
+
+    //FUNCION PARA ACTUALIZAR VALORES DE INPUT A PARTIR DE PRIVATE CONSTRUCTIONS
+    public function assignInputPrivateValues(){
+
+        $constructions = collect($this->buildingConstructionsPrivate);
+
+        // 1. Verificar si la colección está vacía
+        if ($constructions->isEmpty()) {
+
+
+            $this->isClassificationAssigned = false;
+
+            // --- CASO A: COLECCIÓN VACÍA (Asignar Valores por Defecto) ---
+
+            // Asignación de valores por defecto (ejemplo)
+            $this->progressGeneralWorks = 100.0;
+            $this->yearCompletedWork = date('Y'); // Año actual
+            // ... Asigna aquí los demás inputs por defecto que necesites ...
+
+        } else {
+
+            $this->isClassificationAssigned = true;
+            // --- CASO B: COLECCIÓN CON REGISTROS (Tomar el Primero y Calcular) ---
+
+            $totalProgressWork = $constructions->sum('progress_work');
+
+            // 2. OBTENER LA CANTIDAD DE REGISTROS
+            $numberOfConstructions = $constructions->count();
+
+          $this->progressGeneralWorks = $totalProgressWork / $numberOfConstructions;
+
+            // 2. Tomar el primer registro
+            $firstConstruction = $constructions->first();
+
+            //dd($firstConstruction);
+
+            // 3. Asignar/Calcular valores a los inputs
+
+            // a) Asignación directa desde el primer registro (ejemplo)
+           /*  $this->sourceReplacementObtained = $firstConstruction->source_information;
+            $this->conservationStatus = $firstConstruction->conservation_state; */
+
+            // b) Cálculo basado en el primer registro (ejemplo)
+            // Ejemplo de cálculo: Año de término = Año actual - Edad de la construcción
+            $this->yearCompletedWork = date('Y') - $firstConstruction->age;
+
+            $this->generalClassProperty = $firstConstruction->clasification;
+
+            // c) Podrías calcular totales aquí si quisieras:
+            // $this->totalSurface = $this->buildingConstructionsPrivate->sum('surface');
+
+            // ... Asigna aquí los demás inputs calculados o asignados ...
+        }
     }
 
 
@@ -250,7 +361,7 @@ class Buildings extends Component
             // Flotantes
             'surface' => 'required|numeric',
             'unitCostReplacement' => 'required|numeric',
-            'progressWork' => 'required|numeric',
+            'progressWork' => 'required|numeric|min:0|max:100',
 
             // Booleano
             /* 'rangeBasedHeight' => 'required|boolean', */
@@ -439,7 +550,7 @@ class Buildings extends Component
 
 
 
-
+    //Función para convertir valores a enteros
     private function sanitizeInteger($value): int
     {
         // Si el valor es nulo o una cadena vacía, se retorna 0

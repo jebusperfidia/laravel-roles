@@ -3,11 +3,16 @@
 namespace App\Livewire\Forms;
 
 use Livewire\Component;
+use App\Models\Forms\Building\BuildingModel;
+use App\Models\Forms\LandDetails\LandDetailsModel;
 use Masmerise\Toaster\Toaster;
 use Illuminate\Support\Facades\Validator;
 
 class ApplicableSurfaces extends Component
 {
+    public $building; // Para acceder a las relaciones (debes pasarlo al componente)
+    public $buildingConstructionsPrivate; // Colección de construcciones privativas
+    public $buildingConstructionsCommon; // Colección de construcciones privativas
 
     // Arrays públicos para consumir datos para los input select largos
     public array $construction_source_information;
@@ -17,22 +22,82 @@ class ApplicableSurfaces extends Component
 
     //Variables del único contenedor
     public  $calculationBuiltArea,
-             $hr_informationSource,
-             $ua_informationSource,
-             $pl_informationSource;
+        $hr_informationSource,
+        $ua_informationSource,
+        $pl_informationSource;
 
     public float $saleableArea, $builtArea, $hr_surfaceArea, $ua_surfaceArea, $pl_surfaceArea;
 
+    //Obtenemos el valor del checkbox cálculo del terreno excedente
+    public bool $useExcessCalculation;
+
+    //Estos valores los usaremos para obtener el total de las superficies en privativas y comunes
+    public float $totalSurfacePrivate;
+    public float $totalSurfaceCommon;
+
+
+    //Variable para filtrar solo los valores de superficie accesoria y vendible
+    public $buildingConstructionsFilter;
+
+
+    //Usaremos estos valores para asignar la cantidad de superficie accesoria y vendible y accesoria
+    public float $totalSurfacePrivateVendible;
+    public float $totalSurfacePrivateAccesoria;
+
+
+
+
     public function mount()
     {
+
+        // Obtiene el valor de la columna directamente.
+        // Si el registro no existe, optional() devuelve null,
+        // y usamos el operador de fusión de null (??) para establecer un valor seguro por defecto (ej. false).
+        //$this->useExcessCalculation = optional(LandDetailsModel::find($valuationId))->use_excess_calculation ?? false;
+        $this->useExcessCalculation = LandDetailsModel::find(session('valuation_id'))->use_excess_calculation;
+        //dd($this->useExcessCalculation);
+
+        $this->building = BuildingModel::where('valuation_id', session('valuation_id'))->first();
+
+        $this->buildingConstructionsPrivate = collect($this->building->privates()->get());
+
+        $this->buildingConstructionsFilter = $this->buildingConstructionsPrivate->filter(function ($item) {
+            $type = strtolower(trim($item->surface_vad)); // Hacemos el filtro robusto
+
+            return $type === 'superficie accesoria' || $type === 'superficie vendible';
+        });
+
+
+        $this->buildingConstructionsCommon = collect($this->building->commons()->get());
+
+
+        // ✅ Cálculo y asignación de la superficie total privada
+        $this->totalSurfacePrivate = collect($this->buildingConstructionsPrivate)->sum('surface');
+
+        $this->totalSurfaceCommon = collect($this->buildingConstructionsCommon)->sum('surface');
+
+        // Subtotal para 'superficie vendible'
+        $this->totalSurfacePrivateVendible = collect($this->buildingConstructionsPrivate)
+            ->filter(fn($item) => $item->surface_vad === 'superficie vendible')
+            ->sum('surface');
+
+        // Subtotal para 'superficie accesoria'
+        $this->totalSurfacePrivateAccesoria = collect($this->buildingConstructionsPrivate)
+            ->filter(fn($item) => $item->surface_vad === 'superficie accesoria')
+            ->sum('surface');
+
+            //dd($this->totalSurfacePrivateVendible);
+        $this->saleableArea = $this->totalSurfacePrivateVendible;
+
+
         // Inicializa las variables con los datos del archivo de configuración
         $this->construction_source_information = config('properties_inputs.construction_source_information');
-
-     $this->saleableArea = 100.00;
-     $this->builtArea = 100.00;
-     $this->hr_surfaceArea = 0.00;
-     $this->ua_surfaceArea = 0.00;
-     $this->pl_surfaceArea = 0.00;
+/*
+        $this->saleableArea = 100.00;
+        $this->builtArea = 100.00;
+        $this->hr_surfaceArea = 0.00;
+        $this->ua_surfaceArea = 0.00;
+        $this->pl_surfaceArea = 0.00; */
     }
 
 

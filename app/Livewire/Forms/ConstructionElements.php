@@ -11,10 +11,16 @@ use Illuminate\Support\Facades\DB;
 
 use App\Models\Forms\ConstructionElements\ConstructionElementModel;
 use App\Models\Forms\ConstructionElements\FinishingOtherModel;
+use App\Models\Valuations\Valuation;
 
 class ConstructionElements extends Component
 {
 
+    //Obtenemos el valor del avaluo para saber si es pre-avaluo o no
+    public $preValuation;
+
+    //Valor solo si el avaluo es un pre avaluo
+    public $summary;
 
     /* Obra negra */
     public $sc_structure, $sc_shallowFoundation, $sc_intermediateFloor, $sc_ceiling, $sc_walls, $sc_beamsColumns,
@@ -72,22 +78,25 @@ class ConstructionElements extends Component
     //  Inicializar con el tab por defecto
     public function mount()
     {
+        //Obtenemos el valor del avaluo para saber si es pre-avaluo o no
+        $this->preValuation =  Valuation::find(session('valuation_id'))->pre_valuation;
 
 
         $constructionElement = ConstructionElementModel::where('valuation_id', session('valuation_id'))->first();
 
-        $this->constructionElement = $constructionElement;
-
-        $this->constructionElementId = $constructionElement->id;
-        //dd($this->constructionElementId);
-
-        $this->finishingOthersList = $constructionElement->finishingOtherElements;
-
-        //dd($this->finishingOthersList);
-
-        //dd($this->finishingOthersList);
 
         if($constructionElement){
+
+
+            $this->constructionElement = $constructionElement;
+
+            $this->constructionElementId = $constructionElement->id;
+
+            $this->finishingOthersList = $constructionElement->finishingOtherElements;
+
+            $this->summary = $constructionElement->summary;
+
+
             // 1. Obra Estructural (StructuralWork)
             if ($structuralWork = $constructionElement->structuralWork) {
                 $this->sc_structure = $structuralWork->structure;
@@ -203,10 +212,10 @@ class ConstructionElements extends Component
             }
 
             // 6. Herrería (Ironwork)
-            if ($ironwork = $constructionElement->ironwork) {
-                $this->sm_serviceDoor = $ironwork->service_door;
-                $this->sm_windows = $ironwork->windows;
-                $this->sm_others = $ironwork->others;
+            if ($ironWork = $constructionElement->ironWork) {
+                $this->sm_serviceDoor = $ironWork->service_door;
+                $this->sm_windows = $ironWork->windows;
+                $this->sm_others = $ironWork->others;
             }
 
             // 7. Otros Elementos (OtherElement)
@@ -235,6 +244,19 @@ class ConstructionElements extends Component
 
     public function save(){
 
+        if($this->preValuation){
+            $this->validate([
+                'summary' => 'required',
+            ]);
+
+            //Guardamos el resumen en la tabla de construction elements
+            $this->constructionElement->summary = $this->summary;
+            $this->constructionElement->update();
+
+
+            Toaster::success('Datos guardados con éxito.');
+            return redirect()->route('form.index', ['section' => 'buildings']);
+        }
 
         //Validación de datos
         $validator = $this->validateAll();
@@ -642,6 +664,7 @@ class ConstructionElements extends Component
     {
         return [
             /* Obra negra */
+            'summary'                    => 'resumen',
             'sc_structure'               => 'estructura',
             'sc_shallowFoundation'       => 'cimientación',
             'sc_intermediateFloor'       => 'entrepisos',

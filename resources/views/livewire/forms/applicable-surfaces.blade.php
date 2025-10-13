@@ -20,17 +20,47 @@
                                     <th class="border px-2 py-1 ">Aplicar</th>
                                 </tr>
                             </thead>
-                            <tbody>
-
-                                {{-- Valor de ejemplo para usar en los for --}}
+                          <tbody>
+                                @if ( $buildingConstructionsPrivate->isEmpty())
                                 <tr>
-                                    <td class="border px-2 py-1 text-xs text-center">Casa habitacion</td>
-                                    <td class="border px-2 py-1 text-xs text-center">1</td>
-                                    <td class="border px-2 py-1 text-xs text-center">Vendible</td>
-                                    <td class="border px-2 py-1 flex justify-center">
-                                        <flux:checkbox wire:model='data' />
+                                    <td colspan="4" class="border px-2 py-1 text-xs text-center text-gray-500">
+                                        No hay construcciones privativas para mostrar.
                                     </td>
                                 </tr>
+                                @else
+                                @foreach ($buildingConstructionsFilter as $item)
+                                <tr wire:key="private-surface-{{ $item->id }}">
+                                    {{-- Descripción --}}
+                                    <td class="border px-2 py-1 text-xs text-center">{{ $item->description }}</td>
+
+                                    {{-- Superficie --}}
+                                    <td class="border px-2 py-1 text-xs text-center">{{ number_format($item->surface, 2) }}</td>
+
+                                    {{-- Tipo (Asumo que tienes un campo 'type' o similar en tu modelo de construcción) --}}
+                                    <td class="border px-2 py-1 text-xs text-center">
+
+                                        {{$item->surface_vad === 'superficie accesoria' ? 'Accesoria' : 'Vendible'}}
+                                     {{--    @php
+
+                                            if($item->surface_vad === 'superficie accesoria')  {
+                                                'Accesoria'
+                                            }
+                                           elseif($item->surface_vad === 'superficie vendible')  {
+                                               'Vendible'
+                                           }
+
+                                        @endphp --}}
+                                    </td>
+
+                                    {{-- Aplicar (Checkbox vinculado al ID) --}}
+                                    <td class="border px-2 py-1 flex justify-center">
+                                        {{-- Usamos wire:model.live='elementApplyState.{{ $item->id }}' para vincular el checkbox a un índice del
+                                        array --}}
+                                       <flux:checkbox wire:model.live='elementApplyState.{{ $item->id }}' />
+                                    </td>
+                                </tr>
+                                @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -115,7 +145,7 @@
                             <tbody>
 
                                 <tr>
-                                    <td class="border px-2 py-1 text-xs text-center">Casa habitacion</td>
+                                    <td class="border px-2 py-1 text-xs text-center">Total del terreno</td>
                                     <td class="border px-2 py-1 text-xs text-center">
                                         <flux:field>
                                             <div class="radio-group-horizontal">
@@ -147,6 +177,83 @@
                                             </flux:field>
                                     </td>
                                 </tr>
+
+
+
+                                @if ($useExcessCalculation)
+                                    <tr>
+                                        <td class="border px-2 py-1 text-xs text-center">Lote privativo</td>
+                                        <td class="border px-2 py-1 text-xs text-center">
+                                            <flux:field>
+                                                <div class="radio-group-horizontal">
+                                                    <flux:input.group>
+                                                        <flux:input type="number" wire:model='hr_surfaceArea' />
+                                                        <flux:button disabled><b>m²</b></flux:button>
+                                                    </flux:input.group>
+                                                </div>
+                                                <div>
+                                                    <flux:error name="hr_surfaceArea" />
+                                                </div>
+                                            </flux:field>
+                                        </td>
+                                        <td class="border px-2 py-1 text-xs text-center">
+                                            <flux:field class="radio-group-horizontal">
+                                                <flux:select wire:model="hr_informationSource" class=" text-gray-800 [&_option]:text-gray-900">
+                                                    <flux:select.option value="">-- Selecciona una opción --
+                                                    </flux:select.option>
+                                                    @foreach ($construction_source_information as $value => $label)
+                                                    <flux:select.option value="{{ $label }}">
+                                                        {{ $label }}
+                                                    </flux:select.option>
+                                                    @endforeach
+                                                </flux:select>
+                                                <div>
+                                                    <flux:error name="hr_informationSource" />
+                                                </div>
+                                            </flux:field>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border px-2 py-1 text-xs text-center">Lote privativo tipo</td>
+                                        <td class="border px-2 py-1 text-xs text-center">
+                                            <flux:field>
+                                                <div class="radio-group-horizontal">
+                                                    <flux:input.group>
+                                                        <flux:input type="number" wire:model='hr_surfaceArea' />
+                                                        <flux:button disabled><b>m²</b></flux:button>
+                                                    </flux:input.group>
+                                                </div>
+                                                <div>
+                                                    <flux:error name="hr_surfaceArea" />
+                                                </div>
+                                            </flux:field>
+                                        </td>
+                                        <td class="border px-2 py-1 text-xs text-center">
+                                            <flux:field class="radio-group-horizontal">
+                                                <flux:select wire:model="hr_informationSource" class=" text-gray-800 [&_option]:text-gray-900">
+                                                    <flux:select.option value="">-- Selecciona una opción --
+                                                    </flux:select.option>
+                                                    @foreach ($construction_source_information as $value => $label)
+                                                    <flux:select.option value="{{ $label }}">
+                                                        {{ $label }}
+                                                    </flux:select.option>
+                                                    @endforeach
+                                                </flux:select>
+                                                <div>
+                                                    <flux:error name="hr_informationSource" />
+                                                </div>
+                                            </flux:field>
+                                        </td>
+                                    </tr>
+                                @endif
+
+
+
+
+
+
+
+
                                 <tr>
                                     <td class="border px-2 py-1 text-xs text-center">Indiviso aplicable</td>
                                     <td class="border px-2 py-1 text-xs text-center">
@@ -213,65 +320,108 @@
                                         </flux:field>
                                     </td>
                                 </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
 
 
-
-
-
-
-
-
-
-
-
-
-
-                <div class="mt-[64px] form-grid form-grid--2-center">
-                    <div class="overflow-x-auto">
-                        <table class="border-2 ">
-                            <thead>
-                                <tr class="bg-gray-100">
-                                    <th class="border px-2 py-1 "></th>
-                                    <th class="border px-2 py-1 ">Privatias</th>
-                                    <th class="border px-2 py-1 ">Comunes</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                                @if ($useExcessCalculation)
                                 <tr>
-                                    <td class="border px-2 py-1 text-xs text-center">Superficie total de construcciones:
+                                    <td class="border px-2 py-1 text-xs text-center">Sup. terreno excedente</td>
+                                    <td class="border px-2 py-1 text-xs text-center">
+                                        <flux:field>
+                                            <div class="radio-group-horizontal">
+                                                <flux:input.group>
+                                                    <flux:input type="number" wire:model='pl_surfaceArea' />
+                                                    <flux:button disabled><b>m²</b></flux:button>
+                                                </flux:input.group>
+                                            </div>
+                                            <div>
+                                                <flux:error name="pl_surfaceArea" />
+                                            </div>
+                                        </flux:field>
                                     </td>
-                                    <td class="border px-2 py-1 text-xs text-center">1</td>
-                                    <td class="border px-2 py-1 text-sm text-center">1</td>
+
                                 </tr>
+                                @endif
+
+
+
+
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <div class="mt-2 form-grid form-grid--2-center">
-                    <div class="overflow-x-auto">
-                        <table class="border-2 ">
-                            <thead>
-                                <tr class="bg-gray-100">
-                                    <th class="border px-2 py-1 "></th>
-                                    <th class="border px-2 py-1 ">Vendible</th>
-                                    <th class="border px-2 py-1 ">Accesoria</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="border px-2 py-1 text-xs text-center">Superficie</td>
-                                    <td class="border px-2 py-1 text-xs text-center">1</td>
-                                    <td class="border px-2 py-1 text-sm text-center">1</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="mt-2 form-grid form-grid--3">
+                <div class="overflow-x-auto">
+                    <table class="border-2 ">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border px-2 py-1 "></th>
+                                <th class="border px-2 py-1 ">Privativas</th>
+                                <th class="border px-2 py-1 ">Comunes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border px-2 py-1 text-xs text-center">Superficie total de
+                                    construcciones:
+                                </td>
+                                <td class="border px-2 py-1 text-sm text-center">
+                                    {{number_format($totalSurfacePrivate, 2)}}
+                                </td>
+                                <td class="border px-2 py-1 text-sm text-center">
+                                    {{number_format($totalSurfaceCommon, 2)}}
+                                </td>
+                            </tr>
+                           {{--  <tr>
+                                <td class="border px-2 py-1 text-xs text-center">Valor total de construcciones:
+                                </td>
+                                <td class="border px-2 py-1 text-xs text-center">1</td>
+                                <td class="border px-2 py-1 text-sm text-center">1</td>
+                            </tr> --}}
+                        </tbody>
+                    </table>
                 </div>
+            </div>
+
+
+            <div class="mt-2 form-grid form-grid--3">
+                <div class="overflow-x-auto">
+                    <table class="border-2 ">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border px-2 py-1 "></th>
+                                <th class="border px-2 py-1 ">Vendible</th>
+                                <th class="border px-2 py-1 ">Acessoria</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            {{-- Valor de ejemplo para usar en los for --}}
+                            <tr>
+                                <td class="border px-2 py-1 text-xs text-center">Superficie total de
+                                    construcciones:
+                                </td>
+                                <td class="border px-2 py-1 text-sm text-center">{{number_format($totalSurfacePrivateVendible, 2)}}
+                                </td>
+                                <td class="border px-2 py-1 text-sm text-center">{{number_format($totalSurfacePrivateAccesoria, 2)}}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
             </div>
         </div>

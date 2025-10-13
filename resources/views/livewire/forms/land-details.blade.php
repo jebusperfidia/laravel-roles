@@ -1097,7 +1097,7 @@
                         <flux:field>
                             <div class="radio-group-horizontal">
                                 <flux:input.group>
-                                    <flux:input type="text" wire:model='ls_surfacePrivateLot' />
+                                    <flux:input type="number" wire:model.lazy='ls_surfacePrivateLot' step="any" />
                                     <flux:button disabled><b>m²</b></flux:button>
                                 </flux:input.group>
                             </div>
@@ -1117,7 +1117,7 @@
                         <flux:field>
                             <div class="radio-group-horizontal">
                                 <flux:input.group>
-                                    <flux:input type="text" wire:model='ls_surfacePrivateLotType' />
+                                    <flux:input type="number" wire:model.lazy='ls_surfacePrivateLotType' step="any" />
                                     <flux:button disabled><b>m²</b></flux:button>
                                 </flux:input.group>
                             </div>
@@ -1139,7 +1139,7 @@
                         <flux:field>
                             <div class="radio-group-horizontal">
                                 <flux:input.group>
-                                    <flux:input type="number" wire:model='ls_undividedOnlyCondominium' />
+                                    <flux:input type="number" wire:model.lazy='ls_undividedOnlyCondominium' step="any"/>
                                     <flux:button disabled><b>%</b></flux:button>
                                 </flux:input.group>
                             </div>

@@ -31,7 +31,7 @@ class ValuationCreate extends Component
         $rules = [
             "type" => 'required',
             // asignar un guion y espacios en blanco
-            'folio' => 'required|unique:valuations|regex:/^[a-zA-Z0-9\- ]*$/',
+            'folio' => 'required|unique:valuations|regex:/^[a-zA-Z0-9\-= ]*$/',
 
             "date" => 'required',
             "property_type" => 'required'

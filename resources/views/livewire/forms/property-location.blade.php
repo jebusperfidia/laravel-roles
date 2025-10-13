@@ -42,7 +42,7 @@
                 <div class="form-grid form-grid--3 mt-3 mb-2 text-lg">
                     <h2 class="border-b-2 border-gray-300">Croquis macro localización</h2>
                     <h2 class="border-b-2 border-gray-300">Croquis micro localización</h2>
-                    <h2 class="border-b-2 border-gray-300">Polígono del inmueble</h2>
+     {{--                <h2 class="border-b-2 border-gray-300">Polígono del inmueble</h2> --}}
                 </div>
 
                 {{-- **CAMBIO CLAVE:** `wire:ignore` le dice a Livewire que no toque estos divs, dejando que JS los
@@ -50,7 +50,7 @@
                 <div class="form-grid form-grid--3 mt-3 mb-2 text-lg">
                     <div x-ref="mapMacro" class="map-container" wire:ignore></div>
                     <div x-ref="mapMicro" class="map-container" wire:ignore></div>
-                    <div x-ref="mapPolygon" class="map-container" wire:ignore></div>
+                    {{-- <div x-ref="mapPolygon" class="map-container" wire:ignore></div> --}}
                 </div>
 
                 <flux:button type="button" wire:click.prevent="locate" class="mt-4 cursor-pointer btn-intermediary"
@@ -79,7 +79,7 @@
             maps: {
                 macro: { map: null, marker: null },
                 micro: { map: null, marker: null },
-                polygon: { map: null, marker: null }
+                //polygon: { map: null, marker: null }
             },
 
             // Función que crea o actualiza los mapas

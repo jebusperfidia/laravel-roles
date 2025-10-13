@@ -49,6 +49,8 @@ class LandDetails extends Component
     //Variable para guardar el id del landSurface seleccionado para editar o eliminar
     public $landSurfaceId;
 
+    public float $landSurfaceTotal;
+
     //Cargamos la lista de archivos ligados al land_details
     public $measureBoundaries = [];
 
@@ -109,7 +111,8 @@ class LandDetails extends Component
         $this->valuation_id = $valuationId;
 
         //Obtenemos los valores deL avalúo a partir de la variable de sesión del ID
-        $this->valuation = Valuation::find(Session::get('valuation_id'));
+        //$this->valuation = Valuation::find(Session::get('valuation_id'));
+        $this->valuation = Valuation::find($valuationId);
 
         //obtenemos los valores de propertyLocation
         $this->propertyLocation = PropertyLocationModel::where('valuation_id', $valuationId)->first();
@@ -133,6 +136,11 @@ class LandDetails extends Component
 
             //Obtenemos el valor de los landSurfaces ligados al LandDetail
             $this->landSurfaces = $this->landDetail->landSurfaces()->get();
+
+            $this->landSurfaceTotal = collect($this->landSurfaces)->sum('surface');
+
+            //dd($this->landSurfaceTotal);
+
 
             //Obtenemos el valor de los archivos ligados al LandDetail
             $this->measureBoundaries = $this->landDetail->measureBoundaries()->get();
@@ -207,11 +215,18 @@ class LandDetails extends Component
             $this->ls_undividedSurfaceLand = $this->landDetail->undivided_surface_land;
             $this->ls_surplusLandArea = $this->landDetail->surplus_land_area;
 
-            if (stripos($this->valuation->property_type, 'condominio') !== false) {
+            /* $this->landSurfaceTotal = collect($this->landSurfaces)->sum('surface'); */
+
+            $this->updatedLsUndividedOnlyCondominium($this->ls_undividedOnlyCondominium);
+
+
+            //dd($this->ls_undividedOnlyCondominium);
+
+
+            /*   if (stripos($this->valuation->property_type, 'condominio') !== false) {
                 $this->ls_undividedOnlyCondominium = 0;
                 $this->ls_undividedSurfaceLand = 0;
-            }
-
+            } */
         }
 
 
@@ -583,6 +598,19 @@ class LandDetails extends Component
         // Recargar las superficies
         $this->landSurfaces = $this->landDetail->landSurfaces()->get();
 
+        //Recargamos el valor de la suma de las superficies
+        $this->landSurfaceTotal = collect($this->landSurfaces)->sum('surface');
+
+        //ACtualizamos el valor de la superficie indivisa para mostrar en la vista y actualizar la tabla en la BD
+        $this->updatedLsUndividedOnlyCondominium($this->ls_undividedOnlyCondominium);
+
+        //Una vez actualizado el valor de la superficie indivisa, actualizamos el valor en la BD
+        $this->landDetail->update([
+            'undivided_surface_land' => $this->ls_undividedSurfaceLand,
+        ]);
+
+
+
         Toaster::success('Elemento agregado con éxito');
         $this->modal('add-LandSurface')->close();
     }
@@ -612,6 +640,20 @@ class LandDetails extends Component
         $this->landSurfaces = $this->landDetail->landSurfaces()->get();
 
 
+        $this->landSurfaceTotal = collect($this->landSurfaces)->sum('surface');
+
+
+        //ACtualizamos el valor de la superficie indivisa para mostrar en la vista y actualizar la tabla en la BD
+        $this->updatedLsUndividedOnlyCondominium($this->ls_undividedOnlyCondominium);
+
+        //Una vez actualizado el valor de la superficie indivisa, actualizamos el valor en la BD
+        $this->landDetail->update([
+            'undivided_surface_land' => $this->ls_undividedSurfaceLand,
+        ]);
+
+
+
+
         Toaster::success('Elemento editado con éxito');
         $this->modal('edit-LandSurface')->close();
     }
@@ -625,13 +667,82 @@ class LandDetails extends Component
         $this->landSurfaces = $this->landDetail->landSurfaces()->get();
 
         Toaster::error('Elemento eliminado con éxito');
+
+
+        $this->landSurfaceTotal = collect($this->landSurfaces)->sum('surface');
+
+        //ACtualizamos el valor de la superficie indivisa para mostrar en la vista y actualizar la tabla en la BD
+        $this->updatedLsUndividedOnlyCondominium($this->ls_undividedOnlyCondominium);
+
+        //Una vez actualizado el valor de la superficie indivisa, actualizamos el valor en la BD
+        $this->landDetail->update([
+            'undivided_surface_land' => $this->ls_undividedSurfaceLand,
+        ]);
     }
 
 
 
 
 
+    private function sanitizeFloat($value): float
+    {
+        // 1. Manejar valores nulos, vacíos o no numéricos.
+        if ($value === null || trim((string)$value) === '' || !is_numeric($value)) {
+            return 0.00;
+        }
 
+        // 2. Limpiar el valor:
+        // Reemplaza comas por puntos si se usan como separador decimal
+        $cleanValue = str_replace(',', '.', (string)$value);
+
+        // 3. Convertir a float. Esto trunca a la precisión original (ej: 15.0000 -> 15.0)
+        $floatValue = (float) $cleanValue;
+
+        // 4. Formatear a dos decimales, y convertir el resultado de string a float.
+        // Esto asegura que '15' se convierte a '15.00' antes de ser float.
+        return (float) number_format($floatValue, 2, '.', '');
+    }
+
+
+
+    //Watchers de variables publicas
+    public function updatedLsUndividedOnlyCondominium($value){
+        $this->ls_undividedOnlyCondominium = $this->sanitizeFloat($value);
+
+        if($this->ls_undividedOnlyCondominium > 100){
+            $this->ls_undividedOnlyCondominium = 100.00;
+        } elseif($this->ls_undividedOnlyCondominium < 0){
+            $this->ls_undividedOnlyCondominium = 0.00;
+        }
+
+        //$this->ls_undividedSurfaceLand = $this->sanitizeFloat(($this->ls_undividedOnlyCondominium / 100) * $this->landSurfaceTotal);
+        $this->ls_undividedSurfaceLand = ($this->ls_undividedOnlyCondominium / 100) * $this->landSurfaceTotal;
+
+    }
+
+
+
+
+
+    public function updatedLsSurfacePrivateLot($value){
+        $this->ls_surfacePrivateLot = $this->sanitizeFloat($value);
+
+        if($this->ls_surfacePrivateLot < 0){
+            $this->ls_surfacePrivateLot = 0.00;
+        }
+
+        $this->ls_surplusLandArea = $this->ls_surfacePrivateLot - $this->ls_surfacePrivateLotType;
+    }
+
+    public function updatedLsSurfacePrivateLotType($value){
+        $this->ls_surfacePrivateLotType = $this->sanitizeFloat($value);
+
+        if($this->ls_surfacePrivateLotType < 0){
+            $this->ls_surfacePrivateLotType = 0.00;
+        }
+
+        $this->ls_surplusLandArea = $this->ls_surfacePrivateLot - $this->ls_surfacePrivateLotType;
+    }
 
 
 
