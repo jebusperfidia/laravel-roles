@@ -1415,7 +1415,7 @@
             if (macroDiv._leaflet_id) {
                 macroDiv._leaflet_map.remove();
             }
-            const mapMacro = L.map(macroDiv).setView(coords, 6);
+            const mapMacro = L.map(macroDiv).setView(coords, 7);
             macroDiv._leaflet_map = mapMacro; // Guardamos referencia
             L.tileLayer(tileLayerUrl, { attribution }).addTo(mapMacro);
             L.marker(coords).addTo(mapMacro);
@@ -1427,7 +1427,7 @@
             if (microDiv._leaflet_id) {
                 microDiv._leaflet_map.remove();
             }
-            const mapMicro = L.map(microDiv).setView(coords, 18);
+            const mapMicro = L.map(microDiv).setView(coords, 12);
             microDiv._leaflet_map = mapMicro;
             L.tileLayer(tileLayerUrl, { attribution }).addTo(mapMicro);
             L.marker(coords).addTo(mapMicro);

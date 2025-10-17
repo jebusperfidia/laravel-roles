@@ -29,13 +29,13 @@ return new class extends Migration
             $table->float('unit_cost_replacement', 10, 2)->nullable();
             $table->float('progress_work', 10, 2)->nullable();
             $table->string('conservation_state')->nullable();
-            $table->boolean('range_based_height')->nullable();
+            /* $table->boolean('range_based_height')->nullable(); */
             $table->string('surface_vad')->nullable();
 
 
             $table->string('type', 12)->nullable();
 
-            $table->boolean('surfaceApply')->default(false);
+            $table->boolean('surface_apply')->default(false);
 
 
 

@@ -13,6 +13,7 @@ use Flux\Flux;
 class Buildings extends Component
 {
 
+
     // Variable para saber si la clasificación ya fue asignada
     public bool $isClassificationAssigned;
 
@@ -71,7 +72,7 @@ class Buildings extends Component
 
     public float $surface, $unitCostReplacement, $progressWork;
 
-    public bool $rangeBasedHeight = false;
+   /*  public bool $rangeBasedHeight = false; */
 
 
     public function mount(){
@@ -164,6 +165,12 @@ class Buildings extends Component
             'degreeProgressCommonAreas' => 'required',
         ];
 
+        if (stripos($this->valuation->property_type, 'condominio') !== false) {
+            $rules = array_merge($rules, [
+                'degreeProgressCommonAreas' => 'required',
+            ]);
+        }
+
         $this->validate(
             $rules,
             [],
@@ -183,14 +190,21 @@ class Buildings extends Component
             'profitable_units_condominiums' => $this->profitableUnitsCondominiums,
             'number_subject_levels' => $this->numberSubjectLevels,
             'progress_general_works' => $this->progressGeneralWorks,
-            'degree_progress_common_areas' => $this->degreeProgressCommonAreas,
+
         ];
+
+        if (stripos($this->valuation->property_type, 'condominio') !== false) {
+            $data = array_merge($data, [
+                'degree_progress_common_areas' => $this->degreeProgressCommonAreas,
+            ]);
+        }
+
 
         //Actualizamos los datos en la tabla
         $this->building->update($data);
 
         Toaster::success('Formulario guardado con éxito');
-        return redirect()->route('form.index', ['section' => 'property-description']);
+        return redirect()->route('form.index', ['section' => 'applicable-surfaces']);
     }
 
 
@@ -304,6 +318,21 @@ class Buildings extends Component
     {
         $this->modalType = $type;
         $this->resetValidation();
+        $this->reset([
+            'description',
+            'clasification',
+            'use',
+            'sourceInformation',
+            'conservationState',
+            'surfaceVAD',
+            'buildingLevels',
+            'levelsConstructionType',
+            'age',
+            'surface',
+            'unitCostReplacement',
+            'progressWork',
+           /*  'rangeBasedHeight', */
+        ]);
         Flux::modal('add-element')->show();
     }
 
@@ -331,7 +360,7 @@ class Buildings extends Component
         $this->surface = $construction->surface;
         $this->unitCostReplacement = $construction->unit_cost_replacement;
         $this->progressWork = $construction->progress_work;
-        $this->rangeBasedHeight = $construction->range_based_height;
+       /*  $this->rangeBasedHeight = $construction->range_based_height; */
 
 
 
@@ -393,7 +422,7 @@ class Buildings extends Component
             'surface' => $this->surface,
             'unit_cost_replacement' => $this->unitCostReplacement,
             'progress_work' => $this->progressWork,
-            'range_based_height' => (bool) $this->rangeBasedHeight,
+            /* 'range_based_height' => (bool) $this->rangeBasedHeight, */
         ];
 
         //Guardamos la información en la base de datos
@@ -481,7 +510,7 @@ class Buildings extends Component
             'surface' => $this->surface,
             'unit_cost_replacement' => $this->unitCostReplacement,
             'progress_work' => $this->progressWork,
-            'range_based_height' => (bool) $this->rangeBasedHeight,
+            /* 'range_based_height' => (bool) $this->rangeBasedHeight, */
         ];
 
         $buildingConstruction = BuildingConstructionModel::find($this->constructionId);
@@ -627,7 +656,7 @@ class Buildings extends Component
             'progressWork' => ' ',
 
             // Booleano
-            'rangeBasedHeight' => ' ',
+            /* 'rangeBasedHeight' => ' ', */
         ];
     }
 

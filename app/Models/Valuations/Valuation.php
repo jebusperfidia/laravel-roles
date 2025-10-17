@@ -2,7 +2,7 @@
 
 namespace App\Models\Valuations;
 
-use App\Models\Forms\Specialnstallation\SpecialInstallationModel;
+use App\Models\Forms\SpecialInstallation\SpecialInstallationModel;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\PropertyLocationModel;
 

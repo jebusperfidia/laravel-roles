@@ -410,7 +410,7 @@ class GeneralInfo extends Component
             'gi_ownerTypePerson' => 'required',
             'gi_ownerRfc' => 'nullable|min:12',
             'gi_ownerCurp' => 'nullable|min:18',
-            'gi_ownerCp' => 'required|integer|min:5',
+            'gi_ownerCp' => 'required|string|digits:5',
             'gi_ownerEntity' => 'required',
             'gi_ownerLocality' => 'required',
             'gi_ownerColony' => 'required',
@@ -448,7 +448,7 @@ class GeneralInfo extends Component
             'gi_applicTypePerson' => 'required|in:Fisica,Moral',
             'gi_applicRfc'        => 'nullable|min:12',
             'gi_applicCurp' => 'nullable|min:18',
-            'gi_applicCp' => 'required|integer|min:5',
+            'gi_applicCp' => 'required|string|digits:5',
             'gi_applicEntity' => 'required',
             'gi_applicLocality' => 'required',
             'gi_applicColony' => 'required',
@@ -487,7 +487,7 @@ class GeneralInfo extends Component
 
         //VALIDACIONES CONTAINER 4
         $container4 = [
-            'gi_propertyCp' => 'required|integer|min:5',
+            'gi_propertyCp' => 'required|string|digits:5',
             'gi_propertyEntity' => 'required',
             'gi_propertyLocality' => 'required',
             'gi_propertyCity' => 'required',
@@ -594,7 +594,7 @@ class GeneralInfo extends Component
 
         $this->validate(
             [
-                'gi_ownerCp' => 'required|integer|digits:5',
+                'gi_ownerCp' => 'required|string|digits:5',
             ],
             [],
             [
@@ -691,7 +691,7 @@ class GeneralInfo extends Component
 
         $this->validate(
             [
-                'gi_applicCp' => 'required|integer|digits:5',
+                'gi_applicCp' => 'required|string|digits:5',
             ],
             [],
             [
@@ -775,7 +775,7 @@ class GeneralInfo extends Component
 
         $this->validate(
             [
-                'gi_propertyCp' => 'required|integer|digits:5',
+                'gi_propertyCp' => 'required|string|digits:5',
             ],
             [],
             [

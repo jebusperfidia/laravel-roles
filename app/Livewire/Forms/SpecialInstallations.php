@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Forms;
 
-use App\Models\Forms\Specialnstallation\SpecialInstallationModel;
+use App\Models\Forms\SpecialInstallation\SpecialInstallationModel;
 use Livewire\Component;
 use App\Models\Valuations\Valuation;
 use Illuminate\Support\Facades\Session;
@@ -38,10 +38,26 @@ class SpecialInstallations extends Component
     public $commonAccessories = [];
     public $commonWorks = [];
 
+    //Generamos variables para obtener los importes totales de cada tabla
+    public $subTotalPrivateInstallations = 0;
+    public $subTotalPrivateAccessories = 0;
+    public $subTotalPrivateWorks = 0;
+    public $totalPrivateInstallations = 0;
+
+
+    public $subTotalCommonInstallations = 0;
+    public $subTotalCommonAccessories = 0;
+    public $subTotalCommonWorks = 0;
+    public $totalCommonInstallations = 0;
+
+    //Finalmente generamos una variable para obtener el total del indiviso
+    public float $totalCommonProportional = 0;
+
     //Variables para generar elementos en tablas
     public $key, $descriptionSI, $descriptionAE, $descriptionCW,
     $unit, $quantity, $age, $usefulLife, $newRepUnitCost, $ageFactor, $conservationFactor,
     $netRepUnitCost, $undivided, $amount;
+
 
     //Estas variables también son para asignar en la BD pero se asignan mediante la lógica del sistema
     public $classificationType, $elementType;
@@ -65,15 +81,36 @@ class SpecialInstallations extends Component
         //Obtenemos los valores deL avalúo a partir de la variable de sesión del ID
         $this->valuation = Valuation::find(Session::get('valuation_id'));
 
-        //Obtenemos los valores de las tablas
+        //Obtenemos los valores de las tablas, así como los subtotales
         $this->privateInstallations = $this->valuation->privateInstallations;
+        $this->subTotalPrivateInstallations = collect($this->privateInstallations)->sum('amount');
+
         $this->privateAccessories = $this->valuation->privateAccessories;
+        $this->subTotalPrivateAccessories = collect($this->privateAccessories)->sum('amount');
+
         $this->privateWorks = $this->valuation->privateWorks;
+        $this->subTotalPrivateWorks = collect($this->privateWorks)->sum('amount');
+
+        //Finalmente, obtenemos el total de las instalaciones privativas
+        $this->getTotalPrivateInstallations();
 
         if (stripos($this->valuation->property_type, 'condominio') !== false) {
         $this->commonInstallations = $this->valuation->commonInstallations;
+        $this->subTotalCommonInstallations = collect($this->commonInstallations)->sum('amount');
+
         $this->commonAccessories = $this->valuation->commonAccessories;
+        $this->subTotalCommonAccessories = collect($this->commonAccessories)->sum('amount');
+
         $this->commonWorks = $this->valuation->commonWorks;
+        $this->subTotalCommonWorks = collect($this->commonWorks)->sum('amount');
+
+        // Obtener el total proporcional del indiviso
+        $this->getTotalCommonProportional();
+
+        //Finalmente, obtenemos el total de las instalaciones comunes
+        $this->getTotalCommonInstallations();
+
+
         }
 
 
@@ -142,11 +179,13 @@ class SpecialInstallations extends Component
             'age' => 'required|numeric|gt:0',
             'usefulLife' => 'required|numeric|gt:0',
             'newRepUnitCost' => 'required|numeric|gt:0',
-            'ageFactor' => 'required|numeric|gt:0',
+            //'ageFactor' => 'required|numeric|gt:0',
             'conservationFactor' => 'required|numeric|gt:0',
-            'netRepUnitCost' => 'required|numeric|gt:0',
-            'undivided' => 'required|numeric|gt:0',
-            'amount' => 'required|numeric|gt:0',
+            //'netRepUnitCost' => 'required|numeric|gt:0',
+
+            //'undivided' => 'required|numeric|gt:0',
+
+            //'amount' => 'required|numeric|gt:0',
         ];
 
         // Lógica dinámica para la descripción y el mapeo del valor
@@ -184,12 +223,20 @@ class SpecialInstallations extends Component
             // Ejemplo: Busca 'IE01' en $this->select_SI y devuelve el array completo.
             $item = collect($configArray)->firstWhere('clave', $selectedClave);
 
-            // 🔑 1. Asignamos la CLAVE (IE01) a la propiedad 'key' del modelo.
+            //  1. Asignamos la CLAVE (IE01) a la propiedad 'key' del modelo.
             $this->key = $selectedClave;
 
-            // 🔑 2. Asignamos la DESCRIPCIÓN LARGA (Elevadores) a la variable que se va a persistir.
+            //  2. Asignamos la DESCRIPCIÓN LARGA (Elevadores) a la variable que se va a persistir.
             // Si no encuentra la descripción, usa la clave como fallback (seguridad).
             $selectedDescriptionName = $item['descripcion'] ?? $selectedClave;
+        }
+
+
+        //Finalmente, si el valor de   classificationType es común, asignamos la validación
+        if($this->classificationType === 'common'){
+            $rules = array_merge($rules, [
+                'undivided'  => 'required|numeric|between:0,100',
+            ]);
         }
 
         $this->validate(
@@ -198,6 +245,18 @@ class SpecialInstallations extends Component
             $this->validationAttributesItems()
         );
 
+
+        //Hacemos algunos cálculos para asignar valores a campos que no se ingresan directamente
+
+        //Factor de edad
+        $this->ageFactor = 1 - ((($this->age * 100) / $this->usefulLife) * 0.01);
+
+        //Costo unitario de neto reposición
+        $this->netRepUnitCost = $this->newRepUnitCost * $this->ageFactor;
+        //dd($this->netRepUnitCost, $this->newRepUnitCost, $this->ageFactor);
+
+        //Calcular el importe
+        $this->amount = $this->netRepUnitCost * $this->quantity;
 
         $data = [
             'valuation_id' => Session::get('valuation_id'),
@@ -255,10 +314,12 @@ class SpecialInstallations extends Component
             'age' => 'required|numeric|gt:0',
             'usefulLife' => 'required|numeric|gt:0',
             'newRepUnitCost' => 'required|numeric|gt:0',
-            'ageFactor' => 'required|numeric|gt:0',
+            //'ageFactor' => 'required|numeric|gt:0',
             'conservationFactor' => 'required|numeric|gt:0',
-            'netRepUnitCost' => 'required|numeric|gt:0',
-            'undivided' => 'required|numeric|gt:0',
+            //'netRepUnitCost' => 'required|numeric|gt:0',
+
+            //'undivided' => 'required|numeric|gt:0',
+
             'amount' => 'required|numeric|gt:0',
         ];
 
@@ -290,6 +351,12 @@ class SpecialInstallations extends Component
             $selectedDescriptionName = $item['descripcion'] ?? $selectedClave;
         }
 
+        //Finalmente, si el valor de   classificationType es común, asignamos la validación
+        if ($this->classificationType === 'common') {
+            $rules = array_merge($rules, [
+                'undivided'  => 'required|numeric|between:0,100',
+            ]);
+        }
 
         $this->validate(
             $rules,
@@ -297,7 +364,15 @@ class SpecialInstallations extends Component
             $this->validationAttributesItems()
         );
 
+        //Factor de edad
+        $this->ageFactor = 1 - ((($this->age * 100) / $this->usefulLife) * 0.01);
 
+        //Costo unitario de neto reposición
+        $this->netRepUnitCost = $this->newRepUnitCost * $this->ageFactor;
+        //dd($this->netRepUnitCost, $this->newRepUnitCost, $this->ageFactor);
+
+        //Calcular el importe
+        $this->amount = $this->netRepUnitCost * $this->quantity;
 
         $data = [
             // Excluimos 'valuation_id', 'classification_type' y 'element_type' ya que NO deben cambiar
@@ -469,17 +544,28 @@ class SpecialInstallations extends Component
     }
 
 
+
     //Función carga de tablas privativas
     public function loadPrivateInstallations()
     {
-
+        //Obtenemos nuevamente los valores para renderizarlos en la tabla en específico
         $this->privateInstallations = $this->valuation->privateInstallations()->get();
+
+        //Una vez que tenemos los datos, los sumamos para obtener el subtotal
+        $this->subTotalPrivateInstallations = collect($this->privateInstallations)->sum('amount');
+
+        //Finalmente, obtenemos el total de las instalaciones privativas
+        $this->getTotalPrivateInstallations();
     }
 
     public function loadPrivateAccessories()
     {
 
         $this->privateAccessories = $this->valuation->privateAccessories()->get();
+
+        $this->subTotalPrivateAccessories = collect($this->privateAccessories)->sum('amount');
+
+        $this->getTotalPrivateInstallations();
     }
 
 
@@ -487,6 +573,10 @@ class SpecialInstallations extends Component
     {
 
         $this->privateWorks = $this->valuation->privateWorks()->get();
+
+        $this->subTotalPrivateWorks = collect($this->privateWorks)->sum('amount');
+
+        $this->getTotalPrivateInstallations();
     }
 
 
@@ -496,12 +586,19 @@ class SpecialInstallations extends Component
     {
 
         $this->commonInstallations = $this->valuation->commonInstallations()->get();
+        $this->subTotalCommonInstallations = collect($this->commonInstallations)->sum('amount');
+        $this->getTotalCommonInstallations();
+        //En cada actualización, usaremos esta función para obtener el total proporcional del indiviso actualizado
+        $this->getTotalCommonProportional();
     }
 
     public function loadCommonAccessories()
     {
 
         $this->commonAccessories = $this->valuation->commonAccessories()->get();
+        $this->subTotalCommonAccessories = collect($this->commonAccessories)->sum('amount');
+        $this->getTotalCommonInstallations();
+        $this->getTotalCommonProportional();
     }
 
 
@@ -509,9 +606,57 @@ class SpecialInstallations extends Component
     {
 
         $this->commonWorks = $this->valuation->commonWorks()->get();
+        $this->subTotalCommonWorks = collect($this->commonWorks)->sum('amount');
+        $this->getTotalCommonInstallations();
+        $this->getTotalCommonProportional();
     }
 
 
+
+    //Función para obtener el total de privativas y comunes
+    public function getTotalPrivateInstallations()
+    {
+        $this->totalPrivateInstallations = $this->subTotalPrivateInstallations + $this->subTotalPrivateAccessories + $this->subTotalPrivateWorks;
+    }
+
+    public function getTotalCommonInstallations()
+    {
+        $this->totalCommonInstallations = $this->subTotalCommonInstallations + $this->subTotalCommonAccessories + $this->subTotalCommonWorks;
+    }
+
+
+
+
+
+
+    public function getTotalCommonProportional()
+    {
+        // 1. Obtener todos los registros comunes del avalúo actual
+        // Asumo que tienes una relación 'specialInstallations' en el modelo Valuation,
+        // o puedes usar la consulta directa con el modelo y el ID.
+        $commonRecords = SpecialInstallationModel::where('valuation_id', $this->valuation->id)
+            ->where('classification_type', 'common')
+            ->get();
+
+        // Variable temporal para acumular el total
+        $proportionalSum = 0.0;
+
+        // 2. Recorrer los registros y calcular la parte proporcional
+        foreach ($commonRecords as $record) {
+            // Aseguramos que 'undivided' y 'amount' existan y sean numéricos
+            if (isset($record->amount) && isset($record->undivided)) {
+                // Cálculo: amount * (undivided / 100)
+                $indivisoFactor = $record->undivided / 100;
+                $proportionalValue = (float) $record->amount * $indivisoFactor;
+
+                // Sumar al acumulado
+                $proportionalSum += $proportionalValue;
+            }
+        }
+
+        // 3. Asignar el resultado final a la propiedad pública
+        $this->totalCommonProportional = $proportionalSum;
+    }
 
 
     public function render()

@@ -41,9 +41,9 @@
                 </flux:field>
                 <flux:field class="flux-field">
                     <flux:label>Confirmar password</flux:label>
-                    <flux:input type="password" wire:model='confirmar_password' placeholder="Confirmar password" />
+                    <flux:input type="password" wire:model='confirm_password' placeholder="Confirmar password" />
                     <div class="error-container">
-                        <flux:error name="confirmar_password" />
+                        <flux:error name="confirm_password" />
                     </div>
                 </flux:field>
                 <flux:button class="mt-10 cursor-pointer btn-primary" type="submit" variant="primary">Guardar cambios</flux:button>

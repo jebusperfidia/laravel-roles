@@ -97,7 +97,7 @@
 
         <!-- Desktop User Menu -->
         <flux:dropdown class="hidden lg:block" position="bottom" align="start">
-            <flux:profile :name="auth()->user()->name" :initials="auth()->user()->initials()"
+            <flux:profile class="cursor-pointer" :name="auth()->user()->name" :initials="auth()->user()->initials()"
                 icon:trailing="chevrons-up-down" />
 
 
@@ -123,7 +123,7 @@
                 <flux:menu.separator />
 
                 <flux:menu.radio.group>
-                    <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ 'Ajustes' }}
+                    <flux:menu.item :href="route('settings.profile')" icon="cog" class="cursor-pointer" wire:navigate>{{ 'Ajustes' }}
                     </flux:menu.item>
                 </flux:menu.radio.group>
 
@@ -131,7 +131,7 @@
 
                 <form method="POST" action="{{ route('logout') }}" class="w-full">
                     @csrf
-                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
+                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full cursor-pointer">
                         {{ 'Cerrar sesión' }}
                     </flux:menu.item>
                 </form>

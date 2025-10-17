@@ -785,7 +785,7 @@
                             <div class="w-80">
                                 <div class="mb-1 text-sm font-medium text-gray-700 flex justify-center">Ancho</div>
                                 <flux:field>
-                                    <flux:input type="number" wire:model='inf_roadwaysMts' :disabled="$inf_roadways === '7. No presenta'" />
+                                    <flux:input type="number" wire:model='inf_roadwaysMts' :disabled="$inf_roadways === '7. No presenta'" step="any"/>
                                     <flux:label class="text-[12px]">Metros</flux:label>
                                 </flux:field>
                                 <flux:error name="inf_roadwaysMts" />
@@ -827,7 +827,7 @@
                             </div>
                             <div class="w-80">
                                 <flux:field>
-                                    <flux:input type="number" wire:model='inf_sidewalksMts' :disabled="$inf_sidewalks === '5. No presenta'" />
+                                    <flux:input type="number" wire:model='inf_sidewalksMts' :disabled="$inf_sidewalks === '5. No presenta'" step="any"/>
                                    <flux:label class="text-[12px]">Metros</flux:label>
                                    <flux:error name="inf_sidewalksMts" />
                                 </flux:field>
@@ -864,7 +864,7 @@
                             </div>
                             <div class="w-80">
                                 <flux:field>
-                                    <flux:input type="number" wire:model='inf_curbsMts' :disabled="$inf_curbs === '3. No existe'"/>
+                                    <flux:input type="number" wire:model='inf_curbsMts' :disabled="$inf_curbs === '3. No existe'" step="any"/>
                                     <flux:label class="text-[12px]">Metros</flux:label>
                                     <flux:error name="inf_curbsMts" />
                                 </flux:field>

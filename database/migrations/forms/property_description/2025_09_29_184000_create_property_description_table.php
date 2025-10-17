@@ -21,7 +21,7 @@ return new class extends Migration
             $table->tinyInteger('urban_proximity');
             $table->text('actual_use');
             $table->string('multiple_use_space', 15)->nullable();
-            $table->integer('level_building')->nullable();
+            $table->string('level_building')->nullable();
             $table->string('project_quality', 30)->nullable();
 
 

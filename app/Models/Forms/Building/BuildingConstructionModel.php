@@ -24,15 +24,17 @@ class BuildingConstructionModel extends Model
         'unit_cost_replacement',
         'progress_work',
         'conservation_state',
-        'range_based_height',
+       /*  'range_based_height', */
         'surface_vad',
         'type',
+        'surface_apply',
     ];
 
 
 
     protected $casts = [
-        'range_based_height' => 'boolean', // <--- AÑADE ESTA LÍNEA
+        /* 'range_based_height' => 'boolean',  */
+        'surface_apply' => 'boolean',
     ];
 
 

@@ -101,7 +101,7 @@
                     <div class="radio-input">
                         <flux:field>
                             <div class="radio-group-horizontal">
-                                <flux:textarea wire:model='actualUse' />
+                                <flux:textarea class="h-64  " wire:model='actualUse' />
                             </div>
                             <div>
                                 <flux:error name="actualUse"/>
@@ -140,7 +140,7 @@
                     <div class="radio-input">
                         <flux:field>
                             <div class="radio-group-horizontal">
-                                <flux:input type="number" wire:model.lazy='levelBuilding' />
+                                <flux:input type="text" wire:model.lazy='levelBuilding' />
                             </div>
                             <div>
                                 <flux:error name="levelBuilding"/>

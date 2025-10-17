@@ -101,20 +101,20 @@
                                     <tr class="bg-gray-100">
                                         <th class="px-2 py-1 border whitespace-nowrap">Descripcion</th>
                                         <th class="w-[120px] px-2 py-1 border whitespace-nowrap">Clasificación</th>
-                                        <th class="w-[32px] px-2 py-1 border">Uso</th>
-                                        <th class="w-[5%] px-2 py-1 border">Niveles edificio</th>
-                                        <th class="w-[5%] px-2 py-1 border">Niveles por tipo de construcción</th>
-                                        <th class="w-[5%] px-2 py-1 border">Rango niveles TGDF</th>
-                                        <th class="w-[5%] px-2 py-1 border">Edad</th>
-                                        <th class="w-[5%] px-2 py-1 border">Superficie</th>
-                                        <th class="w-[5%] px-2 py-1 border">Fuente de información</th>
-                                        <th class="w-[5%] px-2 py-1 border">Costo unit reposición nuevo</th>
-                                        <th class="w-[5%] px-2 py-1 border">Avance obra</th>
-                                        <th class="w-[5%] px-2 py-1 border">Estado de conservación</th>
-                                        <th class="w-[5%] px-2 py-1 border">RA</th>
-                                        <th class="w-[5%] px-2 py-1 border">Vend</th>
-                                        <th class="w-[5%] px-2 py-1 border">Acc</th>
-                                        <th class="w-[5%] px-2 py-1 border">Desc</th>
+                                        <th class="w-[10%] px-2 py-1 border">Uso</th>
+                                        <th class="w-[8%] px-2 py-1 border">Niveles edificio</th>
+                                        <th class="w-[8%] px-2 py-1 border">Niveles por tipo de construcción</th>
+                                        {{-- <th class="w-[5%] px-2 py-1 border">Rango niveles TGDF</th> --}}
+                                        <th class="w-[8%] px-2 py-1 border">Edad</th>
+                                        <th class="w-[8%] px-2 py-1 border">Superficie</th>
+                                        <th class="w-[8%] px-2 py-1 border">Fuente de información</th>
+                                        <th class="w-[8%] px-2 py-1 border">Costo unit reposición nuevo</th>
+                                        <th class="w-[8%] px-2 py-1 border">Avance obra</th>
+                                        <th class="w-[8%] px-2 py-1 border">Estado de conservación</th>
+                                       {{--  <th class="w-[5%] px-2 py-1 border">RA</th> --}}
+                                        <th class="w-[8%] px-2 py-1 border">Vend</th>
+                                        <th class="w-[8%] px-2 py-1 border">Acc</th>
+                                        <th class="w-[8%] px-2 py-1 border">Desc</th>
                                         <th class="w-[100px] py-1 border">Acciones</th>
                                     </tr>
                                 </thead>
@@ -167,7 +167,7 @@
                                             }}</td>
 
                                         {{-- Rango niveles TGDF: Asumo que esto es un campo, si no lo es, usa N/A --}}
-                                        <td class="px-2 py-1 border text-xs text-center">{{ 'N/A' }}</td>
+                                      {{--   <td class="px-2 py-1 border text-xs text-center">{{ 'N/A' }}</td> --}}
 
                                         <td class="px-2 py-1 border text-xs text-center">{{ $item->age }}</td>
                                         <td class="px-2 py-1 border text-xs text-center">{{
@@ -184,30 +184,30 @@
                                         </td>
 
                                         {{-- RA (Range Based Height) --}}
-                                        <td class="px-2 py-1 border">
+                                        {{-- <td class="px-2 py-1 border"> --}}
                                             {{--
                                             <flux:checkbox :checked="(bool) $item->range_based_height" disabled /> --}}
                                             {{-- <input type="checkbox" disabled {{ $item->range_based_height ?
                                             'checked' :
                                             '' }}> --}}
                                             <!-- Componente Flux UI para mostrar un checkbox de solo lectura -->
-                                            <div class="flex justify-center">
-                                                <flux:checkbox :checked="(bool) $item->range_based_height" {{--
+                                           {{--  <div class="flex justify-center">
+                                                <flux:checkbox :checked="(bool) $item->range_based_height" --}} {{--
                                                     Establece si el checkbox debe estar marcado. Convertimos el valor a
                                                     booleano explícito para asegurar compatibilidad con Flux UI. Si
                                                     $item->
                                                     range_based_height es true, el checkbox aparece marcado.
                                                     --}}
 
-                                                    disabled
+                                                    {{-- disabled --}}
                                                     {{--
                                                     Evita que el usuario interactúe con el checkbox.
                                                     Es útil cuando solo quieres mostrar el estado, sin permitir cambios.
                                                     --}}
 
-                                                    wire:key="checkbox-{{ $item->id }}-{{ (int)
+                                                  {{--   wire:key="checkbox-{{ $item->id }}-{{ (int)
                                                     $item->range_based_height
-                                                    }}"
+                                                    }}" --}}
                                                     {{--
                                                     Esta es la parte más importante.
 
@@ -227,10 +227,10 @@
                                                     en lugar de intentar "reutilizar" el anterior, asegurando que se
                                                     actualice visualmente.
                                                     --}}
-                                                    />
+                                         {{--            />
                                             </div>
                                         </td>
-
+ --}}
                                         {{-- Vend, Acc, Desc: Asumo que estos son campos de lógica/radio específicos.
                                         Aquí
                                         están los
@@ -1172,6 +1172,8 @@
                 </flux:field>
             </div>
         </div>
+
+        @if (stripos($valuation->property_type, 'condominio') !== false)
         <div class="form-grid form-grid--3 form-grid-3-variation">
             <div class="label-variation">
                 <flux:label>Grado de % avance de áreas comunes<span class="sup-required">*</span>
@@ -1188,7 +1190,7 @@
                 </flux:field>
             </div>
         </div>
-
+        @endif
 
     </div>
 </div>
@@ -1325,16 +1327,16 @@
             </div>
         </flux:field>
 
-        <flux:field class="flux-field">
+       {{--  <flux:field class="flux-field">
             <flux:label>Rango con base en la altura<span class="sup-required">*</span></flux:label>
             <flux:checkbox wire:model='rangeBasedHeight' class="cursor-pointer" />
             <div class="error-container">
                 <flux:error name="adjacent" />
             </div>
-        </flux:field>
+        </flux:field> --}}
 
         <flux:field class="flux-field">
-            <flux:label>Avance obra<span class="sup-required">*</span></flux:label>
+            {{-- <flux:label>Avance obra<span class="sup-required">*</span></flux:label> --}}
             <flux:radio.group wire:model="surfaceVAD">
                 <flux:radio value="superficie vendible" label="Superficie vendible" checked />
                 <flux:radio value="superficie accesoria" label="Superficie accesoria" />
@@ -1493,16 +1495,16 @@
             </div>
         </flux:field>
 
-        <flux:field class="flux-field">
+        {{-- <flux:field class="flux-field">
             <flux:label>Rango con base en la altura<span class="sup-required">*</span></flux:label>
             <flux:checkbox wire:model='rangeBasedHeight' class="cursor-pointer" />
             <div class="error-container">
                 <flux:error name="adjacent" />
             </div>
-        </flux:field>
+        </flux:field> --}}
 
         <flux:field class="flux-field">
-            <flux:label>Superficie<span class="sup-required">*</span></flux:label>
+            {{-- <flux:label>Superficie<span class="sup-required">*</span></flux:label> --}}
             <flux:radio.group wire:model="surfaceVAD">
                 <flux:radio value="superficie vendible" label="Superficie vendible" checked />
                 <flux:radio value="superficie accesoria" label="Superficie accesoria" />

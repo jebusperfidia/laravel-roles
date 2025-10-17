@@ -529,3 +529,20 @@ ui-close[data-flux-modal-close] > button {
     transition: box-shadow 0.2s ease, background-color 0.2s ease;
     outline: none; /* quita el outline por defecto */
 }
+
+
+/* ESTILOS PARA LOS SUGGEST TEXT */
+.sugget-text {
+    font-size: 12px;
+    color: #6b7280; /* gray-500 */
+    text-align: left;
+    /* margin-top: 4px; */
+}
+.sugget-text a {
+    color: #25998b; /* primary-alamo */
+    text-decoration: underline;
+    cursor: pointer;
+}
+.sugget-text a:hover {
+    color: #1e7469; /* primary-alamo más oscuro */
+}

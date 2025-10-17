@@ -38,33 +38,33 @@ return new class extends Migration
             $table->text('kitchen_walls');
             $table->text('kitchen_ceilings');
 
-            $table->text('bedrooms_flats');
-            $table->text('bedrooms_walls');
-            $table->text('bedrooms_ceilings');
+            $table->text('bedrooms_flats')->nullable();
+            $table->text('bedrooms_walls')->nullable();
+            $table->text('bedrooms_ceilings')->nullable();
 
-            $table->text('bathrooms_flats');
-            $table->text('bathrooms_walls');
-            $table->text('bathrooms_ceilings');
+            $table->text('bathrooms_flats')->nullable();
+            $table->text('bathrooms_walls')->nullable();
+            $table->text('bathrooms_ceilings')->nullable();
 
-            $table->text('half_bathrooms_flats');
-            $table->text('half_bathrooms_walls');
-            $table->text('half_bathrooms_ceilings');
+            $table->text('half_bathrooms_flats')->nullable();
+            $table->text('half_bathrooms_walls')->nullable();
+            $table->text('half_bathrooms_ceilings')->nullable();
 
-            $table->text('utyr_flats');
-            $table->text('utyr_walls');
-            $table->text('utyr_ceilings');
+            $table->text('utyr_flats')->nullable();
+            $table->text('utyr_walls')->nullable();
+            $table->text('utyr_ceilings')->nullable();
 
-            $table->text('stairs_flats');
-            $table->text('stairs_walls');
-            $table->text('stairs_ceilings');
+            $table->text('stairs_flats')->nullable();
+            $table->text('stairs_walls')->nullable();
+            $table->text('stairs_ceilings')->nullable();
 
-            $table->text('copa_flats');
-            $table->text('copa_walls');
-            $table->text('copa_ceilings');
+            $table->text('copa_flats')->nullable();
+            $table->text('copa_walls')->nullable();
+            $table->text('copa_ceilings')->nullable();
 
-            $table->text('unpa_flats');
-            $table->text('unpa_walls');
-            $table->text('unpa_ceilings');
+            $table->text('unpa_flats')->nullable();
+            $table->text('unpa_walls')->nullable();
+            $table->text('unpa_ceilings')->nullable();
 
             $table->timestamps();
         });

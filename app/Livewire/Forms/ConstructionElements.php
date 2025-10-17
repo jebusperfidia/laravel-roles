@@ -39,8 +39,7 @@ class ConstructionElements extends Component
            $fn1_unpaNumber, $fn1_unpaFlats, $fn1_unpaWalls, $fn1_unpaCeilings;
 
     /* Acabados 2 */
-    public $fn2_cementPlaster, $fn2_ceilings, $fn2_furredWalls, $fn2_stairs, $fn2_flats, $fn2_plinths,
-           $fn2_paint, $fn2_specialCoating;
+    public $fn2_furredWalls, $fn2_plinths, $fn2_paint, $fn2_specialCoating;
 
     /* Carpientaria */
     public $car_doorsAccess, $car_insideDoors, $car_fixedFurnitureBedrooms, $car_fixedFurnitureInsideBedrooms;
@@ -178,11 +177,11 @@ class ConstructionElements extends Component
 
             // 3. Acabados 2 (Finishing2)
             if ($finishing2 = $constructionElement->finishing2) {
-                $this->fn2_cementPlaster = $finishing2->cement_plaster;
-                $this->fn2_ceilings = $finishing2->ceilings;
+               /*  $this->fn2_cementPlaster = $finishing2->cement_plaster;
+                $this->fn2_ceilings = $finishing2->ceilings; */
                 $this->fn2_furredWalls = $finishing2->furred_walls;
-                $this->fn2_stairs = $finishing2->stairs;
-                $this->fn2_flats = $finishing2->flats;
+               /*  $this->fn2_stairs = $finishing2->stairs;
+                $this->fn2_flats = $finishing2->flats; */
                 $this->fn2_plinths = $finishing2->plinths;
                 $this->fn2_paint = $finishing2->paint;
                 $this->fn2_specialCoating = $finishing2->special_coating;
@@ -241,6 +240,54 @@ class ConstructionElements extends Component
     {
         $this->activeTab = $tab;
     }
+
+
+    function updatedFn1BedroomsNumber($value){
+        if($value === 0){
+            $this->fn1_bedroomsFlats = '';
+            $this->fn1_bedroomsWalls = '';
+            $this->fn1_bedroomsCeilings = '';
+
+        }
+    }
+
+    function updatedFn1BathroomsNumber($value){
+        if($value === 0){
+            $this->fn1_bathroomsFlats = '';
+            $this->fn1_bathroomsWalls = '';
+            $this->fn1_bathroomsCeilings = '';
+
+        }
+    }
+
+    function updatedFn1HalfBathroomsNumber($value){
+        if($value === 0){
+            $this->fn1_halfBathroomsFlats = '';
+            $this->fn1_halfBathroomsWalls = '';
+            $this->fn1_halfBathroomsCeilings = '';
+
+        }
+    }
+
+    function updatedFn1CopaNumber($value){
+        if($value === 0){
+            $this->fn1_copaFlats = '';
+            $this->fn1_copaWalls = '';
+            $this->fn1_copaCeilings = '';
+
+        }
+    }
+
+    function updatedFn1UnpaNumber($value){
+        if($value === 0){
+            $this->fn1_unpaFlats = '';
+            $this->fn1_unpaWalls = '';
+            $this->fn1_unpaCeilings = '';
+
+        }
+    }
+
+
 
     public function save(){
 
@@ -334,11 +381,11 @@ class ConstructionElements extends Component
         ];
 
         $dataFinishing2 = [
-            'cement_plaster'    => $this->fn2_cementPlaster,
-            'ceilings'          => $this->fn2_ceilings,
+           /*  'cement_plaster'    => $this->fn2_cementPlaster,
+            'ceilings'          => $this->fn2_ceilings, */
             'furred_walls'      => $this->fn2_furredWalls,
-            'stairs'            => $this->fn2_stairs,
-            'flats'             => $this->fn2_flats,
+           /*  'stairs'            => $this->fn2_stairs,
+            'flats'             => $this->fn2_flats, */
             'plinths'           => $this->fn2_plinths,
             'paint'             => $this->fn2_paint,
             'special_coating'   => $this->fn2_specialCoating,
@@ -450,6 +497,7 @@ class ConstructionElements extends Component
     public function openAddElement()
     {
         $this->resetValidation();
+        $this->reset('space', 'amount', 'floors', 'walls', 'ceilings');
         Flux::modal('add-element')->show();
     }
 
@@ -587,15 +635,15 @@ class ConstructionElements extends Component
             'fn1_kitchenWalls'           => 'required',
             'fn1_kitchenCeilings'        => 'required',
             /* 'fn1_bedroomsNumber'         => 'required', */
-            'fn1_bedroomsFlats'          => 'required',
+         /*    'fn1_bedroomsFlats'          => 'required',
             'fn1_bedroomsWalls'          => 'required',
-            'fn1_bedroomsCeilings'       => 'required',
+            'fn1_bedroomsCeilings'       => 'required', */
            /*  'fn1_bathroomsNumber'        => 'required', */
-            'fn1_bathroomsFlats'         => 'required',
+        /*     'fn1_bathroomsFlats'         => 'required',
             'fn1_bathroomsWalls'         => 'required',
-            'fn1_bathroomsCeilings'      => 'required',
+            'fn1_bathroomsCeilings'      => 'required', */
             /* 'fn1_halfBathroomsNumber'          => 'required', */
-            'fn1_halfBathroomsFlats'     => 'required',
+         /*    'fn1_halfBathroomsFlats'     => 'required',
             'fn1_halfBathroomsWalls'     => 'required',
             'fn1_halfBathroomsCeilings'  => 'required',
             'fn1_utyrFlats'              => 'required',
@@ -603,22 +651,22 @@ class ConstructionElements extends Component
             'fn1_utyrCeilings'           => 'required',
             'fn1_stairsFlats'            => 'required',
             'fn1_stairsWalls'            => 'required',
-            'fn1_stairsCeilings'         => 'required',
+            'fn1_stairsCeilings'         => 'required', */
      /*        'fn1_copaNumber'             => 'required', */
-            'fn1_copaFlats'              => 'required',
+         /*    'fn1_copaFlats'              => 'required',
             'fn1_copaWalls'              => 'required',
-            'fn1_copaCeilings'           => 'required',
+            'fn1_copaCeilings'           => 'required', */
         /*     'fn1_unpaNumber'             => 'required', */
-            'fn1_unpaFlats'              => 'required',
+            /* 'fn1_unpaFlats'              => 'required',
             'fn1_unpaWalls'              => 'required',
-            'fn1_unpaCeilings'           => 'required',
+            'fn1_unpaCeilings'           => 'required', */
 
             /* Acabados 2 */
-            'fn2_cementPlaster'          => 'required',
-            'fn2_ceilings'               => 'required',
+            /* 'fn2_cementPlaster'          => 'required',
+            'fn2_ceilings'               => 'required', */
             'fn2_furredWalls'            => 'required',
-            'fn2_stairs'                 => 'required',
-            'fn2_flats'                  => 'required',
+            /* 'fn2_stairs'                 => 'required',
+            'fn2_flats'                  => 'required', */
             'fn2_plinths'                => 'required',
             'fn2_paint'                  => 'required',
             'fn2_specialCoating'         => 'required',
@@ -685,15 +733,15 @@ class ConstructionElements extends Component
             'fn1_kitchenWalls'           => ' ',
             'fn1_kitchenCeilings'        => ' ',
             /* 'fn1_bedroomsNumber'         => ' ', */
-            'fn1_bedroomsFlats'          => ' ',
+         /*    'fn1_bedroomsFlats'          => ' ',
             'fn1_bedroomsWalls'          => ' ',
-            'fn1_bedroomsCeilings'       => ' ',
+            'fn1_bedroomsCeilings'       => ' ', */
             /* 'fn1_bathroomsNumber'        => ' ', */
-            'fn1_bathroomsFlats'         => ' ',
+            /* 'fn1_bathroomsFlats'         => ' ',
             'fn1_bathroomsWalls'         => ' ',
-            'fn1_bathroomsCeilings'      => ' ',
+            'fn1_bathroomsCeilings'      => ' ', */
             /* 'fn1_halfBathroomsNumber'    => ' ', */
-            'fn1_halfBathroomsFlats'     => ' ',
+       /*      'fn1_halfBathroomsFlats'     => ' ',
             'fn1_halfBathroomsWalls'     => ' ',
             'fn1_halfBathroomsCeilings'  => ' ',
             'fn1_utyrFlats'              => ' ',
@@ -701,22 +749,22 @@ class ConstructionElements extends Component
             'fn1_utyrCeilings'           => ' ',
             'fn1_stairsFlats'            => ' ',
             'fn1_stairsWalls'            => ' ',
-            'fn1_stairsCeilings'         => ' ',
+            'fn1_stairsCeilings'         => ' ', */
             /* 'fn1_copaNumber'             => ' ', */
-            'fn1_copaFlats'              => ' ',
+        /*     'fn1_copaFlats'              => ' ',
             'fn1_copaWalls'              => ' ',
-            'fn1_copaCeilings'           => ' ',
+            'fn1_copaCeilings'           => ' ', */
             /* 'fn1_unpaNumber'             => ' ', */
-            'fn1_unpaFlats'              => ' ',
+            /* 'fn1_unpaFlats'              => ' ',
             'fn1_unpaWalls'              => ' ',
-            'fn1_unpaCeilings'           => ' ',
+            'fn1_unpaCeilings'           => ' ', */
 
             /* Acabados 2 */
-            'fn2_cementPlaster'          => 'aplanados',
-            'fn2_ceilings'               => 'plafones',
+            /* 'fn2_cementPlaster'          => 'aplanados',
+            'fn2_ceilings'               => 'plafones', */
             'fn2_furredWalls'            => 'lambrines',
-            'fn2_stairs'                 => 'escaleras',
-            'fn2_flats'                  => 'pisos',
+            /* 'fn2_stairs'                 => 'escaleras',
+            'fn2_flats'                  => 'pisos', */
             'fn2_plinths'                => 'zoclos',
             'fn2_paint'                  => 'pintura',
             'fn2_specialCoating'         => 'Recubrimientos especiales',

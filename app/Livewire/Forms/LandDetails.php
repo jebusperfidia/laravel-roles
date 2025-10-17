@@ -700,7 +700,8 @@ class LandDetails extends Component
 
         // 4. Formatear a dos decimales, y convertir el resultado de string a float.
         // Esto asegura que '15' se convierte a '15.00' antes de ser float.
-        return (float) number_format($floatValue, 2, '.', '');
+        //return (float) number_format($floatValue, 2, '.', '');
+        return round($floatValue, 2);
     }
 
 
@@ -717,7 +718,9 @@ class LandDetails extends Component
 
         //$this->ls_undividedSurfaceLand = $this->sanitizeFloat(($this->ls_undividedOnlyCondominium / 100) * $this->landSurfaceTotal);
         $this->ls_undividedSurfaceLand = ($this->ls_undividedOnlyCondominium / 100) * $this->landSurfaceTotal;
-
+        if($this->ls_undividedSurfaceLand < 0){
+            $this->ls_undividedSurfaceLand = 0.00;
+        }
     }
 
 
@@ -732,6 +735,10 @@ class LandDetails extends Component
         }
 
         $this->ls_surplusLandArea = $this->ls_surfacePrivateLot - $this->ls_surfacePrivateLotType;
+
+        if($this->ls_surplusLandArea < 0){
+            $this->ls_surplusLandArea = 0.00;
+        }
     }
 
     public function updatedLsSurfacePrivateLotType($value){
@@ -742,6 +749,10 @@ class LandDetails extends Component
         }
 
         $this->ls_surplusLandArea = $this->ls_surfacePrivateLot - $this->ls_surfacePrivateLotType;
+
+        if($this->ls_surplusLandArea < 0){
+            $this->ls_surplusLandArea = 0.00;
+        }
     }
 
 

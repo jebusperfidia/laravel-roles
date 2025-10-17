@@ -141,7 +141,7 @@
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->net_rep_unit_cost}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">N/A</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->amount}}</td>
                                     <td class="my-2 flex justify-evenly">
                                         {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
@@ -220,7 +220,7 @@
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->net_rep_unit_cost}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">N/A</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->amount}}</td>
                                     <td class="my-2 flex justify-evenly">
                                         {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
@@ -302,7 +302,7 @@
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->net_rep_unit_cost}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">N/A</td>
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->amount}}</td>
                                     <td class="my-2 flex justify-evenly">
                                         {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
@@ -589,20 +589,20 @@
                                 <tr>
                                     <td class="px-2 py-2 text-xs text-center">Importe total instalaciones especiales:
                                     </td>
-                                    <td class="px-2 py-2 text-xs text-center">1.9200</td>
-                                    <td class="px-2 py-2 text-xs text-center">0.0000</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{$subTotalPrivateInstallations}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{$subTotalCommonInstallations}}</td>
                                 </tr>
 
                                 <tr>
                                     <td class="px-2 py-2 text-xs text-center">Importe total elementos accesorios:</td>
-                                    <td class="px-2 py-2 text-xs text-center">0.9600</td>
-                                    <td class="px-2 py-2 text-xs text-center">0.0000</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{$subTotalPrivateAccessories}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{$subTotalCommonAccessories}}</td>
                                 </tr>
 
                                 <tr>
                                     <td class="px-2 py-2 text-xs text-center">Importe total obras complementarias:</td>
-                                    <td class="px-2 py-2 text-xs text-center">0.9775</td>
-                                    <td class="px-2 py-2 text-xs text-center">0.0000</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{$subTotalPrivateWorks}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{$subTotalCommonWorks}}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -627,15 +627,15 @@
                                 <tr>
                                     <td class="px-2 py-2 text-xs text-center">Importe Total:
                                         (Inst. Especiales, Obras Comp. y Elem. Accesorios)</td>
-                                    <td class="px-2 py-2 text-xs text-center">3.8575</td>
-                                    <td class="px-2 py-2 text-xs text-center">0.0000</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{$totalPrivateInstallations}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{$totalCommonInstallations}}</td>
                                 </tr>
 
                                 <tr>
                                     <td class="px-2 py-2 text-xs text-center">Importe PRO INDIVISO:
                                         (Inst. Especiales, Obras Comp. y Elem. Accesorios)</td>
                                     <td class="px-2 py-2 text-xs text-center">No aplica</td>
-                                    <td class="px-2 py-2 text-xs text-center">0.0000</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{$totalCommonProportional}}</td>
                                 </tr>
 
                             </tbody>
@@ -962,14 +962,14 @@
             </div>
         </flux:field>
 
-        <flux:field class="flux-field">
+       {{--  <flux:field class="flux-field">
             <flux:label>Factor de edad<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model='ageFactor' />
             <div class="error-container">
                 <flux:error name="ageFactor" />
             </div>
         </flux:field>
-
+ --}}
 
         {{-- Inicia --}}
         <div class="relative inline-block w-full">
@@ -1046,14 +1046,15 @@
         </div>
         {{-- Finaliza --}}
 
-        <flux:field class="flux-field pt-4">
+{{--         <flux:field class="flux-field pt-4">
             <flux:label>Costo Unit Neto Rep<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model='netRepUnitCost' />
             <div class="error-container">
                 <flux:error name="netRepUnitCost" />
             </div>
-        </flux:field>
+        </flux:field> --}}
 
+        @if ($classificationType === 'common')
         <flux:field class="flux-field">
             <flux:label>%Indiviso<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model='undivided' />
@@ -1061,14 +1062,17 @@
                 <flux:error name="undivided" />
             </div>
         </flux:field>
+        @endif
 
-        <flux:field class="flux-field">
+
+
+      {{--   <flux:field class="flux-field">
             <flux:label>Importe<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model='amount' />
             <div class="error-container">
                 <flux:error name="amount" />
             </div>
-        </flux:field>
+        </flux:field> --}}
 
         <div class="flex">
             <flux:spacer />
@@ -1376,7 +1380,7 @@
 
         <flux:field class="flux-field">
             <flux:label>Edad<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='age' />
+            <flux:input type="number" wire:model.lazy='age' />
             <div class="error-container">
                 <flux:error name="age" />
             </div>
@@ -1398,14 +1402,14 @@
             </div>
         </flux:field>
 
-        <flux:field class="flux-field">
+{{--         <flux:field class="flux-field">
             <flux:label>Factor de edad<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='ageFactor' />
+            <flux:input type="number" wire:model='ageFactor' disabled/>
             <div class="error-container">
                 <flux:error name="ageFactor" />
             </div>
         </flux:field>
-
+ --}}
 
         {{-- Inicia --}}
         <div class="relative inline-block w-full">
@@ -1482,14 +1486,15 @@
         </div>
         {{-- Finaliza --}}
 
-        <flux:field class="flux-field pt-4">
+        {{-- <flux:field class="flux-field pt-4">
             <flux:label>Costo Unit Neto Rep<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model='netRepUnitCost' />
             <div class="error-container">
                 <flux:error name="netRepUnitCost" />
             </div>
-        </flux:field>
+        </flux:field> --}}
 
+        @if ($classificationType === 'common')
         <flux:field class="flux-field">
             <flux:label>%Indiviso<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model='undivided' />
@@ -1497,14 +1502,15 @@
                 <flux:error name="undivided" />
             </div>
         </flux:field>
+        @endif
 
-        <flux:field class="flux-field">
+        {{-- <flux:field class="flux-field">
             <flux:label>Importe<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model='amount' />
             <div class="error-container">
                 <flux:error name="amount" />
             </div>
-        </flux:field>
+        </flux:field> --}}
 
         <div class="flex">
             <flux:spacer />

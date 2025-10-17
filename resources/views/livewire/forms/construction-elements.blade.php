@@ -14,28 +14,126 @@
 
                     {{-- Navbar responsivo con hamburguesa --}}
                     <div x-data="{ open: false }" class="w-full">
-                        @php
-                        $tabs = [
-                        'obra_negra' => 'Obra negra',
-                        'acabados1' => 'Acabados 1',
-                        'acabados2' => 'Acabados 2',
-                        'carpinteria' => 'Carpintería',
-                        'hidraulicas' => 'Hidráulicas y sanitarias',
-                        'herreria' => 'Herrería',
-                        'otros' => 'Otros elementos',
-                        ];
-                        $lastKey = array_key_last($tabs);
-                        @endphp
+                      @php
+                   $tabs = [
+                'obra_negra' => [
+                'label' => 'Obra negra',
+                'fields' => [
+                'sc_structure',
+                'sc_shallowFoundation',
+                'sc_intermediateFloor',
+                'sc_ceiling',
+                'sc_walls',
+                'sc_beamsColumns',
+                'sc_roof',
+                'sc_fences',
+                ],
+                ],
+
+                'acabados1' => [
+                'label' => 'Acabados 1',
+                'fields' => [
+                // Áreas comunes
+                'fn1_hallFlats', 'fn1_hallWalls', 'fn1_hallCeilings',
+                'fn1_stdrFlats', 'fn1_stdrWalls', 'fn1_stdrCeilings',
+                'fn1_kitchenFlats', 'fn1_kitchenWalls', 'fn1_kitchenCeilings',
+
+                // Dormitorios y Baños (incluyendo números y acabados)
+                'fn1_bedroomsNumber', 'fn1_bedroomsFlats', 'fn1_bedroomsWalls', 'fn1_bedroomsCeilings',
+                'fn1_bathroomsNumber', 'fn1_bathroomsFlats', 'fn1_bathroomsWalls', 'fn1_bathroomsCeilings',
+                'fn1_halfBathroomsNumber', 'fn1_halfBathroomsFlats', 'fn1_halfBathroomsWalls', 'fn1_halfBathroomsCeilings',
+
+                // Servicios y Circulación
+                'fn1_utyrFlats', 'fn1_utyrWalls', 'fn1_utyrCeilings',
+                'fn1_stairsFlats', 'fn1_stairsWalls', 'fn1_stairsCeilings',
+
+                // Patios y Exteriores
+                'fn1_copaNumber', 'fn1_copaFlats', 'fn1_copaWalls', 'fn1_copaCeilings',
+                'fn1_unpaNumber', 'fn1_unpaFlats', 'fn1_unpaWalls', 'fn1_unpaCeilings',
+                ],
+                ],
+
+                'acabados2' => [
+                'label' => 'Acabados 2',
+                'fields' => [
+                'fn2_furredWalls',
+                'fn2_plinths',
+                'fn2_paint',
+                'fn2_specialCoating',
+                ],
+                ],
+
+                'carpinteria' => [
+                'label' => 'Carpintería',
+                'fields' => [
+                'car_doorsAccess',
+                'car_insideDoors',
+                'car_fixedFurnitureBedrooms',
+                'car_fixedFurnitureInsideBedrooms',
+                ],
+                ],
+
+                'hidraulicas' => [
+                'label' => 'Hidráulicas y sanitarias',
+                'fields' => [
+                'hs_bathroomFurniture',
+                'hs_hiddenApparentHydraulicBranches',
+                'hs_hydraulicBranches',
+                'hs_hiddenApparentSanitaryBranches',
+                'hs_SanitaryBranches',
+                'hs_hiddenApparentElectrics',
+                'hs_electrics',
+                ],
+                ],
+
+                'herreria' => [
+                'label' => 'Herrería',
+                'fields' => [
+                'sm_serviceDoor',
+                'sm_windows',
+                'sm_others',
+                ],
+                ],
+
+                'otros' => [
+                'label' => 'Otros elementos',
+                'fields' => [
+                'oe_structure',
+                'oe_locksmith',
+                'oe_facades',
+                'oe_elevator',
+                ],
+                ],
+                ];
+                    $lastKey = array_key_last($tabs);
+                    @endphp
 
                         {{-- Navbar para pantallas grandes (≥950px) --}}
                         <flux:navbar class="hidden xl:flex bg-white border-b-2">
-                            @foreach ($tabs as $key => $label)
+                            @foreach ($tabs as $key => $tab)
+                            {{-- VERIFICACIÓN DE ERRORES DEL TAB: Usamos $errors->hasAny() --}}
+                            @php
+                            $hasErrors = $errors->hasAny($tab['fields']);
+                            @endphp
+                           {{--  @foreach ($tabs as $key => $label) --}}
                             <flux:navbar.item wire:click.prevent="setTab('{{ $key }}')"
                                 :active="$activeTab === '{{ $key }}'" class="cursor-pointer px-4 py-2 transition-colors
                                     {{ $activeTab === $key
                                         ? 'border-b-2 border-[#43A497] text-[#3A8B88] font-semibold'
                                         : 'text-gray-600 hover:text-[#5CBEB4]' }}">
-                                <span class="text-[16px]">{{ $label }}</span>
+                                <span class="text-[16px] flex items-center">
+                                    {{ $tab['label'] }}
+
+                                    {{-- INDICADOR VISUAL DE ERROR --}}
+                                    @if ($hasErrors)
+                                    <svg class="w-4 h-4 ml-2 text-red-500 fill-current animate-pulse" viewBox="0 0 20 20"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    @endif
+                                </span>
                             </flux:navbar.item>
 
                             @if ($key !== $lastKey)
@@ -68,13 +166,26 @@
                     <div x-show="open" x-transition class="xl:hidden bg-white border-b border-gray-200">
                         <ul class="flex flex-col divide-y divide-gray-100">
                             @foreach ($tabs as $key => $label)
+                            {{-- VERIFICACIÓN DE ERRORES DEL TAB --}}
+                            @php
+                            $hasErrors = $errors->hasAny($tab['fields']);
+                            @endphp
                             <li>
                                 <button type="button" wire:click.prevent="setTab('{{ $key }}')" @click="open = false"
                                     class="cursor-pointer w-full text-left px-4 py-3 transition-colors
                                             {{ $activeTab === $key
                                                 ? 'border-l-4 border-[#43A497] bg-[#F0FDFD] text-[#3A8B88] font-semibold'
                                                 : 'text-gray-700 hover:bg-gray-100' }}">
-                                    {{ $label }}
+                                    {{ $tab['label'] }}
+
+                                    {{-- INDICADOR VISUAL DE ERROR EN MÓVIL --}}
+                                    @if ($hasErrors)
+                                    <svg class="w-5 h-5 text-red-500 fill-current animate-pulse" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    @endif
                                 </button>
                             </li>
                             @endforeach
@@ -218,20 +329,16 @@
                                 <thead>
                                     <tr class="bg-gray-100">
                                         <th class="w-[140px] px-2 py-1 border">Espacio</th>
-                                        <th class="w-[90px] px-2 py-1 border">Cantidad<span
-                                                class="sup-required">*</span></th>
-                                        <th class="w-[28%] px-2 py-1 border">Pisos<span class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[28%] px-2 py-1 border">Muros<span class="sup-required">*</span>
-                                        </th>
-                                        <th class="w-[28%] px-2 py-1 border">Plafones<span class="sup-required">*</span>
-                                        </th>
+                                        <th class="w-[90px] px-2 py-1 border">Cantidad</th>
+                                        <th class="w-[28%] px-2 py-1 border">Pisos</th>
+                                        <th class="w-[28%] px-2 py-1 border">Muros</th>
+                                        <th class="w-[28%] px-2 py-1 border">Plafones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {{-- hall --}}
                                     <tr>
-                                        <td class="px-2 py-1 border text-sm text-center">Sala</td>
+                                        <td class="px-2 py-1 border text-sm text-center">Sala<span class="sup-required">*</span></td>
                                         <td class="px-2 py-1 border text-sm"></td>
                                         <td class="px-2 py-1 border text-sm">
                                             <flux:field class="flux_field pt-8">
@@ -260,7 +367,7 @@
                                     </tr>
                                     {{-- stay-diningRoom --}}
                                     <tr>
-                                        <td class="px-2 py-1 border text-sm text-center">Estancia / comedor</td>
+                                        <td class="px-2 py-1 border text-sm text-center">Estancia / comedor<span class="sup-required">*</span></td>
                                         <td class="px-2 py-1 border text-sm"></td>
                                         <td class="px-2 py-1 border text-sm">
                                             <flux:field class="flux_field pt-8">
@@ -289,7 +396,7 @@
                                     </tr>
                                     {{-- Kitchen --}}
                                     <tr>
-                                        <td class="px-2 py-1 border text-sm text-center">Cocina</td>
+                                        <td class="px-2 py-1 border text-sm text-center">Cocina<span class="sup-required">*</span></td>
                                         <td class="px-2 py-1 border text-sm"></td>
                                         <td class="px-2 py-1 border text-sm">
                                             <flux:field class="flux_field pt-8">
@@ -321,7 +428,7 @@
                                         <td class="px-2 py-1 border text-sm text-center">Recámaras</td>
                                         <td class="px-2 py-1 border">
                                             <flux:field>
-                                                <flux:select wire:model="fn1_bedroomsNumber"
+                                                <flux:select wire:model.live.number="fn1_bedroomsNumber"
                                                     class="w-[20px] text-gray-800 [&_option]:text-gray-900">
                                                     <flux:select.option value="0">0</flux:select.option>
                                                     <flux:select.option value="1">1</flux:select.option>
@@ -342,7 +449,7 @@
                                         </td>
                                         <td class="px-2 py-1 border text-sm">
                                             <flux:field class="flux_field pt-8">
-                                                <flux:textarea wire:model='fn1_bedroomsFlats' />
+                                                <flux:textarea wire:model.live='fn1_bedroomsFlats' :disabled="$fn1_bedroomsNumber === 0"/>
                                                 <div class="error-container">
                                                     <flux:error name="fn1_bedroomsFlats" />
                                                 </div>
@@ -350,7 +457,7 @@
                                         </td>
                                         <td class="px-2 py-1 border">
                                             <flux:field class="flux_field pt-8">
-                                                <flux:textarea wire:model='fn1_bedroomsWalls' />
+                                                <flux:textarea wire:model='fn1_bedroomsWalls' :disabled="$fn1_bedroomsNumber === 0"/>
                                                 <div class="error-container">
                                                     <flux:error name="fn1_bedroomsWalls" />
                                                 </div>
@@ -358,7 +465,7 @@
                                         </td>
                                         <td class="px-2 py-1 border">
                                             <flux:field class="flux_field pt-8">
-                                                <flux:textarea wire:model='fn1_bedroomsCeilings' />
+                                                <flux:textarea wire:model='fn1_bedroomsCeilings' :disabled="$fn1_bedroomsNumber === 0"/>
                                                 <div class="error-container">
                                                     <flux:error name="fn1_bedroomsCeilings" />
                                                 </div>
@@ -369,7 +476,7 @@
                                         <td class="px-2 py-1 border text-sm text-center">Baños</td>
                                         <td class="px-2 py-1 border">
                                             <flux:field>
-                                                <flux:select wire:model="fn1_bathroomsNumber"
+                                                <flux:select wire:model.live.number="fn1_bathroomsNumber"
                                                     class="w-[20px] text-gray-800 [&_option]:text-gray-900">
                                                     <flux:select.option value="0">0</flux:select.option>
                                                     <flux:select.option value="1">1</flux:select.option>
@@ -387,7 +494,7 @@
                                         </td>
                                         <td class="px-2 py-1 border text-sm">
                                             <flux:field class="flux_field pt-8">
-                                                <flux:textarea wire:model='fn1_bathroomsFlats' />
+                                                <flux:textarea wire:model='fn1_bathroomsFlats' :disabled="$fn1_bathroomsNumber === 0"/>
                                                 <div class="error-container">
                                                     <flux:error name="fn1_bathroomsFlats" />
                                                 </div>
@@ -395,7 +502,7 @@
                                         </td>
                                         <td class="px-2 py-1 border">
                                             <flux:field class="flux_field pt-8">
-                                                <flux:textarea wire:model='fn1_bathroomsWalls' />
+                                                <flux:textarea wire:model='fn1_bathroomsWalls' :disabled="$fn1_bathroomsNumber === 0"/>
                                                 <div class="error-container">
                                                     <flux:error name="fn1_bathroomsWalls" />
                                                 </div>
@@ -403,7 +510,7 @@
                                         </td>
                                         <td class="px-2 py-1 border">
                                             <flux:field class="flux_field pt-8">
-                                                <flux:textarea wire:model='fn1_bathroomsCeilings' />
+                                                <flux:textarea wire:model='fn1_bathroomsCeilings' :disabled="$fn1_bathroomsNumber === 0"/>
                                                 <div class="error-container">
                                                     <flux:error name="fn1_bathroomsCeilings" />
                                                 </div>
@@ -414,7 +521,7 @@
                                         <td class="px-2 py-1 border text-sm text-center">Medios baños</td>
                                         <td class="px-2 py-1 border">
                                             <flux:field>
-                                                <flux:select wire:model="fn1_halfBathroomsNumber"
+                                                <flux:select wire:model.live.number="fn1_halfBathroomsNumber"
                                                     class="w-[20px] text-gray-800 [&_option]:text-gray-900">
                                                     <flux:select.option value="0">0</flux:select.option>
                                                     <flux:select.option value="1">1</flux:select.option>
@@ -432,7 +539,7 @@
                                         </td>
                                         <td class="px-2 py-1 border text-sm">
                                             <flux:field class="flux_field pt-8">
-                                                <flux:textarea wire:model='fn1_halfBathroomsFlats' />
+                                                <flux:textarea wire:model='fn1_halfBathroomsFlats' :disabled="$fn1_halfBathroomsNumber === 0"/>
                                                 <div class="error-container">
                                                     <flux:error name="fn1_halfBathroomsFlats" />
                                                 </div>
@@ -440,7 +547,7 @@
                                         </td>
                                         <td class="px-2 py-1 border">
                                             <flux:field class="flux_field pt-8">
-                                                <flux:textarea wire:model='fn1_halfBathroomsWalls' />
+                                                <flux:textarea wire:model='fn1_halfBathroomsWalls' :disabled="$fn1_halfBathroomsNumber === 0"/>
                                                 <div class="error-container">
                                                     <flux:error name="fn1_halfBathroomsWalls" />
                                                 </div>
@@ -448,7 +555,7 @@
                                         </td>
                                         <td class="px-2 py-1 border">
                                             <flux:field class="flux_field pt-8">
-                                                <flux:textarea wire:model='fn1_halfBathroomsCeilings' />
+                                                <flux:textarea wire:model='fn1_halfBathroomsCeilings' :disabled="$fn1_halfBathroomsNumber === 0"/>
                                                 <div class="error-container">
                                                     <flux:error name="fn1_halfBathroomsCeilings" />
                                                 </div>
@@ -517,7 +624,7 @@
                                         <td class="px-2 py-1 border text-sm text-center">Estacionamiento cubierto</td>
                                         <td class="px-2 py-1 border">
                                             <flux:field>
-                                                <flux:select wire:model="fn1_copaNumber"
+                                                <flux:select wire:model.live.number="fn1_copaNumber"
                                                     class="w-[20px] text-gray-800 [&_option]:text-gray-900">
                                                     <flux:select.option value="0">0</flux:select.option>
                                                     <flux:select.option value="1">1</flux:select.option>
@@ -535,7 +642,7 @@
                                         </td>
                                         <td class="px-2 py-1 border text-sm">
                                             <flux:field class="flux_field pt-8">
-                                                <flux:textarea wire:model='fn1_copaFlats' />
+                                                <flux:textarea wire:model='fn1_copaFlats' :disabled="$fn1_copaNumber === 0"/>
                                                 <div class="error-container">
                                                     <flux:error name="fn1_copaFlats" />
                                                 </div>
@@ -543,7 +650,7 @@
                                         </td>
                                         <td class="px-2 py-1 border">
                                             <flux:field class="flux_field pt-8">
-                                                <flux:textarea wire:model='fn1_copaWalls' />
+                                                <flux:textarea wire:model='fn1_copaWalls' :disabled="$fn1_copaNumber === 0"/>
                                                 <div class="error-container">
                                                     <flux:error name="fn1_copaWalls" />
                                                 </div>
@@ -551,7 +658,7 @@
                                         </td>
                                         <td class="px-2 py-1 border">
                                             <flux:field class="flux_field pt-8">
-                                                <flux:textarea wire:model='fn1_copaCeilings' />
+                                                <flux:textarea wire:model='fn1_copaCeilings' :disabled="$fn1_copaNumber === 0"/>
                                                 <div class="error-container">
                                                     <flux:error name="fn1_copaCeilings" />
                                                 </div>
@@ -563,7 +670,7 @@
                                         </td>
                                         <td class="px-2 py-1 border text-sm">
                                             <flux:field>
-                                                <flux:select wire:model="fn1_unpaNumber"
+                                                <flux:select wire:model.live.number="fn1_unpaNumber"
                                                     class="w-[20px] text-gray-800 [&_option]:text-gray-900">
                                                     <flux:select.option value="0">0</flux:select.option>
                                                     <flux:select.option value="1">1</flux:select.option>
@@ -581,7 +688,7 @@
                                         </td>
                                         <td class="px-2 py-1 border text-sm">
                                             <flux:field class="flux_field pt-8">
-                                                <flux:textarea wire:model='fn1_unpaFlats' />
+                                                <flux:textarea wire:model='fn1_unpaFlats' :disabled="$fn1_unpaNumber === 0"/>
                                                 <div class="error-container">
                                                     <flux:error name="fn1_unpaFlats" />
                                                 </div>
@@ -589,7 +696,7 @@
                                         </td>
                                         <td class="px-2 py-1 border">
                                             <flux:field class="flux_field pt-8">
-                                                <flux:textarea wire:model='fn1_unpaWalls' />
+                                                <flux:textarea wire:model='fn1_unpaWalls' :disabled="$fn1_unpaNumber === 0"/>
                                                 <div class="error-container">
                                                     <flux:error name="fn1_unpaWalls" />
                                                 </div>
@@ -597,7 +704,7 @@
                                         </td>
                                         <td class="px-2 py-1 border">
                                             <flux:field class="flux_field pt-8">
-                                                <flux:textarea wire:model='fn1_unpaCeilings' />
+                                                <flux:textarea wire:model='fn1_unpaCeilings' :disabled="$fn1_unpaNumber === 0"/>
                                                 <div class="error-container">
                                                     <flux:error name="fn1_unpaCeilings" />
                                                 </div>
@@ -713,7 +820,7 @@
                     {{-- Acabados 2 --}}
                     @if ($activeTab === 'acabados2')
                     <div class="form-container__content">
-                        <div class="form-grid form-grid--2">
+                    {{--     <div class="form-grid form-grid--2">
                             <flux:field class="flux_field pt2">
                                 <flux:label>Aplanados<span class="sup-required">*</span></flux:label>
                                 <flux:textarea wire:model='fn2_cementPlaster' />
@@ -728,7 +835,7 @@
                                     <flux:error name="fn2_ceilings" />
                                 </div>
                             </flux:field>
-                        </div>
+                        </div> --}}
                         <div class="form-grid form-grid--2">
                             <flux:field class="flux_field pt2">
                                 <flux:label>Lambrines<span class="sup-required">*</span></flux:label>
@@ -738,28 +845,29 @@
                                 </div>
                             </flux:field>
                             <flux:field class="flux_field pt2">
-                                <flux:label>Escaleras<span class="sup-required">*</span></flux:label>
-                                <flux:textarea wire:model='fn2_stairs' />
-                                <div class="error-container">
-                                    <flux:error name="fn2_stairs" />
-                                </div>
-                            </flux:field>
-                        </div>
-                        <div class="form-grid form-grid--2">
-                            <flux:field class="flux_field pt2">
-                                <flux:label>Pisos<span class="sup-required">*</span></flux:label>
-                                <flux:textarea wire:model='fn2_flats' />
-                                <div class="error-container">
-                                    <flux:error name="fn2_flats" />
-                                </div>
-                            </flux:field>
-                            <flux:field class="flux_field pt2">
                                 <flux:label>Zoclos<span class="sup-required">*</span></flux:label>
                                 <flux:textarea wire:model='fn2_plinths' />
                                 <div class="error-container">
                                     <flux:error name="fn2_plinths" />
                                 </div>
                             </flux:field>
+                            {{-- <flux:field class="flux_field pt2">
+                                <flux:label>Escaleras<span class="sup-required">*</span></flux:label>
+                                <flux:textarea wire:model='fn2_stairs' />
+                                <div class="error-container">
+                                    <flux:error name="fn2_stairs" />
+                                </div>
+                            </flux:field> --}}
+                        </div>
+                        <div class="form-grid form-grid--2">
+                            {{-- <flux:field class="flux_field pt2">
+                                <flux:label>Pisos<span class="sup-required">*</span></flux:label>
+                                <flux:textarea wire:model='fn2_flats' />
+                                <div class="error-container">
+                                    <flux:error name="fn2_flats" />
+                                </div>
+                            </flux:field> --}}
+
                         </div>
                         <div class="form-grid form-grid--2">
                             <flux:field class="flux_field pt2">
@@ -1090,10 +1198,10 @@
 
         @else
         <div class="form-container__content">
-            <div class="form-grid form-grid--1">
+            <div class="form-grid form-grid--2">
                 <flux:field class="flux-field">
                     <flux:label>Resumen<span class="sup-required">*</span></flux:label>
-                    <flux:textarea wire:model='summary'/>
+                    <flux:textarea class="h-64" wire:model='summary'/>
                     <div class="error-container">
                         <flux:error name="summary" />
                     </div>
@@ -1133,7 +1241,7 @@
 
                 <flux:field class="flux-field">
                     <flux:label>Pisos<span class="sup-required">*</span></flux:label>
-                    <flux:input type="number" wire:model='floors' />
+                    <flux:input type="text" wire:model='floors' />
                     <div class="error-container">
                         <flux:error name="floors" />
                     </div>

@@ -80,7 +80,7 @@ return new class extends Migration
             $table->string('property_building', 100)->nullable();
             $table->string('property_departament', 100)->nullable();
             $table->string('property_access', 100)->nullable();
-            $table->string('property_level', 10)->nullable();
+            $table->string('property_level', 20)->nullable();
             $table->string('property_condominium', 100)->nullable();
             $table->string('property_street_between', 100)->nullable();
             $table->string('property_and_street', 100)->nullable();

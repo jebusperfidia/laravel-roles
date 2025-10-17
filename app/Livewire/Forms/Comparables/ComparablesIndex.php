@@ -110,7 +110,7 @@ class ComparablesIndex extends Component
         //Validamos que el campo no esté vacío y contenga 5 dígitos
         $this->validate(
             [
-                'comparableCp' => 'required|integer|digits:5',
+                'comparableCp' => 'required|string|digits:5',
             ],
             [], // Mensajes personalizados (si quieres)
             [   // Atributos personalizados (lo que quieres hacer)

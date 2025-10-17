@@ -29,8 +29,8 @@
                     <flux:field class="flux-field">
                         <flux:label>Tipo de avalúo</flux:label>
                         <flux:select wire:model="gi_type" class="text-gray-800 [&_option]:text-gray-900">
-                            <flux:select.option value="fiscal">Físcal</flux:select.option>
-                            <flux:select.option value="comercial">Comercial</flux:select.option>
+                            <flux:select.option value="Fiscal">Físcal</flux:select.option>
+                            <flux:select.option value="Comercial">Comercial</flux:select.option>
                         </flux:select>
                         <div class="error-container">
                             <flux:error name="gi_type" />
@@ -53,7 +53,7 @@
                         <flux:label>Valuador<span class="sup-required">*</span></flux:label>
                         <flux:select wire:model="gi_valuator">
                             @foreach ($users as $user)
-                            <flux:select.option value="{{ $user->id }}">
+                            <flux:select.option value="{{ $user->name }}">
                                 {{ $user->name }}
                             </flux:select.option>
                             @endforeach
@@ -499,12 +499,14 @@
                 Datos del inmueble
             </div>
             <div class="form-container__content">
+                @if (!$gi_preValuation)
                 <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <flux:label>Copiar dirección del propietario</flux:label>
                         <flux:checkbox wire:model.live="gi_copyFromOwner" />
                     </flux:field>
                 </div>
+                @endif
                 <div class="form-grid form-grid--3">
                     <flux:field class="flux-field">
                         <label for="tipo" class="flux-label text-sm">Código postal<span

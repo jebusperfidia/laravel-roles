@@ -16,11 +16,11 @@ class Finishing2Model extends Model
     protected $fillable = [
         'construction_elements_id',
 
-        'cement_plaster',
-        'ceilings',
+        /* 'cement_plaster',
+        'ceilings', */
         'furred_walls',
-        'stairs',
-        'flats',
+      /*   'stairs',
+        'flats', */
         'plinths',
         'paint',
         'special_coating',

@@ -72,28 +72,27 @@
 
                 <div class="mt-[64px] form-grid form-grid--2-center">
                     <div class="form-grid-2-variation">
-                        <flux:label class="label-variation" for="sourceReplacementObtained">Superficie vendible:
+                        <flux:label class="label-variation">Superficie vendible:
                         </flux:label>
                         <flux:field>
                             <div class="radio-group-horizontal">
                                 <flux:input.group>
-                                    <flux:input type="number" wire:model='saleableArea' readonly/>
+                                    <flux:input type="number" wire:model='totalSurfacePrivateVendible' readonly step="any"/>
                                     <flux:button disabled><b>m²</b></flux:button>
                                 </flux:input.group>
                             </div>
                             <div>
-                                <flux:error name="saleableArea" />
+                                <flux:error name="totalSurfacePrivateVendible" />
                             </div>
                         </flux:field>
                     </div>
                 </div>
                 <div class="mt-2 form-grid form-grid--2-center">
                     <div class="form-grid-2-variation">
-                        <flux:label class="label-variation" for="sourceReplacementObtained">Cálculo de superficie
-                            <br>construida:</flux:label>
+                        <flux:label class="label-variation">Cálculo de superficie<br>construida:</flux:label>
                         <flux:field>
                             <div class="radio-group-horizontal">
-                                <flux:checkbox wire:model='calculationBuiltArea'/>
+                                <flux:checkbox wire:model.live='calculationBuiltArea'/>
                             </div>
                             <small class="text-[12px] text-gray-500">Si la casilla está seleccionada, el valor en la
                                 celda de abajo será siempre igual al la superficie vendible. Si
@@ -107,13 +106,16 @@
                 </div>
                 <div class="mt-2 form-grid form-grid--2-center">
                     <div class="form-grid-2-variation">
-                        <flux:label class="label-variation" for="sourceReplacementObtained">Superficie construida:
-                        </flux:label>
+                        <flux:label class="label-variation">Superficie construida:</flux:label>
                         <flux:field>
                             <div class="radio-group-horizontal">
                                 <flux:input.group>
-                                    <flux:input type="number" wire:model='builtArea' />
-                                    <flux:button disabled><b>m²</b></flux:button>
+                                    @if ($calculationBuiltArea)
+                                    <flux:input type="number" wire:model.live='builtArea' step="any" readonly/>
+                                    @else
+                                    <flux:input type="number" wire:model.live='builtArea' step="any"/>
+                                    @endif
+                                    <flux:button><b>m²</b></flux:button>
                                 </flux:input.group>
                             </div>
                             <div>
@@ -150,18 +152,19 @@
                                         <flux:field>
                                             <div class="radio-group-horizontal">
                                                 <flux:input.group>
-                                                    <flux:input type="number" wire:model='hr_surfaceArea' />
+                                                    <flux:input type="number" wire:model='surfaceArea' step="any" />
                                                     <flux:button disabled><b>m²</b></flux:button>
                                                 </flux:input.group>
                                             </div>
+                                            <small class="sugget-text">Valor propuesto: <a wire:click="setSurfaceAreaToSuggested">{{number_format($landSurfacesTotal, 2)}}</a><b> m²</b></small>
                                             <div>
-                                                <flux:error name="hr_surfaceArea" />
+                                                <flux:error name="surfaceArea" />
                                             </div>
                                         </flux:field>
                                     </td>
                                     <td class="border px-2 py-1 text-xs text-center">
                                         <flux:field class="radio-group-horizontal">
-                                            <flux:select wire:model="hr_informationSource"
+                                            <flux:select wire:model="sourceSurfaceArea"
                                                 class=" text-gray-800 [&_option]:text-gray-900">
                                                 <flux:select.option value="">-- Selecciona una opción --
                                                 </flux:select.option>
@@ -172,7 +175,7 @@
                                                 @endforeach
                                             </flux:select>
                                             <div>
-                                                <flux:error name="hr_informationSource" />
+                                                <flux:error name="sourceSurfaceArea" />
                                             </div>
                                             </flux:field>
                                     </td>
@@ -187,18 +190,20 @@
                                             <flux:field>
                                                 <div class="radio-group-horizontal">
                                                     <flux:input.group>
-                                                        <flux:input type="number" wire:model='hr_surfaceArea' />
+                                                        <flux:input type="number" wire:model='privateLot' step="any" />
                                                         <flux:button disabled><b>m²</b></flux:button>
                                                     </flux:input.group>
                                                 </div>
+                                                <small class="sugget-text">Valor propuesto: <a wire:click="setPrivateLotToSuggested">{{number_format($landDetail->surface_private_lot , 2)}}</a><b>
+                                                        m²</b></small>
                                                 <div>
-                                                    <flux:error name="hr_surfaceArea" />
+                                                    <flux:error name="privateLot" />
                                                 </div>
                                             </flux:field>
                                         </td>
                                         <td class="border px-2 py-1 text-xs text-center">
                                             <flux:field class="radio-group-horizontal">
-                                                <flux:select wire:model="hr_informationSource" class=" text-gray-800 [&_option]:text-gray-900">
+                                                <flux:select wire:model="sourcePrivateLot" class=" text-gray-800 [&_option]:text-gray-900">
                                                     <flux:select.option value="">-- Selecciona una opción --
                                                     </flux:select.option>
                                                     @foreach ($construction_source_information as $value => $label)
@@ -208,7 +213,7 @@
                                                     @endforeach
                                                 </flux:select>
                                                 <div>
-                                                    <flux:error name="hr_informationSource" />
+                                                    <flux:error name="sourcePrivateLot" />
                                                 </div>
                                             </flux:field>
                                         </td>
@@ -219,18 +224,19 @@
                                             <flux:field>
                                                 <div class="radio-group-horizontal">
                                                     <flux:input.group>
-                                                        <flux:input type="number" wire:model='hr_surfaceArea' />
+                                                        <flux:input type="number" wire:model='privateLotType' step="any" />
                                                         <flux:button disabled><b>m²</b></flux:button>
                                                     </flux:input.group>
                                                 </div>
+                                                <small class="sugget-text">Valor propuesto: <a wire:click="setPrivateLotTypeToSuggested">{{number_format($landDetail->surface_private_lot_type , 2)}}</a><b> m²</b></small>
                                                 <div>
-                                                    <flux:error name="hr_surfaceArea" />
+                                                    <flux:error name="privateLotType" />
                                                 </div>
                                             </flux:field>
                                         </td>
                                         <td class="border px-2 py-1 text-xs text-center">
                                             <flux:field class="radio-group-horizontal">
-                                                <flux:select wire:model="hr_informationSource" class=" text-gray-800 [&_option]:text-gray-900">
+                                                <flux:select wire:model="sourcePrivateLotType" class=" text-gray-800 [&_option]:text-gray-900">
                                                     <flux:select.option value="">-- Selecciona una opción --
                                                     </flux:select.option>
                                                     @foreach ($construction_source_information as $value => $label)
@@ -240,7 +246,7 @@
                                                     @endforeach
                                                 </flux:select>
                                                 <div>
-                                                    <flux:error name="hr_informationSource" />
+                                                    <flux:error name="sourcePrivateLotType" />
                                                 </div>
                                             </flux:field>
                                         </td>
@@ -253,25 +259,26 @@
 
 
 
-
+                                @if (stripos($propertyType, 'condominio') !== false)
                                 <tr>
                                     <td class="border px-2 py-1 text-xs text-center">Indiviso aplicable</td>
                                     <td class="border px-2 py-1 text-xs text-center">
                                         <flux:field>
                                             <div class="radio-group-horizontal">
                                                 <flux:input.group>
-                                                    <flux:input type="number" wire:model='ua_surfaceArea'/>
+                                                    <flux:input type="number" wire:model='applicableUndivided' step="any"/>
                                                     <flux:button disabled><b>%</b></flux:button>
                                                 </flux:input.group>
                                             </div>
+                                            <small class="sugget-text">Valor propuesto: <a wire:click="setApplicableUndividedToSuggested">{{number_format($landDetail->undivided_only_condominium , 2)}}</a><b> %</b></small>
                                             <div>
-                                                <flux:error name="ua_surfaceArea"/>
+                                                <flux:error name="applicableUndivided"/>
                                             </div>
                                         </flux:field>
                                     </td>
                                     <td class="border px-2 py-1 text-xs text-center">
                                         <flux:field class="radio-group-horizontal">
-                                            <flux:select wire:model="ua_informationSource"
+                                            <flux:select wire:model="sourceApplicableUndivided"
                                                 class=" text-gray-800 [&_option]:text-gray-900">
                                                 <flux:select.option value="">-- Selecciona una opción --
                                                 </flux:select.option>
@@ -282,7 +289,7 @@
                                                 @endforeach
                                             </flux:select>
                                             <div>
-                                                <flux:error name="ua_informationSource" />
+                                                <flux:error name="sourceApplicableUndivided" />
                                             </div>
                                         </flux:field>
                                     </td>
@@ -293,18 +300,19 @@
                                         <flux:field>
                                             <div class="radio-group-horizontal">
                                                 <flux:input.group>
-                                                    <flux:input type="number" wire:model='pl_surfaceArea' />
+                                                    <flux:input type="number" wire:model='proporcionalLand' step="any"/>
                                                     <flux:button disabled><b>m²</b></flux:button>
                                                 </flux:input.group>
                                             </div>
+                                            <small class="sugget-text">Valor propuesto: <a wire:click="setProporcionalLandToSuggested">{{number_format($landDetail->undivided_surface_land , 2)}}</a><b> m²</b></small>
                                             <div>
-                                                <flux:error name="pl_surfaceArea" />
+                                                <flux:error name="proporcionalLand" />
                                             </div>
                                         </flux:field>
                                     </td>
                                     <td class="border px-2 py-1 text-xs text-center">
                                         <flux:field class="radio-group-horizontal">
-                                            <flux:select wire:model="pl_informationSource"
+                                            <flux:select wire:model="sourceProporcionalLand"
                                                 class=" text-gray-800 [&_option]:text-gray-900">
                                                 <flux:select.option value="">-- Selecciona una opción --
                                                 </flux:select.option>
@@ -315,12 +323,12 @@
                                                 @endforeach
                                             </flux:select>
                                             <div>
-                                                <flux:error name="pl_informationSource" />
+                                                <flux:error name="sourceProporcionalLand" />
                                             </div>
                                         </flux:field>
                                     </td>
                                 </tr>
-
+                                @endif
 
                                 @if ($useExcessCalculation)
                                 <tr>
@@ -329,12 +337,13 @@
                                         <flux:field>
                                             <div class="radio-group-horizontal">
                                                 <flux:input.group>
-                                                    <flux:input type="number" wire:model='pl_surfaceArea' />
+                                                    <flux:input type="number" wire:model='surplusLandArea' step="any"/>
                                                     <flux:button disabled><b>m²</b></flux:button>
                                                 </flux:input.group>
                                             </div>
+                                            <small class="sugget-text">Valor propuesto: <a wire:click="setSurplusLandAreaToSuggested">{{number_format($landDetail->surplus_land_area , 2)}}</a><b> m²</b></small>
                                             <div>
-                                                <flux:error name="pl_surfaceArea" />
+                                                <flux:error name="surplusLandArea" />
                                             </div>
                                         </flux:field>
                                     </td>

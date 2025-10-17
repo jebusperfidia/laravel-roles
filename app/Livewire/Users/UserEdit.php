@@ -25,8 +25,14 @@ class UserEdit extends Component
             "name" => 'required',
             "email" => 'required|email',
             "type" => 'required',
-            "password" => 'same:confirmar_password',
+            "password" => 'nullable|same:confirm_password',
         ];
+
+        if ($this->password) {
+            $rules['password'] = 'required|same:confirm_password';
+            $rules['confirm_password'] = 'required';
+        }
+
 
         $this->validate(
             $rules,
@@ -53,6 +59,8 @@ class UserEdit extends Component
         return [
             'name' => 'nombre',
             'type' => 'tipo de usuario',
+            'type' => 'tipo de usuario',
+            'confirm_password' => 'confirmar password',
         ];
     }
 

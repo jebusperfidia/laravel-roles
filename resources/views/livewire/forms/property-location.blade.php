@@ -109,8 +109,8 @@
                 };
 
                 // Ejecutamos la configuración para cada mapa
-                setupMap(this.$refs.mapMacro, this.maps.macro, 5);
-                setupMap(this.$refs.mapMicro, this.maps.micro, 14);
+                setupMap(this.$refs.mapMacro, this.maps.macro, 7);
+                setupMap(this.$refs.mapMicro, this.maps.micro, 12);
                 setupMap(this.$refs.mapPolygon, this.maps.polygon, 18);
             },
 
