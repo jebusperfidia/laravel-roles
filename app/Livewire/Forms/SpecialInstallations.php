@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\Forms\LandDetails\LandDetailsModel;
 use App\Models\Forms\SpecialInstallation\SpecialInstallationModel;
 use Livewire\Component;
 use App\Models\Valuations\Valuation;
 use Illuminate\Support\Facades\Session;
 use Masmerise\Toaster\Toaster;
 use Flux\Flux;
+use Psy\Command\WhereamiCommand;
 
 class SpecialInstallations extends Component
 {
@@ -54,13 +56,16 @@ class SpecialInstallations extends Component
     public float $totalCommonProportional = 0;
 
     //Variables para generar elementos en tablas
-    public $key, $descriptionSI, $descriptionAE, $descriptionCW,
+    public $key, $descriptionSI, $descriptionAE, $descriptionCW, $descriptionOther,
     $unit, $quantity, $age, $usefulLife, $newRepUnitCost, $ageFactor, $conservationFactor,
     $netRepUnitCost, $undivided, $amount;
 
 
     //Estas variables también son para asignar en la BD pero se asignan mediante la lógica del sistema
     public $classificationType, $elementType;
+
+    //Asignamos el valor del indivso desde terreno:
+    public $undividedOnlyCondominium;
 
     public function mount()
     {
@@ -110,11 +115,21 @@ class SpecialInstallations extends Component
         //Finalmente, obtenemos el total de las instalaciones comunes
         $this->getTotalCommonInstallations();
 
+        //Obtenemos el valor del indiviso aplicado en terreno
+        $this->undividedOnlyCondominium = LandDetailsModel::findOrFail(Session::get('valuation_id'))->undivided_only_condominium;
+
+
+        //dd($this->undividedOnlyCondominium);
 
         }
 
 
         //dd($this->commonWorks);
+    }
+
+    public function nextComponent(){
+        /* Toaster::success('Formulario guardado con éxito'); */
+        return redirect()->route('form.index', ['section' => 'pre-appraisal-considerations']);
     }
 
 
@@ -154,10 +169,13 @@ class SpecialInstallations extends Component
 
         if ($this->elementType === 'installations') {
             $this->descriptionSI = $element->key; // IE01, IE02, etc.
+            $this->descriptionOther = $element->description_other;
         } elseif ($this->elementType === 'accessories') {
             $this->descriptionAE = $element->key; // EA01, EA02, etc.
+            $this->descriptionOther = $element->description_other;
         } elseif ($this->elementType === 'works') {
             $this->descriptionCW = $element->key; // OC01, OC02, etc.
+            $this->descriptionOther = $element->description_other;
         }
 
 
@@ -191,6 +209,7 @@ class SpecialInstallations extends Component
         // Lógica dinámica para la descripción y el mapeo del valor
         $selectedClave = null; // Variable temporal para guardar la clave elegida (Ej: 'IE01')
         $configArray = [];      // Variable temporal para guardar el array de configuración (Ej: $this->select_SI)
+        $selectedDescriptionName = null;
 
         if($this->elementType === 'installations'){
             $rules = array_merge($rules, [
@@ -199,6 +218,7 @@ class SpecialInstallations extends Component
             $selectedClave = $this->descriptionSI;
             //Mapea el valor de la clave seleccionada y el array de búsqueda
             $configArray = $this->select_SI;
+
 
         }elseif($this->elementType === 'accessories'){
             $rules = array_merge($rules, [
@@ -218,24 +238,27 @@ class SpecialInstallations extends Component
 
         }
 
-        if ($selectedClave) {
-            // Busca el elemento completo en el array de configuración usando la clave seleccionada.
-            // Ejemplo: Busca 'IE01' en $this->select_SI y devuelve el array completo.
-            $item = collect($configArray)->firstWhere('clave', $selectedClave);
 
-            //  1. Asignamos la CLAVE (IE01) a la propiedad 'key' del modelo.
-            $this->key = $selectedClave;
+        // Estas claves (IE19, EA12, OC17) no tienen descripción predefinida,
+        // así que se debe escribir una manualmente
+        $manualKeys = ['IE19', 'EA12', 'OC17'];
+        $isManualDescription = in_array($selectedClave, $manualKeys, true);
 
-            //  2. Asignamos la DESCRIPCIÓN LARGA (Elevadores) a la variable que se va a persistir.
-            // Si no encuentra la descripción, usa la clave como fallback (seguridad).
-            $selectedDescriptionName = $item['descripcion'] ?? $selectedClave;
+
+        // Si la clave requiere descripción manual, hacemos que 'descriptionOther' sea obligatoria.
+        // Si no, simplemente la dejamos como opcional.
+        if ($isManualDescription) {
+            $rules['descriptionOther'] = 'required|string';
+        } else {
+            $rules['descriptionOther'] = 'nullable|string';
         }
 
-
         //Finalmente, si el valor de   classificationType es común, asignamos la validación
-        if($this->classificationType === 'common'){
+        if ($this->classificationType === 'common') {
+
+            //$this->undividedOnlyCondominium = $this->undivided;
             $rules = array_merge($rules, [
-                'undivided'  => 'required|numeric|between:0,100',
+                'undividedOnlyCondominium'  => 'required|numeric|between:0,100',
             ]);
         }
 
@@ -244,6 +267,34 @@ class SpecialInstallations extends Component
             [],
             $this->validationAttributesItems()
         );
+
+
+        // Si no es una descripción manual, buscamos el texto del catálogo
+        // (esto se salta para IE19, EA12, OC17)
+        if ($selectedClave && !$isManualDescription) {
+            $item = collect($configArray)->firstWhere('clave', $selectedClave);
+            $selectedDescriptionName = $item['descripcion'] ?? $selectedClave;
+        }
+
+
+        $this->key = $selectedClave;
+
+        /* if ($selectedClave) { */
+            // Busca el elemento completo en el array de configuración usando la clave seleccionada.
+            // Ejemplo: Busca 'IE01' en $this->select_SI y devuelve el array completo.
+           /*  $item = collect($configArray)->firstWhere('clave', $selectedClave); */
+
+            //  1. Asignamos la CLAVE (IE01) a la propiedad 'key' del modelo.
+     /*        $this->key = $selectedClave; */
+
+
+
+            //  2. Asignamos la DESCRIPCIÓN LARGA (Elevadores) a la variable que se va a persistir.
+            // Si no encuentra la descripción, usa la clave como fallback (seguridad).
+      /*       $selectedDescriptionName = $item['descripcion'] ?? $selectedClave;
+        }
+ */
+
 
 
         //Hacemos algunos cálculos para asignar valores a campos que no se ingresan directamente
@@ -265,7 +316,16 @@ class SpecialInstallations extends Component
 
             // NO incluimos 'valuation_id', 'classification_type' ni 'element_type' ya que no deberían cambiar al editar
             'key' => $this->key,
-            'description' => $selectedDescriptionName, // El valor que va a la BD
+            /*    'description' => $selectedDescriptionName,
+            'description_other' => $this->descriptionOther, */
+
+            // Si es manual → 'description' va null y se usa 'description_other'
+            // Si no es manual → 'description_other' va null
+
+            'description' => $isManualDescription ? null : $selectedDescriptionName,
+            'description_other' => $isManualDescription ? $this->descriptionOther : null,
+
+
             'unit' => $this->unit,
             'quantity' => $this->quantity,
             'age' => $this->age,
@@ -274,9 +334,11 @@ class SpecialInstallations extends Component
             'age_factor' => $this->ageFactor,
             'conservation_factor' => $this->conservationFactor,
             'net_rep_unit_cost' => $this->netRepUnitCost,
-            'undivided' => $this->undivided,
+            'undivided' => $this->undividedOnlyCondominium,
             'amount' => $this->amount,
         ];
+
+        //dd($data);
 
         SpecialInstallationModel::create($data);
 
@@ -343,14 +405,26 @@ class SpecialInstallations extends Component
             $configArray = $this->select_CW;
         }
 
+        // Claves que requieren descripción manual
+        $manualKeys = ['IE19', 'EA12', 'OC17'];
+        $isManualDescription = in_array($selectedClave, $manualKeys, true);
+
+
+        // Validación condicional
+        if ($isManualDescription) {
+            $rules['descriptionOther'] = 'required|string';
+        } else {
+            $rules['descriptionOther'] = 'nullable|string';
+        }
+
         //  EXTRACCIÓN Y MAPEAMENTO DE CLAVE/DESCRIPCIÓN ---
-        if ($selectedClave) {
+       /*  if ($selectedClave) {
             $item = collect($configArray)->firstWhere('clave', $selectedClave);
 
             $this->key = $selectedClave;
             $selectedDescriptionName = $item['descripcion'] ?? $selectedClave;
         }
-
+ */
         //Finalmente, si el valor de   classificationType es común, asignamos la validación
         if ($this->classificationType === 'common') {
             $rules = array_merge($rules, [
@@ -374,10 +448,27 @@ class SpecialInstallations extends Component
         //Calcular el importe
         $this->amount = $this->netRepUnitCost * $this->quantity;
 
+
+
+        // Asignamos la clave y la descripción correcta para el guardado
+        if ($selectedClave) {
+            $this->key = $selectedClave;
+
+            if (!$isManualDescription) {
+                // Para claves normales, obtenemos la descripción del catálogo
+                $item = collect($configArray)->firstWhere('clave', $selectedClave);
+                $selectedDescriptionName = $item['descripcion'] ?? $selectedClave;
+            } else {
+                // Para claves manuales, description se deja null
+                $selectedDescriptionName = null;
+            }
+        }
+
         $data = [
             // Excluimos 'valuation_id', 'classification_type' y 'element_type' ya que NO deben cambiar
             'key' => $this->key,
             'description' => $selectedDescriptionName, // El valor que va a la BD
+            'description_other' => $isManualDescription ? $this->descriptionOther : null,
             'unit' => $this->unit,
             'quantity' => $this->quantity,
             'age' => $this->age,
@@ -389,6 +480,8 @@ class SpecialInstallations extends Component
             'undivided' => $this->undivided,
             'amount' => $this->amount,
         ];
+
+
 
         SpecialInstallationModel::find($this->elementId)->update($data);
 
@@ -474,6 +567,7 @@ class SpecialInstallations extends Component
             'descriptionSI',
             'descriptionAE',
             'descriptionCW',
+            'descriptionOther',
             'unit',
             'quantity',
             'age',

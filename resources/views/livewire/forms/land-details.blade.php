@@ -1,16 +1,15 @@
-<div>
-    {{-- AÑADIDO: Estilos CSS de Leaflet. Esencial para que el mapa se vea correctamente. --}}
+<div x-data="mapViewer()" x-init="init()">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
-        /* AÑADIDO: Asegura que los contenedores de los mapas tengan una altura definida */
         .map-container {
             height: 350px;
             border-radius: 12px;
             z-index: 1;
-            /* Asegura que el mapa se muestre correctamente sobre otros elementos */
         }
-    </style>
+
+        </style>
 
     <div class="flex justify-end font-semibold text-sm text-red-600 pt-2 -mb-3"><span>* Campos obligatorios</span></div>
     <form wire:submit="save">
@@ -342,7 +341,8 @@
                     <div>
                         <div class="flex items-center gap-4">
                             {{-- Input de archivo oculto para múltiples selecciones --}}
-                            <input type="file" wire:model="photos" class="sr-only" id="file-upload" multiple @if(!$landDetail) disabled @endif>
+                            <input type="file" wire:model="photos" class="sr-only" id="file-upload" multiple
+                                @if(!$landDetail) disabled @endif>
 
                             {{-- Botón estilizado para seleccionar archivos --}}
                             <label for="file-upload"
@@ -559,12 +559,9 @@
                     <h2 class="border-b-2 border-gray-300">Croquis - macro</h2>
                     <h2 class="border-b-2 border-gray-300">Croquis - micro</h2>
                 </div>
-
-                <div class="form-grid form-grid--3 mt-3 mb-2 text-lg" wire:ignore>
-
-                    <div id="map-macro" class="map-container"></div>
-
-                    <div id="map-micro" class="map-container"></div>
+                <div class="form-grid form-grid--3 mt-3 mb-2 text-lg">
+                    <div x-ref="mapMacro" class="map-container" wire:ignore></div>
+                    <div x-ref="mapMicro" class="map-container" wire:ignore ></div>
                 </div>
 
                 <div class="form-grid form-grid--3 mt-3 mb-2 text-lg">
@@ -992,7 +989,8 @@
                 @if ($ct_EasementRestrictions === 'Otras')
                 <div class="form-grid form-grid--2">
                     <flux:field class="flux-field">
-                        <flux:label>Especifique otras (servimbre y/o restricciones)<span class="sup-required">*</span></flux:label>
+                        <flux:label>Especifique otras (servimbre y/o restricciones)<span class="sup-required">*</span>
+                        </flux:label>
                         <flux:input type="text" wire:model='ct_EasementRestrictionsOthers' />
                         <div class="error-container">
                             <flux:error name="ct_EasementRestrictionsOthers" />
@@ -1046,7 +1044,8 @@
                                 <tr>
                                     <td class="px-2 py-1 text-xs text-center">{{ number_format($surface->surface, 2) }}
                                     </td>
-                                 {{--    <td class="px-2 py-1 text-xs text-center">{{ number_format($surface->value_area, 2)
+                                    {{-- <td class="px-2 py-1 text-xs text-center">{{
+                                        number_format($surface->value_area, 2)
                                         }}</td> --}}
                                     <td class="my-2 flex justify-evenly">
                                         <flux:button type="button" icon-leading="pencil"
@@ -1139,7 +1138,8 @@
                         <flux:field>
                             <div class="radio-group-horizontal">
                                 <flux:input.group>
-                                    <flux:input type="number" wire:model.lazy='ls_undividedOnlyCondominium' step="any"/>
+                                    <flux:input type="number" wire:model.lazy='ls_undividedOnlyCondominium'
+                                        step="any" />
                                     <flux:button disabled><b>%</b></flux:button>
                                 </flux:input.group>
                             </div>
@@ -1395,51 +1395,56 @@
         <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos</flux:button>
     </form>
 <script>
-    function initializeMaps() {
-        const lat = @js($propertyLocation->latitude);
-        const lon = @js($propertyLocation->longitude);
+        function mapViewer() {
+                return {
+                    maps: {
+                        macro: { map: null, marker: null },
+                        micro: { map: null, marker: null },
+                    },
 
-        if (lat === null || lon === null) {
-            console.error('Latitud o Longitud son nulas. No se puede inicializar el mapa.');
-            return;
-        }
+                    createOrUpdateMaps(lat, lon, alt = 0) {
+                        const latitude = parseFloat(lat);
+                        const longitude = parseFloat(lon);
+                        const altitude = parseFloat(alt) || 0;
 
-        const coords = [parseFloat(lat), parseFloat(lon)];
+                        if (isNaN(latitude) || isNaN(longitude)) {
+                            console.error('Coordenadas inválidas. No se puede inicializar el mapa.');
+                            return;
+                        }
 
-        const tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-        const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+                        const tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+                        const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 
-        // Macro
-        const macroDiv = document.getElementById('map-macro');
-        if (macroDiv) {
-            if (macroDiv._leaflet_id) {
-                macroDiv._leaflet_map.remove();
+                        const setupMap = (ref, mapObj, zoom) => {
+                            if (!ref) return;
+
+                            // Crea mapa solo una vez
+                            const map = L.map(ref).setView([latitude, longitude], zoom);
+                            L.tileLayer(tileLayerUrl, { attribution }).addTo(map);
+
+                            const marker = L.marker([latitude, longitude]).addTo(map);
+                            marker.bindPopup(
+                                `Lat: ${latitude.toFixed(6)}<br>Lon: ${longitude.toFixed(6)}<br>Alt: ${altitude.toFixed(2)} m`
+                            ).openPopup();
+
+                            mapObj.map = map;
+                            mapObj.marker = marker;
+                        };
+
+                        setupMap(this.$refs.mapMacro, this.maps.macro, 7);
+                        setupMap(this.$refs.mapMicro, this.maps.micro, 12);
+                    },
+
+                    init() {
+                        // Obtenemos los valores del componente Livewire (ya cargados desde la BD)
+                        const lat = @this.get('latitude');
+                        const lon = @this.get('longitude');
+                        const alt = @this.get('altitude') ?? 0;
+
+                        // Esperamos un momento para que el DOM esté listo
+                        setTimeout(() => this.createOrUpdateMaps(lat, lon, alt), 50);
+                    }
+                }
             }
-            const mapMacro = L.map(macroDiv).setView(coords, 7);
-            macroDiv._leaflet_map = mapMacro; // Guardamos referencia
-            L.tileLayer(tileLayerUrl, { attribution }).addTo(mapMacro);
-            L.marker(coords).addTo(mapMacro);
-        }
-
-        // Micro
-        const microDiv = document.getElementById('map-micro');
-        if (microDiv) {
-            if (microDiv._leaflet_id) {
-                microDiv._leaflet_map.remove();
-            }
-            const mapMicro = L.map(microDiv).setView(coords, 12);
-            microDiv._leaflet_map = mapMicro;
-            L.tileLayer(tileLayerUrl, { attribution }).addTo(mapMicro);
-            L.marker(coords).addTo(mapMicro);
-        }
-
-        console.log('Mapas inicializados con éxito');
-    }
-
-    document.addEventListener('DOMContentLoaded', initializeMaps);
-
-    document.addEventListener('livewire:navigated', () => {
-        setTimeout(initializeMaps, 0); // Espera al DOM completo
-    });
-</script>
+    </script>
 </div>

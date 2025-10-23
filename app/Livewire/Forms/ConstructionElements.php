@@ -523,7 +523,7 @@ class ConstructionElements extends Component
         $rules = [
             'space' => 'required',
             'amount' => 'required|numeric',
-            'floors' => 'required|numeric',
+            'floors' => 'required',
             'walls' => 'required',
             'ceilings' => 'required'
         ];

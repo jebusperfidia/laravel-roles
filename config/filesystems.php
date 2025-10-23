@@ -53,6 +53,13 @@ return [
             'visibility' => 'public',
         ],
 
+        'comparables_public' => [
+            'driver' => 'local',
+            'root' => public_path('comparables'), // <-- AHORA apunta directamente a public/comparables
+            'url' => env('APP_URL') . '/comparables',
+            'visibility' => 'public',
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

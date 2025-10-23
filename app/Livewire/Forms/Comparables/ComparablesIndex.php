@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Forms\Comparables;
 
+
+use App\Models\Forms\Comparable\ComparableModel;
+use Livewire\WithFileUploads;
 use Livewire\Component;
 use Illuminate\Support\Facades\Session;
 use App\Models\Valuations\Valuation;
@@ -14,6 +17,18 @@ use Illuminate\Support\Facades\Auth;
 
 class ComparablesIndex extends Component
 {
+
+    use WithFileUploads;
+
+    public $comparablePhotosFile;
+
+    // PROPIEDADES AGREGADAS PARA LATITUD Y LONGITUD
+    //public float $comparableLatitude = 19.4326; // VALOR INICIAL DEFAULT (CDMX)
+    //public float $comparableLongitude = -99.1332; // VALOR INICIAL DEFAULT (CDMX)
+
+    // LISTENER PARA RECIBIR COORDENADAS DESDE JAVASCRIPT/ALPINE.JS
+    protected $listeners = ['set-map-coordinates' => 'setMapCoordinates'];
+
     public $id;
     public $valuation;
 
@@ -29,22 +44,30 @@ class ComparablesIndex extends Component
     public $userSession;
 
     //Variables para el modal de creación de comparables para el avaluo
-    public $comparableKey, $comparableFolio, $comparableDischargedBy, $Comparableproperty,
+    public $comparableKey, $comparableFolio, $comparableDischargedBy, $comparableProperty,
     $comparableEntity, $comparableLocality, $comparableColony, $comparableOtherColony, $comparableStreet,
     $comparableBetweenStreet, $comparableAndStreet, $comparableCp,
-    $comparableName, $comparableLastName, $comparablePhone, $comparableUrl, $comparablelandUse,
+    $comparableName, $comparableLastName, $comparablePhone, $comparableUrl, $comparableLandUse,
     $comparableDescServicesInfraestructure,
     $comparableServicesInfraestructure, $comparableShape, $comparableDensity,
     $comparableFront, $comparableFrontType, $comparableDescriptionForm, $comparableTopography,
     $comparableCharacteristics, $comparableCharacteristicsGeneral,  $comparableLocationBlock,
     $comparableStreetLocation, $comparableGeneralPropArea, $comparableUrbanProximityReference,
-    $comparableSourceInfImages, $comparablePhotos, $comparableActive;
+    $comparableSourceInfImages, $comparableActive;
 
-    public int $comparableAbroadNumber, $comparableInsideNumber, $comparableAllowedLevels,
+    //Variables para obtener los nombres de estado, ciudad y colonia sin consultar API Dipomex
+    public $comparableEntityName, $comparableLocalityName;
+
+    public $comparableAbroadNumber, $comparableInsideNumber, $comparableAllowedLevels,
     $comparableNumberFronts;
 
     public float $comparableFreeAreaRequired, $comparableSlope, $comparableOffers, $comparableLandArea,
         $comparableBuiltArea, $comparableUnitValue, $comparableBargainingFactor;
+
+
+    //Variable para guardar los comparables asignados al avaluo
+    public $assignedComparables = [];
+
 
 
     public function mount(DipomexService $dipomex)
@@ -58,6 +81,9 @@ class ComparablesIndex extends Component
         //Buscamos el valor del avaluó para mostrar el valor del folio correspondiente
         $this->valuation = Valuation::find($this->id);
 
+        //Asignamos los comparables ya asignados al avalúo
+        $this->assignedComparables = $this->valuation->comparables()->orderByPivot('position')->get();
+
         //Inicializar variables de ejemplos
         $this->comparableKey = 01;
         $this->comparableFolio = $this->valuation->folio;
@@ -66,9 +92,18 @@ class ComparablesIndex extends Component
 
         $this->comparableDischargedBy = $userSession->name;
 
+     }
 
+    // NUEVA FUNCIÓN PARA ACTUALIZAR COORDENADAS DESDE EL MAPA (JAVASCRIPT)
+   /*  public function setMapCoordinates($latitude, $longitude)
+    {
+        $this->comparableLatitude = (float) $latitude;
+        $this->comparableLongitude = (float) $longitude; */
+        // OPCIONAL: MOSTRAR UN TOAST PARA CONFIRMAR LA ACTUALIZACIÓN
+ /*        Toaster::info('Coordenadas actualizadas desde el mapa.');
     }
 
+ */
 
     //Función para agregar un comparable para el avalúo
     public function openAddComparable()
@@ -77,27 +112,94 @@ class ComparablesIndex extends Component
         Flux::modal('add-comparable')->show();
     }
 
-
-    public function save(){
-
-        //Ejecutar función con todas las reglas de validación y validaciones condicionales, guardando todo en una variable
+    public function save()
+    {
+        // Ejecutar función con todas las reglas de validación y validaciones condicionales, guardando todo en una variable
         $validator = $this->validateModal();
 
-        //Comprobamos si se obtuvieron errores de validación
+        // Comprobamos si se obtuvieron errores de validación
         if ($validator->fails()) {
-            //Enviamos un mensaje en pantalla indicando que existen errores de validación
+            // Enviamos un mensaje en pantalla indicando que existen errores de validación
             Toaster::error('Existen errores de validación');
 
-            //Colocamos los errores en pantalla
+            // Colocamos los errores en pantalla
             $this->setErrorBag($validator->getMessageBag());
 
-            //Hacemos un return para detener el flujo del sistema
+            // Hacemos un return para detener el flujo del sistema
+
+            //dd($validator->errors()->all());
             return;
         }
 
-       $this->resetComparableFields();
+        // --- MANEJO Y SUBIDA DE ARCHIVO (Solo si la validación pasa) ---
+        $photoPath = null;
+        if ($this->comparablePhotosFile) {
+            // Guarda el archivo en el disco 'public' y devuelve la ruta.
+            $photoPath = $this->comparablePhotosFile->store('/', 'comparables_public');
+        }
 
-        Toaster::success('Comparable añadido');
+        // --- CREACIÓN DEL REGISTRO EN LA BASE DE DATOS (Mapeo completo) ---
+        ComparableModel::create([
+            'valuation_id' => $this->id,
+            'comparable_key' => $this->comparableKey,
+            'comparable_folio' => $this->comparableFolio,
+            'comparable_discharged_by' => $this->comparableDischargedBy,
+            'comparable_property' => $this->comparableProperty,
+            'comparable_entity' => $this->comparableEntity,
+            'comparable_entity_name' => $this->comparableEntityName,
+            'comparable_locality' => $this->comparableLocality,
+            'comparable_locality_name' => $this->comparableLocalityName,
+            'comparable_colony' => $this->comparableColony,
+            'comparable_other_colony' => $this->comparableOtherColony,
+            'comparable_street' => $this->comparableStreet,
+            'comparable_between_street' => $this->comparableBetweenStreet,
+            'comparable_and_street' => $this->comparableAndStreet,
+            'comparable_cp' => $this->comparableCp,
+            'comparable_name' => $this->comparableName,
+            'comparable_last_name' => $this->comparableLastName,
+            'comparable_phone' => $this->comparablePhone,
+            'comparable_url' => $this->comparableUrl,
+            'comparable_land_use' => $this->comparableLandUse,
+            'comparable_desc_services_infraestructure' => $this->comparableDescServicesInfraestructure,
+            'comparable_services_infraestructure' => $this->comparableServicesInfraestructure,
+            'comparable_shape' => $this->comparableShape,
+            'comparable_density' => $this->comparableDensity,
+            'comparable_front' => $this->comparableFront,
+            'comparable_front_type' => $this->comparableFrontType,
+            'comparable_description_form' => $this->comparableDescriptionForm,
+            'comparable_topography' => $this->comparableTopography,
+            'comparable_characteristics' => $this->comparableCharacteristics,
+            'comparable_characteristics_general' => $this->comparableCharacteristicsGeneral,
+            'comparable_location_block' => $this->comparableLocationBlock,
+            'comparable_street_location' => $this->comparableStreetLocation,
+            'comparable_general_prop_area' => $this->comparableGeneralPropArea,
+            'comparable_urban_proximity_reference' => $this->comparableUrbanProximityReference,
+            'comparable_source_inf_images' => $this->comparableSourceInfImages ?? '',
+            'comparable_photos' => $photoPath, // <--- RUTA DEL ARCHIVO SUBIDO
+            'comparable_abroad_number' => $this->comparableAbroadNumber,
+            'comparable_inside_number' => $this->comparableInsideNumber,
+            'comparable_allowed_levels' => $this->comparableAllowedLevels,
+            'comparable_number_fronts' => $this->comparableNumberFronts,
+            'comparable_free_area_required' => $this->comparableFreeAreaRequired,
+            'comparable_slope' => $this->comparableSlope,
+            'comparable_offers' => $this->comparableOffers,
+            'comparable_land_area' => $this->comparableLandArea,
+            'comparable_built_area' => $this->comparableBuiltArea,
+            'comparable_unit_value' => $this->comparableUnitValue,
+            'comparable_bargaining_factor' => $this->comparableBargainingFactor,
+           // 'comparable_latitude' => $this->comparableLatitude,
+            //'comparable_longitude' => $this->comparableLongitude,
+            'is_active' => $this->comparableActive,
+        ]);
+
+
+        // Limpiamos los campos después de guardar
+        $this->resetComparableFields();
+
+        // Enviamos mensaje de éxito
+        Toaster::success('Comparable añadido exitosamente');
+
+        // Cerramos el modal
         Flux::modal('add-comparable')->close();
     }
 
@@ -123,7 +225,7 @@ class ComparablesIndex extends Component
         //Si por alguna razón la respueta está vacía, reseteamos los campos y mostramos un error
         if (empty($data)) {
             Toaster::error('No se encontró información para el código postal proporcionado.');
-            $this->reset(['comparableCp', 'comparableEntity', 'comparableLocality', 'comparableColony', 'municipalities', 'colonies']);
+            $this->reset(['comparableCp', 'comparableEntity', 'comparableLocality', 'comparableColony', 'municipalities', 'colonies', 'comparableEntityName', 'comparableLocalityName']);
             return;
         }
 
@@ -139,6 +241,10 @@ class ComparablesIndex extends Component
         // Setear el id del estado seleccionado
         $this->comparableEntity = $estadoId;
 
+        // <-- AGREGADO: Asignar el NOMBRE del estado
+        $this->comparableEntityName = $data['estado'];
+        //dd($this->comparableEntityName);
+
         // Poblar municipios inmediatamente
         $this->municipalities = $dipomex->getMunicipiosPorEstado($estadoId);
         //dd($this->municipalities);
@@ -149,9 +255,15 @@ class ComparablesIndex extends Component
         //Asignamos el valor del municipio
         $this->comparableLocality = $municipioId;
 
+        // <-- AGREGADO: Asignar el NOMBRE del municipio
+        $this->comparableLocalityName = $data['municipio'];
+
         // Asignar colonias
         $this->colonies = $data['colonias'];
+
         //dd($this->colonies);
+
+        //dd($this->comparableLocalityName, $this->comparableEntityName, $this->comparableEntity, $this->comparableLocality);
 
         Toaster::success('Información encontrada correctamente.');
     }
@@ -160,9 +272,14 @@ class ComparablesIndex extends Component
 
     //Creamos un watcher para cuando se actualice el valor del select de estados
     //Este llamará al método del servicio para poblar los municipios
+    //Creamos un watcher para cuando se actualice el valor del select de estados
     public function updatedComparableEntity($estadoId, DipomexService $dipomex)
     {
-        $this->reset(['comparableLocality', 'comparableColony', 'municipalities', 'colonies']);
+        // <-- MODIFICADO: Reiniciar también los nombres de ubicación al cambiar el estado
+        $this->reset(['comparableLocality', 'comparableColony', 'municipalities', 'colonies', 'comparableLocalityName']);
+
+        // <-- AGREGADO: Asignar el NOMBRE del estado si el ID es válido
+        $this->comparableEntityName = $this->states[$estadoId] ?? null;
 
         if ($estadoId) {
             $this->municipalities = $dipomex->getMunicipiosPorEstado($estadoId);
@@ -170,12 +287,14 @@ class ComparablesIndex extends Component
     }
 
     //Creamos un watcher para cuando se actualice el valor del select de municipios
-    //Este llamará al método del servicio para poblar las colonias
     public function updatedComparableLocality($municipioId, DipomexService $dipomex)
     {
-
-
+        // <-- MODIFICADO: Reiniciar también el nombre de la colonia al cambiar el municipio
         $this->reset(['comparableColony', 'colonies']);
+
+        // <-- AGREGADO: Asignar el NOMBRE del municipio si el ID es válido
+        // Asumiendo que $this->municipalities es un array ID => Nombre
+        $this->comparableLocalityName = $this->municipalities[$municipioId] ?? null;
 
         if ($municipioId && $this->comparableEntity) {
             // Como ahora gi_ownerLocality tiene el MUNICIPIO_ID, lo pasamos directo
@@ -186,21 +305,25 @@ class ComparablesIndex extends Component
 
     //Función para acortar URL usando URL clean https://urlclean.com
     public function shortUrl(){
+        //Generamos la validación
         $this->validate([
             'comparableUrl' => 'required|url',
         ]);
-
+        //Mediante un try catch, intentamos formatear el texto usando la API de cleanuri
         try {
             $response = Http::asForm()->post('https://cleanuri.com/api/v1/shorten', [
+                //Enviamos como parámetro la url obtenida del modal
                 'url' => $this->comparableUrl,
             ]);
-
+            //Si la respuesta fue exitosa, y se obtuvo la URL, enviamos un mensaje y asignamos la URL ya generada
             if ($response->successful() && isset($response['result_url'])) {
                 $this->comparableUrl = $response['result_url'];
                 Toaster::success('URL acortada exitosamente.');
+                //Si hubo algún error, enviamos un mensaje en pantalla
             } else {
                 Toaster::error('No se pudo acortar la URL. Intenta de nuevo.');
             }
+            //Si por alguna razón, no hay respuesta de la API, enviamos un mensaje en pantalla
         } catch (\Exception $e) {
             Toaster::error('Error al conectar con CleanURL: ' . $e->getMessage());
         }
@@ -213,15 +336,17 @@ class ComparablesIndex extends Component
             'comparableKey' => 'required',
             'comparableFolio' => 'required',
             'comparableDischargedBy' => 'required',
-            'Comparableproperty' => 'required',
+            'comparableProperty' => 'required',
             'comparableCp' => 'required|integer|digits:5',
             'comparableEntity' => 'nullable',
+            //'comparableEntityName' => 'nullable',
             'comparableLocality' => 'nullable',
+            //'comparableLocalityName' => 'nullable',
             'comparableColony' => 'nullable',
             /* 'comparableOtherColony' => 'required', */
             'comparableStreet' => 'required',
-            'comparableAbroadNumber' => 'required|integer',
-            'comparableInsideNumber' => 'nullable|integer',
+            'comparableAbroadNumber' => 'required',
+            'comparableInsideNumber' => 'nullable',
             'comparableBetweenStreet' => 'required',
             'comparableAndStreet' => 'required',
             'comparableName' => 'required',
@@ -230,8 +355,8 @@ class ComparablesIndex extends Component
             /* 'comparablePhone' => 'bail|required|regex:/^[0-9]+$/|digits_between:7,15', */
             'comparablePhone' => 'bail|required|integer|digits_between:7,15',
             'comparableUrl' => 'required|url',
-            'comparablelandUse' => 'required',
-            'comparableFreeAreaRequired' => 'required|integer|between:0,100',
+            'comparableLandUse' => 'required',
+            'comparableFreeAreaRequired' => 'required|numeric|between:0,100',
             'comparableAllowedLevels' => 'required|integer',
             'comparableServicesInfraestructure' => 'nullable',
             'comparableDescServicesInfraestructure' => 'required',
@@ -255,8 +380,15 @@ class ComparablesIndex extends Component
             'comparableUrbanProximityReference' => 'required',
             'comparableNumberFronts' => 'required|integer',
             'comparableSourceInfImages' => 'required',
-            'comparablePhotos' => 'required',
+            //'comparablePhotos' => 'required',
             /* 'comparableActive' => 'required', */
+
+            // REGLAS PARA COORDENADAS: REQUIERE UN VALOR NUMÉRICO VÁLIDO
+            //'comparableLatitude' => 'required|numeric|between:-90,90',
+            //'comparableLongitude' => 'required|numeric|between:-180,180',
+
+            // Regla específica para el archivo de foto
+            'comparablePhotosFile' => 'required|mimes:jpg,jpeg,png|max:2048', // Máximo 5MB
         ];
 
         if($this->comparableOtherColony === 'no-listada'){
@@ -283,7 +415,7 @@ class ComparablesIndex extends Component
             'comparableKey' => 'clave',
             'comparableFolio' => 'folio',
             'comparableDischargedBy' => 'dado de alta por',
-            'Comparableproperty' => 'tipo de inmueble',
+            'comparableProperty' => 'tipo de inmueble',
             'comparableCp' => 'código postal',
             'comparableEntity' => 'estado',
             'comparableLocality' => 'municipio',
@@ -298,7 +430,7 @@ class ComparablesIndex extends Component
             'comparableLastName' => 'apellido',
             'comparablePhone' => 'teléfono',
             'comparableUrl' => 'URL',
-            'comparablelandUse' => 'uso de suelo',
+            'comparableLandUse' => 'uso de suelo',
             'comparableFreeAreaRequired' => 'área libre requerido',
             'comparableAllowedLevels' => 'niveles permitidos',
             'comparableServicesInfraestructure' => 'servicios/infraestructura',
@@ -323,14 +455,22 @@ class ComparablesIndex extends Component
             'comparableUrbanProximityReference' => 'referencia de proximidad urbana',
             'comparableNumberFronts' => 'número de frentes',
             'comparableSourceInfImages' => 'fuente de imágenes',
-            'comparablePhotos' => 'fotos',
+            'comparablePhotosFile' => 'fotos',
             'comparableActive' => 'activo',
+
+            // ATRIBUTOS AÑADIDOS PARA MENSAJES DE ERROR MÁS CLAROS
+            'comparableLatitude' => 'latitud (Mapa)',
+            'comparableLongitude' => 'longitud (Mapa)',
         ];
     }
 
 
     public function resetComparableFields()
     {
+     /*    $this->comparableLatitude = 19.4326;
+        $this->comparableLongitude = -99.1332; */
+
+
         $this->reset([
             'comparableCp',
             'comparableEntity',
@@ -346,8 +486,8 @@ class ComparablesIndex extends Component
             'comparableLastName',
             'comparablePhone',
             'comparableUrl',
-            'comparablelandUse',
-            'comparablefreeAreaRequired',
+            'comparableLandUse',
+            'comparableFreeAreaRequired',
             'comparableAllowedLevels',
             'comparableServicesInfraestructure',
             'comparableDescServicesInfraestructure',
@@ -371,8 +511,10 @@ class ComparablesIndex extends Component
             'comparableUrbanProximityReference',
             'comparableNumberFronts',
             'comparableSourceInfImages',
-            'comparablePhotos',
+            //'comparablePhotos',
             'comparableActive',
+
+            'comparablePhotosFile', // Resetear el archivo temporal
         ]);
     }
 

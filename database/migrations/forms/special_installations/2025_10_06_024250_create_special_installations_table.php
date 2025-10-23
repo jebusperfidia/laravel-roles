@@ -27,7 +27,9 @@ return new class extends Migration
             $table->string('key')->nullable(); // Campo $key
 
             // Campo de descripción unificado (en lugar de descriptionSI, descriptionAE, descriptionCW)
-            $table->string('description');
+            $table->string('description')->nullable();
+
+            $table->string('description_other')->nullable(); // Campo adicional para asignar una descricción personalizada
 
             $table->string('unit', 50)->nullable();
             $table->unsignedInteger('quantity')->nullable();
@@ -35,14 +37,14 @@ return new class extends Migration
             $table->unsignedSmallInteger('useful_life')->nullable();
 
             // Costos y Factores (Decimales)
-            $table->decimal('new_rep_unit_cost', 10, 2)->nullable();
-            $table->decimal('age_factor', 5, 2)->nullable();
-            $table->decimal('conservation_factor', 5, 2)->nullable();
-            $table->decimal('net_rep_unit_cost', 10, 2)->nullable();
+            $table->decimal('new_rep_unit_cost', 15, 4)->nullable();
+            $table->decimal('age_factor', 5, 4)->nullable();
+            $table->decimal('conservation_factor', 5, 4)->nullable();
+            $table->decimal('net_rep_unit_cost', 15, 4)->nullable();
 
             // Valores finales
-            $table->decimal('undivided', 10, 2)->nullable();
-            $table->decimal('amount', 10, 2)->nullable();
+            $table->decimal('undivided', 10, 6)->nullable();
+            $table->decimal('amount', 15, 6)->nullable();
 
 
             $table->timestamps();

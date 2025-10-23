@@ -27,6 +27,7 @@ class SpecialInstallationModel extends Model
         'element_type',
         'key',
         'description',
+        'description_other',
         'unit',
         'quantity',
         'age',

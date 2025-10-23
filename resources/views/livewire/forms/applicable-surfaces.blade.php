@@ -111,9 +111,9 @@
                             <div class="radio-group-horizontal">
                                 <flux:input.group>
                                     @if ($calculationBuiltArea)
-                                    <flux:input type="number" wire:model.live='builtArea' step="any" readonly/>
+                                    <flux:input type="number" wire:model='builtArea' step="any" readonly/>
                                     @else
-                                    <flux:input type="number" wire:model.live='builtArea' step="any"/>
+                                    <flux:input type="number" wire:model='builtArea' step="any"/>
                                     @endif
                                     <flux:button><b>m²</b></flux:button>
                                 </flux:input.group>
@@ -156,7 +156,10 @@
                                                     <flux:button disabled><b>m²</b></flux:button>
                                                 </flux:input.group>
                                             </div>
-                                            <small class="sugget-text">Valor propuesto: <a wire:click="setSurfaceAreaToSuggested">{{number_format($landSurfacesTotal, 2)}}</a><b> m²</b></small>
+                                            <small class="sugget-text">Valor propuesto: <a wire:click="setSurfaceAreaToSuggested">
+                                             {{--    {{number_format($landSurfacesTotal, 2)}} --}}
+                                                {{ rtrim(rtrim(number_format($landSurfacesTotal, 6, '.', ','), '0'), '.') }}
+                                            </a><b> m²</b></small>
                                             <div>
                                                 <flux:error name="surfaceArea" />
                                             </div>
@@ -387,10 +390,16 @@
                                     construcciones:
                                 </td>
                                 <td class="border px-2 py-1 text-sm text-center">
-                                    {{number_format($totalSurfacePrivate, 2)}}
+                                    {{-- {{number_format($totalSurfacePrivate, 2)}} --}}
+                                    {{
+                                   rtrim(rtrim(number_format($totalSurfacePrivate, 6, '.', ','), '0'), '.')
+                                    }}
                                 </td>
                                 <td class="border px-2 py-1 text-sm text-center">
-                                    {{number_format($totalSurfaceCommon, 2)}}
+                                    {{-- {{number_format($totalSurfaceCommon, 2)}} --}}
+                                    {{
+                               rtrim(rtrim(number_format($totalSurfaceCommon, 6, '.', ','), '0'), '.')
+                                }}
                                 </td>
                             </tr>
                            {{--  <tr>
@@ -422,9 +431,17 @@
                                 <td class="border px-2 py-1 text-xs text-center">Superficie total de
                                     construcciones:
                                 </td>
-                                <td class="border px-2 py-1 text-sm text-center">{{number_format($totalSurfacePrivateVendible, 2)}}
+                                <td class="border px-2 py-1 text-sm text-center">
+                                    {{
+                                    /* number_format($totalSurfacePrivateVendible, 2) */
+                                    rtrim(rtrim(number_format($totalSurfacePrivateVendible, 6, '.', ','), '0'), '.')
+                                    }}
                                 </td>
-                                <td class="border px-2 py-1 text-sm text-center">{{number_format($totalSurfacePrivateAccesoria, 2)}}
+                                <td class="border px-2 py-1 text-sm text-center">
+                                    {{
+                                    /* number_format($totalSurfacePrivateAccesoria, 2) */
+                                    rtrim(rtrim(number_format($totalSurfacePrivateAccesoria, 6, '.', ','), '0'), '.')
+                                    }}
                                 </td>
                             </tr>
                         </tbody>

@@ -132,17 +132,20 @@
                                 @foreach ($privateInstallations as $item)
                                 <tr>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->key.'-'.$item->description}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+
+                                        {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
+                                    </td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->quantity}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{number_format($item->quantity)}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->new_rep_unit_cost}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->net_rep_unit_cost}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">N/A</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->amount}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
                                     <td class="my-2 flex justify-evenly">
                                         {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
@@ -211,17 +214,20 @@
                                 @foreach ($privateAccessories as $item)
                                 <tr>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->key.'-'.$item->description}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->quantity}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->new_rep_unit_cost}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->net_rep_unit_cost}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">N/A</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->amount}}</td>
+                                   <td class="px-2 py-1 border text-sm text-center">
+
+                                    {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
+                                </td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{number_format($item->quantity)}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">N/A</td>
+                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
                                     <td class="my-2 flex justify-evenly">
                                         {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
@@ -293,17 +299,20 @@
                                 @foreach ($privateWorks as $item)
                                 <tr>
                                   <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->key.'-'.$item->description}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->quantity}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->new_rep_unit_cost}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->net_rep_unit_cost}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">N/A</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->amount}}</td>
+                               <td class="px-2 py-1 border text-sm text-center">
+
+                                {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
+                            </td>
+                            <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
+                            <td class="px-2 py-1 border text-sm text-center">{{number_format($item->quantity)}}</td>
+                            <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
+                            <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
+                            <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
+                            <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
+                            <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
+                            <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
+                            <td class="px-2 py-1 border text-sm text-center">N/A</td>
+                            <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
                                     <td class="my-2 flex justify-evenly">
                                         {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
@@ -379,17 +388,20 @@
                                 @foreach ($commonInstallations as $item)
                                 <tr>
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->key.'-'.$item->description}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">
+
+                                    {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
+                                </td>
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->quantity}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{number_format($item->quantity)}}</td>
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->new_rep_unit_cost}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->net_rep_unit_cost}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->amount}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}} %</td>
+                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
                                     <td class="my-2 flex justify-evenly">
                                         {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
@@ -459,17 +471,20 @@
                                 @foreach ($commonAccessories as $item)
                                 <tr>
                                    <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->key.'-'.$item->description}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->quantity}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->new_rep_unit_cost}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->net_rep_unit_cost}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->amount}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">
+
+                                    {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
+                                </td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{number_format($item->quantity)}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}} %</td>
+                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
                                     <td class="my-2 flex justify-evenly">
                                         {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
@@ -537,17 +552,20 @@
                                 @foreach ($commonWorks as $item)
                                 <tr>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->key.'-'.$item->description}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+
+                                        {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
+                                    </td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->quantity}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{number_format($item->quantity)}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->new_rep_unit_cost}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->net_rep_unit_cost}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->amount}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}} %</td>
+                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
                                     <td class="my-2 flex justify-evenly">
                                         {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
                                             <flux:button type="button" icon-leading="pencil"
@@ -589,20 +607,20 @@
                                 <tr>
                                     <td class="px-2 py-2 text-xs text-center">Importe total instalaciones especiales:
                                     </td>
-                                    <td class="px-2 py-2 text-xs text-center">{{$subTotalPrivateInstallations}}</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{$subTotalCommonInstallations}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{number_format($subTotalPrivateInstallations,4)}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{number_format($subTotalCommonInstallations,4)}}</td>
                                 </tr>
 
                                 <tr>
                                     <td class="px-2 py-2 text-xs text-center">Importe total elementos accesorios:</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{$subTotalPrivateAccessories}}</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{$subTotalCommonAccessories}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{number_format($subTotalPrivateAccessories,4)}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{number_format($subTotalCommonAccessories,4)}}</td>
                                 </tr>
 
                                 <tr>
                                     <td class="px-2 py-2 text-xs text-center">Importe total obras complementarias:</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{$subTotalPrivateWorks}}</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{$subTotalCommonWorks}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{number_format($subTotalPrivateWorks,4)}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{number_format($subTotalCommonWorks,4)}}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -627,15 +645,15 @@
                                 <tr>
                                     <td class="px-2 py-2 text-xs text-center">Importe Total:
                                         (Inst. Especiales, Obras Comp. y Elem. Accesorios)</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{$totalPrivateInstallations}}</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{$totalCommonInstallations}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{number_format($totalPrivateInstallations,4)}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{number_format($totalCommonInstallations, 4)}}</td>
                                 </tr>
 
                                 <tr>
                                     <td class="px-2 py-2 text-xs text-center">Importe PRO INDIVISO:
                                         (Inst. Especiales, Obras Comp. y Elem. Accesorios)</td>
                                     <td class="px-2 py-2 text-xs text-center">No aplica</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{$totalCommonProportional}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">{{number_format($totalCommonProportional,4)}}</td>
                                 </tr>
 
                             </tbody>
@@ -649,9 +667,9 @@
 </div>
 
 
-{{--
-<flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos
-</flux:button> --}}
+
+<flux:button class="mt-4 cursor-pointer btn-primary" variant="primary" wire:click='nextComponent'>Continuar
+</flux:button>
 
 
 {{-- MODALES PARA INSTALACIONES ESPECIALES --}}
@@ -913,6 +931,16 @@
 
         @endif
 
+        @if ($descriptionSI === 'IE19' || $descriptionAE === 'EA12' || $descriptionCW === 'OC17')
+
+        <flux:field class="flux-field pt-4 pb-[-10px]">
+            <flux:label>Agregar otra descripción</flux:label>
+            <flux:input type="text" wire:model='descriptionOther' />
+            <div class="error-container">
+                <flux:error name="descriptionOther" />
+            </div>
+        </flux:field>
+        @endif
 
 
         <flux:field class="flux-field pt-4">
@@ -949,7 +977,7 @@
         <flux:field class="flux-field">
             <flux:label>Vida útil<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model.live='usefulLife'
-            :disabled="$descriptionSI !== 'IE19'"/>
+          :disabled="!($descriptionSI === 'IE19' || $descriptionAE === 'EA12' || $descriptionCW === 'OC17')"/>
             <div class="error-container">
                 <flux:error name="usefulLife" />
             </div>
@@ -1057,7 +1085,7 @@
         @if ($classificationType === 'common')
         <flux:field class="flux-field">
             <flux:label>%Indiviso<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='undivided' />
+            <flux:input type="number" wire:model='undivided'/>
             <div class="error-container">
                 <flux:error name="undivided" />
             </div>
@@ -1347,10 +1375,16 @@
 
 
 
+        @if ($descriptionSI === 'IE19' || $descriptionAE === 'EA12' || $descriptionCW === 'OC17')
 
-
-
-
+        <flux:field class="flux-field pt-4 pb-[-10px]">
+            <flux:label>Agregar otra descripción</flux:label>
+            <flux:input type="text" wire:model='descriptionOther' />
+            <div class="error-container">
+                <flux:error name="descriptionOther" />
+            </div>
+        </flux:field>
+        @endif
 
 
 
@@ -1495,11 +1529,11 @@
         </flux:field> --}}
 
         @if ($classificationType === 'common')
-        <flux:field class="flux-field">
+        <flux:field class="flux-field pt-4">
             <flux:label>%Indiviso<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='undivided' />
+            <flux:input type="number" wire:model='undividedOnlyCondominium' readonly/>
             <div class="error-container">
-                <flux:error name="undivided" />
+                <flux:error name="undividedOnlyCondominium" />
             </div>
         </flux:field>
         @endif
@@ -1512,8 +1546,8 @@
             </div>
         </flux:field> --}}
 
-        <div class="flex">
-            <flux:spacer />
+        <div class="flex pt-8">
+            <flux:spacer/>
 
             <flux:button type="button" class="btn-primary btn-table cursor-pointer" variant="primary"
                 wire:click='addElement'>Guardar elemento

@@ -108,9 +108,12 @@ class ApplicableSurfaces extends Component
         $this->totalSurfaceCommon = collect($this->buildingConstructionsCommon)->sum('surface');
 
         // Subtotal para 'superficie vendible'
-        $this->totalSurfacePrivateVendible = collect($this->buildingConstructionsPrivate)
+        $totalSurfacePrivateVendible = collect($this->buildingConstructionsPrivate)
             ->filter(fn($item) => $item->surface_vad === 'superficie vendible')
             ->sum('surface');
+
+        $this->totalSurfacePrivateVendible  = rtrim(
+            rtrim(number_format($totalSurfacePrivateVendible, 6, '.', ','), '0'));
 
         // Subtotal para 'superficie accesoria'
         $this->totalSurfacePrivateAccesoria = collect($this->buildingConstructionsPrivate)
@@ -355,7 +358,7 @@ class ApplicableSurfaces extends Component
         }
 
         // Asignar el total al campo de superficie construida (builtArea)
-        $this->builtArea = $sum;
+        $this->builtArea = rtrim(rtrim(number_format($sum, 6, '.', ','), '0'), '.');
     }
 
 

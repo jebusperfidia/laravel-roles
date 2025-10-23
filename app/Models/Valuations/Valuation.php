@@ -5,6 +5,8 @@ namespace App\Models\Valuations;
 use App\Models\Forms\SpecialInstallation\SpecialInstallationModel;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\PropertyLocationModel;
+use App\Models\Forms\Comparable\ValuationComparableModel;
+use App\Models\Forms\Comparable\ComparableModel;
 
 class Valuation extends Model
 {
@@ -173,4 +175,49 @@ class Valuation extends Model
         // Ahora apunta al nuevo nombre de la clase
         return $this->hasOne(PropertyLocationModel::class);
     } */
+
+
+
+    /**
+     * Relación 1:N con la tabla pivote (valuation_comparables).
+     *
+     * Devuelve los registros de la tabla intermedia "valuation_comparables"
+     * que vinculan este avalúo con sus comparables asignados.
+     *
+     * Ejemplo:
+     * $valuation->assignedComparables → colección de registros pivote
+     */
+
+    public function assignedComparables()
+    {
+        return $this->hasMany(ValuationComparableModel::class, 'valuation_id');
+    }
+
+
+    /**
+     * Relación N:M con los comparables.
+     *
+     * Devuelve directamente los modelos de comparables asociados al avalúo
+     * usando la tabla pivote "valuation_comparables".
+     *
+     * Se agregan los campos del pivote (position, is_active, created_by)
+     * y se ordena por el campo "position" para respetar el orden asignado.
+     *
+     * Ejemplo:
+     * $valuation->comparables → colección de modelos ComparableModel
+     */
+
+    public function comparables()
+    {
+        return $this->belongsToMany(
+            ComparableModel::class,
+            'valuation_comparables',
+            'valuation_id',
+            'comparable_id'
+        )
+            ->withPivot(['position', 'is_active', 'created_by'])
+            ->withTimestamps()
+            ->orderBy('pivot_position');
+    }
+
 }

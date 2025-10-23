@@ -1,6 +1,6 @@
 {{-- **CAMBIO CLAVE:** Se renombra el evento a kebab-case para seguir convenciones --}}
 <div x-data="mapManager()" x-init="init()"
-    @location-updated.window="createOrUpdateMaps($event.detail[0].lat, $event.detail[0].lon)">
+    @location-updated.window="createOrUpdateMaps($event.detail.lat, $event.detail.lon, $event.detail.alt)">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
@@ -73,19 +73,20 @@
 
   {{--   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> --}}
 
-    <script>
-        function mapManager() {
+<script>
+    function mapManager() {
         return {
             maps: {
                 macro: { map: null, marker: null },
                 micro: { map: null, marker: null },
-                //polygon: { map: null, marker: null }
+                // polygon: { map: null, marker: null },
             },
 
             // Función que crea o actualiza los mapas
-            createOrUpdateMaps(lat, lon) {
+            createOrUpdateMaps(lat, lon, alt = 0) {
                 const latitude = parseFloat(lat);
                 const longitude = parseFloat(lon);
+                const altitude = parseFloat(alt) || 0;
 
                 if (isNaN(latitude) || isNaN(longitude)) {
                     console.error('Coordenadas inválidas. No se puede actualizar el mapa.');
@@ -95,35 +96,50 @@
                 const tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
                 const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
-                // Función interna para configurar un mapa individual
                 const setupMap = (ref, mapObj, zoom) => {
-                    if (!mapObj.map) { // Si el mapa NO existe, lo creamos
+                    if (!ref) return;
+
+                    if (!mapObj.map) {
                         const map = L.map(ref).setView([latitude, longitude], zoom);
                         L.tileLayer(tileLayerUrl, { attribution }).addTo(map);
+                        const marker = L.marker([latitude, longitude]).addTo(map);
+                        marker.bindPopup(
+                            `Lat: ${latitude.toFixed(6)}<br>Lon: ${longitude.toFixed(6)}<br>Alt: ${altitude.toFixed(2)} m`
+                        ).openPopup();
+
                         mapObj.map = map;
-                        mapObj.marker = L.marker([latitude, longitude]).addTo(map);
-                    } else { // Si YA existe, solo actualizamos su centro y el marcador
+                        mapObj.marker = marker;
+                    } else {
                         mapObj.map.setView([latitude, longitude], zoom);
                         mapObj.marker.setLatLng([latitude, longitude]);
+                        mapObj.marker.setPopupContent(
+                            `Lat: ${latitude.toFixed(6)}<br>Lon: ${longitude.toFixed(6)}<br>Alt: ${altitude.toFixed(2)} m`
+                        );
                     }
                 };
 
-                // Ejecutamos la configuración para cada mapa
                 setupMap(this.$refs.mapMacro, this.maps.macro, 7);
                 setupMap(this.$refs.mapMicro, this.maps.micro, 12);
-                setupMap(this.$refs.mapPolygon, this.maps.polygon, 18);
+                // setupMap(this.$refs.mapPolygon, this.maps.polygon, 18);
             },
 
-            // La función init se ejecuta al cargar el componente
             init() {
-                // Obtenemos los valores iniciales del componente Livewire
                 const initialLat = @this.get('latitude');
                 const initialLon = @this.get('longitude');
+                const initialAlt = @this.get('altitude') ?? 0;
 
-                // Inicializamos los mapas con un pequeño retraso para asegurar que el DOM esté listo
-                setTimeout(() => this.createOrUpdateMaps(initialLat, initialLon), 50);
-            }
-        }
+                // Renderiza mapas iniciales
+                setTimeout(() => this.createOrUpdateMaps(initialLat, initialLon, initialAlt), 50);
+
+                // También escucha actualizaciones del evento Livewire
+                window.addEventListener('location-updated', (event) => {
+                    const { lat, lon } = event.detail[0];
+                    const alt = @this.get('altitude') ?? 0;
+                    this.createOrUpdateMaps(lat, lon, alt);
+                });
+            },
+        };
     }
-    </script>
+</script>
+
 </div>

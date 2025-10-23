@@ -206,7 +206,7 @@ return [
     ],
     'complementary_works' => [
         ['clave' => 'OC11', 'descripcion' => 'Alberas y chapoteadores'],
-        ['clave' => 'OC01', 'descripcion' => 'Barrdas, celosías'],
+        ['clave' => 'OC01', 'descripcion' => 'Bardas, celosías'],
         ['clave' => 'OC13', 'descripcion' => 'Bóvedas de seguridas hechas en obra'],
         ['clave' => 'OC16', 'descripcion' => 'Cámaras frigopríficas hechas en obra'],
         ['clave' => 'OC10', 'descripcion' => 'Cisternas o aljibes'],

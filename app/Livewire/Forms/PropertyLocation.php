@@ -38,19 +38,19 @@ class PropertyLocation extends Component
     /**
      * Valida y envía las coordenadas al mapa en el frontend.
      */
-    public function locate()
-    {
-        $this->validateLocation();
+public function locate()
+{
+    $this->validateLocation();
 
-        // **CORRECCIÓN:** El nombre del evento debe coincidir con el de la vista (kebab-case).
-        $this->dispatch('location-updated', [
-            'lat' => $this->latitude,
-            'lon' => $this->longitude
-        ]);
+    // Enviar lat, lon y alt al frontend
+    $this->dispatch('location-updated', [
+        'lat' => $this->latitude,
+        'lon' => $this->longitude,
+        'alt' => $this->altitude ?? 0, // si no hay altitud, 0
+    ]);
 
-        Toaster::success('Ubicación actualizada en el mapa');
-    }
-
+    Toaster::success('Ubicación actualizada en el mapa');
+}
     /**
      * Guarda los datos en la base de datos.
      */

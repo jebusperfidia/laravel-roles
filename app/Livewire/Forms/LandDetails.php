@@ -99,7 +99,7 @@ class LandDetails extends Component
     public float $modalSurface;
 
 
-
+    public $latitude, $longitude, $altitude;
 
 
         public function mount(){
@@ -115,16 +115,24 @@ class LandDetails extends Component
         $this->valuation = Valuation::find($valuationId);
 
         //obtenemos los valores de propertyLocation
-        $this->propertyLocation = PropertyLocationModel::where('valuation_id', $valuationId)->first();
+        $propertyLocation = PropertyLocationModel::where('valuation_id', $valuationId)->first();
 
-        if (!$this->propertyLocation) {
-            // Asignar coordenadas por defecto (centro de México)
-            $this->propertyLocation = (object)[
-                'latitude' => '23.6345',
-                'longitude' => '-102.5528',
-                'altitude' => '0'
-            ];
+        //dd($propertyLocation);
+
+        if ($propertyLocation) {
+            $this->latitude  = $propertyLocation->latitude;
+            $this->longitude = $propertyLocation->longitude;
+            $this->altitude  = $propertyLocation->altitude;
+
+        } else {
+            // **CORRECCIÓN:** Inicializa con coordenadas numéricas válidas si no hay datos.
+            // Los mapas no pueden funcionar con valores nulos o vacíos para latitud/longitud.
+            $this->latitude  = '23.6345';  // Centro geográfico de México
+            $this->longitude = '-102.5528';
+            $this->altitude  = '0'; // La altitud es opcional, se puede inicializar como null
         }
+
+
 
         // Asignar el modelo solo si valuationId existe para evitar errores
         $this->landDetail = LandDetailsModel::where('valuation_id', $valuationId)->first();
@@ -701,7 +709,7 @@ class LandDetails extends Component
         // 4. Formatear a dos decimales, y convertir el resultado de string a float.
         // Esto asegura que '15' se convierte a '15.00' antes de ser float.
         //return (float) number_format($floatValue, 2, '.', '');
-        return round($floatValue, 2);
+        return $floatValue;
     }
 
 

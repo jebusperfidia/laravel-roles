@@ -106,11 +106,11 @@ return new class extends Migration
             //SUPERFICIE DEL TERRENO
 
             $table->boolean('use_excess_calculation')->default(false);
-            $table->decimal('surface_private_lot', 10, 2)->default((0));
-            $table->decimal('surface_private_lot_type', 10, 2)->default((0));
-            $table->decimal('undivided_only_condominium', 10, 2)->default((0));
-            $table->decimal('undivided_surface_land', 10, 2)->default((0));
-            $table->decimal('surplus_land_area', 10, 2)->default((0));
+            $table->decimal('surface_private_lot', 20, 10)->default((0));
+            $table->decimal('surface_private_lot_type', 20, 10)->default((0));
+            $table->decimal('undivided_only_condominium', 10, 10)->default((0));
+            $table->decimal('undivided_surface_land', 20, 10)->default((0));
+            $table->decimal('surplus_land_area', 20, 10)->default((0));
 
 
 
