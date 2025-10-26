@@ -15,11 +15,11 @@ class UserIndex extends Component
     {
 
         //creamos una variable para obtener la colección de datos de los usuarios, y generamos la búsqueda de coincidencias para la búsqueda
-        $users = User::where("name","LIKE","%{$this->search}%")
+     /*    $users = User::where("name","LIKE","%{$this->search}%")
         ->orWhere("email", "LIKE", "%{$this->search}%")
-        ->orWhere("type", "LIKE", "%{$this->search}%")
+        ->orWhere("type", "LIKE", "%{$this->search}%") */
         //Paginamos los elementos por la cantidad indicada
-        ->Paginate(10);
+        /* ->Paginate(10); */
 
         /* //Si eliminamos el último usuario y no hay datos, debe devolvernos a la página 1 para no dejar el componente en blanco
         if ($users->isEmpty() && $users->currentPage() > 1) {
@@ -33,7 +33,8 @@ class UserIndex extends Component
         } */
 
         //Devolvemos la colección de datos después de verificar la búsqueda y el if para evitar problemas en la páginación
-        return view('livewire.users.user-index', compact(("users")));
+       /*  return view('livewire.users.user-index', compact(("users"))); */
+        return view('livewire.users.user-index');
 
         /* return view('livewire.users.user-index', compact("users")); */
     }
@@ -58,7 +59,7 @@ class UserIndex extends Component
 
         return to_route("user.index")->with("info", "Usuario eliminado con éxito");
     } */
-    public function delete($id)
+   /*  public function delete($id)
     {
         $usersBefore = User::where("name", "LIKE", "%{$this->search}%")
             ->orWhere("email", "LIKE", "%{$this->search}%")
@@ -75,5 +76,5 @@ class UserIndex extends Component
         }
 
         session()->flash("info", "Usuario eliminado con éxito");
-    }
+    } */
 }

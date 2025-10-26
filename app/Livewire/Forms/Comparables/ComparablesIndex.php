@@ -4,6 +4,7 @@ namespace App\Livewire\Forms\Comparables;
 
 
 use App\Models\Forms\Comparable\ComparableModel;
+use App\Models\Forms\Comparable\ValuationComparableModel;
 use Livewire\WithFileUploads;
 use Livewire\Component;
 use Illuminate\Support\Facades\Session;
@@ -14,9 +15,17 @@ use Illuminate\Support\Facades\Validator;
 use App\Services\DipomexService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
+//use Livewire\Attributes\On;
 
 class ComparablesIndex extends Component
 {
+
+    //Variable para mostrar el loader
+    //public bool $isLoading = false;
+
+    //Evento de escucha para ejecutar la función de asignación
+    protected $listeners = ['assignedElement'];
+
 
     use WithFileUploads;
 
@@ -27,7 +36,7 @@ class ComparablesIndex extends Component
     //public float $comparableLongitude = -99.1332; // VALOR INICIAL DEFAULT (CDMX)
 
     // LISTENER PARA RECIBIR COORDENADAS DESDE JAVASCRIPT/ALPINE.JS
-    protected $listeners = ['set-map-coordinates' => 'setMapCoordinates'];
+    //protected $listeners = ['set-map-coordinates' => 'setMapCoordinates'];
 
     public $id;
     public $valuation;
@@ -82,28 +91,77 @@ class ComparablesIndex extends Component
         $this->valuation = Valuation::find($this->id);
 
         //Asignamos los comparables ya asignados al avalúo
-        $this->assignedComparables = $this->valuation->comparables()->orderByPivot('position')->get();
+        $this->loadAssignedComparables();
 
         //Inicializar variables de ejemplos
         $this->comparableKey = 01;
         $this->comparableFolio = $this->valuation->folio;
 
-        $userSession = Auth::user();
+        $this->userSession = Auth::user();
 
-        $this->comparableDischargedBy = $userSession->name;
+        //dd($this->userSession->id);
+
+        $this->comparableDischargedBy = $this->userSession->name;
 
      }
 
     // NUEVA FUNCIÓN PARA ACTUALIZAR COORDENADAS DESDE EL MAPA (JAVASCRIPT)
-   /*  public function setMapCoordinates($latitude, $longitude)
+    /*  public function setMapCoordinates($latitude, $longitude)
     {
         $this->comparableLatitude = (float) $latitude;
         $this->comparableLongitude = (float) $longitude; */
-        // OPCIONAL: MOSTRAR UN TOAST PARA CONFIRMAR LA ACTUALIZACIÓN
- /*        Toaster::info('Coordenadas actualizadas desde el mapa.');
+    // OPCIONAL: MOSTRAR UN TOAST PARA CONFIRMAR LA ACTUALIZACIÓN
+    /*        Toaster::info('Coordenadas actualizadas desde el mapa.');
     }
 
  */
+
+     //Generamos una función para actualizar los valores de los comparables asignados al avaluo
+    public function loadAssignedComparables(){
+        $this->assignedComparables = $this->valuation->comparables()->orderByPivot('position')->get();
+    }
+
+
+
+   // #[On('assigned')]
+    /* public function openForms(array $IdValuation) */
+    public function assignedElement($idComparable)
+    {
+        //dd($this->userSession);
+
+        //dd('El método llega con éxito', $idComparable);
+        //return redirect()->route('form.index');
+
+
+        /* $this->isLoading = true; */
+
+        //Obtenemos el valor de la última posición asignada
+        $max_position = $this->valuation->comparables()->max('position');
+
+        //A ese valor le sumamos un 1 para asignar en la posición del nuevo elemento a asignar
+        $new_position = $max_position + 1;
+
+        ValuationComparableModel::create([
+            'valuation_id' => $this->id,
+            'comparable_id' => $idComparable,
+            'created_by' => $this->userSession->id,
+            'position' => $new_position
+        ]);
+
+
+        //Actualizamos la tabla de los comparables
+        $this->dispatch('pg:eventRefresh-comparables-table');
+
+        //Actualizamos los valores de la tabla de las asignaciones de comparables ligadas al avaluo
+        $this->loadAssignedComparables();
+
+        //Enviamos un mensaje para notificar al usuario sobre la correcta asignación
+        Toaster::success('Comparable asignado correctamente.');
+
+        //$this->dispatch('refreshComparablesTable');
+        /* $this->isLoading = false; */
+    }
+
 
     //Función para agregar un comparable para el avalúo
     public function openAddComparable()
@@ -192,12 +250,15 @@ class ComparablesIndex extends Component
             'is_active' => $this->comparableActive,
         ]);
 
+        //Actualizamos la tabla
+        $this->dispatch('pg:eventRefresh-comparables-table');
 
         // Limpiamos los campos después de guardar
         $this->resetComparableFields();
 
         // Enviamos mensaje de éxito
         Toaster::success('Comparable añadido exitosamente');
+
 
         // Cerramos el modal
         Flux::modal('add-comparable')->close();
@@ -304,30 +365,129 @@ class ComparablesIndex extends Component
 
 
     //Función para acortar URL usando URL clean https://urlclean.com
-    public function shortUrl(){
-        //Generamos la validación
+    public function shortUrl()
+    {
         $this->validate([
             'comparableUrl' => 'required|url',
         ]);
-        //Mediante un try catch, intentamos formatear el texto usando la API de cleanuri
+
         try {
-            $response = Http::asForm()->post('https://cleanuri.com/api/v1/shorten', [
-                //Enviamos como parámetro la url obtenida del modal
+            $response = Http::get('https://is.gd/create.php', [
+                'format' => 'simple',
                 'url' => $this->comparableUrl,
             ]);
-            //Si la respuesta fue exitosa, y se obtuvo la URL, enviamos un mensaje y asignamos la URL ya generada
-            if ($response->successful() && isset($response['result_url'])) {
-                $this->comparableUrl = $response['result_url'];
+
+            if ($response->successful()) {
+                $short = trim($response->body());
+
+                if (str_starts_with($short, 'Error:')) {
+                    Toaster::error('Error al acortar la URL: ' . $short);
+                    return;
+                }
+
+                $this->comparableUrl = $short;
                 Toaster::success('URL acortada exitosamente.');
-                //Si hubo algún error, enviamos un mensaje en pantalla
             } else {
                 Toaster::error('No se pudo acortar la URL. Intenta de nuevo.');
             }
-            //Si por alguna razón, no hay respuesta de la API, enviamos un mensaje en pantalla
         } catch (\Exception $e) {
-            Toaster::error('Error al conectar con CleanURL: ' . $e->getMessage());
+            Toaster::error('Error al conectar con is.gd: ' . $e->getMessage());
         }
     }
+
+
+    /**
+     * Mueve un comparable hacia arriba o abajo en la lista asignada
+     *
+     * @param int $idComparable ID del comparable que queremos mover
+     * @param string $direction Dirección del movimiento: 'up' = subir, 'down' = bajar
+     */
+    public function moveComparable($idComparable, $direction)
+    {
+        // Buscamos el comparable que queremos mover dentro de la valoración actual
+        // Usamos la relación 'comparables' y filtramos por el ID recibido
+        $current = $this->valuation->comparables()->where('comparables.id', $idComparable)->first();
+
+        // Si no existe, salimos de la función
+        if (!$current) {
+            return;
+        }
+
+        // Guardamos la posición actual de este comparable desde la tabla pivot
+        // Ejemplo: si está en la posición 2, $currentPosition = 2
+        $currentPosition = $current->pivot->position;
+
+        // --- Caso "subir" ---
+        if ($direction === 'up' && $currentPosition > 1) {
+            // Buscamos el comparable que está justo arriba del actual
+            // Ejemplo: si $currentPosition = 3, buscamos el que tiene posición = 2
+            $swap = $this->valuation->comparables()->wherePivot('position', $currentPosition - 1)->first();
+
+            if ($swap) {
+                // Intercambiamos las posiciones en la tabla pivot
+                // El comparable que estaba arriba ($swap) pasa a la posición actual del que se mueve
+                $this->valuation->comparables()->updateExistingPivot($swap->id, ['position' => $currentPosition]);
+                // El comparable actual pasa a la posición del que estaba arriba
+                $this->valuation->comparables()->updateExistingPivot($current->id, ['position' => $currentPosition - 1]);
+            }
+
+            // --- Caso "bajar" ---
+        } elseif ($direction === 'down') {
+            // Primero obtenemos la posición máxima de los comparables asignados
+            // Esto nos asegura no mover más allá del último
+            $maxPosition = $this->valuation->comparables()
+                ->max('valuation_comparables.position');
+
+            if ($currentPosition < $maxPosition) {
+                // Buscamos el comparable que está justo debajo del actual
+                // Ejemplo: si $currentPosition = 2, buscamos el que tiene posición = 3
+                $swap = $this->valuation->comparables()->wherePivot('position', $currentPosition + 1)->first();
+
+                if ($swap) {
+                    // Intercambiamos las posiciones
+                    // El comparable que estaba abajo ($swap) pasa a la posición actual del que se mueve
+                    $this->valuation->comparables()->updateExistingPivot($swap->id, ['position' => $currentPosition]);
+                    // El comparable actual pasa a la posición del que estaba abajo
+                    $this->valuation->comparables()->updateExistingPivot($current->id, ['position' => $currentPosition + 1]);
+                }
+            }
+        }
+
+        // Después de mover, reordenamos todas las posiciones para que queden consecutivas (1, 2, 3...)
+        $this->reorderPositions();
+
+        // Finalmente, recargamos la lista de comparables para refrescar la tabla en la vista
+        $this->loadAssignedComparables();
+    }
+
+
+    /**
+     * Reordena las posiciones de los comparables asignados
+     * Esto evita huecos o duplicados después de mover o eliminar elementos
+     */
+    public function reorderPositions()
+    {
+        // Obtenemos todos los comparables asignados, ordenados por posición actual
+        $comparables = $this->valuation->comparables()->orderByPivot('position')->get();
+
+        $position = 1; // Empezamos a contar desde 1
+
+        foreach ($comparables as $comp) {
+            // Si la posición actual del pivot no coincide con la secuencia, la actualizamos
+            // Ejemplo: si el primer comparable tiene position=2, lo cambiamos a 1
+            if ($comp->pivot->position != $position) {
+                $this->valuation->comparables()->updateExistingPivot($comp->id, ['position' => $position]);
+            }
+
+            $position++; // Incrementamos para el siguiente comparable
+        }
+    }
+
+
+
+
+
+
 
 
     public function validateModal(){
@@ -337,12 +497,12 @@ class ComparablesIndex extends Component
             'comparableFolio' => 'required',
             'comparableDischargedBy' => 'required',
             'comparableProperty' => 'required',
-            'comparableCp' => 'required|integer|digits:5',
-            'comparableEntity' => 'nullable',
+            'comparableCp' => 'required|string|digits:5',
+            'comparableEntity' => 'required',
             //'comparableEntityName' => 'nullable',
-            'comparableLocality' => 'nullable',
+            'comparableLocality' => 'required',
             //'comparableLocalityName' => 'nullable',
-            'comparableColony' => 'nullable',
+            'comparableColony' => 'required',
             /* 'comparableOtherColony' => 'required', */
             'comparableStreet' => 'required',
             'comparableAbroadNumber' => 'required',
@@ -353,7 +513,7 @@ class ComparablesIndex extends Component
             'comparableLastName' => 'required',
             //Bail detiene las validaciones en cuanto ocurra el primero error y lo muestra en pantalla
             /* 'comparablePhone' => 'bail|required|regex:/^[0-9]+$/|digits_between:7,15', */
-            'comparablePhone' => 'bail|required|integer|digits_between:7,15',
+            'comparablePhone' => 'required',
             'comparableUrl' => 'required|url',
             'comparableLandUse' => 'required',
             'comparableFreeAreaRequired' => 'required|numeric|between:0,100',
@@ -361,7 +521,7 @@ class ComparablesIndex extends Component
             'comparableServicesInfraestructure' => 'nullable',
             'comparableDescServicesInfraestructure' => 'required',
             'comparableShape' => 'required',
-            'comparableSlope' => 'required',
+            'comparableSlope' => 'required|numeric|between:0,100',
             'comparableDensity' => 'required',
             'comparableFront' => 'required',
             'comparableFrontType' => 'nullable',
@@ -369,10 +529,10 @@ class ComparablesIndex extends Component
             'comparableTopography' => 'required',
             'comparableCharacteristics' => 'required',
             'comparableCharacteristicsGeneral' => 'nullable',
-            'comparableOffers' => 'required|numeric',
-            'comparableLandArea' => 'required|numeric',
-            'comparableBuiltArea' => 'required|numeric',
-            'comparableUnitValue' => 'required|numeric',
+            'comparableOffers' => 'required|numeric|gt:0',
+            'comparableLandArea' => 'required|numeric|gt:0',
+            'comparableBuiltArea' => 'required|numeric|gt:0',
+            'comparableUnitValue' => 'required|numeric|gt:0',
             'comparableBargainingFactor' => 'required|numeric|between:0.8,1',
             'comparableLocationBlock' => 'required',
             'comparableStreetLocation' => 'required',

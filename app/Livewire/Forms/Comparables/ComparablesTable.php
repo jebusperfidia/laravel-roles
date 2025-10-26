@@ -11,14 +11,21 @@ use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
+use Illuminate\Support\Facades\Session;
+
 
 final class ComparablesTable extends PowerGridComponent
 {
+
+    public $idValuation;
+
     public string $tableName = 'comparables-table';
 
     public function setUp(): array
     {
         /* $this->showCheckBox(); */
+    $this->idValuation = Session::get('valuation_id');
+
 
         return [
             PowerGrid::header()
@@ -29,9 +36,20 @@ final class ComparablesTable extends PowerGridComponent
         ];
     }
 
-    public function datasource(): Builder
+    /*  public function datasource(): Builder
     {
         return ComparableModel::query();
+    }
+ */
+
+    public function datasource(): Builder
+    {
+        return ComparableModel::query()
+            ->whereNotIn('id', function ($query) {
+                $query->select('comparable_id')
+                    ->from('valuation_comparables')
+                    ->where('valuation_id', $this->idValuation);
+            });
     }
 
     public function relationSearch(): array
@@ -60,12 +78,19 @@ final class ComparablesTable extends PowerGridComponent
            ->add('comparable_abroad_number')
            ->add('comparable_cp')
             ->add('comparable_offers')
+            /* ->add('price_offers', fn (ComparableModel $model) => Number::currency($model->comparable_offers, in: 'EUR', locale: 'pt_PT')) */
+            ->add('price_offers', fn (ComparableModel $model) =>  '$' . rtrim(rtrim(number_format($model->comparable_offers, 6, '.', ','), '0'), '.'))
             ->add('comparable_land_area')
             ->add('comparable_unit_value')
             ->add('comparable_land_use')
             ->add('comparable_built_area')
             ->add('created_at_formatted', fn (ComparableModel $model) => Carbon::parse($model->created_at)->format('d/m/Y'))
-            ->add('comparable_url')
+            ->add(
+                'comparable_url',
+                fn(ComparableModel $model) =>
+                '<a target="_blank" class="underline text-blue-600 hover:text-blue-800" href="' . e($model->comparable_url) . '">' . e($model->comparable_url) . '</a>'
+            )
+
             /*   ->add('comparable_name')
             ->add('comparable_last_name')
             ->add('comparable_phone') */
@@ -170,7 +195,7 @@ final class ComparablesTable extends PowerGridComponent
                 ->searchable(),
 
 
-            Column::make('Oferta', 'comparable_offers')
+            Column::make('Oferta', 'price_offers' ,'comparable_offers')
                 ->sortable()
                 ->searchable(),
 
@@ -331,21 +356,21 @@ final class ComparablesTable extends PowerGridComponent
         return [
         ];
     }
-
+/*
     #[\Livewire\Attributes\On('edit')]
     public function edit($rowId): void
     {
         $this->js('alert('.$rowId.')');
     }
-
+ */
     public function actions(ComparableModel $row): array
     {
         return [
-            Button::add('edit')
+            Button::add()
                 ->slot('Asignar')
                 ->id()
                 ->class('cursor-pointer btn-primary')
-                ->dispatch('edit', ['rowId' => $row->id])
+                ->dispatch('assignedElement', ['idComparable' => $row->id])
         ];
     }
 

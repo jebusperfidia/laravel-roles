@@ -28,7 +28,7 @@ class Buildings extends Component
 
     // Arrays públicos para consumir datos para los input select largos
     public array $construction_classification, $construction_use, $construction_source_information,
-                 $construction_conservation_state;
+                 $construction_conservation_state, $construction_life_values;
 
     // Estado del tab activo
     public string $activeTab;
@@ -72,7 +72,13 @@ class Buildings extends Component
 
     public float $surface, $unitCostReplacement, $progressWork;
 
-   /*  public bool $rangeBasedHeight = false; */
+
+    // Valores para la asignación de los valores totales
+    public $sumValuesTotalsPriv, $sumValuesTotalsCom;
+
+    //Valores para la asignación de totales del apartado promedios y ponderaciones
+    public $totalUsefulLifeProperty, $usefulLifeProperty, $ageProperty, $totalAgeProperty;
+
 
 
     public function mount(){
@@ -84,6 +90,7 @@ class Buildings extends Component
         $this->construction_use = config('properties_inputs.construction_use', []);
         $this->construction_source_information = config('properties_inputs.construction_source_information', []);
         $this->construction_conservation_state = config('properties_inputs.construction_conservation_state', []);
+        $this->construction_life_values = config('properties_inputs.construction_life_values', []);
 
 
 
@@ -223,7 +230,7 @@ class Buildings extends Component
 
         $this->assignInputPrivateValues();
 
-        // ✅ Cálculo y asignación de la superficie total privada
+        // Cálculo y asignación de la superficie total privada
         $this->totalSurfacePrivate = collect($this->buildingConstructionsPrivate)->sum('surface');
 
 

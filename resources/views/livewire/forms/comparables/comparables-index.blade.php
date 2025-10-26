@@ -38,13 +38,13 @@
             Comparables disponibles
         </div>
         <div class="form-container__content">
-            <div class="form-grid form-grid--2 overflow-x-auto">
+         {{--    <div class="form-grid form-grid--2 overflow-x-auto"> --}}
                 <livewire:forms.comparables.comparables-table>
-            </div>
+           {{--  </div> --}}
         </div>
     </div>
 
-    <div class="form-container">
+{{--     <div class="form-container">
         <div class="form-container__header">
             Comparables asignados
         </div>
@@ -110,7 +110,122 @@
                 </div>
             </div>
         </div>
+    </div> --}}
+
+
+
+
+
+
+
+
+
+
+
+<div class="form-container">
+    <div class="form-container__header">
+        Comparables asignados
     </div>
+    <div class="form-container__content">
+        <div class="form-grid">
+            <div class="mt-2">
+                <div class="overflow-x-auto max-w-full">
+                    <table class="min-w-[550px] table-fixed w-full border-2">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="w-[20px] py-2 border">#</th> <!-- Posición -->
+                                {{-- <th class="px-2 py-2 border">Folio</th> --}}
+
+                                <th class="px-2 py-2 border">Mover</th>
+                                <th class="px-2 py-2 border">Propiedad</th>
+                                <th class="px-2 py-2 border">Estado</th>
+                                <th class="px-2 py-2 border">Ciudad</th>
+                                <th class="px-2 py-2 border">Colonia</th>
+                                <th class="px-2 py-2 border">Calle</th>
+                                <th class="px-2 py-2 border">N°</th>
+                                <th class="px-2 py-2 border">CP</th>
+                                <th class="px-2 py-2 border">Oferta</th>
+                                <th class="px-2 py-2 border">Terreno</th>
+                                <th class="px-2 py-2 border">Construida</th>
+                                <th class="px-2 py-2 border">Unitario</th>
+                                <th class="w-[100px] py-2 border">Acciones</th> <!-- Editar/Eliminar -->
+                                <!-- Nueva columna para flechas -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if ($assignedComparables->isEmpty())
+                            <tr>
+                                <td colspan="15" class="px-2 py-4 text-center text-gray-500">
+                                    No hay comparables asignados
+                                </td>
+                            </tr>
+                            @else
+                            @foreach ($assignedComparables as $item)
+                            <tr>
+                                <!-- Posición -->
+                                <td class="px-2 py-2 border text-sm text-center">{{ $item->pivot->position }}</td>
+                                <td class="px-2 py-2 border text-center">
+                                    <div class="flex justify-center gap-2">
+                                        <flux:button type="button" icon-leading="chevron-double-down" class="cursor-pointer btn-primary btn-buildings"
+                                            wire:click="moveComparable({{ $item->id }}, 'down')" :disabled="$loop->last" />
+
+                                        <flux:button type="button" icon-leading="chevron-double-up" class="cursor-pointer btn-primary btn-buildings"
+                                            wire:click="moveComparable({{ $item->id }}, 'up')" :disabled="$loop->first" />
+
+                                    </div>
+                                </td>
+
+                               {{--  <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_folio }}</td> --}}
+                                <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_property }}</td>
+                                <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_entity_name }}
+                                </td>
+                                <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_locality_name }}
+                                </td>
+                                <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_colony }}</td>
+                                <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_street }}</td>
+                                <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_abroad_number }}
+                                </td>
+                                <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_cp }}</td>
+                                <td class="px-2 py-2 border text-sm text-center">$ {{
+
+                                rtrim(rtrim(number_format($item->comparable_offers, 6, '.', ','), '0'), '.')
+                                }}</td>
+                                <td class="px-2 py-2 border text-sm text-center">{{
+                                rtrim(rtrim(number_format($item->comparable_land_area, 6, '.', ','), '0'), '.')
+                                }}</td>
+                                <td class="px-2 py-2 border text-sm text-center">{{
+                                rtrim(rtrim(number_format($item->comparable_land_area, 6, '.', ','), '0'), '.')
+                                }}</td>
+                                <td class="px-2 py-2 border text-sm text-center">{{
+                                rtrim(rtrim(number_format($item->comparable_built_area, 6, '.', ','), '0'), '.')
+                                }}</td>
+
+                                <!-- Editar / Eliminar -->
+                               <td class="px-2 py-2 border text-center">
+                                <div class="flex justify-center gap-2">
+                                    <flux:button type="button" icon-leading="pencil" class="cursor-pointer btn-intermediary btn-buildins"
+                                        wire:click="editComparable({{ $item->id }})" />
+
+                                    <flux:button type="button" icon-leading="trash"
+                                        onclick="confirm('¿Estás seguro de que deseas eliminar este comparable?') || event.stopImmediatePropagation()"
+                                        wire:click="deleteComparable({{ $item->id }})" class="cursor-pointer btn-deleted btn-buildings" />
+                                </div>
+                            </td>
+
+                                <!-- Flechas para mover -->
+                              <!-- Flechas para mover -->
+
+
+                            </tr>
+                            @endforeach
+                            @endif
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 
@@ -121,11 +236,35 @@
 
 
 
+<!-- Loader -->
+{{-- <div wire:loading wire:target="assignedElement, moveComparable, deleteComparable, editComparable"
+    class="fixed inset-0 z-50 bg-black bg-opacity-40 backdrop-blur-sm items-center justify-center">
+    <div class="bg-white rounded-xl p-6 flex flex-col items-center">
+        <svg class="animate-spin h-10 w-10 text-blue-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 018 8h-4l3 3 3-3h-4a8 8 0 01-8 8v-4l-3 3 3 3v-4a8 8 0 01-8-8z" />
+        </svg>
+        <span class="text-gray-700 font-medium">Actualizando comparables...</span>
+    </div>
+</div>
 
+ --}}
 
-
-
-
+{{-- <div x-data="{ open: @entangle('isLoading') }" x-show="open"
+    class="fixed inset-0 z-50 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center">
+    <div class="bg-white rounded-xl p-6 flex flex-col items-center">
+        <svg class="animate-spin h-10 w-10 text-blue-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 018 8h-4l3 3 3-3h-4a8 8 0 01-8 8v-4l-3 3 3 3v-4a8 8 0 01-8-8z" />
+        </svg>
+        <span class="text-gray-700 font-medium">Actualizando comparables...</span>
+    </div>
+</div>
+ --}}
 
 
 
@@ -135,8 +274,8 @@
     <flux:modal name="add-comparable" class="md:w-110">
         <div class="space-y-4">
             <div>
-                <flux:heading size="lg"><b>Nuevo comparable</b></flux:heading>
-                <flux:text class="mt-2">Indique los valores solicitados</flux:text>
+                <flux:heading size="lg"><b class="text-lg">Nuevo comparable</b></flux:heading>
+                <flux:text class="mt-2 font-bold">Indique los valores solicitados</flux:text>
             </div>
             <flux:separator />
 
@@ -145,8 +284,12 @@
 
 
             {{-- Datos de asignación --}}
-            <div class="form-grid form-grid--1 mt-[20px]">
+            {{-- <div class="form-grid form-grid--1 mt-[20px]">
                 <h2>Datos de asignación:</h2>
+            </div> --}}
+
+            <div class="form-grid form-grid--1 mt-3 mb-2 text-md">
+                <h2><span class="border-b-2 border-gray-300 font-semibold">Datos de asignación</span></h2>
             </div>
 
             <flux:field class="flux-field">
@@ -180,8 +323,8 @@
 
 
             {{-- Datos de inmueble --}}
-            <div class="form-grid form-grid--1 mt-[20px]">
-                <h2>Datos del inmueble:</h2>
+           <div class="form-grid form-grid--1 mt-3 mb-2 text-md">
+                <h2><span class="border-b-2 border-gray-300 font-semibold">Datos del inmueble</span></h2>
             </div>
 
             <flux:field class="flux-field">
@@ -334,7 +477,7 @@
 
                 {{-- Datos del informante --}}
                 <div class="form-grid form-grid--1 mt-3 mb-2 text-md">
-                    <h2><span class="border-b-2 border-gray-300">Datos del informante</span></h2>
+                    <h2><span class="border-b-2 border-gray-300 font-semibold">Datos del informante</span></h2>
                 </div>
 
                 <flux:field class="flux-field">
@@ -387,8 +530,8 @@
 
 
                 {{-- Datos generales --}}
-                <div class="form-grid form-grid--1 mt-3 mb-2 text-md">
-                    <h2><span class="border-b-2 border-gray-300">Datos generales</span></h2>
+               <div class="form-grid form-grid--1 mt-3 mb-2 text-md">
+                    <h2><span class="border-b-2 border-gray-300 font-semibold">Datos generales</span></h2>
                 </div>
 
                 <flux:field class="flux-field">
@@ -405,6 +548,8 @@
                     <flux:label>Área libre requerido<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
                         <flux:input type="number" wire:model='comparableFreeAreaRequired' />
+                        <flux:button type="button" class="font-bold" disabled>%
+                        </flux:button>
                     </flux:input.group>
                     <div class="error-container">
                         <flux:error name="comparableFreeAreaRequired" />
@@ -459,9 +604,11 @@
                 </flux:field>
 
                 <flux:field class="flux-field">
-                    <flux:label>% De pendiente<span class="sup-required">*</span></flux:label>
+                    <flux:label>De pendiente<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
                         <flux:input type="text" wire:model='comparableSlope' />
+                        <flux:button type="button" class="font-bold" disabled><b>%</b>
+                        </flux:button>
                     </flux:input.group>
                     <div class="error-container">
                         <flux:error name="comparableSlope" />
@@ -551,7 +698,7 @@
                 <flux:field class="flux-field">
                     <flux:label>Oferta<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
-                        <flux:input type="text" wire:model='comparableOffers' />
+                        <flux:input type="number" wire:model='comparableOffers' step="any"/>
                     </flux:input.group>
                     <div class="error-container">
                         <flux:error name="comparableOffers" />
@@ -561,8 +708,8 @@
                 <flux:field class="flux-field">
                     <flux:label>Superficie del terreno<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
-                        <flux:input type="text" wire:model='comparableLandArea' />
-                        <flux:button type="button" disabled>M2
+                        <flux:input type="number" wire:model='comparableLandArea' step="any"/>
+                        <flux:button type="button" class="text-bold" disabled>m²
                         </flux:button>
                     </flux:input.group>
                     <div class="error-container">
@@ -573,8 +720,8 @@
                 <flux:field class="flux-field">
                     <flux:label>Superficie construida<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
-                        <flux:input type="text" wire:model='comparableBuiltArea' />
-                        <flux:button type="button" disabled>M2
+                        <flux:input type="number" wire:model='comparableBuiltArea' step="any"/>
+                        <flux:button type="button" class="text-bold" disabled>m²
                         </flux:button>
                     </flux:input.group>
                     <div class="error-container">
@@ -585,20 +732,24 @@
                 <flux:field class="flux-field">
                     <flux:label>Valor unitario<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
-                        <flux:input type="text" wire:model='comparableUnitValue' />
-                        <flux:button type="button" disabled>M2
-                        </flux:button>
+                        <flux:input type="number" wire:model='comparableUnitValue' step="any" />
+                        <flux:button type="button" icon="calculator" disabled></flux:button>
                     </flux:input.group>
                     <div class="error-container">
                         <flux:error name="comparableUnitValue" />
                     </div>
                 </flux:field>
 
+
+
+
+
                 <flux:field class="flux-field">
                     <flux:label>Factor de negociación<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
-                        <flux:input type="text" wire:model='comparableBargainingFactor' />
+                        <flux:input type="number" wire:model='comparableBargainingFactor' step="any" />
                     </flux:input.group>
+                    <small>Factor entre 0.8 y 1</small>
                     <div class="error-container">
                         <flux:error name="comparableBargainingFactor" />
                     </div>
@@ -692,7 +843,7 @@
                 <flux:field class="flux-field">
                     <flux:label>Número de frentes<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
-                        <flux:input type="text" wire:model='comparableNumberFronts' />
+                        <flux:input type="number" wire:model='comparableNumberFronts' />
                     </flux:input.group>
                     <div class="error-container">
                         <flux:error name="comparableNumberFronts" />
@@ -709,48 +860,51 @@
                     </div>
                 </flux:field>
 
-               <flux:field class="flux-field">
-                <flux:label>Fotos<span class="sup-required">*</span></flux:label>
+        <flux:field class="flux-field">
+            <flux:label>Fotos<span class="sup-required">*</span></flux:label>
 
-                <div class="flex items-center gap-4 mt-1">
-                    {{-- Input de archivo oculto --}}
-                    <input type="file" wire:model="comparablePhotosFile" id="file-upload" class="sr-only">
+            <div class="flex items-center gap-3 mt-1">
+                {{-- Input de archivo oculto --}}
+                <input type="file" wire:model="comparablePhotosFile" id="file-upload" class="sr-only">
 
-                    {{-- Botón estilizado para seleccionar archivo --}}
-                    <label for="file-upload"
-                        class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        <svg class="h-5 w-5 text-gray-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                            fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 4-4z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        {{ __('Seleccionar archivo') }}
-                    </label>
+                {{-- Botón estilizado un poco más pequeño --}}
+                <label for="file-upload"
+                    class="cursor-pointer inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 whitespace-nowrap">
+                    <svg class="h-5 w-5 text-gray-500 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 4-4z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    {{ __('Seleccionar archivo') }}
+                </label>
 
-                    {{-- Nombre del archivo o mensaje por defecto --}}
+                {{-- Nombre del archivo con límite de ancho --}}
+                <div class="max-w-[190px] overflow-hidden text-ellipsis whitespace-nowrap">
                     @if ($comparablePhotosFile)
-                    <span class="text-sm text-gray-500">
-                        {{ is_string($comparablePhotosFile) ? $comparablePhotosFile : $comparablePhotosFile->getClientOriginalName()
-                        }}
+                    <span class="text-sm text-gray-500"
+                        title="{{ is_string($comparablePhotosFile) ? $comparablePhotosFile : $comparablePhotosFile->getClientOriginalName() }}">
+                        {{ is_string($comparablePhotosFile) ? $comparablePhotosFile :
+                        $comparablePhotosFile->getClientOriginalName() }}
                     </span>
                     @else
                     <span class="text-sm text-gray-500">
-                        {{ __('No se ha seleccionado archivo') }}
+                        {{ __('Seleccione un archivo...') }}
                     </span>
                     @endif
                 </div>
+            </div>
 
-                {{-- Errores de validación --}}
-                <div class="error-container mt-1">
-                    @error('comparablePhotosFile')
-                    <flux:error name="comparablePhotosFile" />
-                    @enderror
-                </div>
+            {{-- Errores de validación --}}
+            <div class="error-container mt-1">
+                @error('comparablePhotosFile')
+                <flux:error name="comparablePhotosFile" />
+                @enderror
+            </div>
 
-                {{-- Indicador de carga (subiendo archivo) --}}
-                <div class="mt-2 min-h-[24px]">
-                <div wire:loading wire:target="comparablePhotosFile" class="mt-2 text-sm text-blue-600 flex items-center gap-2">
+            {{-- Indicador de carga (subiendo archivo) --}}
+            <div class="min-h-[40px]">
+                <div wire:loading wire:target="comparablePhotosFile" class="text-sm text-blue-600 flex items-center gap-2">
                     <svg class="animate-spin h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -759,7 +913,7 @@
                     {{ __('Subiendo archivo...') }}
                 </div>
             </div>
-            </flux:field>
+        </flux:field>
 
                 <flux:field class="flux-field">
                     <flux:label>Activo</flux:label>

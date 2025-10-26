@@ -156,7 +156,7 @@
                                                     <flux:button disabled><b>m²</b></flux:button>
                                                 </flux:input.group>
                                             </div>
-                                            <small class="sugget-text">Valor propuesto: <a wire:click="setSurfaceAreaToSuggested">
+                                            <small class="suggested-text">Valor propuesto: <a wire:click="setSurfaceAreaToSuggested">
                                              {{--    {{number_format($landSurfacesTotal, 2)}} --}}
                                                 {{ rtrim(rtrim(number_format($landSurfacesTotal, 6, '.', ','), '0'), '.') }}
                                             </a><b> m²</b></small>
@@ -197,7 +197,7 @@
                                                         <flux:button disabled><b>m²</b></flux:button>
                                                     </flux:input.group>
                                                 </div>
-                                                <small class="sugget-text">Valor propuesto: <a wire:click="setPrivateLotToSuggested">{{number_format($landDetail->surface_private_lot , 2)}}</a><b>
+                                                <small class="suggested-text">Valor propuesto: <a wire:click="setPrivateLotToSuggested">{{number_format($landDetail->surface_private_lot , 2)}}</a><b>
                                                         m²</b></small>
                                                 <div>
                                                     <flux:error name="privateLot" />
@@ -231,7 +231,7 @@
                                                         <flux:button disabled><b>m²</b></flux:button>
                                                     </flux:input.group>
                                                 </div>
-                                                <small class="sugget-text">Valor propuesto: <a wire:click="setPrivateLotTypeToSuggested">{{number_format($landDetail->surface_private_lot_type , 2)}}</a><b> m²</b></small>
+                                                <small class="suggested-text">Valor propuesto: <a wire:click="setPrivateLotTypeToSuggested">{{number_format($landDetail->surface_private_lot_type , 2)}}</a><b> m²</b></small>
                                                 <div>
                                                     <flux:error name="privateLotType" />
                                                 </div>
@@ -273,7 +273,7 @@
                                                     <flux:button disabled><b>%</b></flux:button>
                                                 </flux:input.group>
                                             </div>
-                                            <small class="sugget-text">Valor propuesto: <a wire:click="setApplicableUndividedToSuggested">{{number_format($landDetail->undivided_only_condominium , 2)}}</a><b> %</b></small>
+                                            <small class="suggested-text">Valor propuesto: <a wire:click="setApplicableUndividedToSuggested">{{number_format($landDetail->undivided_only_condominium , 2)}}</a><b> %</b></small>
                                             <div>
                                                 <flux:error name="applicableUndivided"/>
                                             </div>
@@ -307,7 +307,7 @@
                                                     <flux:button disabled><b>m²</b></flux:button>
                                                 </flux:input.group>
                                             </div>
-                                            <small class="sugget-text">Valor propuesto: <a wire:click="setProporcionalLandToSuggested">{{number_format($landDetail->undivided_surface_land , 2)}}</a><b> m²</b></small>
+                                            <small class="suggested-text">Valor propuesto: <a wire:click="setProporcionalLandToSuggested">{{number_format($landDetail->undivided_surface_land , 2)}}</a><b> m²</b></small>
                                             <div>
                                                 <flux:error name="proporcionalLand" />
                                             </div>
@@ -344,7 +344,7 @@
                                                     <flux:button disabled><b>m²</b></flux:button>
                                                 </flux:input.group>
                                             </div>
-                                            <small class="sugget-text">Valor propuesto: <a wire:click="setSurplusLandAreaToSuggested">{{number_format($landDetail->surplus_land_area , 2)}}</a><b> m²</b></small>
+                                            <small class="suggested-text">Valor propuesto: <a wire:click="setSurplusLandAreaToSuggested">{{number_format($landDetail->surplus_land_area , 2)}}</a><b> m²</b></small>
                                             <div>
                                                 <flux:error name="surplusLandArea" />
                                             </div>

@@ -69,9 +69,9 @@
                         @foreach ($tabs as $key => $label)
                         <li>
                             <button type="button" wire:click.prevent="setTab('{{ $key }}')" @click="open = false" class="cursor-pointer w-full text-left px-4 py-3 transition-colors
-                                                                {{ $activeTab === $key
-                                                                    ? 'border-l-4 border-[#43A497] bg-[#F0FDFD] text-[#3A8B88] font-semibold'
-                                                                    : 'text-gray-700 hover:bg-gray-100' }}">
+                                {{ $activeTab === $key
+                                 ? 'border-l-4 border-[#43A497] bg-[#F0FDFD] text-[#3A8B88] font-semibold'
+                                 : 'text-gray-700 hover:bg-gray-100' }}">
                                 {{ $label }}
                             </button>
                         </li>
@@ -83,8 +83,9 @@
 
 
 
-                @if ($activeTab === 'privativas')
+               {{--  @if ($activeTab === 'privativas') --}}
 
+               <div class="{{ $activeTab === 'privativas' ? 'block' : 'hidden' }}">
                 {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
                 {{-- <flux:modal.trigger name="add-element" class="flex justify-end pt-8"> --}}
                     <div class="flex justify-end pt-4">
@@ -156,7 +157,8 @@
                                         </td>
                                         <td class="px-2 py-1 border text-xs text-center">{{
                                             $item->levels_construction_type }}</td>
-                                        <td class="px-2 py-1 border text-xs text-center">{{ $item->age }}</td>
+                                        <td class="px-2 py-1 border text-xs text-center">{{ number_format($item->age) }}
+                                        </td>
 
                                         {{-- Superficie con hasta 6 decimales --}}
                                         <td class="px-2 py-1 border text-xs text-center">
@@ -168,18 +170,18 @@
 
                                         {{-- Costo unitario con formato flexible --}}
                                         <td class="px-2 py-1 border text-xs text-center">
-                                          ${{ rtrim(rtrim(number_format($item->unit_cost_replacement, 6, '.', ','), '0'), '.') }}
+                                            ${{ number_format($item->unit_cost_replacement, 4) }}
                                         </td>
 
-                                        <td class="px-2 py-1 border text-xs text-center">{{ $item->progress_work }}%
+                                        <td class="px-2 py-1 border text-xs text-center">{{
+                                            rtrim(rtrim(number_format($item->progress_work, 6, '.', ''), '0'), '.') }}%
                                         </td>
                                         <td class="px-2 py-1 border text-xs text-center">{{ $item->conservation_state }}
                                         </td>
 
                                         {{-- Radios VEND/ACC/DESC --}}
                                         @foreach (['superficie vendible' => 'Vend', 'superficie accesoria' => 'Acc',
-                                        'construccion
-                                        superficie descubierta' => 'Desc'] as $value => $label)
+                                        'construccion superficie descubierta' => 'Desc'] as $value => $label)
                                         <td class="px-2 py-1 border text-sm text-center">
                                             <input type="radio" name="surface_vad_group_{{ $item->id }}"
                                                 value="{{ $value }}" class="w-4 h-4 text-blue-500" disabled {{
@@ -246,7 +248,14 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                               {{--      @php
+                                    $this->ageProperty = 0;
+                                    $this->totalAgeProperty = 0;
 
+                                    $this->usefulLifeProperty = 0;
+                                    $this->totalUsefulLifeProperty = 0;
+
+                                    @endphp --}}
                                     @if ($buildingConstructionsPrivate->isEmpty())
                                     <tr>
                                         <td colspan="12" class="px-2 py-4 text-center text-gray-500">
@@ -254,99 +263,174 @@
                                         </td>
                                     </tr>
                                     @else
+
+                                    @php
+                                    $this->totalAgeProperty = 0;
+                                    $this->totalUsefulLifeProperty = 0;
+                                    @endphp
                                     @foreach ($buildingConstructionsPrivate as $item)
 
                                     @php
-                                    $vidaUtilTotal = match ($item->clasification) {
-                                    'Minima' => 30,
-                                    'Economica' => 40,
-                                    'Interes social' => 40,
-                                    'Media' => 50,
-                                    'Semilujo' => 70,
-                                    'Residencial' => 90,
-                                    'Residencial plus' => 90,
-                                    'Residencial plus +' => 90,
-                                    'Unica' => 0,
-                                    };
 
+                                    // CÁLCULOS DE AVALUÓ POR CONSTRUCCIÓN
+
+
+                                    // 1. Obtener la vida útil total según combinación (Clasificación + Uso)
+                                    $claveCombinacion = $item->clasification . '_' . $item->use;
+                                    $vidaUtilTotal = $this->construction_life_values[$claveCombinacion] ?? 0;
+
+
+
+                                    // 2. Edad de la construcción
+                                    $edad = $item->age;
+
+                                    // 3. Vida útil remanente
+                                    $vidaUtilRemanente = $vidaUtilTotal > 0 ? max($vidaUtilTotal - $edad, 0) : 0;
+
+                                    // 4. Factor de edad (FEd) a partir de la formula proporcionada
+                                    // FEd = (0.100 × VP + 0.900 × (VP - E)) / VP
+                                    $factorEdad = $vidaUtilTotal > 0
+                                    ? (0.100 * $vidaUtilTotal + 0.900 * ($vidaUtilTotal - $edad)) / $vidaUtilTotal
+                                    : 0;
+
+                                    // 5. Factor de conservación
+                                    //Hacemos match con el valor asignado para mostrarlo en la tabla
                                     $factorConservacion = match ($item->conservation_state) {
                                     '0. Ruidoso' => 0.0,
                                     '0.8 Malo' => 0.8,
-                                    '1. Normal' => 1.0,
-                                    '1. Bueno' => 1.0,
-                                    '1.1 Muy bueno' => 1.1,
+                                    '1. Normal', '1. Bueno' => 1.0,
+                                    '1.1 Muy bueno', '1.1 Recientemente remodelado' => 1.1,
                                     '1. Nuevo' => 1.0,
-                                    '1.1 Recientemente remodelado' => 1.1,
                                     };
 
-                                    $edad = (float) $item->age;
+                                    // 6. Factor resultante
+                                    // Fórmula: Factor resultante = FEd × FCons × (Avance de obra / 100)
+                                    $factorResultante = $factorEdad * $factorConservacion * ($item->progress_work /
+                                    100);
+                                    // El factor resultante no puede ser menor a 0.600 (valor minimo permitido)
+                                    $factorResultante = max($factorResultante, 0.600);
 
-                                    if ($vidaUtilTotal === 0) {
-                                    $vidaUtilRemanente = 0;
-                                    } else {
-                                    $vidaUtilRemanente = $vidaUtilTotal - $edad;
-                                    }
+                                    // 7. Costo unitario neto de reposición
+                                    // Costo neto = Costo nuevo × Factor resultante
+                                    $costoUnitarioNeto = $item->unit_cost_replacement * $factorResultante;
+
+                                    // 8. Valor total
+                                    // Valor total = Superficie × Costo unitario neto
+                                    $valorTotal = $item->surface * $costoUnitarioNeto;
+
+                                    $sumValuesTotalsPriv = $sumValuesTotalsPriv + $valorTotal;
+
+                                    // 9. Una vez obtenidos los valores, obtenemos el total para el cálculo de vida util total del inmueble
+                                    // Y la edad del inmueble, en cada iteración solo se sumaran los totales, el cálculo final
+                                    // Se hará cuando se vaya a mostrar en pantalla, con lo cual se actualiza en cada cambio y alta de las tablas automáticamente
+                                    $this->totalAgeProperty += ($item->age * $item->surface);
+                                    $this->totalUsefulLifeProperty += ($vidaUtilTotal * $item->surface);
+                                    /* $this->totalUsefulLifeProperty = $this->totalUsefulLifeProperty + ($vidaUtilTotal * $item->surface); */
+
+                                    //dd($totalAgeProperty);
+
+
+
                                     @endphp
-
                                     <tr wire:key="result-private-{{ $item->id }}">
                                         <td class="px-2 py-1 border text-xs text-center">{{ $item->description }}</td>
 
                                         <td class="px-2 py-1 border text-xs text-center">{{
-                                            rtrim(rtrim(number_format($item->age, 0, '.', ''), '0'), '.') }}</td>
+                                            number_format($item->age) }}</td>
 
                                         <td class="px-2 py-1 border text-xs text-center">{{
-                                            rtrim(rtrim(number_format($vidaUtilTotal, 0, '.', ''), '0'), '.') }}</td>
+                                            number_format($vidaUtilTotal) }}</td>
 
                                         <td class="px-2 py-1 border text-xs text-center">{{
-                                            rtrim(rtrim(number_format($vidaUtilRemanente, 0, '.', ''), '0'), '.') }}
+                                            number_format($vidaUtilRemanente) }}
                                         </td>
 
                                         <td class="px-2 py-1 border text-xs text-center">{{
-                                            rtrim(rtrim(number_format($item->surface, 2, '.', ''), '0'), '.') }}</td>
+                                            rtrim(rtrim(number_format($item->surface, 6, '.', ''), '0'), '.') }}</td>
 
                                         <td class="px-2 py-1 border text-xs text-center">
 
-                                            ${{ rtrim(rtrim(number_format($item->unit_cost_replacement, 6, '.', ','), '0'), '.') }}
-                                            </td>
-
-                                        <td class="px-2 py-1 border text-xs text-center">[N/A O CÁLCULO]</td>
-
-                                        <td class="px-2 py-1 border text-xs text-center">{{ $factorConservacion }}</td>
-
-                                        <td class="px-2 py-1 border text-xs text-center">{{
-                                            rtrim(rtrim(number_format($item->progress_work, 2, '.', ''), '0'), '.') }}%
+                                            ${{ number_format($item->unit_cost_replacement, 4) }}
                                         </td>
 
-                                        <td class="px-2 py-1 border text-xs text-center">[N/A O CÁLCULO]</td>
+                                        <td class="px-2 py-1 border text-xs text-center">{{number_format($factorEdad,
+                                            4)}}</td>
 
-                                        <td class="px-2 py-1 border text-xs text-center">${{ '[N/A O CÁLCULO]' }}</td>
+                                        <td class="px-2 py-1 border text-xs text-center">{{
+                                            number_format($factorConservacion, 1) }}</td>
 
-                                        <td class="px-2 py-1 border text-xs text-center">${{ '[N/A O CÁLCULO]' }}</td>
+                                        <td class="px-2 py-1 border text-xs text-center">{{
+                                            rtrim(rtrim(number_format($item->progress_work, 6, '.', ''), '0'), '.') }}%
+                                        </td>
+
+                                        <td class="px-2 py-1 border text-xs text-center">
+                                            {{number_format($factorResultante, 2)}}</td>
+
+                                        <td class="px-2 py-1 border text-xs text-center">${{
+                                            number_format($costoUnitarioNeto, 4) }}</td>
+
+                                        <td class="px-2 py-1 border text-xs text-center">${{ number_format($valorTotal,
+                                            4) }}</td>
                                     </tr>
                                     @endforeach
                                     @endif
+
+                                    @php
+
+
+                                    $this->ageProperty = $this->totalAgeProperty/$this->totalSurfacePrivate;
+
+                                    $this->usefulLifeProperty = $this->totalUsefulLifeProperty/$this->totalSurfacePrivate;
+
+
+                                    //dd($this->totalAgeProperty, $this->totalSurfacePrivate, $this->totalUsefulLifeProperty, $this->usefulLifeProperty, $this->ageProperty);
+                                    @endphp
                                 </tbody>
                                 <tfoot>
                                     <tr class="font-bold">
-                                        <td colspan="4" class="px-2 py-1"></td>
+                                        <td colspan="11" class="px-2 py-1"></td>
 
                                         <td class="px-2 py-1 text-xs text-center">
-                                            {{ rtrim(rtrim(number_format($totalSurfacePrivate, 2, '.', ''), '0'), '.')
+
+                                            ${{ number_format($sumValuesTotalsPriv, 4)
                                             }}
                                         </td>
 
-                                        <td colspan="7" class="px-2 py-1"></td>
+                                        {{-- <td colspan="7" class="px-2 py-1"></td> --}}
                                     </tr>
                                 </tfoot>
                             </table>
                         </div>
                     </div>
+                    </div>
 
-                    @endif
+                    {{-- @endif --}}
 
 
 
-                    @if ($activeTab === 'comunes')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    {{-- @if ($activeTab === 'comunes') --}}
+
+                    <div class="{{ $activeTab === 'comunes' ? 'block' : 'hidden' }}">
 
                     {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
                     {{-- <flux:modal.trigger name="add-element" class="flex justify-end pt-8"> --}}
@@ -435,7 +519,7 @@
                                             $item->levels_construction_type }}</td>
 
                                         <td class="px-2 py-1 border text-xs text-center">{{
-                                            rtrim(rtrim(number_format($item->age, 0, '.', ''), '0'), '.') }}</td>
+                                            number_format($item->age) }}</td>
 
                                         <td class="px-2 py-1 border text-xs text-center">{{
                                             rtrim(rtrim(number_format($item->surface, 6, '.', ''), '0'), '.') }}</td>
@@ -444,25 +528,33 @@
                                         </td>
 
                                         <td class="px-2 py-1 border text-xs text-center">
-                                            ${{ rtrim(rtrim(number_format($item->unit_cost_replacement, 6, '.', ','), '0'), '.') }}
-                                            </td>
+                                            ${{ number_format($item->unit_cost_replacement, 4) }}
+                                        </td>
 
                                         <td class="px-2 py-1 border text-xs text-center">{{
-                                            rtrim(rtrim(number_format($item->progress_work, 2, '.', ''), '0'), '.') }}%
+                                            rtrim(rtrim(number_format($item->progress_work, 6, '.', ''), '0'), '.') }}%
                                         </td>
 
                                         <td class="px-2 py-1 border text-xs text-center">{{ $item->conservation_state }}
                                         </td>
 
-                                        {{-- Vend --}}
+                                        @foreach (['superficie vendible' => 'Vend', 'superficie accesoria' => 'Acc',
+                                        'construccion superficie descubierta' => 'Desc'] as $value => $label)
                                         <td class="px-2 py-1 border text-sm text-center">
+                                            <input type="radio" name="surface_vad_group_{{ $item->id }}"
+                                                value="{{ $value }}" class="w-4 h-4 text-blue-500" disabled {{
+                                                $item->surface_vad === $value ? 'checked' : '' }}>
+                                        </td>
+                                        @endforeach
+
+                                        {{-- <td class="px-2 py-1 border text-sm text-center">
                                             <input type="radio" name="surface_vad_group_{{ $item->id }}"
                                                 value="superficie vendible" class="w-4 h-4 text-blue-500" disabled {{
                                                 $item->surface_vad === 'superficie vendible' ?
                                             'checked' : '' }}>
                                         </td>
 
-                                        {{-- Acc --}}
+
                                         <td class="px-2 py-1 border text-sm text-center">
                                             <input type="radio" name="surface_vad_group_{{ $item->id }}"
                                                 value="superficie accesoria" class="w-4 h-4 text-blue-500" disabled {{
@@ -470,13 +562,13 @@
                                             'checked' : '' }}>
                                         </td>
 
-                                        {{-- Desc --}}
+
                                         <td class="px-2 py-1 border text-sm text-center">
                                             <input type="radio" name="surface_vad_group_{{ $item->id }}"
                                                 value="construccion superficie descubierta"
                                                 class="w-4 h-4 text-blue-500" disabled {{ $item->surface_vad ===
                                             'construccion superficie descubierta' ? 'checked' : '' }}>
-                                        </td>
+                                        </td> --}}
 
                                         {{-- Acciones --}}
                                         <td class="px-2 py-1 border">
@@ -550,123 +642,115 @@
                                     {{-- AQUI GENERAMOS LOS CÁLCULOS NECESARIOS PARA ASIGNAR A LOS VALORES SEGÚN SE
                                     NECESITE --}}
                                     @php
-                                    // --- 1. CÁLCULO DE VIDA ÚTIL TOTAL ---
-                                    $vidaUtilTotal = match ($item->clasification) {
-                                    'Minima' => 30,
-                                    'Economica' => 40,
-                                    'Interes social' => 40,
-                                    'Media' => 50,
-                                    'Semilujo' => 70,
-                                    'Residencial' => 90,
-                                    'Residencial plus' => 90,
-                                    'Residencial plus +' => 90,
-                                    'Unica' => 0,
-                                    };
+
+                                    // CÁLCULOS DE AVALUÓ POR CONSTRUCCIÓN
 
 
+                                    // 1. Obtener la vida útil total según combinación (Clasificación + Uso)
+                                    $claveCombinacion = $item->clasification . '_' . $item->use;
+                                    $vidaUtilTotal = $this->construction_life_values[$claveCombinacion] ?? 0;
+
+                                    // 2. Edad de la construcción
+                                    $edad = $item->age;
+
+                                    // 3. Vida útil remanente
+                                    $vidaUtilRemanente = $vidaUtilTotal > 0 ? max($vidaUtilTotal - $edad, 0) : 0;
+
+                                    // 4. Factor de edad (FEd) a partir de la formula proporcionada
+                                    // FEd = (0.100 × VP + 0.900 × (VP - E)) / VP
+                                    $factorEdad = $vidaUtilTotal > 0
+                                    ? (0.100 * $vidaUtilTotal + 0.900 * ($vidaUtilTotal - $edad)) / $vidaUtilTotal
+                                    : 0;
+
+                                    // 5. Factor de conservación
+                                    //Hacemos match con el valor asignado para mostrarlo en la tabla
                                     $factorConservacion = match ($item->conservation_state) {
                                     '0. Ruidoso' => 0.0,
                                     '0.8 Malo' => 0.8,
-                                    '1. Normal' => 1.0,
-                                    '1. Bueno' => 1.0,
-                                    '1.1 Muy bueno' => 1.1,
+                                    '1. Normal', '1. Bueno' => 1.0,
+                                    '1.1 Muy bueno', '1.1 Recientemente remodelado' => 1.1,
                                     '1. Nuevo' => 1.0,
-                                    '1.1 Recientemente remodelado' => 1.1,
-
                                     };
 
-                                    // --- DATOS DE ENTRADA DIRECTOS (Mantenemos para el renderizado) ---
-                                    $edad = (float) $item->age;
-                                    /* $superficie = (float) $item->surface;
-                                    $costoUnitarioNuevo = (float) $item->unit_cost_replacement; */
+                                    // 6. Factor resultante
+                                    // Fórmula: Factor resultante = FEd × FCons × (Avance de obra / 100)
+                                    $factorResultante = $factorEdad * $factorConservacion * ($item->progress_work /
+                                    100);
+                                    // El factor resultante no puede ser menor a 0.600 (valor minimo permitido)
+                                    $factorResultante = max($factorResultante, 0.600);
 
-                                    // Las demás variables de cálculo quedan sin definir por ahora.
+                                    // 7. Costo unitario neto de reposición
+                                    // Costo neto = Costo nuevo × Factor resultante
+                                    $costoUnitarioNeto = $item->unit_cost_replacement * $factorResultante;
 
+                                    // 8. Valor total
+                                    // Valor total = Superficie × Costo unitario neto
+                                    $valorTotal = $item->surface * $costoUnitarioNeto;
 
-                                    //CALCULOS DE VALORES
-
-                                    // Vida útil remanente
-                                    if ($vidaUtilTotal === 0) {
-                                    $vidaUtilRemanente = 0;
-                                    } else {
-                                    $vidaUtilRemanente = $vidaUtilTotal - $edad;
-                                    }
-
-
+                                    $sumValuesTotalsCom = $sumValuesTotalsCom + $valorTotal;
 
                                     @endphp
 
-
                                     <tr wire:key="result-private-{{ $item->id }}">
-                                        {{-- 1. Descripción (Directo) --}}
-                                        <td class="px-2 py-1 border text-xs text-center">{{ $item->description
-                                            }}</td>
+                                        <td class="px-2 py-1 border text-xs text-center">{{ $item->description }}</td>
 
-                                        {{-- 2. Edad (Directo) --}}
                                         <td class="px-2 py-1 border text-xs text-center">{{
-                                            number_format($item->age, 0) }}</td>
+                                            number_format($item->age) }}</td>
 
-                                        {{-- 3. Vida útil (CALCULADO O CONSTANTE - Placeholder) --}}
-                                        <td class="px-2 py-1 border text-xs text-center">
-                                            {{number_format($vidaUtilTotal, 0)}}</td>
-
-                                        {{-- 4. Vida útil remanente (CALCULADO - Placeholder) --}}
-                                        <td class="px-2 py-1 border text-xs text-center">
-                                            {{number_format($vidaUtilRemanente, 0)}}</td>
-
-                                        {{-- 5. Superficie (Directo) --}}
                                         <td class="px-2 py-1 border text-xs text-center">{{
-                                            number_format($item->surface, 2) }}</td>
+                                            number_format($vidaUtilTotal) }}</td>
 
-                                        {{-- 6. Costo unitario reposición nuevo (Directo) --}}
-                                        <td class="px-2 py-1 border text-xs text-center">${{ rtrim(rtrim(number_format($item->unit_cost_replacement, 6, '.', ','), '0'), '.') }}
-                                            </td>
-
-                                        {{-- 7. Factor edad (CALCULADO - Placeholder) --}}
-                                        <td class="px-2 py-1 border text-xs text-center">[N/A O CÁLCULO]</td>
-
-                                        {{-- 8. Factor conservación (CALCULADO O DIRECTO - Placeholder) --}}
-                                        <td class="px-2 py-1 border text-xs text-center">{{$factorConservacion}}
+                                        <td class="px-2 py-1 border text-xs text-center">{{
+                                            number_format($vidaUtilRemanente) }}
                                         </td>
 
-                                        {{-- 9. Avance obra (Directo, con símbolo %) --}}
                                         <td class="px-2 py-1 border text-xs text-center">{{
-                                            number_format($item->progress_work, 2) }}%</td>
+                                            rtrim(rtrim(number_format($item->surface, 6, '.', ''), '0'), '.') }}</td>
 
-                                        {{-- 10. Factor resultante (CALCULADO - Placeholder) --}}
-                                        <td class="px-2 py-1 border text-xs text-center">[N/A O CÁLCULO]</td>
+                                        <td class="px-2 py-1 border text-xs text-center">
 
-                                        {{-- 11. Costo unitario neto de reposición (CALCULADO - Placeholder)
-                                        --}}
-                                        <td class="px-2 py-1 border text-xs text-center">${{ '[N/A O CÁLCULO]'
-                                            }}</td>
+                                            ${{ number_format($item->unit_cost_replacement, 4) }}
+                                        </td>
 
-                                        {{-- 12. Valor total (CALCULADO - Placeholder) --}}
-                                        <td class="px-2 py-1 border text-xs text-center">${{ '[N/A O CÁLCULO]'
-                                            }}</td>
+                                        <td class="px-2 py-1 border text-xs text-center">{{number_format($factorEdad,
+                                            4)}}</td>
+
+                                        <td class="px-2 py-1 border text-xs text-center">{{
+                                            number_format($factorConservacion, 1) }}</td>
+
+                                        <td class="px-2 py-1 border text-xs text-center">{{
+                                            rtrim(rtrim(number_format($item->progress_work, 6, '.', ''), '0'), '.') }}%
+                                        </td>
+
+                                        <td class="px-2 py-1 border text-xs text-center">
+                                            {{number_format($factorResultante, 2)}}</td>
+
+                                        <td class="px-2 py-1 border text-xs text-center">${{
+                                            number_format($costoUnitarioNeto, 4) }}</td>
+
+                                        <td class="px-2 py-1 border text-xs text-center">${{ number_format($valorTotal,
+                                            4) }}</td>
                                     </tr>
                                     @endforeach
                                     @endif
                                 </tbody>
                                 <tfoot>
                                     <tr class="font-bold">
+                                        <td colspan="11" class="px-2 py-1"></td>
 
-                                        {{-- Celdas vacías (Columna 1 a 4: Descripcion, Edad, VUT, VUR) --}}
-                                        <td colspan="4" class="px-2 py-1"></td>
-
-                                        {{-- Total Superficie (Columna 5) --}}
                                         <td class="px-2 py-1 text-xs text-center">
-                                            {{ number_format($totalSurfaceCommon, 2) }}
+                                            ${{ number_format($sumValuesTotalsCom, 4)
+                                            }}
                                         </td>
 
-                                        {{-- Celdas vacías (Columna 6 a 12: Resto de la tabla) --}}
-                                        <td colspan="7" class="px-2 py-1"></td>
+                                        {{-- <td colspan="7" class="px-2 py-1"></td> --}}
                                     </tr>
                                 </tfoot>
                             </table>
                         </div>
                     </div>
-                    @endif
+                    </div>
+                   {{--  @endif --}}
 
 
                     <div class="form-grid form-grid--3 mt-[64px] mb-2 text-lg">
@@ -691,22 +775,24 @@
                                         </td>
                                         <td class="border px-2 py-1 text-sm text-center">
                                             {{
-                                               /*  number_format($totalSurfacePrivate, 2) */
-                                                rtrim(rtrim(number_format($totalSurfacePrivate, 6, '.', ','), '0'), '.')
-                                                }}
+                                            /* number_format($totalSurfacePrivate, 2) */
+                                            rtrim(rtrim(number_format($totalSurfacePrivate, 6, '.', ','), '0'), '.')
+                                            }}
                                         </td>
                                         <td class="border px-2 py-1 text-sm text-center">
                                             {{
-                                                /* number_format($totalSurfaceCommon, 2) */
-                                                rtrim(rtrim(number_format($totalSurfaceCommon, 6, '.', ','), '0'), '.')
-                                                }}
+                                            /* number_format($totalSurfaceCommon, 2) */
+                                            rtrim(rtrim(number_format($totalSurfaceCommon, 6, '.', ','), '0'), '.')
+                                            }}
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="border px-2 py-1 text-xs text-center">Valor total de construcciones:
                                         </td>
-                                        <td class="border px-2 py-1 text-xs text-center">1</td>
-                                        <td class="border px-2 py-1 text-sm text-center">1</td>
+                                        <td class="border px-2 py-1 text-xs text-center">
+                                            {{number_format($sumValuesTotalsPriv, 4)}}</td>
+                                        <td class="border px-2 py-1 text-xs text-center">
+                                            {{number_format($sumValuesTotalsCom, 4)}}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -733,14 +819,16 @@
                                         </td>
                                         <td class="border px-2 py-1 text-sm text-center">
                                             {{
-                                                /* number_format($totalSurfacePrivateVendible, 2) */
-                                                rtrim(rtrim(number_format($totalSurfacePrivateVendible, 6, '.', ','), '0'), '.')
-                                                }}</td>
+                                            /* number_format($totalSurfacePrivateVendible, 2) */
+                                            rtrim(rtrim(number_format($totalSurfacePrivateVendible, 6, '.', ','), '0'),
+                                            '.')
+                                            }}</td>
                                         <td class="border px-2 py-1 text-sm text-center">
                                             {{
-                                                /* number_format($totalSurfacePrivateAccesoria, 2) */
-                                                rtrim(rtrim(number_format($totalSurfacePrivateAccesoria, 6, '.', ','), '0'), '.')
-                                                }}</td>
+                                            /* number_format($totalSurfacePrivateAccesoria, 2) */
+                                            rtrim(rtrim(number_format($totalSurfacePrivateAccesoria, 6, '.', ','), '0'),
+                                            '.')
+                                            }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -783,17 +871,20 @@
                         {{-- Valor de ejemplo para usar en los for --}}
                         <tr>
                             <td class="border px-2 py-1 text-xs text-center">Vida útil total del inmueble:</td>
-                            <td class="border px-2 py-1 text-xs text-center">90 años</td>
+                            {{-- <td class="border px-2 py-1 text-xs text-center">{{$this->totalUsefulLifeProperty/$totalSurfacePrivate}}</td> --}}
+                            <td class="border px-2 py-1 text-xs text-center">{{ round($this->usefulLifeProperty, 0) }}</td>
                         </tr>
 
                         <tr>
                             <td class="border px-2 py-1 text-xs text-center">Edad del inmueble del inmueble:</td>
-                            <td class="border px-2 py-1 text-xs text-center">1 año</td>
+                            {{-- <td class="border px-2 py-1 text-xs text-center">{{$this->totalsAgeProperty/$totalSurfacePrivate}}</td> --}}
+                            <td class="border px-2 py-1 text-xs text-center">{{ round($this->ageProperty, 0) }}</td>
                         </tr>
 
                         <tr>
                             <td class="border px-2 py-1 text-xs text-center">Vida útil remanente del inmueble:</td>
-                            <td class="border px-2 py-1 text-xs text-center">89 años</td>
+                            {{-- <td class="border px-2 py-1 text-xs text-center">{{ ($this->totalUsefulLifeProperty/$totalSurfacePrivate)-($this->totalsAgeProperty/$totalSurfacePrivate) }}</td> --}}
+                           <td class="border px-2 py-1 text-xs text-center">{{ round($this->usefulLifeProperty - $this->ageProperty, 0) }}</td>
                         </tr>
                     </tbody>
                 </table>
