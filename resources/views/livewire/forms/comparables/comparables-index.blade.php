@@ -19,7 +19,7 @@
 
     <flux:separator />
     <div class="pt-4">
-        <flux:button variant="primary" class="cursor-pointer btn-primary" wire:click='openAddComparable'>Agregar
+        <flux:button variant="primary" class="cursor-pointer btn-primary" wire:click='addComparable'>Agregar
             comparable</flux:button>
     </div>
    {{--  <div class="form-container">
@@ -137,7 +137,7 @@
                                 {{-- <th class="px-2 py-2 border">Folio</th> --}}
 
                                 <th class="px-2 py-2 border">Mover</th>
-                                <th class="px-2 py-2 border">Propiedad</th>
+                                {{-- <th class="px-2 py-2 border">Propiedad</th> --}}
                                 <th class="px-2 py-2 border">Estado</th>
                                 <th class="px-2 py-2 border">Ciudad</th>
                                 <th class="px-2 py-2 border">Colonia</th>
@@ -148,7 +148,7 @@
                                 <th class="px-2 py-2 border">Terreno</th>
                                 <th class="px-2 py-2 border">Construida</th>
                                 <th class="px-2 py-2 border">Unitario</th>
-                                <th class="w-[100px] py-2 border">Acciones</th> <!-- Editar/Eliminar -->
+                                <th class="w-[320px] py-2 border">Acciones</th> <!-- Editar/Eliminar -->
                                 <!-- Nueva columna para flechas -->
                             </tr>
                         </thead>
@@ -167,16 +167,16 @@
                                 <td class="px-2 py-2 border text-center">
                                     <div class="flex justify-center gap-2">
                                         <flux:button type="button" icon-leading="chevron-double-down" class="cursor-pointer btn-primary btn-buildings"
-                                            wire:click="moveComparable({{ $item->id }}, 'down')" :disabled="$loop->last" />
+                                            wire:click="moveComparable({{ $item->id }}, 'down')" wire:loading.attr="disabled" :disabled="$loop->last" />
 
                                         <flux:button type="button" icon-leading="chevron-double-up" class="cursor-pointer btn-primary btn-buildings"
-                                            wire:click="moveComparable({{ $item->id }}, 'up')" :disabled="$loop->first" />
+                                            wire:click="moveComparable({{ $item->id }}, 'up')" wire:loading.attr="disabled" :disabled="$loop->first" />
 
                                     </div>
                                 </td>
 
                                {{--  <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_folio }}</td> --}}
-                                <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_property }}</td>
+                                {{-- <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_property }}</td> --}}
                                 <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_entity_name }}
                                 </td>
                                 <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_locality_name }}
@@ -200,16 +200,32 @@
                                 rtrim(rtrim(number_format($item->comparable_built_area, 6, '.', ','), '0'), '.')
                                 }}</td>
 
-                                <!-- Editar / Eliminar -->
+                                <!-- Resumen / Editar / Eliminar  -->
                                <td class="px-2 py-2 border text-center">
-                                <div class="flex justify-center gap-2">
+                                <div class="flex justify-center gap-4">
+
+                                    <flux:button type="button"  class="cursor-pointer btn-change btn-table text-sm"
+                                        wire:click="$dispatch('openSummary', { id: {{ $item->id }} })">Resumen</flux:button>
+
+                                    <flux:button type="button" class="cursor-pointer btn-intermediary btn-table text-sm"
+                                        wire:click="editComparable({{ $item->id }})">Editar</flux:button>
+
+                                    <flux:button type="button"
+                                        onclick="confirm('¿Estás seguro de que deseas eliminar este comparable?') || event.stopImmediatePropagation()"
+                                        wire:click="deallocatedElement({{ $item->id }})" class="cursor-pointer btn-deleted btn-table text-sm">Quitar</flux:button>
+                                </div>
+                             {{--    <div class="flex justify-center gap-2">
+
+                                   <flux:button type="button" icon-leading="document-text" class="cursor-pointer btn-change btn-buildins"
+                                    wire:click="$dispatch('openSummary', { id: {{ $item->id }} })" />
+
                                     <flux:button type="button" icon-leading="pencil" class="cursor-pointer btn-intermediary btn-buildins"
                                         wire:click="editComparable({{ $item->id }})" />
 
                                     <flux:button type="button" icon-leading="trash"
                                         onclick="confirm('¿Estás seguro de que deseas eliminar este comparable?') || event.stopImmediatePropagation()"
                                         wire:click="deleteComparable({{ $item->id }})" class="cursor-pointer btn-deleted btn-buildings" />
-                                </div>
+                                </div> --}}
                             </td>
 
                                 <!-- Flechas para mover -->
@@ -271,7 +287,7 @@
 
 
     {{-- MODAL PARA AGREGAR UN NUEVO COMPARABLE --}}
-    <flux:modal name="add-comparable" class="md:w-110">
+    <flux:modal :dismissible="false" name="modal-comparable" class="md:w-110">
         <div class="space-y-4">
             <div>
                 <flux:heading size="lg"><b class="text-lg">Nuevo comparable</b></flux:heading>
@@ -606,7 +622,7 @@
                 <flux:field class="flux-field">
                     <flux:label>De pendiente<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
-                        <flux:input type="text" wire:model='comparableSlope' />
+                        <flux:input type="number" wire:model='comparableSlope' step="any" />
                         <flux:button type="button" class="font-bold" disabled><b>%</b>
                         </flux:button>
                     </flux:input.group>
@@ -698,7 +714,7 @@
                 <flux:field class="flux-field">
                     <flux:label>Oferta<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
-                        <flux:input type="number" wire:model='comparableOffers' step="any"/>
+                        <flux:input type="number" wire:model.lazy='comparableOffers' step="any"/>
                     </flux:input.group>
                     <div class="error-container">
                         <flux:error name="comparableOffers" />
@@ -708,7 +724,7 @@
                 <flux:field class="flux-field">
                     <flux:label>Superficie del terreno<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
-                        <flux:input type="number" wire:model='comparableLandArea' step="any"/>
+                        <flux:input type="number" wire:model.lazy='comparableLandArea' step="any"/>
                         <flux:button type="button" class="text-bold" disabled>m²
                         </flux:button>
                     </flux:input.group>
@@ -732,7 +748,7 @@
                 <flux:field class="flux-field">
                     <flux:label>Valor unitario<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
-                        <flux:input type="number" wire:model='comparableUnitValue' step="any" />
+                        <flux:input type="number" wire:model='comparableUnitValue' step="any" disabled/>
                         <flux:button type="button" icon="calculator" disabled></flux:button>
                     </flux:input.group>
                     <div class="error-container">
@@ -840,7 +856,7 @@
                 </flux:field>
 
 
-                <flux:field class="flux-field">
+           {{--      <flux:field class="flux-field">
                     <flux:label>Número de frentes<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
                         <flux:input type="number" wire:model='comparableNumberFronts' />
@@ -849,7 +865,7 @@
                         <flux:error name="comparableNumberFronts" />
                     </div>
                 </flux:field>
-
+ --}}
                 <flux:field class="flux-field">
                     <flux:label>Fuente de información imágenes<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
@@ -895,6 +911,12 @@
                 </div>
             </div>
 
+          @if ($comparablePhotosFile && is_string($comparablePhotosFile) && Storage::disk('comparables_public')->exists($comparablePhotosFile))
+            <div>
+                <img src="{{ asset('comparables/'.$comparablePhotosFile) }}" alt="Foto del comparable"
+                    class="w-full h-full object-cover">
+            </div>
+             @endif
             {{-- Errores de validación --}}
             <div class="error-container mt-1">
                 @error('comparablePhotosFile')
@@ -929,14 +951,29 @@
 
 
 
+                @if ($comparableId)
+                        <div class="flex">
+                            <flux:spacer />
+                            <flux:button class="btn-primary btn-table cursor-pointer" type="button" variant="primary" wire:click='comparableUpdate'>Editar
+                                comparable</flux:button>
+                        </div>
+                @endunless
 
+
+                @if($comparableId === null)
                 <div class="flex">
                     <flux:spacer />
-                    <flux:button class="btn-primary btn-table cursor-pointer" type="button" variant="primary"
-                        wire:click='save'>Crear comparable</flux:button>
+                    <flux:button class="btn-primary btn-table cursor-pointer" type="button" variant="primary" wire:click='save'>Crear
+                        comparable</flux:button>
                 </div>
+                @endif
             </div>
     </flux:modal>
+
+
+
+{{-- Añadimos el componente del modal para el resumen del comparable --}}
+<livewire:forms.comparables.comparable-summary />
 
 
 </div>

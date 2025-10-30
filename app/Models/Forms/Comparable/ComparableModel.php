@@ -3,6 +3,7 @@
 namespace App\Models\Forms\Comparable;
 
 use App\Models\Valuations\Valuation;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -66,7 +67,8 @@ class ComparableModel extends Model
         'comparable_bargaining_factor',
         'comparable_latitude',
         'comparable_longitude',
-        'is_active', // Mapeo de comparableActive
+        'is_active',
+        'created_by',
     ];
 
     /**
@@ -138,5 +140,16 @@ class ComparableModel extends Model
         )
             ->withPivot(['position', 'is_active', 'created_by'])
             ->withTimestamps();
+    }
+
+
+
+    //Función para obtener el usuario el dato del usuario que creo el avaluo
+
+    public function createdBy()
+    {
+        // Le decimos a Eloquent: "Este comparable pertenece a un User,
+        // y la llave para buscarlo está en la columna 'created_by'."
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

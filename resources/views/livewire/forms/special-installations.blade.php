@@ -1423,7 +1423,7 @@
         <flux:field class="flux-field">
             <flux:label>Vida útil<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model='usefulLife'
-            :disabled="!($descriptionSI === 'IE19' || $descriptionAE === 'EA12' || $descriptionCW === 'OC17')"/>
+            :disabled="!($descriptionSI === 'IE19' || $descriptionAE === 'EA12' || $descriptionCW === 'OC17' || $descriptionCW === 'OC18' || $descriptionCW === 'OC06')"/>
             <div class="error-container">
                 <flux:error name="usefulLife" />
             </div>

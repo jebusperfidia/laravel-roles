@@ -6,6 +6,8 @@ namespace App\Livewire\Forms\Comparables;
 use App\Models\Forms\Comparable\ComparableModel;
 use App\Models\Forms\Comparable\ValuationComparableModel;
 use Livewire\WithFileUploads;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Illuminate\Support\Facades\Session;
 use App\Models\Valuations\Valuation;
@@ -15,6 +17,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Services\DipomexService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
+//Se importa flux para poder controlar el modal desde aquí
+
 //use Livewire\Attributes\On;
 
 class ComparablesIndex extends Component
@@ -24,7 +28,7 @@ class ComparablesIndex extends Component
     //public bool $isLoading = false;
 
     //Evento de escucha para ejecutar la función de asignación
-    protected $listeners = ['assignedElement'];
+    protected $listeners = ['assignedElement', 'editComparable', 'deallocatedElement', 'deleteElement'];
 
 
     use WithFileUploads;
@@ -70,13 +74,16 @@ class ComparablesIndex extends Component
     public $comparableAbroadNumber, $comparableInsideNumber, $comparableAllowedLevels,
     $comparableNumberFronts;
 
-    public float $comparableFreeAreaRequired, $comparableSlope, $comparableOffers, $comparableLandArea,
-        $comparableBuiltArea, $comparableUnitValue, $comparableBargainingFactor;
+    public float $comparableFreeAreaRequired, $comparableSlope, $comparableOffers = 0, $comparableLandArea = 0,
+        $comparableBuiltArea = 0, $comparableUnitValue = 0, $comparableBargainingFactor;
 
 
     //Variable para guardar los comparables asignados al avaluo
     public $assignedComparables = [];
 
+
+    //Valor que se usará para la actualización de los comparables
+    public $comparableId = null;
 
 
     public function mount(DipomexService $dipomex)
@@ -91,13 +98,15 @@ class ComparablesIndex extends Component
         $this->valuation = Valuation::find($this->id);
 
         //Asignamos los comparables ya asignados al avalúo
-        $this->loadAssignedComparables();
+        //$this->loadAssignedComparables();
 
         //Inicializar variables de ejemplos
         $this->comparableKey = 01;
         $this->comparableFolio = $this->valuation->folio;
 
         $this->userSession = Auth::user();
+
+        //dd($this->userSession);
 
         //dd($this->userSession->id);
 
@@ -119,21 +128,260 @@ class ComparablesIndex extends Component
      //Generamos una función para actualizar los valores de los comparables asignados al avaluo
     public function loadAssignedComparables(){
         $this->assignedComparables = $this->valuation->comparables()->orderByPivot('position')->get();
+
+        //dd($this->assignedComparables);
+
+        //dd($this->comparable);
     }
 
 
 
-   // #[On('assigned')]
-    /* public function openForms(array $IdValuation) */
-    public function assignedElement($idComparable)
+
+    //Función para abrirl modal de creación de comparable para el avalúo
+    public function addComparable()
     {
-        //dd($this->userSession);
+        //Reseteamos las validaciones
+        $this->resetValidation();
+        //Reseteamos los campos del modal
+        $this->resetComparableFields();
+        //Abrimos el modal
+        Flux::modal('modal-comparable')->show();
+    }
 
-        //dd('El método llega con éxito', $idComparable);
-        //return redirect()->route('form.index');
+
+    public function editComparable($idComparable, DipomexService $dipomex) {
+        //Reseteamos las validaciones
+        $this->resetValidation();
+        //Reseteamos los campos del modal
+        $this->resetComparableFields();
+
+        $this->comparableId = $idComparable;
+
+        //Usamos el id recibido para obtenemos los valoresl del comparable desde la BD
+        $comparable = ComparableModel::find($idComparable);
+
+        /* $this->comparable = $comparable; */
 
 
-        /* $this->isLoading = true; */
+        // Mapeo completo de MODELO (snake_case) a PROPIEDADES (camelCase)
+        $this->comparableKey = $comparable->comparable_key;
+        $this->comparableFolio = $comparable->comparable_folio;
+        $this->comparableDischargedBy = $comparable->comparable_discharged_by;
+        $this->comparableProperty = $comparable->comparable_property;
+        $this->comparableEntity = $comparable->comparable_entity;
+        $this->comparableEntityName = $comparable->comparable_entity_name;
+        $this->comparableLocality = $comparable->comparable_locality;
+        $this->comparableLocalityName = $comparable->comparable_locality_name;
+        $this->comparableColony = $comparable->comparable_colony;
+        $this->comparableOtherColony = $comparable->comparable_other_colony;
+        $this->comparableStreet = $comparable->comparable_street;
+        $this->comparableBetweenStreet = $comparable->comparable_between_street;
+        $this->comparableAndStreet = $comparable->comparable_and_street;
+        $this->comparableCp = $comparable->comparable_cp;
+        $this->comparableName = $comparable->comparable_name;
+        $this->comparableLastName = $comparable->comparable_last_name;
+        $this->comparablePhone = $comparable->comparable_phone;
+        $this->comparableUrl = $comparable->comparable_url;
+        $this->comparableLandUse = $comparable->comparable_land_use;
+        $this->comparableDescServicesInfraestructure = $comparable->comparable_desc_services_infraestructure;
+        $this->comparableServicesInfraestructure = $comparable->comparable_services_infraestructure;
+        $this->comparableShape = $comparable->comparable_shape;
+        $this->comparableDensity = $comparable->comparable_density;
+        $this->comparableFront = $comparable->comparable_front;
+        $this->comparableFrontType = $comparable->comparable_front_type;
+        $this->comparableDescriptionForm = $comparable->comparable_description_form;
+        $this->comparableTopography = $comparable->comparable_topography;
+        $this->comparableCharacteristics = $comparable->comparable_characteristics;
+        $this->comparableCharacteristicsGeneral = $comparable->comparable_characteristics_general;
+        $this->comparableLocationBlock = $comparable->comparable_location_block;
+        $this->comparableStreetLocation = $comparable->comparable_street_location;
+        $this->comparableGeneralPropArea = $comparable->comparable_general_prop_area;
+        $this->comparableUrbanProximityReference = $comparable->comparable_urban_proximity_reference;
+        $this->comparableSourceInfImages = $comparable->comparable_source_inf_images;
+        $this->comparableAbroadNumber = $comparable->comparable_abroad_number;
+        $this->comparableInsideNumber = $comparable->comparable_inside_number;
+        $this->comparableAllowedLevels = $comparable->comparable_allowed_levels;
+        $this->comparableNumberFronts = $comparable->comparable_number_fronts;
+        $this->comparableFreeAreaRequired = $comparable->comparable_free_area_required;
+        $this->comparableSlope = $comparable->comparable_slope;
+
+        // Campos que también son outputs de cálculo (aseguramos el tipo float)
+        $this->comparableOffers = (float) $comparable->comparable_offers;
+        $this->comparableLandArea = (float) $comparable->comparable_land_area;
+        $this->comparableBuiltArea = (float) $comparable->comparable_built_area;
+        $this->comparableUnitValue = (float) $comparable->comparable_unit_value;
+        $this->comparableBargainingFactor = (float) $comparable->comparable_bargaining_factor;
+
+        $this->comparableActive = $comparable->is_active;
+
+        // Foto: Cargamos la RUTA existente en la propiedad del archivo.
+        $this->comparablePhotosFile = $comparable->comparable_photos;
+
+        /*  $this->comparable = $comparable; */
+
+        // 1. Cargamos Localidades/Municipios (si la Entidad existe)
+        if ($this->comparableEntity) {
+            $this->municipalities = $dipomex->getMunicipiosPorEstado($this->comparableEntity);
+        }
+
+
+        // 2. Cargamos Colonias/Asentamientos (si la Localidad existe)
+        if ($this->comparableLocality && $this->comparableCp) {
+            // Asumo que tu servicio Dipomex tiene un método para buscar colonias por Localidad o CP
+            // Utilizaremos la lógica del otro componente: buscar por CP.
+            $data = $dipomex->buscarPorCodigoPostal($this->comparableCp);
+
+            // Asignar las colonias obtenidas del CP
+            $this->colonies = $data['colonias'] ?? [];
+        }
+
+        Flux::modal('modal-comparable')->show();
+    }
+
+
+    public function comparableUpdate(){
+        // 1. Validaciones
+        $validator = $this->validateModal();
+
+        if ($validator->fails()) {
+            Toaster::error('Existen errores de validación');
+            $this->setErrorBag($validator->getMessageBag());
+            return;
+        }
+
+        // --- 2. MANEJO DE FOTO Y RUTA FINAL ---
+
+        // Inicializa la variable que finalmente se guardará en el campo 'comparable_photos'.
+        // Si la lógica no encuentra nada, el valor final será null (eliminando la referencia de la foto).
+        $photoPath = null;
+
+        // ----------------------------------------------------------------------------------
+        // CASO A: MANTENER FOTO EXISTENTE (Modo Edición)
+        // ----------------------------------------------------------------------------------
+        if (is_string($this->comparablePhotosFile) && $this->comparablePhotosFile) {
+
+            // is_string(): Verifica que la propiedad contiene una CADENA (la ruta vieja que trajimos de la BD).
+            // $this->comparablePhotosFile: Verifica que esa cadena no esté vacía o sea nula.
+
+            // Si ambas son ciertas, simplemente mantenemos la ruta de la foto existente.
+            $photoPath = $this->comparablePhotosFile;
+
+            // ----------------------------------------------------------------------------------
+            // CASO B: SUBIR Y REEMPLAZAR FOTO (Creación o Edición con archivo nuevo)
+            // ----------------------------------------------------------------------------------
+        } elseif ($this->comparablePhotosFile instanceof TemporaryUploadedFile) {
+
+            // instanceof TemporaryUploadedFile: Verifica que el valor es un OBJETO de Livewire,
+            // lo que significa que el usuario ha seleccionado un archivo nuevo para subir.
+
+            // 1. Lógica de Eliminación de la Vieja Foto (Solo si estamos editando)
+            if ($this->comparableId) {
+                // Verifica si estamos en modo edición (si comparableId tiene un valor)
+
+                $oldComparable = ComparableModel::find($this->comparableId);
+                // Busca el comparable antiguo en la BD.
+
+                if ($oldComparable && $oldComparable->comparable_photos) {
+                    // Verifica que el registro exista y que tenga una ruta de foto guardada.
+
+                    // Borramos el archivo del disco 'comparables_public'.
+                    // Esto es crucial para no dejar archivos basura en el servidor.
+                    Storage::disk('comparables_public')->delete(basename($oldComparable->comparable_photos));
+                }
+            }
+
+            // 2. Subir la NUEVA foto al disco 'comparables_public'.
+            // El método store devuelve la ruta o nombre de archivo que se debe guardar en la BD.
+            $photoPath = $this->comparablePhotosFile->store('/', 'comparables_public');
+        }
+
+        // ----------------------------------------------------------------------------------
+        // FALLBACK: ¿QUÉ PASA SI SE ELIMINÓ O NUNCA HUBO FOTO?
+        // ----------------------------------------------------------------------------------
+
+        // Si $this->comparablePhotosFile era NULL (el usuario la eliminó usando 'removePhoto' o nunca subió nada):
+        // Las condiciones 'if' y 'elseif' fallan, y $photoPath se queda en 'null',
+        // lo que actualizará el campo 'comparable_photos' de la BD a NULL.
+
+        // --- 3. CREAR ARRAY DE DATOS ($data) ---
+        $data = [
+            //'valuation_id' => $this->id,
+            'comparable_key' => $this->comparableKey,
+            'comparable_folio' => $this->comparableFolio,
+            'comparable_discharged_by' => $this->comparableDischargedBy,
+            'comparable_property' => $this->comparableProperty,
+            'comparable_entity' => $this->comparableEntity,
+            'comparable_entity_name' => $this->comparableEntityName,
+            'comparable_locality' => $this->comparableLocality,
+            'comparable_locality_name' => $this->comparableLocalityName,
+            'comparable_colony' => $this->comparableColony,
+            'comparable_other_colony' => $this->comparableOtherColony,
+            'comparable_street' => $this->comparableStreet,
+            'comparable_between_street' => $this->comparableBetweenStreet,
+            'comparable_and_street' => $this->comparableAndStreet,
+            'comparable_cp' => $this->comparableCp,
+            'comparable_name' => $this->comparableName,
+            'comparable_last_name' => $this->comparableLastName,
+            'comparable_phone' => $this->comparablePhone,
+            'comparable_url' => $this->comparableUrl,
+            'comparable_land_use' => $this->comparableLandUse,
+            'comparable_desc_services_infraestructure' => $this->comparableDescServicesInfraestructure,
+            'comparable_services_infraestructure' => $this->comparableServicesInfraestructure,
+            'comparable_shape' => $this->comparableShape,
+            'comparable_density' => $this->comparableDensity,
+            'comparable_front' => $this->comparableFront,
+            'comparable_front_type' => $this->comparableFrontType,
+            'comparable_description_form' => $this->comparableDescriptionForm,
+            'comparable_topography' => $this->comparableTopography,
+            'comparable_characteristics' => $this->comparableCharacteristics,
+            'comparable_characteristics_general' => $this->comparableCharacteristicsGeneral,
+            'comparable_location_block' => $this->comparableLocationBlock,
+            'comparable_street_location' => $this->comparableStreetLocation,
+            'comparable_general_prop_area' => $this->comparableGeneralPropArea,
+            'comparable_urban_proximity_reference' => $this->comparableUrbanProximityReference,
+            'comparable_source_inf_images' => $this->comparableSourceInfImages ?? '',
+            'comparable_photos' => $photoPath, // <--- RUTA FINAL
+            'comparable_abroad_number' => $this->comparableAbroadNumber,
+            'comparable_inside_number' => $this->comparableInsideNumber,
+            'comparable_allowed_levels' => $this->comparableAllowedLevels,
+            'comparable_number_fronts' => $this->comparableNumberFronts,
+            'comparable_free_area_required' => $this->comparableFreeAreaRequired,
+            'comparable_slope' => $this->comparableSlope,
+            'comparable_offers' => $this->comparableOffers,
+            'comparable_land_area' => $this->comparableLandArea,
+            'comparable_built_area' => $this->comparableBuiltArea,
+            'comparable_unit_value' => $this->comparableUnitValue,
+            'comparable_bargaining_factor' => $this->comparableBargainingFactor,
+            'is_active' => $this->comparableActive,
+          /*   'created_by' => $this->userSession->id ?? null, */
+        ];
+
+        $comparable = ComparableModel::find($this->comparableId);
+
+
+        $comparable->update($data);
+
+        // 5. Limpieza y UI
+        $this->resetComparableFields();
+        // Asumo que el modal de creación/edición se llama 'modal-comparable'
+        Flux::modal('modal-comparable')->close();
+
+        // Refrescamos PowerGrid
+        $this->dispatch('pg:eventRefresh-comparables-table');
+
+        $this->comparableId = null;
+
+        Toaster::success('Comparable actualzado con éxito');
+    }
+
+
+
+
+    // #[On('assigned')]
+    /* public function openForms(array $IdValuation) */
+    public function assignedElement($idComparable, $showToaster = true)
+    {
+
 
         //Obtenemos el valor de la última posición asignada
         $max_position = $this->valuation->comparables()->max('position');
@@ -156,19 +404,78 @@ class ComparablesIndex extends Component
         $this->loadAssignedComparables();
 
         //Enviamos un mensaje para notificar al usuario sobre la correcta asignación
-        Toaster::success('Comparable asignado correctamente.');
+        // Solo mostramos el toaster si $showToaster es true
+        if ($showToaster) {
+            Toaster::success('Comparable asignado correctamente.');
+        }
 
         //$this->dispatch('refreshComparablesTable');
         /* $this->isLoading = false; */
     }
 
 
-    //Función para agregar un comparable para el avalúo
-    public function openAddComparable()
+    //Método para desasignar un comparable
+    public function deallocatedElement($idComparable)
     {
-        $this->resetValidation();
-        Flux::modal('add-comparable')->show();
+        //dd('El método llega con éxito', $idComparable);
+
+
+        //Primero encontramos el registro de la tabla valuation_comparables
+        $valuationComparable = ValuationComparableModel::where('valuation_id', $this->id)->where('comparable_id', $idComparable)->first();
+
+        //dd($valuationComparable);
+
+        //Si existe alguna coincidencia, se elimina el registro, de no ser así, se omite
+        $valuationComparable?->delete();
+
+        //Primero ejecutamos la función de reordenar los elementos
+        $this->reorderPositions();
+
+        //Refrescamos la tabla de comparables
+        $this->loadAssignedComparables();
+
+        //Refrescamos la tabla de comparables x asignar
+        $this->dispatch('pg:eventRefresh-comparables-table');
+
+        //Finalmente, enviamos un mensaje en pantalla indicamando que el comparable fue desasignado
+        Toaster::success('Comparable desasignado correctamente.');
+
+
     }
+
+
+    public function deleteElement($idComparable)
+    {
+
+        $assignmentCount = ValuationComparableModel::where('comparable_id', $idComparable)->count();
+
+        //dd($assignmentCount);
+
+        if ($assignmentCount < 1) {
+
+            $comparable = ComparableModel::find($idComparable);
+            $comparable->delete();
+
+        //Primero ejecutamos la función de reordenar los elementos
+        $this->reorderPositions();
+
+        //Refrescamos la tabla de comparables
+        $this->loadAssignedComparables();
+
+        //Refrescamos la tabla de comparables x asignar
+        $this->dispatch('pg:eventRefresh-comparables-table');
+
+        //Finalmente, enviamos un mensaje en pantalla indicamando que el comparable fue desasignado
+        Toaster::success('Comparable eliminado correctamente.');
+
+        } else {
+            Toaster::error('No se puede eliminar comparable, está asiagnado a '.$assignmentCount.' avaluo(s). Desasígnalo primero.');
+    }
+
+}
+
+
+
 
     public function save()
     {
@@ -197,7 +504,7 @@ class ComparablesIndex extends Component
         }
 
         // --- CREACIÓN DEL REGISTRO EN LA BASE DE DATOS (Mapeo completo) ---
-        ComparableModel::create([
+        $comparable = ComparableModel::create([
             'valuation_id' => $this->id,
             'comparable_key' => $this->comparableKey,
             'comparable_folio' => $this->comparableFolio,
@@ -248,7 +555,11 @@ class ComparablesIndex extends Component
            // 'comparable_latitude' => $this->comparableLatitude,
             //'comparable_longitude' => $this->comparableLongitude,
             'is_active' => $this->comparableActive,
+            'created_by' => $this->userSession->id,
         ]);
+
+        //Asignamos el comparable recién creado directo al avalúo
+        $this->assignedElement($comparable->id, false);
 
         //Actualizamos la tabla
         $this->dispatch('pg:eventRefresh-comparables-table');
@@ -261,7 +572,7 @@ class ComparablesIndex extends Component
 
 
         // Cerramos el modal
-        Flux::modal('add-comparable')->close();
+        Flux::modal('modal-comparable')->close();
     }
 
 
@@ -485,9 +796,44 @@ class ComparablesIndex extends Component
 
 
 
+    //FUNCIONES DE WATCHER
+    public function updatedComparableOffers($value){
+        if($value < 0){
+            $this->comparableOffers = 0;
+        }
+
+        $this->calcUnitValue();
+    }
+
+    public function updatedComparableLandArea($value){
+        if($value < 0){
+            $this->comparableLandArea = 0;
+        }
+
+        $this->calcUnitValue();
+    }
 
 
+    public function calcUnitValue(){
 
+        // Primero nos aseguramos que ambas variables sean tratadas como floats (o 0 si son null/vacio)
+        $offers = (float) $this->comparableOffers;
+        $area = (float) $this->comparableLandArea;
+
+
+        // El divisor (área) no puede ser cero. Si lo es, o si la oferta es 0, el resultado es 0.
+        if ($area === 0.0 || $offers === 0.0) {
+            $this->comparableUnitValue = 0.0;
+            return;
+        }
+
+        //Obtenemos el cálculo con las variables ya seteadas
+        $result = $offers / $area;
+
+        //Forzamos a que el resultado siempre sea mayor a 0
+        $this->comparableUnitValue = max(0.0, $result);
+
+    }
 
 
     public function validateModal(){
@@ -538,7 +884,7 @@ class ComparablesIndex extends Component
             'comparableStreetLocation' => 'required',
             'comparableGeneralPropArea' => 'required',
             'comparableUrbanProximityReference' => 'required',
-            'comparableNumberFronts' => 'required|integer',
+            'comparableNumberFronts' => 'nullable|integer',
             'comparableSourceInfImages' => 'required',
             //'comparablePhotos' => 'required',
             /* 'comparableActive' => 'required', */
@@ -547,14 +893,38 @@ class ComparablesIndex extends Component
             //'comparableLatitude' => 'required|numeric|between:-90,90',
             //'comparableLongitude' => 'required|numeric|between:-180,180',
 
-            // Regla específica para el archivo de foto
-            'comparablePhotosFile' => 'required|mimes:jpg,jpeg,png|max:2048', // Máximo 5MB
         ];
 
         if($this->comparableOtherColony === 'no-listada'){
             $comparableRules = array_merge($comparableRules, [
                 'comparableOtherColony'  => 'required|max:100'
             ]);
+        }
+
+        $fileExists = $this->comparablePhotosFile && is_string($this->comparablePhotosFile);
+
+
+        if($fileExists) {
+            $comparableRules = array_merge($comparableRules, [
+
+                'comparablePhotosFile'  => 'nullable|string'
+            ]);
+        } else {
+
+
+            if ($this->comparableId === null) {
+            $comparableRules = array_merge(
+                $comparableRules,
+                [
+             'comparablePhotosFile'  => 'nullable|file|image|max:1024']);
+                } else {
+                $comparableRules = array_merge(
+                    $comparableRules,
+                    [
+                        'comparablePhotosFile'  => 'required|file|image|max:1024'
+                    ]
+                );
+                }
         }
 
 
@@ -693,6 +1063,7 @@ class ComparablesIndex extends Component
 
     public function render()
     {
+        $this->loadAssignedComparables();
         return view('livewire.forms.comparables.comparables-index');
     }
 }

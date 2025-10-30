@@ -12,6 +12,7 @@ use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Blade;
 
 
 final class ComparablesTable extends PowerGridComponent
@@ -21,6 +22,8 @@ final class ComparablesTable extends PowerGridComponent
 
     public string $tableName = 'comparables-table';
 
+    //public bool $loadingIndicator = true;
+
     public function setUp(): array
     {
         /* $this->showCheckBox(); */
@@ -28,11 +31,12 @@ final class ComparablesTable extends PowerGridComponent
 
 
         return [
+            //'loadingIndicator' => true,
             PowerGrid::header()
                 ->showSearchInput(),
             PowerGrid::footer()
                 ->showPerPage()
-                ->showRecordCount(),
+                ->showRecordCount()
         ];
     }
 
@@ -367,10 +371,35 @@ final class ComparablesTable extends PowerGridComponent
     {
         return [
             Button::add()
+                ->slot('Resumen'
+                    // Renderizamos el componente Blade manualmente
+                   /*  Blade::render('<x-icons.document-text class="w-[24px] h-[24px] inline-block" />') */
+                )
+                ->id()
+                ->class('cursor-pointer btn-change')
+                ->dispatch('openSummary', ['id' => $row->id]),
+
+            Button::add()
                 ->slot('Asignar')
                 ->id()
                 ->class('cursor-pointer btn-primary')
-                ->dispatch('assignedElement', ['idComparable' => $row->id])
+                ->dispatch('assignedElement', ['idComparable' => $row->id]),
+
+            Button::add()
+                ->slot('Editar')
+                ->id()
+                ->class('cursor-pointer btn-intermediary')
+                ->dispatch('editComparable', ['idComparable' => $row->id]),
+
+            Button::add()
+                ->slot('Eliminar')
+                ->confirm('¿Estás seguro de eliminar el comparable?')
+                ->slot('Eliminar')
+                ->id()
+                ->class('cursor-pointer btn-deleted btn-table')
+                ->dispatch('deleteElement', ['idComparable' => $row->id]),
+
+
         ];
     }
 

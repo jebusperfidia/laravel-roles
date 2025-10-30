@@ -15,8 +15,16 @@ return new class extends Migration
             $table->id();
             // Clave foránea al avalúo (Valuation)
             $table->foreignId('valuation_id')
+                ->nullable()
                 ->constrained('valuations')
-                ->onDelete('cascade');
+                ->nullOnDelete();
+
+
+            // Asignamos al usuario que genera el comparable
+            $table->foreignId('created_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
             // --- Datos de Asignación y Control ---
             $table->string('comparable_key', 50);
@@ -90,7 +98,7 @@ return new class extends Migration
             $table->decimal('comparable_bargaining_factor', 20, 10); // Factor de negociación (0.8 a 1)
             // CAMBIO: antes era float, ahora decimal(20,10) para mayor precisión en factores.
 
-            $table->integer('comparable_number_fronts');
+            $table->integer('comparable_number_fronts')->nullable();
             // CAMBIO: se mantiene integer, ya que no requiere precisión decimal.
 
             // --- Ubicación y Referencias (Clase de zona) ---

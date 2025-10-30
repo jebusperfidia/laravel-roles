@@ -4,12 +4,13 @@ namespace App\Livewire\Forms;
 
 use App\Models\Forms\LandDetails\LandDetailsModel;
 use App\Models\Forms\SpecialInstallation\SpecialInstallationModel;
+use App\Models\Forms\Building\BuildingModel;
 use Livewire\Component;
 use App\Models\Valuations\Valuation;
 use Illuminate\Support\Facades\Session;
 use Masmerise\Toaster\Toaster;
 use Flux\Flux;
-use Psy\Command\WhereamiCommand;
+/* use Psy\Command\WhereamiCommand; */
 
 class SpecialInstallations extends Component
 {
@@ -28,6 +29,9 @@ class SpecialInstallations extends Component
 
     //Generamos una variable para guardar la información del avaluo
     public $valuation;
+
+    //Variable para obtener el valor del building, necesario para el dato de vida util total
+    public $building;
 
     public $elementId;
 
@@ -67,10 +71,59 @@ class SpecialInstallations extends Component
     //Asignamos el valor del indivso desde terreno:
     public $undividedOnlyCondominium;
 
+    //Asignamos la vida util total del inmueble, desde construcciones (modelo building)
+    public $usefulLifeProperty;
+
+
+    public $construction_life_values;
+
     public function mount()
     {
 
-        //Obtenemos los valores para los input
+        $this->construction_life_values = config('properties_inputs.construction_life_values', []);
+
+        //Obtenemos la vida util total del inmueble
+
+        //Primero obtenemos el valor general de building construction, apartir del id del avaluo de nuestra variable de sesión
+        $this->building = BuildingModel::where('valuation_id', $this->valuation->id)->first();
+        //dd($this->building);
+
+        //Si existe registro en la base de datos, obtenemos el valor
+        if($this->building) {
+
+            //inicializamos internamente el valor del total
+            $totalUsefulLifeProperty = 0;
+
+            //Mediantel la variable de building, obtenemos el valor de todos los registros privativos
+            //ligados al modelo, desde la tabla buildingConstruction
+            $buildingConstructionsPrivate = $this->building->privates()->get();
+
+            //dd($buildingConstructionsPrivate);
+
+            //Generamos la suma del total de todas las superficies para el cálculo
+            $totalSurfacePrivate = collect($buildingConstructionsPrivate)->sum('surface');
+
+            //Recorremos todos los resultados obtenidos de buildingConstruction para generar la suma total
+            foreach($buildingConstructionsPrivate as $item) {
+
+                //Obtenemos el valor de la vida útll a partir de la combinación generada en el registro
+                $claveCombinacion = $item->clasification . '_' . $item->use;
+                //Del valor generado guardamos el valor de la vida útil total
+                $vidaUtilTotal = $this->construction_life_values[$claveCombinacion] ?? 0;
+
+                //Al total le sumamos el valor de la iteración, obtenido de la vida total * superficie
+                $totalUsefulLifeProperty += ($vidaUtilTotal * $item->surface);
+            }
+
+            //Una que termina de iterar todos los elementos, generamos primero el total dividiendo este entre la superficie
+            $this->usefulLifeProperty = $totalUsefulLifeProperty / $totalSurfacePrivate;
+
+            //Al valor obtenido, generamos un redondeo para generar el valor total, 0.5 sube a 1, valores inferiores bajan a 0
+            $this->usefulLifeProperty = round($this->usefulLifeProperty, 0);
+
+            //dd($this->usefulLifeProperty);
+        }
+
 
         //valores para los input de instalaciones especiales
         $this->select_SI = config('properties_inputs.special_installations', []);
@@ -617,7 +670,7 @@ class SpecialInstallations extends Component
 
 
         if (in_array($value, ['OC11', 'OC01', 'OC16', 'OC10', 'OC14', 'OC03', 'OC12'])) {
-            $this->usefulLife = 90;
+            $this->usefulLife = $this->usefulLifeProperty;
         }
 
         if (in_array($value, ['OC15', 'OC04', 'OC08'])) {
