@@ -6,32 +6,37 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+
     public function up(): void
     {
-        Schema::create('valuation_comparables', function (Blueprint $table) {
+        Schema::create('valuation_building_comparables', function (Blueprint $table) {
             $table->id();
 
             //Ligar con la valoración
             $table->foreignId('valuation_id')
-            ->constrained('valuations')
-            ->cascadeOnDelete();
+                ->constrained('valuations')
+                ->cascadeOnDelete();
 
             //Ligar con el comparable
             $table->foreignId('comparable_id')
-            ->constrained('comparables')
-            ->cascadeOnDelete();
-
+                ->constrained('comparables')
+                ->cascadeOnDelete();
 
             $table->unsignedSmallInteger('position')->default(0)->index();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->boolean('is_active')->default(true);
             $table->unique(['valuation_id', 'comparable_id']);
+
+
             $table->timestamps();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('valuation_comparables');
+        Schema::dropIfExists('valuation_building_comparables');
     }
 };

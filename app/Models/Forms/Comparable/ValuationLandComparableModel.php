@@ -7,9 +7,9 @@ use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ValuationComparableModel extends Model
+class ValuationLandComparableModel extends Model
 {
-    protected $table = 'valuation_comparables';
+    protected $table = 'valuation_land_comparables';
 
     protected $fillable = [
         'valuation_id',

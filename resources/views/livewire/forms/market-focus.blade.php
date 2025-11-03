@@ -35,7 +35,7 @@
                                 <td class="px-2 py-2 text-xs text-center">$ 0.00</td>
                                 <td class="px-2 py-2 text-xs text-center">
                                     <flux:button type="button" class="btn-intermediary btn-table cursor-pointer" variant="primary"
-                                      wire:click='openComparablesConstSale'>Asignar
+                                      wire:click='openComparablesBuilding'>Asignar
                                     </flux:button>
                                 </td>
                             </tr>

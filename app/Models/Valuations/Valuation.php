@@ -188,11 +188,39 @@ class Valuation extends Model
      * $valuation->assignedComparables → colección de registros pivote
      */
 
-    public function assignedComparables()
+    /**
+     * NUEVA RELACIÓN: Comparables de Terreno (LAND)
+     * Apunta a la nueva tabla pivote 'valuation_land_comparables'.
+     */
+    public function landComparables()
     {
-        return $this->hasMany(ValuationComparableModel::class, 'valuation_id');
+        return $this->belongsToMany(
+            ComparableModel::class,
+            'valuation_land_comparables', // <-- Nueva tabla
+            'valuation_id',
+            'comparable_id'
+        )
+            ->withPivot(['position', 'is_active', 'created_by'])
+            ->withTimestamps()
+            ->orderBy('pivot_position');
     }
 
+    /**
+     * NUEVA RELACIÓN: Comparables de Construcción (BUILDING)
+     * Apunta a la nueva tabla pivote 'valuation_building_comparables'.
+     */
+    public function buildingComparables()
+    {
+        return $this->belongsToMany(
+            ComparableModel::class,
+            'valuation_building_comparables', // <-- Nueva tabla
+            'valuation_id',
+            'comparable_id'
+        )
+            ->withPivot(['position', 'is_active', 'created_by'])
+            ->withTimestamps()
+            ->orderBy('pivot_position');
+    }
 
     /**
      * Relación N:M con los comparables.
@@ -207,17 +235,5 @@ class Valuation extends Model
      * $valuation->comparables → colección de modelos ComparableModel
      */
 
-    public function comparables()
-    {
-        return $this->belongsToMany(
-            ComparableModel::class,
-            'valuation_comparables',
-            'valuation_id',
-            'comparable_id'
-        )
-            ->withPivot(['position', 'is_active', 'created_by'])
-            ->withTimestamps()
-            ->orderBy('pivot_position');
-    }
 
 }

@@ -15,12 +15,12 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Blade;
 
 
-final class ComparablesTable extends PowerGridComponent
+final class ComparablesLandTable extends PowerGridComponent
 {
 
     public $idValuation;
 
-    public string $tableName = 'comparables-table';
+    public string $tableName = 'comparables-land-table';
 
     //public bool $loadingIndicator = true;
 
@@ -48,10 +48,17 @@ final class ComparablesTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
+
+        $comparableType = 'land';
+        $pivotTableName = 'valuation_land_comparables';
+
         return ComparableModel::query()
-            ->whereNotIn('id', function ($query) {
+            // *** FILTRO AÑADIDO: Solo registros donde comparable_type es 'building' ***
+            ->where('comparable_type', $comparableType)
+            // Excluye los comparables ya asignados a este avalúo
+            ->whereNotIn('id', function ($query) use ($pivotTableName) {
                 $query->select('comparable_id')
-                    ->from('valuation_comparables')
+                    ->from($pivotTableName)
                     ->where('valuation_id', $this->idValuation);
             });
     }

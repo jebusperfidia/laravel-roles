@@ -4,7 +4,8 @@ namespace App\Livewire\Forms\Comparables;
 
 
 use App\Models\Forms\Comparable\ComparableModel;
-use App\Models\Forms\Comparable\ValuationComparableModel;
+use App\Models\Forms\Comparable\ValuationLandComparableModel;
+use App\Models\Forms\Comparable\ValuationBuildingComparableModel;
 use Livewire\WithFileUploads;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -23,6 +24,10 @@ use Illuminate\Support\Facades\Auth;
 
 class ComparablesIndex extends Component
 {
+
+
+    // Arrays públicos para consumir datos para los input select largos
+    public array $levels_input;
 
     //Variable para mostrar el loader
     //public bool $isLoading = false;
@@ -57,7 +62,7 @@ class ComparablesIndex extends Component
     public $userSession;
 
     //Variables para el modal de creación de comparables para el avaluo
-    public $comparableKey, $comparableFolio, $comparableDischargedBy, $comparableProperty,
+    /*  public $comparableKey, $comparableFolio, $comparableDischargedBy, $comparableProperty,
     $comparableEntity, $comparableLocality, $comparableColony, $comparableOtherColony, $comparableStreet,
     $comparableBetweenStreet, $comparableAndStreet, $comparableCp,
     $comparableName, $comparableLastName, $comparablePhone, $comparableUrl, $comparableLandUse,
@@ -66,16 +71,54 @@ class ComparablesIndex extends Component
     $comparableFront, $comparableFrontType, $comparableDescriptionForm, $comparableTopography,
     $comparableCharacteristics, $comparableCharacteristicsGeneral,  $comparableLocationBlock,
     $comparableStreetLocation, $comparableGeneralPropArea, $comparableUrbanProximityReference,
-    $comparableSourceInfImages, $comparableActive;
+    $comparableSourceInfImages, $comparableActive; */
+
+    //Variables para obtener los nombres de estado, ciudad y colonia sin consultar API Dipomex
+    /*   public $comparableEntityName, $comparableLocalityName;
+
+    public $comparableAbroadNumber, $comparableInsideNumber, $comparableAllowedLevels,
+    $comparableNumberFronts; */
+
+    /*  public float $comparableFreeAreaRequired, $comparableSlope, $comparableOffers = 0, $comparableLandArea = 0,
+        $comparableBuiltArea = 0, $comparableUnitValue = 0, $comparableBargainingFactor;
+ */
+
+    // --- CAMPOS COMPARTIDOS (Ambos tipos) ---
+    public $comparableKey, $comparableFolio, $comparableDischargedBy, $comparableProperty,
+        $comparableEntity, $comparableLocality, $comparableColony, $comparableOtherColony, $comparableStreet,
+        $comparableBetweenStreet, $comparableAndStreet, $comparableCp,
+        $comparableName, $comparableLastName, $comparablePhone, $comparableUrl,
+        $comparableCharacteristics, $comparableCharacteristicsGeneral,  $comparableLocationBlock,
+        $comparableStreetLocation, $comparableGeneralPropArea, $comparableUrbanProximityReference,
+        $comparableSourceInfImages, $comparableActive = true; // <--- Inicializado en true
 
     //Variables para obtener los nombres de estado, ciudad y colonia sin consultar API Dipomex
     public $comparableEntityName, $comparableLocalityName;
 
-    public $comparableAbroadNumber, $comparableInsideNumber, $comparableAllowedLevels,
-    $comparableNumberFronts;
+    public $comparableAbroadNumber, $comparableInsideNumber, $comparableNumberFronts;
 
-    public float $comparableFreeAreaRequired, $comparableSlope, $comparableOffers = 0, $comparableLandArea = 0,
-        $comparableBuiltArea = 0, $comparableUnitValue = 0, $comparableBargainingFactor;
+    // **NOTA: comparableLandArea movido aquí (es común según el nuevo Blade)**
+    public float $comparableOffers = 0, $comparableLandArea = 0, $comparableBuiltArea = 0, $comparableUnitValue = 0, $comparableBargainingFactor;
+
+
+    // --- CAMPOS ESPECÍFICOS DE LAND (Terreno) ---
+    public $comparableLandUse, $comparableDescServicesInfraestructure,
+        $comparableServicesInfraestructure, $comparableShape, $comparableDensity,
+        $comparableFront, $comparableFrontType, $comparableDescriptionForm, $comparableTopography,
+        $comparableAllowedLevels;
+
+    public float $comparableFreeAreaRequired, $comparableSlope;
+
+
+    // --- CAMPOS ESPECÍFICOS DE BUILDING (Construcción) ---
+    public $comparableNumberBedrooms, $comparableNumberToilets, $comparableNumberHalfbaths,
+        $comparableNumberParkings, $comparableFeaturesAmenities, $comparableNumberFloorLevel,
+        $comparableQuality, $comparableConservation, $comparableLevels, $comparableClasification,
+        $comparableAge, $comparableVut;
+
+    public bool $comparableElevator = false, $comparableStore = false, $comparableRoofGarden = false; // <--- Inicializados
+
+    public float $comparableSeleableArea;
 
 
     //Variable para guardar los comparables asignados al avaluo
@@ -85,9 +128,19 @@ class ComparablesIndex extends Component
     //Valor que se usará para la actualización de los comparables
     public $comparableId = null;
 
+    //Obtenemos el valor del tipo de comparable
+    public $comparableType;
 
     public function mount(DipomexService $dipomex)
     {
+
+        //Obtenemos el valor de los niveles para el input correspondiente
+        //desde el archivo de configuración
+        $this->levels_input = config('properties_inputs.levels', []);
+
+        $this->comparableType = Session::get('comparable-type');
+
+        //dd($this->comparableType);
 
         //Obtenemos los estados
         $this->states = $dipomex->getEstados();
@@ -127,7 +180,12 @@ class ComparablesIndex extends Component
 
      //Generamos una función para actualizar los valores de los comparables asignados al avaluo
     public function loadAssignedComparables(){
-        $this->assignedComparables = $this->valuation->comparables()->orderByPivot('position')->get();
+
+        if($this->comparableType === 'land') {
+        $this->assignedComparables = $this->valuation->landComparables()->orderByPivot('position')->get();
+        } else {
+        $this->assignedComparables = $this->valuation->buildingComparables()->orderByPivot('position')->get();
+        }
 
         //dd($this->assignedComparables);
 
@@ -149,6 +207,239 @@ class ComparablesIndex extends Component
     }
 
 
+
+
+
+
+    public function save()
+    {
+        // Ejecutar función con todas las reglas de validación y validaciones condicionales, guardando todo en una variable
+        $validator = $this->validateModal();
+
+        // Comprobamos si se obtuvieron errores de validación
+        if ($validator->fails()) {
+            // Enviamos un mensaje en pantalla indicando que existen errores de validación
+            Toaster::error('Existen errores de validación');
+
+            // Colocamos los errores en pantalla
+            $this->setErrorBag($validator->getMessageBag());
+
+            // Hacemos un return para detener el flujo del sistema
+
+            //dd($validator->errors()->all());
+            return;
+        }
+
+        // --- MANEJO Y SUBIDA DE ARCHIVO (Solo si la validación pasa) ---
+        $photoPath = null;
+        if ($this->comparablePhotosFile) {
+            // Guarda el archivo en el disco 'public' y devuelve la ruta.
+            $photoPath = $this->comparablePhotosFile->store('/', 'comparables_public');
+        }
+
+        // --- CREACIÓN DEL REGISTRO EN LA BASE DE DATOS (Mapeo completo) ---
+        /*   $comparable = ComparableModel::create([
+            'valuation_id' => $this->id,
+            'comparable_key' => $this->comparableKey,
+            'comparable_folio' => $this->comparableFolio,
+            'comparable_discharged_by' => $this->comparableDischargedBy,
+            'comparable_property' => $this->comparableProperty,
+            'comparable_entity' => $this->comparableEntity,
+            'comparable_entity_name' => $this->comparableEntityName,
+            'comparable_locality' => $this->comparableLocality,
+            'comparable_locality_name' => $this->comparableLocalityName,
+            'comparable_colony' => $this->comparableColony,
+            'comparable_other_colony' => $this->comparableOtherColony,
+            'comparable_street' => $this->comparableStreet,
+            'comparable_between_street' => $this->comparableBetweenStreet,
+            'comparable_and_street' => $this->comparableAndStreet,
+            'comparable_cp' => $this->comparableCp,
+            'comparable_name' => $this->comparableName,
+            'comparable_last_name' => $this->comparableLastName,
+            'comparable_phone' => $this->comparablePhone,
+            'comparable_url' => $this->comparableUrl,
+            'comparable_land_use' => $this->comparableLandUse,
+            'comparable_desc_services_infraestructure' => $this->comparableDescServicesInfraestructure,
+            'comparable_services_infraestructure' => $this->comparableServicesInfraestructure,
+            'comparable_shape' => $this->comparableShape,
+            'comparable_density' => $this->comparableDensity,
+            'comparable_front' => $this->comparableFront,
+            'comparable_front_type' => $this->comparableFrontType,
+            'comparable_description_form' => $this->comparableDescriptionForm,
+            'comparable_topography' => $this->comparableTopography,
+            'comparable_characteristics' => $this->comparableCharacteristics,
+            'comparable_characteristics_general' => $this->comparableCharacteristicsGeneral,
+            'comparable_location_block' => $this->comparableLocationBlock,
+            'comparable_street_location' => $this->comparableStreetLocation,
+            'comparable_general_prop_area' => $this->comparableGeneralPropArea,
+            'comparable_urban_proximity_reference' => $this->comparableUrbanProximityReference,
+            'comparable_source_inf_images' => $this->comparableSourceInfImages ?? '',
+            'comparable_photos' => $photoPath,
+            'comparable_abroad_number' => $this->comparableAbroadNumber,
+            'comparable_inside_number' => $this->comparableInsideNumber,
+            'comparable_allowed_levels' => $this->comparableAllowedLevels,
+            'comparable_number_fronts' => $this->comparableNumberFronts,
+            'comparable_free_area_required' => $this->comparableFreeAreaRequired,
+            'comparable_slope' => $this->comparableSlope,
+            'comparable_offers' => $this->comparableOffers,
+            'comparable_land_area' => $this->comparableLandArea,
+            'comparable_built_area' => $this->comparableBuiltArea,
+            'comparable_unit_value' => $this->comparableUnitValue,
+            'comparable_bargaining_factor' => $this->comparableBargainingFactor,
+            'is_active' => $this->comparableActive,
+            'created_by' => $this->userSession->id,
+        ]);*/
+
+        // --- 1. DATOS COMUNES ---
+        // (Campos que se guardan sin importar el tipo)
+        // --- 1. DATOS COMUNES (Campos que se guardan sin importar el tipo) ---
+        $data = [
+            'valuation_id' => $this->id,
+            'comparable_key' => $this->comparableKey,
+            'comparable_folio' => $this->comparableFolio,
+            'comparable_discharged_by' => $this->comparableDischargedBy,
+            'comparable_property' => $this->comparableProperty,
+            'comparable_entity' => $this->comparableEntity,
+            'comparable_entity_name' => $this->comparableEntityName,
+            'comparable_locality' => $this->comparableLocality,
+            'comparable_locality_name' => $this->comparableLocalityName,
+            'comparable_colony' => $this->comparableColony,
+            'comparable_other_colony' => $this->comparableOtherColony,
+            'comparable_street' => $this->comparableStreet,
+            'comparable_between_street' => $this->comparableBetweenStreet,
+            'comparable_and_street' => $this->comparableAndStreet,
+            'comparable_cp' => $this->comparableCp,
+            'comparable_name' => $this->comparableName,
+            'comparable_last_name' => $this->comparableLastName,
+            'comparable_phone' => $this->comparablePhone,
+            'comparable_url' => $this->comparableUrl,
+            'comparable_characteristics' => $this->comparableCharacteristics,
+            'comparable_characteristics_general' => $this->comparableCharacteristicsGeneral,
+            'comparable_location_block' => $this->comparableLocationBlock,
+            'comparable_street_location' => $this->comparableStreetLocation,
+            'comparable_general_prop_area' => $this->comparableGeneralPropArea,
+            'comparable_urban_proximity_reference' => $this->comparableUrbanProximityReference,
+            'comparable_source_inf_images' => $this->comparableSourceInfImages ?? '',
+            'comparable_photos' => $photoPath, // <--- RUTA DEL ARCHIVO SUBIDO
+            'comparable_abroad_number' => $this->comparableAbroadNumber,
+            'comparable_inside_number' => $this->comparableInsideNumber,
+            // 'comparable_number_fronts' => $this->comparableNumberFronts, // Omitido (no en Blade)
+            'comparable_offers' => $this->comparableOffers,
+            'comparable_land_area' => $this->comparableLandArea, // <--- CAMBIO: Ahora es común
+            'comparable_built_area' => $this->comparableBuiltArea,
+            'comparable_unit_value' => $this->comparableUnitValue,
+            'comparable_bargaining_factor' => $this->comparableBargainingFactor,
+            // 'comparable_latitude' => $this->comparableLatitude,
+            //'comparable_longitude' => $this->comparableLongitude,
+            'is_active' => $this->comparableActive,
+            'created_by' => $this->userSession->id,
+            'comparable_type' => $this->comparableType, // <-- MUY IMPORTANTE
+        ];
+
+        // --- 2. DATOS ESPECÍFICOS (Condicional) ---
+        if ($this->comparableType === 'land') {
+            $landData = [
+                'comparable_land_use' => $this->comparableLandUse,
+                'comparable_desc_services_infraestructure' => $this->comparableDescServicesInfraestructure,
+                'comparable_services_infraestructure' => $this->comparableServicesInfraestructure,
+                'comparable_shape' => $this->comparableShape,
+                'comparable_density' => $this->comparableDensity,
+                'comparable_front' => $this->comparableFront,
+                'comparable_front_type' => $this->comparableFrontType,
+                'comparable_description_form' => $this->comparableDescriptionForm,
+                'comparable_topography' => $this->comparableTopography,
+                'comparable_allowed_levels' => $this->comparableAllowedLevels,
+                'comparable_free_area_required' => $this->comparableFreeAreaRequired,
+                'comparable_slope' => $this->comparableSlope,
+            ];
+            // Limpieza de campos Building
+            $nullBuildingData = [
+                'comparable_number_bedrooms' => null,
+                'comparable_number_toilets' => null,
+                'comparable_number_halfbaths' => null,
+                'comparable_number_parkings' => null,
+                'comparable_features_amenities' => null,
+                'comparable_floor_level' => null,
+                'comparable_quality' => null,
+                'comparable_conservation' => null,
+                'comparable_levels' => null,
+                'comparable_clasification' => null,
+                'comparable_age' => null,
+                'comparable_vut' => null,
+                'comparable_elevator' => false,
+                'comparable_store' => false,
+                'comparable_roof_garden' => false,
+                'comparable_seleable_area' => null,
+            ];
+            $data = array_merge($data, $landData, $nullBuildingData);
+        } elseif ($this->comparableType === 'building') {
+            $buildingData = [
+                'comparable_number_bedrooms' => $this->comparableNumberBedrooms,
+                'comparable_number_toilets' => $this->comparableNumberToilets,
+                'comparable_number_halfbaths' => $this->comparableNumberHalfbaths,
+                'comparable_number_parkings' => $this->comparableNumberParkings,
+                'comparable_features_amenities' => $this->comparableFeaturesAmenities,
+                'comparable_floor_level' => $this->comparableNumberFloorLevel,
+                'comparable_quality' => $this->comparableQuality,
+                'comparable_conservation' => $this->comparableConservation,
+                'comparable_levels' => $this->comparableLevels,
+                'comparable_clasification' => $this->comparableClasification,
+                'comparable_age' => $this->comparableAge,
+                'comparable_vut' => $this->comparableVut,
+                'comparable_elevator' => $this->comparableElevator,
+                'comparable_store' => $this->comparableStore,
+                'comparable_roof_garden' => $this->comparableRoofGarden,
+                'comparable_seleable_area' => $this->comparableSeleableArea,
+            ];
+            // Limpieza de campos Land
+            $nullLandData = [
+                'comparable_land_use' => null,
+                'comparable_desc_services_infraestructure' => null,
+                'comparable_services_infraestructure' => null,
+                'comparable_shape' => null,
+                'comparable_density' => null,
+                'comparable_front' => null,
+                'comparable_front_type' => null,
+                'comparable_description_form' => null,
+                'comparable_topography' => null,
+                'comparable_allowed_levels' => null,
+                'comparable_free_area_required' => null,
+                'comparable_slope' => null,
+                // comparable_land_area ya es común, no se anula
+            ];
+            $data = array_merge($data, $buildingData, $nullLandData);
+        }
+
+
+        // --- 3. CREACIÓN DEL REGISTRO ---
+        $comparable = ComparableModel::create($data);
+
+        //Asignamos el comparable recién creado directo al avalúo
+        $this->assignedElement($comparable->id, false);
+
+        //Actualizamos la tabla (CORREGIDO)
+        if ($this->comparableType === 'land') {
+            $this->dispatch('pg:eventRefresh-comparables-land-table');
+        } else {
+            $this->dispatch('pg:eventRefresh-comparables-building-table');
+        }
+
+        // Limpiamos los campos después de guardar
+        $this->resetComparableFields();
+
+        // Enviamos mensaje de éxito
+        Toaster::success('Comparable añadido exitosamente');
+
+
+        // Cerramos el modal
+        Flux::modal('modal-comparable')->close();
+    }
+
+
+
+
+
+
     public function editComparable($idComparable, DipomexService $dipomex) {
         //Reseteamos las validaciones
         $this->resetValidation();
@@ -160,11 +451,11 @@ class ComparablesIndex extends Component
         //Usamos el id recibido para obtenemos los valoresl del comparable desde la BD
         $comparable = ComparableModel::find($idComparable);
 
-        /* $this->comparable = $comparable; */
+
 
 
         // Mapeo completo de MODELO (snake_case) a PROPIEDADES (camelCase)
-        $this->comparableKey = $comparable->comparable_key;
+        /*  $this->comparableKey = $comparable->comparable_key;
         $this->comparableFolio = $comparable->comparable_folio;
         $this->comparableDischargedBy = $comparable->comparable_discharged_by;
         $this->comparableProperty = $comparable->comparable_property;
@@ -205,7 +496,7 @@ class ComparablesIndex extends Component
         $this->comparableFreeAreaRequired = $comparable->comparable_free_area_required;
         $this->comparableSlope = $comparable->comparable_slope;
 
-        // Campos que también son outputs de cálculo (aseguramos el tipo float)
+
         $this->comparableOffers = (float) $comparable->comparable_offers;
         $this->comparableLandArea = (float) $comparable->comparable_land_area;
         $this->comparableBuiltArea = (float) $comparable->comparable_built_area;
@@ -214,27 +505,113 @@ class ComparablesIndex extends Component
 
         $this->comparableActive = $comparable->is_active;
 
-        // Foto: Cargamos la RUTA existente en la propiedad del archivo.
+
         $this->comparablePhotosFile = $comparable->comparable_photos;
+ */
+        // --- Mapeo de Campos Comunes ---
+        // --- Mapeo de Campos Comunes ---
+        $this->comparableKey = $comparable->comparable_key;
+        $this->comparableFolio = $comparable->comparable_folio;
+        $this->comparableDischargedBy = $comparable->comparable_discharged_by;
+        $this->comparableProperty = $comparable->comparable_property;
+        $this->comparableEntity = $comparable->comparable_entity;
+        $this->comparableEntityName = $comparable->comparable_entity_name;
+        $this->comparableLocality = $comparable->comparable_locality;
+        $this->comparableLocalityName = $comparable->comparable_locality_name;
+        $this->comparableColony = $comparable->comparable_colony;
+        $this->comparableOtherColony = $comparable->comparable_other_colony;
+        $this->comparableStreet = $comparable->comparable_street;
+        $this->comparableBetweenStreet = $comparable->comparable_between_street;
+        $this->comparableAndStreet = $comparable->comparable_and_street;
+        $this->comparableCp = $comparable->comparable_cp;
+        $this->comparableName = $comparable->comparable_name;
+        $this->comparableLastName = $comparable->comparable_last_name;
+        $this->comparablePhone = $comparable->comparable_phone;
+        $this->comparableUrl = $comparable->comparable_url;
+        $this->comparableCharacteristics = $comparable->comparable_characteristics;
+        $this->comparableCharacteristicsGeneral = $comparable->comparable_characteristics_general;
+        $this->comparableLocationBlock = $comparable->comparable_location_block;
+        $this->comparableStreetLocation = $comparable->comparable_street_location;
+        $this->comparableGeneralPropArea = $comparable->comparable_general_prop_area;
+        $this->comparableUrbanProximityReference = $comparable->comparable_urban_proximity_reference;
+        $this->comparableSourceInfImages = $comparable->comparable_source_inf_images;
+        $this->comparableAbroadNumber = $comparable->comparable_abroad_number;
+        $this->comparableInsideNumber = $comparable->comparable_inside_number;
+        // $this->comparableNumberFronts = $comparable->comparable_number_fronts; // Omitido (no en Blade)
+        $this->comparableActive = $comparable->is_active;
+        $this->comparablePhotosFile = $comparable->comparable_photos; // Foto: Cargamos la RUTA
 
-        /*  $this->comparable = $comparable; */
+        // Campos (float) comunes
+        $this->comparableOffers = (float) $comparable->comparable_offers;
+        $this->comparableLandArea = (float) $comparable->comparable_land_area; // <--- CAMBIO: Ahora es común
+        $this->comparableBuiltArea = (float) $comparable->comparable_built_area;
+        $this->comparableUnitValue = (float) $comparable->comparable_unit_value;
+        $this->comparableBargainingFactor = (float) $comparable->comparable_bargaining_factor;
 
-        // 1. Cargamos Localidades/Municipios (si la Entidad existe)
-        if ($this->comparableEntity) {
-            $this->municipalities = $dipomex->getMunicipiosPorEstado($this->comparableEntity);
-        }
+        // --- Mapeo de Campos Land ---
+        $this->comparableLandUse = $comparable->comparable_land_use;
+        $this->comparableDescServicesInfraestructure = $comparable->comparable_desc_services_infraestructure;
+        $this->comparableServicesInfraestructure = $comparable->comparable_services_infraestructure;
+        $this->comparableShape = $comparable->comparable_shape;
+        $this->comparableDensity = $comparable->comparable_density;
+        $this->comparableFront = $comparable->comparable_front;
+        $this->comparableFrontType = $comparable->comparable_front_type;
+        $this->comparableDescriptionForm = $comparable->comparable_description_form;
+        $this->comparableTopography = $comparable->comparable_topography;
+        $this->comparableAllowedLevels = $comparable->comparable_allowed_levels;
+        $this->comparableFreeAreaRequired = (float) $comparable->comparable_free_area_required;
+        $this->comparableSlope = (float) $comparable->comparable_slope;
+
+        // --- Mapeo de Campos Building ---
+        $this->comparableNumberBedrooms = $comparable->comparable_number_bedrooms;
+        $this->comparableNumberToilets = $comparable->comparable_number_toilets;
+        $this->comparableNumberHalfbaths = $comparable->comparable_number_halfbaths;
+        $this->comparableNumberParkings = $comparable->comparable_number_parkings;
+        $this->comparableFeaturesAmenities = $comparable->comparable_features_amenities;
+        $this->comparableNumberFloorLevel = $comparable->comparable_floor_level;
+        $this->comparableQuality = $comparable->comparable_quality;
+        $this->comparableConservation = $comparable->comparable_conservation;
+        $this->comparableLevels = $comparable->comparable_levels;
+        $this->comparableClasification = $comparable->comparable_clasification;
+        $this->comparableAge = $comparable->comparable_age;
+        $this->comparableVut = $comparable->comparable_vut;
+        $this->comparableElevator = (bool) $comparable->comparable_elevator;
+        $this->comparableStore = (bool) $comparable->comparable_store;
+        $this->comparableRoofGarden = (bool) $comparable->comparable_roof_garden;
+        $this->comparableSeleableArea = (float) $comparable->comparable_seleable_area;
 
 
-        // 2. Cargamos Colonias/Asentamientos (si la Localidad existe)
-        if ($this->comparableLocality && $this->comparableCp) {
-            // Asumo que tu servicio Dipomex tiene un método para buscar colonias por Localidad o CP
-            // Utilizaremos la lógica del otro componente: buscar por CP.
+     // 1. Verificamos que tengamos un CP para buscar
+        if ($this->comparableCp) {
             $data = $dipomex->buscarPorCodigoPostal($this->comparableCp);
 
-            // Asignar las colonias obtenidas del CP
-            $this->colonies = $data['colonias'] ?? [];
-        }
+            if ($data && isset($data['estado'])) {
+                // 2. Buscar el ID del estado con base en el nombre devuelto
+                // (Asumiendo que $this->states ya fue cargado en el mount() o aquí)
+                if (empty($this->states)) {
+                     $this->states = $dipomex->getEstados(); // Aseguramos que los estados estén cargados
+                }
+                $estadoId = array_search($data['estado'], $this->states);
 
+                if ($estadoId !== false) {
+                    $this->comparableEntity = $estadoId; // Re-asignamos el ID del estado
+                }
+
+                // 3. Poblar municipios (AHORA que tenemos el ID del estado correcto)
+                $this->municipalities = $dipomex->getMunicipiosPorEstado($this->comparableEntity);
+
+                // 4. Buscar el ID del municipio con base en el nombre devuelto
+                $municipioId = array_search($data['municipio'], $this->municipalities);
+                if ($municipioId !== false) {
+                    $this->comparableLocality = $municipioId; // Re-asignamos el ID del municipio
+                }
+
+                // 5. Asignar colonias
+                // $this->comparableColony ya tiene el nombre correcto de la BD.
+                // Solo poblamos la lista para que el <select> pueda encontrarlo.
+                $this->colonies = $data['colonias'] ?? [];
+            }
+        }
         Flux::modal('modal-comparable')->show();
     }
 
@@ -304,8 +681,7 @@ class ComparablesIndex extends Component
         // lo que actualizará el campo 'comparable_photos' de la BD a NULL.
 
         // --- 3. CREAR ARRAY DE DATOS ($data) ---
-        $data = [
-            //'valuation_id' => $this->id,
+        /*  $data = [
             'comparable_key' => $this->comparableKey,
             'comparable_folio' => $this->comparableFolio,
             'comparable_discharged_by' => $this->comparableDischargedBy,
@@ -340,7 +716,7 @@ class ComparablesIndex extends Component
             'comparable_general_prop_area' => $this->comparableGeneralPropArea,
             'comparable_urban_proximity_reference' => $this->comparableUrbanProximityReference,
             'comparable_source_inf_images' => $this->comparableSourceInfImages ?? '',
-            'comparable_photos' => $photoPath, // <--- RUTA FINAL
+            'comparable_photos' => $photoPath,
             'comparable_abroad_number' => $this->comparableAbroadNumber,
             'comparable_inside_number' => $this->comparableInsideNumber,
             'comparable_allowed_levels' => $this->comparableAllowedLevels,
@@ -353,8 +729,122 @@ class ComparablesIndex extends Component
             'comparable_unit_value' => $this->comparableUnitValue,
             'comparable_bargaining_factor' => $this->comparableBargainingFactor,
             'is_active' => $this->comparableActive,
-          /*   'created_by' => $this->userSession->id ?? null, */
         ];
+ */
+
+
+        // (Campos comunes que siempre se actualizan)
+        $data = [
+            'comparable_key' => $this->comparableKey,
+            'comparable_folio' => $this->comparableFolio,
+            'comparable_discharged_by' => $this->comparableDischargedBy,
+            'comparable_property' => $this->comparableProperty,
+            'comparable_entity' => $this->comparableEntity,
+            'comparable_entity_name' => $this->comparableEntityName,
+            'comparable_locality' => $this->comparableLocality,
+            'comparable_locality_name' => $this->comparableLocalityName,
+            'comparable_colony' => $this->comparableColony,
+            'comparable_other_colony' => $this->comparableOtherColony,
+            'comparable_street' => $this->comparableStreet,
+            'comparable_between_street' => $this->comparableBetweenStreet,
+            'comparable_and_street' => $this->comparableAndStreet,
+            'comparable_cp' => $this->comparableCp,
+            'comparable_name' => $this->comparableName,
+            'comparable_last_name' => $this->comparableLastName,
+            'comparable_phone' => $this->comparablePhone,
+            'comparable_url' => $this->comparableUrl,
+            'comparable_characteristics' => $this->comparableCharacteristics,
+            'comparable_characteristics_general' => $this->comparableCharacteristicsGeneral,
+            'comparable_location_block' => $this->comparableLocationBlock,
+            'comparable_street_location' => $this->comparableStreetLocation,
+            'comparable_general_prop_area' => $this->comparableGeneralPropArea,
+            'comparable_urban_proximity_reference' => $this->comparableUrbanProximityReference,
+            'comparable_source_inf_images' => $this->comparableSourceInfImages ?? '',
+            'comparable_photos' => $photoPath, // <--- RUTA FINAL
+            'comparable_abroad_number' => $this->comparableAbroadNumber,
+            'comparable_inside_number' => $this->comparableInsideNumber,
+            // 'comparable_number_fronts' => $this->comparableNumberFronts, // Omitido (no en Blade)
+            'comparable_offers' => $this->comparableOffers,
+            'comparable_land_area' => $this->comparableLandArea, // <--- CAMBIO: Ahora es común
+            'comparable_built_area' => $this->comparableBuiltArea,
+            'comparable_unit_value' => $this->comparableUnitValue,
+            'comparable_bargaining_factor' => $this->comparableBargainingFactor,
+            'is_active' => $this->comparableActive,
+            // No actualizamos 'created_by' ni 'comparable_type'
+        ];
+
+        // --- 4. DATOS ESPECÍFICOS (Condicional) ---
+        if ($this->comparableType === 'land') {
+            $landData = [
+                'comparable_land_use' => $this->comparableLandUse,
+                'comparable_desc_services_infraestructure' => $this->comparableDescServicesInfraestructure,
+                'comparable_services_infraestructure' => $this->comparableServicesInfraestructure,
+                'comparable_shape' => $this->comparableShape,
+                'comparable_density' => $this->comparableDensity,
+                'comparable_front' => $this->comparableFront,
+                'comparable_front_type' => $this->comparableFrontType,
+                'comparable_description_form' => $this->comparableDescriptionForm,
+                'comparable_topography' => $this->comparableTopography,
+                'comparable_allowed_levels' => $this->comparableAllowedLevels,
+                'comparable_free_area_required' => $this->comparableFreeAreaRequired,
+                'comparable_slope' => $this->comparableSlope,
+            ];
+            // Limpieza de campos Building
+            $nullBuildingData = [
+                'comparable_number_bedrooms' => null,
+                'comparable_number_toilets' => null,
+                'comparable_number_halfbaths' => null,
+                'comparable_number_parkings' => null,
+                'comparable_features_amenities' => null,
+                'comparable_floor_level' => null,
+                'comparable_quality' => null,
+                'comparable_conservation' => null,
+                'comparable_levels' => null,
+                'comparable_clasification' => null,
+                'comparable_age' => null,
+                'comparable_vut' => null,
+                'comparable_elevator' => false,
+                'comparable_store' => false,
+                'comparable_roof_garden' => false,
+                'comparable_seleable_area' => null,
+            ];
+            $data = array_merge($data, $landData, $nullBuildingData);
+        } elseif ($this->comparableType === 'building') {
+            $buildingData = [
+                'comparable_number_bedrooms' => $this->comparableNumberBedrooms,
+                'comparable_number_toilets' => $this->comparableNumberToilets,
+                'comparable_number_halfbaths' => $this->comparableNumberHalfbaths,
+                'comparable_number_parkings' => $this->comparableNumberParkings,
+                'comparable_features_amenities' => $this->comparableFeaturesAmenities,
+                'comparable_floor_level' => $this->comparableNumberFloorLevel,
+                'comparable_quality' => $this->comparableQuality,
+                'comparable_conservation' => $this->comparableConservation,
+                'comparable_levels' => $this->comparableLevels,
+                'comparable_clasification' => $this->comparableClasification,
+                'comparable_age' => $this->comparableAge,
+                'comparable_vut' => $this->comparableVut,
+                'comparable_elevator' => $this->comparableElevator,
+                'comparable_store' => $this->comparableStore,
+                'comparable_roof_garden' => $this->comparableRoofGarden,
+                'comparable_seleable_area' => $this->comparableSeleableArea,
+            ];
+            // Limpieza de campos Land
+            $nullLandData = [
+                'comparable_land_use' => null,
+                'comparable_desc_services_infraestructure' => null,
+                'comparable_services_infraestructure' => null,
+                'comparable_shape' => null,
+                'comparable_density' => null,
+                'comparable_front' => null,
+                'comparable_front_type' => null,
+                'comparable_description_form' => null,
+                'comparable_topography' => null,
+                'comparable_allowed_levels' => null,
+                'comparable_free_area_required' => null,
+                'comparable_slope' => null,
+            ];
+            $data = array_merge($data, $buildingData, $nullLandData);
+        }
 
         $comparable = ComparableModel::find($this->comparableId);
 
@@ -367,7 +857,12 @@ class ComparablesIndex extends Component
         Flux::modal('modal-comparable')->close();
 
         // Refrescamos PowerGrid
-        $this->dispatch('pg:eventRefresh-comparables-table');
+        /* $this->dispatch('pg:eventRefresh-comparables-table'); */
+        if ($this->comparableType === 'land') {
+            $this->dispatch('pg:eventRefresh-comparables-land-table');
+        } else {
+            $this->dispatch('pg:eventRefresh-comparables-building-table');
+        }
 
         $this->comparableId = null;
 
@@ -382,23 +877,37 @@ class ComparablesIndex extends Component
     public function assignedElement($idComparable, $showToaster = true)
     {
 
-
-        //Obtenemos el valor de la última posición asignada
-        $max_position = $this->valuation->comparables()->max('position');
+        if($this->comparableType === 'land') {
+            //Obtenemos el valor de la última posición asignada
+            $max_position = $this->valuation->landComparables()->max('position');
+        } else {
+            $max_position = $this->valuation->buildingComparables()->max('position');
+        }
 
         //A ese valor le sumamos un 1 para asignar en la posición del nuevo elemento a asignar
         $new_position = $max_position + 1;
 
-        ValuationComparableModel::create([
+        if($this->comparableType === 'land') {
+        ValuationLandComparableModel::create([
             'valuation_id' => $this->id,
             'comparable_id' => $idComparable,
             'created_by' => $this->userSession->id,
             'position' => $new_position
         ]);
-
-
+        } else {
+            ValuationBuildingComparableModel::create([
+            'valuation_id' => $this->id,
+            'comparable_id' => $idComparable,
+            'created_by' => $this->userSession->id,
+            'position' => $new_position
+            ]);
+        }
         //Actualizamos la tabla de los comparables
-        $this->dispatch('pg:eventRefresh-comparables-table');
+        if ($this->comparableType === 'land') {
+            $this->dispatch('pg:eventRefresh-comparables-land-table');
+        } else {
+            $this->dispatch('pg:eventRefresh-comparables-building-table');
+        }
 
         //Actualizamos los valores de la tabla de las asignaciones de comparables ligadas al avaluo
         $this->loadAssignedComparables();
@@ -417,25 +926,47 @@ class ComparablesIndex extends Component
     //Método para desasignar un comparable
     public function deallocatedElement($idComparable)
     {
-        //dd('El método llega con éxito', $idComparable);
+        // --- INICIO DE LA CORRECCIÓN ---
+        // 1. Encontrar el comparable y su TIPO
+        $comparable = ComparableModel::find($idComparable);
 
+        // Si no existe, no podemos continuar
+        if (!$comparable) {
+            Toaster::error('Error: Comparable no encontrado.');
+            return;
+        }
+        $itemType = $comparable->comparable_type;
+        // --- FIN DE LA CORRECCIÓN ---
 
-        //Primero encontramos el registro de la tabla valuation_comparables
-        $valuationComparable = ValuationComparableModel::where('valuation_id', $this->id)->where('comparable_id', $idComparable)->first();
+        if($itemType === 'land') {
+            //Primero encontramos el registro de la tabla valuation_comparables
+            $valuationLandComparable = ValuationLandComparableModel::where('valuation_id', $this->id)->where('comparable_id', $idComparable)->first();
 
-        //dd($valuationComparable);
+            //dd($valuationComparable);
 
-        //Si existe alguna coincidencia, se elimina el registro, de no ser así, se omite
-        $valuationComparable?->delete();
+            //Si existe alguna coincidencia, se elimina el registro, de no ser así, se omite
+            $valuationLandComparable?->delete();
+        } else {
+            $valuationBuildingComparable = ValuationBuildingComparableModel::where('valuation_id', $this->id)->where('comparable_id', $idComparable)->first();
+
+            //dd($valuationComparable);
+
+            //Si existe alguna coincidencia, se elimina el registro, de no ser así, se omite
+            $valuationBuildingComparable?->delete();
+        }
 
         //Primero ejecutamos la función de reordenar los elementos
-        $this->reorderPositions();
+        $this->reorderPositions($itemType);
 
         //Refrescamos la tabla de comparables
         $this->loadAssignedComparables();
 
         //Refrescamos la tabla de comparables x asignar
-        $this->dispatch('pg:eventRefresh-comparables-table');
+        if ($this->comparableType === 'land') {
+            $this->dispatch('pg:eventRefresh-comparables-land-table');
+        } else {
+            $this->dispatch('pg:eventRefresh-comparables-building-table');
+        }
 
         //Finalmente, enviamos un mensaje en pantalla indicamando que el comparable fue desasignado
         Toaster::success('Comparable desasignado correctamente.');
@@ -447,23 +978,55 @@ class ComparablesIndex extends Component
     public function deleteElement($idComparable)
     {
 
-        $assignmentCount = ValuationComparableModel::where('comparable_id', $idComparable)->count();
+
+        // --- INICIO DE LA CORRECCIÓN ---
+        // 1. Encontrar el comparable y su TIPO
+        $comparable = ComparableModel::find($idComparable);
+
+        if (!$comparable) {
+            Toaster::error('Error: Comparable no encontrado.');
+            return;
+        }
+        $itemType = $comparable->comparable_type;
+        // --- FIN DE LA CORRECCIÓN ---
+
+        if($itemType === 'land') {
+            $assignmentCount = ValuationLandComparableModel::where('comparable_id', $idComparable)->count();
+        } else {
+            $assignmentCount = ValuationBuildingComparableModel::where('comparable_id', $idComparable)->count();
+        }
+
+
+       // $assignmentCount = ValuationLandComparableModel::where('comparable_id', $idComparable)->count();
 
         //dd($assignmentCount);
 
         if ($assignmentCount < 1) {
 
             $comparable = ComparableModel::find($idComparable);
+
+            // --- Lógica de borrado de foto ---
+            if ($comparable && $comparable->comparable_photos) {
+                Storage::disk('comparables_public')->delete(basename($comparable->comparable_photos));
+            }
+            // --- Fin Lógica de borrado de foto ---
+
             $comparable->delete();
 
         //Primero ejecutamos la función de reordenar los elementos
-        $this->reorderPositions();
+        $this->reorderPositions($itemType);
 
         //Refrescamos la tabla de comparables
         $this->loadAssignedComparables();
 
-        //Refrescamos la tabla de comparables x asignar
-        $this->dispatch('pg:eventRefresh-comparables-table');
+        if($this->comparableType === 'land')  {
+                //Refrescamos la tabla de comparables x asignar
+                $this->dispatch('pg:eventRefresh-comparables-land-table');
+        } else {
+                //Refrescamos la tabla de comparables x asignar
+                $this->dispatch('pg:eventRefresh-comparables-building-table');
+        }
+
 
         //Finalmente, enviamos un mensaje en pantalla indicamando que el comparable fue desasignado
         Toaster::success('Comparable eliminado correctamente.');
@@ -477,103 +1040,6 @@ class ComparablesIndex extends Component
 
 
 
-    public function save()
-    {
-        // Ejecutar función con todas las reglas de validación y validaciones condicionales, guardando todo en una variable
-        $validator = $this->validateModal();
-
-        // Comprobamos si se obtuvieron errores de validación
-        if ($validator->fails()) {
-            // Enviamos un mensaje en pantalla indicando que existen errores de validación
-            Toaster::error('Existen errores de validación');
-
-            // Colocamos los errores en pantalla
-            $this->setErrorBag($validator->getMessageBag());
-
-            // Hacemos un return para detener el flujo del sistema
-
-            //dd($validator->errors()->all());
-            return;
-        }
-
-        // --- MANEJO Y SUBIDA DE ARCHIVO (Solo si la validación pasa) ---
-        $photoPath = null;
-        if ($this->comparablePhotosFile) {
-            // Guarda el archivo en el disco 'public' y devuelve la ruta.
-            $photoPath = $this->comparablePhotosFile->store('/', 'comparables_public');
-        }
-
-        // --- CREACIÓN DEL REGISTRO EN LA BASE DE DATOS (Mapeo completo) ---
-        $comparable = ComparableModel::create([
-            'valuation_id' => $this->id,
-            'comparable_key' => $this->comparableKey,
-            'comparable_folio' => $this->comparableFolio,
-            'comparable_discharged_by' => $this->comparableDischargedBy,
-            'comparable_property' => $this->comparableProperty,
-            'comparable_entity' => $this->comparableEntity,
-            'comparable_entity_name' => $this->comparableEntityName,
-            'comparable_locality' => $this->comparableLocality,
-            'comparable_locality_name' => $this->comparableLocalityName,
-            'comparable_colony' => $this->comparableColony,
-            'comparable_other_colony' => $this->comparableOtherColony,
-            'comparable_street' => $this->comparableStreet,
-            'comparable_between_street' => $this->comparableBetweenStreet,
-            'comparable_and_street' => $this->comparableAndStreet,
-            'comparable_cp' => $this->comparableCp,
-            'comparable_name' => $this->comparableName,
-            'comparable_last_name' => $this->comparableLastName,
-            'comparable_phone' => $this->comparablePhone,
-            'comparable_url' => $this->comparableUrl,
-            'comparable_land_use' => $this->comparableLandUse,
-            'comparable_desc_services_infraestructure' => $this->comparableDescServicesInfraestructure,
-            'comparable_services_infraestructure' => $this->comparableServicesInfraestructure,
-            'comparable_shape' => $this->comparableShape,
-            'comparable_density' => $this->comparableDensity,
-            'comparable_front' => $this->comparableFront,
-            'comparable_front_type' => $this->comparableFrontType,
-            'comparable_description_form' => $this->comparableDescriptionForm,
-            'comparable_topography' => $this->comparableTopography,
-            'comparable_characteristics' => $this->comparableCharacteristics,
-            'comparable_characteristics_general' => $this->comparableCharacteristicsGeneral,
-            'comparable_location_block' => $this->comparableLocationBlock,
-            'comparable_street_location' => $this->comparableStreetLocation,
-            'comparable_general_prop_area' => $this->comparableGeneralPropArea,
-            'comparable_urban_proximity_reference' => $this->comparableUrbanProximityReference,
-            'comparable_source_inf_images' => $this->comparableSourceInfImages ?? '',
-            'comparable_photos' => $photoPath, // <--- RUTA DEL ARCHIVO SUBIDO
-            'comparable_abroad_number' => $this->comparableAbroadNumber,
-            'comparable_inside_number' => $this->comparableInsideNumber,
-            'comparable_allowed_levels' => $this->comparableAllowedLevels,
-            'comparable_number_fronts' => $this->comparableNumberFronts,
-            'comparable_free_area_required' => $this->comparableFreeAreaRequired,
-            'comparable_slope' => $this->comparableSlope,
-            'comparable_offers' => $this->comparableOffers,
-            'comparable_land_area' => $this->comparableLandArea,
-            'comparable_built_area' => $this->comparableBuiltArea,
-            'comparable_unit_value' => $this->comparableUnitValue,
-            'comparable_bargaining_factor' => $this->comparableBargainingFactor,
-           // 'comparable_latitude' => $this->comparableLatitude,
-            //'comparable_longitude' => $this->comparableLongitude,
-            'is_active' => $this->comparableActive,
-            'created_by' => $this->userSession->id,
-        ]);
-
-        //Asignamos el comparable recién creado directo al avalúo
-        $this->assignedElement($comparable->id, false);
-
-        //Actualizamos la tabla
-        $this->dispatch('pg:eventRefresh-comparables-table');
-
-        // Limpiamos los campos después de guardar
-        $this->resetComparableFields();
-
-        // Enviamos mensaje de éxito
-        Toaster::success('Comparable añadido exitosamente');
-
-
-        // Cerramos el modal
-        Flux::modal('modal-comparable')->close();
-    }
 
 
 
@@ -715,83 +1181,166 @@ class ComparablesIndex extends Component
      */
     public function moveComparable($idComparable, $direction)
     {
-        // Buscamos el comparable que queremos mover dentro de la valoración actual
-        // Usamos la relación 'comparables' y filtramos por el ID recibido
-        $current = $this->valuation->comparables()->where('comparables.id', $idComparable)->first();
+        // 1. OBTENER EL TIPO DE COMPARABLE (La lógica "inteligente")
+        // Primero, buscamos el comparable en la BD usando su ID.
+        // Esto es crucial porque no podemos confiar en $this->comparableType,
+        // ya que ese es el "contexto" de la página, no el "contexto" del ítem.
+        // Esta es la misma lógica que usamos en deallocatedElement() y deleteElement().
+        $comparable = ComparableModel::find($idComparable);
 
-        // Si no existe, salimos de la función
+        // Si por alguna razón no existe (ej. se borró en otra pestaña), paramos.
+        if (!$comparable) {
+            Toaster::error('Error: Comparable no encontrado.');
+            return;
+        }
+        // Guardamos el tipo ('land' o 'building') de este ítem específico.
+        $itemType = $comparable->comparable_type;
+
+        // --- *** INICIO DE LA LÓGICA DE MOVIMIENTO *** ---
+        // A diferencia de antes, NO guardamos la relación en una variable $relation.
+        // ¿Por qué? Porque el objeto de relación de Eloquent se "muta" (cambia)
+        // con cada consulta. Llamar a la función () cada vez nos da una
+        // consulta "fresca" y evita que los "where" se acumulen y fallen.
+        // Es más verboso, pero 100% seguro (como en la versión que sí funcionaba).
+
+        // 2. BUSCAR EL ÍTEM ACTUAL Y SU POSICIÓN
+        // Necesitamos saber la posición actual del ítem que queremos mover.
+        if ($itemType === 'land') {
+            // Buscamos el ítem DENTRO de la relación de este avalúo.
+            $current = $this->valuation->landComparables()->where('comparables.id', $idComparable)->first();
+        } else {
+            // Hacemos lo mismo para la relación de 'building'.
+            $current = $this->valuation->buildingComparables()->where('comparables.id', $idComparable)->first();
+        }
+
+        // Si no está (quizás ya se quitó de la relación), salimos.
         if (!$current) {
             return;
         }
-
-        // Guardamos la posición actual de este comparable desde la tabla pivot
-        // Ejemplo: si está en la posición 2, $currentPosition = 2
+        // Guardamos su posición actual (ej. 3)
         $currentPosition = $current->pivot->position;
 
-        // --- Caso "subir" ---
+        // 3. LÓGICA DE "SUBIR" (Mover a una posición menor: 3 -> 2)
+        // Verificamos si la dirección es 'up' y si no es ya el primero (posición > 1).
         if ($direction === 'up' && $currentPosition > 1) {
-            // Buscamos el comparable que está justo arriba del actual
-            // Ejemplo: si $currentPosition = 3, buscamos el que tiene posición = 2
-            $swap = $this->valuation->comparables()->wherePivot('position', $currentPosition - 1)->first();
 
-            if ($swap) {
-                // Intercambiamos las posiciones en la tabla pivot
-                // El comparable que estaba arriba ($swap) pasa a la posición actual del que se mueve
-                $this->valuation->comparables()->updateExistingPivot($swap->id, ['position' => $currentPosition]);
-                // El comparable actual pasa a la posición del que estaba arriba
-                $this->valuation->comparables()->updateExistingPivot($current->id, ['position' => $currentPosition - 1]);
+            // Verificamos el tipo para saber qué relación consultar.
+            if ($itemType === 'land') {
+                // Buscamos el ítem que está justo arriba (posición - 1).
+                $swap = $this->valuation->landComparables()->wherePivot('position', $currentPosition - 1)->first();
+                // Si existe...
+                if ($swap) {
+                    // 1. Al ítem de arriba ($swap), le ponemos la posición del actual (ej. 3).
+                    $this->valuation->landComparables()->updateExistingPivot($swap->id, ['position' => $currentPosition]);
+                    // 2. Al ítem actual ($current), le ponemos la posición del de arriba (ej. 2).
+                    $this->valuation->landComparables()->updateExistingPivot($current->id, ['position' => $currentPosition - 1]);
+                }
+            } else {
+                // Repetimos la misma lógica para 'building'.
+                $swap = $this->valuation->buildingComparables()->wherePivot('position', $currentPosition - 1)->first();
+                if ($swap) {
+                    $this->valuation->buildingComparables()->updateExistingPivot($swap->id, ['position' => $currentPosition]);
+                    $this->valuation->buildingComparables()->updateExistingPivot($current->id, ['position' => $currentPosition - 1]);
+                }
             }
 
-            // --- Caso "bajar" ---
+            // 4. LÓGICA DE "BAJAR" (Mover a una posición mayor: 2 -> 3)
         } elseif ($direction === 'down') {
-            // Primero obtenemos la posición máxima de los comparables asignados
-            // Esto nos asegura no mover más allá del último
-            $maxPosition = $this->valuation->comparables()
-                ->max('valuation_comparables.position');
 
-            if ($currentPosition < $maxPosition) {
-                // Buscamos el comparable que está justo debajo del actual
-                // Ejemplo: si $currentPosition = 2, buscamos el que tiene posición = 3
-                $swap = $this->valuation->comparables()->wherePivot('position', $currentPosition + 1)->first();
+            // Verificamos el tipo...
+            if ($itemType === 'land') {
+                // 4a. Obtenemos la posición MÁXIMA actual.
+                // Esta es la consulta CLAVE que fallaba antes.
+                // Debe ser una consulta directa a la relación con la columna pivot.
+                $maxPosition = $this->valuation->landComparables()->max('valuation_land_comparables.position');
 
-                if ($swap) {
-                    // Intercambiamos las posiciones
-                    // El comparable que estaba abajo ($swap) pasa a la posición actual del que se mueve
-                    $this->valuation->comparables()->updateExistingPivot($swap->id, ['position' => $currentPosition]);
-                    // El comparable actual pasa a la posición del que estaba abajo
-                    $this->valuation->comparables()->updateExistingPivot($current->id, ['position' => $currentPosition + 1]);
+                // 4b. Verificamos si no estamos ya en el último lugar.
+                if ($currentPosition < $maxPosition) {
+                    // Buscamos el ítem que está justo abajo (posición + 1).
+                    $swap = $this->valuation->landComparables()->wherePivot('position', $currentPosition + 1)->first();
+                    if ($swap) {
+                        // 1. Al ítem de abajo ($swap), le ponemos la posición del actual (ej. 2).
+                        $this->valuation->landComparables()->updateExistingPivot($swap->id, ['position' => $currentPosition]);
+                        // 2. Al ítem actual ($current), le ponemos la posición del de abajo (ej. 3).
+                        $this->valuation->landComparables()->updateExistingPivot($current->id, ['position' => $currentPosition + 1]);
+                    }
+                }
+            } else {
+                // Repetimos la misma lógica para 'building'.
+                $maxPosition = $this->valuation->buildingComparables()->max('valuation_building_comparables.position');
+                if ($currentPosition < $maxPosition) {
+                    $swap = $this->valuation->buildingComparables()->wherePivot('position', $currentPosition + 1)->first();
+                    if ($swap) {
+                        $this->valuation->buildingComparables()->updateExistingPivot($swap->id, ['position' => $currentPosition]);
+                        $this->valuation->buildingComparables()->updateExistingPivot($current->id, ['position' => $currentPosition + 1]);
+                    }
                 }
             }
         }
+        // --- *** FIN DE LA LÓGICA DE MOVIMIENTO *** ---
 
-        // Después de mover, reordenamos todas las posiciones para que queden consecutivas (1, 2, 3...)
-        $this->reorderPositions();
+        // 5. REORDENAR POSICIONES
+        // Después de mover (ej. 3 -> 4), es posible que la BD quede (1, 2, 4, 3).
+        // Llamamos a reorderPositions() para "barrer" y reordenar todo a (1, 2, 3, 4).
+        // Le pasamos el $itemType correcto que obtuvimos al inicio.
+        $this->reorderPositions($itemType);
 
-        // Finalmente, recargamos la lista de comparables para refrescar la tabla en la vista
+        // 6. RECARGAR LA VISTA
+        // Finalmente, llamamos a loadAssignedComparables() para refrescar
+        // la variable $assignedComparables y que Livewire actualice la tabla.
         $this->loadAssignedComparables();
     }
-
 
     /**
      * Reordena las posiciones de los comparables asignados
      * Esto evita huecos o duplicados después de mover o eliminar elementos
      */
-    public function reorderPositions()
-    {
-        // Obtenemos todos los comparables asignados, ordenados por posición actual
-        $comparables = $this->valuation->comparables()->orderByPivot('position')->get();
+    /**
+     * Reordena las posiciones de los comparables asignados
+     * (Esta es la versión que acepta 1 parámetro)
+     */
 
-        $position = 1; // Empezamos a contar desde 1
+
+    public function reorderPositions($itemType) // <-- 1. PARÁMETRO REQUERIDO
+    {
+        // ****** CORRECCIÓN CRÍTICA ******
+        // Usamos $itemType (no $this->comparableType) para la lógica
+        if ($itemType === 'land') {
+            $comparables = $this->valuation->landComparables()->orderByPivot('position')->get();
+            $relation = $this->valuation->landComparables();
+        } else {
+            $comparables = $this->valuation->buildingComparables()->orderByPivot('position')->get();
+            $relation = $this->valuation->buildingComparables();
+        }
+        // ****** FIN DE LA CORRECCIÓN ******
+
+        $position = 1;
 
         foreach ($comparables as $comp) {
-            // Si la posición actual del pivot no coincide con la secuencia, la actualizamos
-            // Ejemplo: si el primer comparable tiene position=2, lo cambiamos a 1
             if ($comp->pivot->position != $position) {
-                $this->valuation->comparables()->updateExistingPivot($comp->id, ['position' => $position]);
+                // Usamos la variable $relation para actualizar el pivote
+                $relation->updateExistingPivot($comp->id, ['position' => $position]);
             }
-
-            $position++; // Incrementamos para el siguiente comparable
+            $position++;
         }
+
+
+
+           /*  // Obtenemos todos los comparables asignados, ordenados por posición actual
+            $comparables = $this->valuation->landComparables()->orderByPivot('position')->get();
+
+            $position = 1; // Empezamos a contar desde 1
+
+            foreach ($comparables as $comp) {
+                // Si la posición actual del pivot no coincide con la secuencia, la actualizamos
+                // Ejemplo: si el primer comparable tiene position=2, lo cambiamos a 1
+                if ($comp->pivot->position != $position) {
+                    $this->valuation->landComparables()->updateExistingPivot($comp->id, ['position' => $position]);
+                }
+
+                $position++; // Incrementamos para el siguiente comparable
+            } */
+
     }
 
 
@@ -836,111 +1385,133 @@ class ComparablesIndex extends Component
     }
 
 
-    public function validateModal(){
-        // VALIDACIONES COMPARABLES
-        $comparableRules = [
-            'comparableKey' => 'required',
+    public function validateModal()
+    {
+
+        // --- 1. REGLAS COMUNES (Siempre se validan) ---
+        $commonRules = [
+            'comparableKey' => 'nullable', // readonly
             'comparableFolio' => 'required',
             'comparableDischargedBy' => 'required',
             'comparableProperty' => 'required',
             'comparableCp' => 'required|string|digits:5',
-            'comparableEntity' => 'required',
-            //'comparableEntityName' => 'nullable',
-            'comparableLocality' => 'required',
-            //'comparableLocalityName' => 'nullable',
+            'comparableEntity' => 'required', // Aunque se autollena, debe estar seleccionado
+            'comparableLocality' => 'required', // Aunque se autollena, debe estar seleccionado
             'comparableColony' => 'required',
-            /* 'comparableOtherColony' => 'required', */
             'comparableStreet' => 'required',
             'comparableAbroadNumber' => 'required',
-            'comparableInsideNumber' => 'nullable',
+            'comparableInsideNumber' => 'nullable', // Sin *
             'comparableBetweenStreet' => 'required',
             'comparableAndStreet' => 'required',
             'comparableName' => 'required',
             'comparableLastName' => 'required',
-            //Bail detiene las validaciones en cuanto ocurra el primero error y lo muestra en pantalla
-            /* 'comparablePhone' => 'bail|required|regex:/^[0-9]+$/|digits_between:7,15', */
             'comparablePhone' => 'required',
             'comparableUrl' => 'required|url',
-            'comparableLandUse' => 'required',
-            'comparableFreeAreaRequired' => 'required|numeric|between:0,100',
-            'comparableAllowedLevels' => 'required|integer',
-            'comparableServicesInfraestructure' => 'nullable',
-            'comparableDescServicesInfraestructure' => 'required',
-            'comparableShape' => 'required',
-            'comparableSlope' => 'required|numeric|between:0,100',
-            'comparableDensity' => 'required',
-            'comparableFront' => 'required',
-            'comparableFrontType' => 'nullable',
-            'comparableDescriptionForm' => 'nullable',
-            'comparableTopography' => 'required',
             'comparableCharacteristics' => 'required',
-            'comparableCharacteristicsGeneral' => 'nullable',
+            'comparableCharacteristicsGeneral' => 'nullable', // Sin *
             'comparableOffers' => 'required|numeric|gt:0',
-            'comparableLandArea' => 'required|numeric|gt:0',
+            'comparableLandArea' => 'required|numeric|gt:0', // <--- CAMBIO: Ahora es común
             'comparableBuiltArea' => 'required|numeric|gt:0',
-            'comparableUnitValue' => 'required|numeric|gt:0',
+            'comparableUnitValue' => 'required|numeric|gt:0', // disabled, pero requerido
             'comparableBargainingFactor' => 'required|numeric|between:0.8,1',
             'comparableLocationBlock' => 'required',
             'comparableStreetLocation' => 'required',
             'comparableGeneralPropArea' => 'required',
             'comparableUrbanProximityReference' => 'required',
-            'comparableNumberFronts' => 'nullable|integer',
             'comparableSourceInfImages' => 'required',
-            //'comparablePhotos' => 'required',
-            /* 'comparableActive' => 'required', */
-
-            // REGLAS PARA COORDENADAS: REQUIERE UN VALOR NUMÉRICO VÁLIDO
-            //'comparableLatitude' => 'required|numeric|between:-90,90',
-            //'comparableLongitude' => 'required|numeric|between:-180,180',
-
+            'comparableActive' => 'nullable|boolean', // Sin *
+            // comparableNumberFronts no está en el Blade, lo omito de las reglas
+        ];
+        // --- 2. REGLAS LAND (Solo si comparableType es 'land') ---
+        $landRules = [
+            'comparableLandUse' => 'required',
+            'comparableFreeAreaRequired' => 'required|numeric|between:0,100',
+            'comparableAllowedLevels' => 'required|integer',
+            'comparableServicesInfraestructure' => 'required', // <--- CAMBIO: Tiene *
+            'comparableDescServicesInfraestructure' => 'required',
+            'comparableShape' => 'required',
+            'comparableSlope' => 'required|numeric|between:0,100',
+            'comparableDensity' => 'required',
+            'comparableFront' => 'required',
+            'comparableFrontType' => 'nullable', // Sin *
+            'comparableDescriptionForm' => 'nullable', // Sin *
+            'comparableTopography' => 'required',
         ];
 
-        if($this->comparableOtherColony === 'no-listada'){
-            $comparableRules = array_merge($comparableRules, [
+        // --- 3. REGLAS BUILDING (Solo si comparableType es 'building') ---
+        $buildingRules = [
+            // CAMBIO: Estos 5 son nullable ahora (sin *)
+            'comparableNumberBedrooms' => 'nullable|integer|min:0',
+            'comparableNumberToilets' => 'nullable|integer|min:0',
+            'comparableNumberHalfbaths' => 'nullable|integer|min:0',
+            'comparableNumberParkings' => 'nullable|integer|min:0',
+            'comparableNumberFloorLevel' => 'nullable',
+            // CAMBIO: Checkboxes son nullable
+            'comparableElevator' => 'nullable|boolean',
+            'comparableStore' => 'nullable|boolean',
+            'comparableRoofGarden' => 'nullable|boolean',
+            // CAMBIO: Este sí es requerido
+            'comparableFeaturesAmenities' => 'required|string|max:500',
+            'comparableQuality' => 'required|string|max:100',
+            'comparableConservation' => 'required',
+            'comparableLevels' => 'required|integer|min:0',
+            'comparableSeleableArea' => 'required|numeric|gt:0',
+            'comparableClasification' => 'required',
+            'comparableAge' => 'required|integer|min:0',
+            'comparableVut' => 'required|numeric|min:0',
+        ];
+        // --- 4. CONSTRUCCIÓN DE REGLAS FINALES ---
+        $rules = $commonRules;
+
+        if ($this->comparableType === 'land') {
+            $rules = array_merge($rules, $landRules);
+        } elseif ($this->comparableType === 'building') {
+            $rules = array_merge($rules, $buildingRules);
+        }
+
+        // --- 5. REGLAS CONDICIONALES ADICIONALES (Se mantienen) ---
+        if ($this->comparableColony === 'no-listada') { // Corregido de comparableOtherColony
+            $rules = array_merge($rules, [
                 'comparableOtherColony'  => 'required|max:100'
             ]);
         }
 
         $fileExists = $this->comparablePhotosFile && is_string($this->comparablePhotosFile);
 
-
-        if($fileExists) {
-            $comparableRules = array_merge($comparableRules, [
-
+        if ($fileExists) {
+            $rules = array_merge($rules, [
                 'comparablePhotosFile'  => 'nullable|string'
             ]);
         } else {
-
-
             if ($this->comparableId === null) {
-            $comparableRules = array_merge(
-                $comparableRules,
-                [
-             'comparablePhotosFile'  => 'nullable|file|image|max:1024']);
-                } else {
-                $comparableRules = array_merge(
-                    $comparableRules,
+                $rules = array_merge(
+                    $rules,
                     [
-                        'comparablePhotosFile'  => 'required|file|image|max:1024'
+                        'comparablePhotosFile'  => 'nullable|file|image|max:2048' // Permite nulo al crear
                     ]
                 );
-                }
+            } else {
+                $rules = array_merge(
+                    $rules,
+                    [
+                        'comparablePhotosFile'  => 'nullable|file|image|max:2048' // Permite nulo al editar también (por si no quiere cambiarla)
+                    ]
+                );
+            }
         }
 
-
+        // --- 6. RETORNO DEL VALIDADOR ---
         return  Validator::make(
             $this->all(),
-            $comparableRules,
-            [],
-            $this->validateModalAttributes()
+            $rules,
+            [], // Mensajes personalizados
+            $this->validateModalAttributes() // Atributos en español
         );
-
-
     }
 
 
-
-    protected function validateModalAttributes(): array {
+    protected function validateModalAttributes(): array
+    {
         return [
             'comparableKey' => 'clave',
             'comparableFolio' => 'folio',
@@ -960,6 +1531,22 @@ class ComparablesIndex extends Component
             'comparableLastName' => 'apellido',
             'comparablePhone' => 'teléfono',
             'comparableUrl' => 'URL',
+            'comparableCharacteristics' => 'características',
+            'comparableCharacteristicsGeneral' => 'características generales',
+            'comparableOffers' => 'oferta',
+            'comparableBuiltArea' => 'superficie construida',
+            'comparableUnitValue' => 'valor unitario',
+            'comparableBargainingFactor' => 'factor de negociación',
+            'comparableLocationBlock' => 'ubicación en la manzana',
+            'comparableStreetLocation' => 'ubicación en la calle',
+            'comparableGeneralPropArea' => 'clase general de la zona',
+            'comparableUrbanProximityReference' => 'referencia de proximidad urbana',
+            // 'comparableNumberFronts' => 'número de frentes', // Omitido (no en Blade)
+            'comparableSourceInfImages' => 'fuente de imágenes',
+            'comparablePhotosFile' => 'fotos',
+            'comparableActive' => 'activo',
+
+            // --- Atributos LAND ---
             'comparableLandUse' => 'uso de suelo',
             'comparableFreeAreaRequired' => 'área libre requerido',
             'comparableAllowedLevels' => 'niveles permitidos',
@@ -972,34 +1559,37 @@ class ComparablesIndex extends Component
             'comparableFrontType' => 'frente tipo',
             'comparableDescriptionForm' => 'descripción de forma',
             'comparableTopography' => 'topografía',
-            'comparableCharacteristics' => 'características',
-            'comparableCharacteristicsGeneral' => 'características generales',
-            'comparableOffers' => 'oferta',
-            'comparableLandArea' => 'superficie del terreno',
-            'comparableBuiltArea' => 'superficie construida',
-            'comparableUnitValue' => 'valor unitario',
-            'comparableBargainingFactor' => 'factor de negociación',
-            'comparableLocationBlock' => 'ubicación en la manzana',
-            'comparableStreetLocation' => 'ubicación en la calle',
-            'comparableGeneralPropArea' => 'clase general de la zona',
-            'comparableUrbanProximityReference' => 'referencia de proximidad urbana',
-            'comparableNumberFronts' => 'número de frentes',
-            'comparableSourceInfImages' => 'fuente de imágenes',
-            'comparablePhotosFile' => 'fotos',
-            'comparableActive' => 'activo',
+            'comparableLandArea' => 'superficie del terreno', // <--- CAMBIO: Ahora común
+
+            // --- Atributos BUILDING ---
+            'comparableNumberBedrooms' => 'N° de recámaras',
+            'comparableNumberToilets' => 'N° de baños',
+            'comparableNumberHalfbaths' => 'N° 1/2 baños',
+            'comparableNumberParkings' => 'N° estacionamientos',
+            'comparableElevator' => 'elevador',
+            'comparableStore' => 'bodega',
+            'comparableRoofGarden' => 'roof garden',
+            'comparableFeaturesAmenities' => 'características amenidades',
+            'comparableNumberFloorLevel' => 'piso/nivel',
+            'comparableQuality' => 'calidad',
+            'comparableConservation' => 'conservación',
+            'comparableLevels' => 'niveles',
+            'comparableSeleableArea' => 'superficie vendible',
+            'comparableClasification' => 'clasificación del inmueble',
+            'comparableAge' => 'edad',
+            'comparableVut' => 'VUT',
 
             // ATRIBUTOS AÑADIDOS PARA MENSAJES DE ERROR MÁS CLAROS
-            'comparableLatitude' => 'latitud (Mapa)',
-            'comparableLongitude' => 'longitud (Mapa)',
+            // 'comparableLatitude' => 'latitud (Mapa)',
+            // 'comparableLongitude' => 'longitud (Mapa)',
         ];
     }
 
 
     public function resetComparableFields()
     {
-     /*    $this->comparableLatitude = 19.4326;
+        /* $this->comparableLatitude = 19.4326;
         $this->comparableLongitude = -99.1332; */
-
 
         $this->reset([
             'comparableCp',
@@ -1016,6 +1606,23 @@ class ComparablesIndex extends Component
             'comparableLastName',
             'comparablePhone',
             'comparableUrl',
+            'comparableCharacteristics',
+            'comparableCharacteristicsGeneral',
+            'comparableOffers',
+            // 'comparableLandArea', // Se resetea abajo
+            'comparableBuiltArea',
+            'comparableUnitValue',
+            'comparableBargainingFactor',
+            'comparableLocationBlock',
+            'comparableStreetLocation',
+            'comparableGeneralPropArea',
+            'comparableUrbanProximityReference',
+            'comparableNumberFronts',
+            'comparableSourceInfImages',
+            'comparableActive',
+            'comparablePhotosFile',
+
+            // --- Campos LAND ---
             'comparableLandUse',
             'comparableFreeAreaRequired',
             'comparableAllowedLevels',
@@ -1028,24 +1635,36 @@ class ComparablesIndex extends Component
             'comparableFrontType',
             'comparableDescriptionForm',
             'comparableTopography',
-            'comparableCharacteristics',
-            'comparableCharacteristicsGeneral',
-            'comparableOffers',
             'comparableLandArea',
-            'comparableBuiltArea',
-            'comparableUnitValue',
-            'comparableBargainingFactor',
-            'comparableLocationBlock',
-            'comparableStreetLocation',
-            'comparableGeneralPropArea',
-            'comparableUrbanProximityReference',
-            'comparableNumberFronts',
-            'comparableSourceInfImages',
-            //'comparablePhotos',
-            'comparableActive',
 
-            'comparablePhotosFile', // Resetear el archivo temporal
+            // --- Campos BUILDING ---
+            'comparableNumberBedrooms',
+            'comparableNumberToilets',
+            'comparableNumberHalfbaths',
+            'comparableNumberParkings',
+            'comparableElevator',
+            'comparableStore',
+            'comparableRoofGarden',
+            'comparableFeaturesAmenities',
+            'comparableNumberFloorLevel',
+            'comparableQuality',
+            'comparableConservation',
+            'comparableLevels',
+            'comparableSeleableArea',
+            'comparableClasification',
+            'comparableAge',
+            'comparableVut',
         ]);
+
+        // Reiniciar valores por defecto que no son null
+  /*       $this->comparableActive = true; */
+        $this->comparableElevator = false;
+        $this->comparableStore = false;
+        $thisRouteGuard = false;
+        $this->comparableOffers = 0;
+        $this->comparableLandArea = 0;
+        $this->comparableBuiltArea = 0;
+        $this->comparableUnitValue = 0;
     }
 
 

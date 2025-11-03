@@ -5,8 +5,10 @@ namespace App\Livewire\Forms\Comparables;
 use Livewire\Component;
 use Flux\Flux;
 use App\Models\Forms\Comparable\ComparableModel;
-use App\Models\Forms\Comparable\ValuationComparableModel;
+use App\Models\Forms\Comparable\ValuationLandComparableModel;
+use App\Models\Forms\Comparable\ValuationBuildingComparableModel;
 use App\Models\Valuations\Valuation;
+use Illuminate\Support\Facades\Session;
 
 class ComparableSummary extends Component
 {
@@ -19,7 +21,12 @@ class ComparableSummary extends Component
     public array $ValuationComparables;
 
 
+    public $comparableType;
+
     public function mount(){
+
+        $this->comparableType = Session::get('comparable-type');
+
 
     }
 
@@ -34,10 +41,13 @@ class ComparableSummary extends Component
             return;
         }
 
+        if($this->comparableType === 'land') $pivotTable = ValuationLandComparableModel::class;
+        if($this->comparableType === 'building') $pivotTable = ValuationBuildingComparableModel::class;
+
         // 2. OBTENER LA COLECCIÓN DE REGISTROS DE ASIGNACIÓN DIRECTAMENTE
         //    Cargamos el modelo de Valuación (Avalúo) y el Usuario (createdBy)
         //    a través del modelo de la tabla intermedia (ValuationComparableModel).
-        $assignmentRecords = ValuationComparableModel::where('comparable_id', $id) // <- NOMBRE DE VARIABLE CORREGIDO
+        $assignmentRecords = $pivotTable::where('comparable_id', $id) // <- NOMBRE DE VARIABLE CORREGIDO
             ->with(['valuation', 'createdBy']) // 'valuation' y 'createdBy' son relaciones BelongsTo en el modelo de la tabla intermedia
             ->get();
 

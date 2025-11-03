@@ -6,6 +6,9 @@ use App\Models\Valuations\Valuation;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+// Importamos los modelos de pivote específicos
+use App\Models\Forms\Comparable\ValuationLandComparable;
+use App\Models\Forms\Comparable\ValuationBuildingComparable;
 
 class ComparableModel extends Model
 {
@@ -15,10 +18,11 @@ class ComparableModel extends Model
 
     /**
      * The attributes that are mass assignable.
-     * Mapea todas las propiedades del Livewire (camelCase) a las columnas de la DB (snake_case).
+     * Incluye todos los campos de la migración.
      */
     protected $fillable = [
         'valuation_id',
+        'comparable_type', // AÑADIDO: Tipo 'land' o 'building'
         'comparable_key',
         'comparable_folio',
         'comparable_discharged_by',
@@ -65,31 +69,62 @@ class ComparableModel extends Model
         'comparable_built_area',
         'comparable_unit_value',
         'comparable_bargaining_factor',
-        'comparable_latitude',
-        'comparable_longitude',
         'is_active',
         'created_by',
+
+        // --- CAMPOS DE BUILDINGS ---
+        'comparable_number_bedrooms',
+        'comparable_number_toilets',
+        'comparable_number_halfbaths',
+        'comparable_number_parkings',
+        'comparable_elevator',
+        'comparable_store',
+        'comparable_roof_garden',
+        'comparable_features_amenities',
+        'comparable_floor_level',
+        'comparable_quality',
+        'comparable_conservation',
+        'comparable_levels',
+        'comparable_seleable_area',
+        'comparable_clasification',
+        'comparable_age',
+        'comparable_vut',
     ];
 
     /**
      * The attributes that should be cast.
+     * CRÍTICO: Se usan 'decimal:10' para coincidir con la precisión de la migración.
      */
     protected $casts = [
         'is_active' => 'boolean',
-        // Valores flotantes
-        'comparable_free_area_required' => 'float',
-        'comparable_slope' => 'float',
-        'comparable_offers' => 'float',
-        'comparable_land_area' => 'float',
-        'comparable_built_area' => 'float',
-        'comparable_unit_value' => 'float',
-        'comparable_bargaining_factor' => 'float',
-        'comparable_latitude' => 'float',
-        'comparable_longitude' => 'float',
+        'comparable_type' => 'string',
+
+        // Valores decimales/flotantes (todos a decimal:10)
+        'comparable_free_area_required' => 'decimal:10',
+        'comparable_slope' => 'decimal:10',
+        'comparable_offers' => 'decimal:10',
+        'comparable_land_area' => 'decimal:10',
+        'comparable_built_area' => 'decimal:10',
+        'comparable_unit_value' => 'decimal:10',
+        'comparable_bargaining_factor' => 'decimal:10',
+        'comparable_front' => 'decimal:10',
+        'comparable_seleable_area' => 'decimal:10',
+
         // Valores enteros
         'comparable_allowed_levels' => 'integer',
         'comparable_number_fronts' => 'integer',
-        // Los números de calle se dejaron como string en la migración.
+        'comparable_number_bedrooms' => 'integer',
+        'comparable_number_toilets' => 'integer',
+        'comparable_number_halfbaths' => 'integer',
+        'comparable_number_parkings' => 'integer',
+        'comparable_levels' => 'integer',
+        'comparable_age' => 'integer',
+        'comparable_vut' => 'integer',
+
+        // Valores booleanos
+        'comparable_elevator' => 'boolean',
+        'comparable_store' => 'boolean',
+        'comparable_roof_garden' => 'boolean',
     ];
 
     /**
@@ -100,41 +135,24 @@ class ComparableModel extends Model
         return $this->belongsTo(Valuation::class);
     }
 
-
     /**
-     * Relación 1:N con la tabla pivote (valuation_comparables).
-     *
-     * Devuelve los registros pivote donde este comparable
-     * ha sido asignado a distintos avalúos.
-     *
-     * Ejemplo:
-     * $comparable->assignedValuations → registros pivote donde aparece este comparable
+     * Obtiene el usuario que creó este comparable.
      */
-
-    public function assignedValuations()
+    public function createdBy()
     {
-        return $this->hasMany(ValuationComparableModel::class, 'comparable_id');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
+    // --- RELACIONES PIVOTE N:M PARA CADA TIPO ---
 
     /**
-     * Relación N:M con los avalúos.
-     *
-     * Devuelve los modelos de avalúos a los que está vinculado este comparable
-     * a través de la tabla "valuation_comparables".
-     *
-     * Incluye los campos extra del pivote (position, is_active, created_by)
-     * y timestamps.
-     *
-     * Ejemplo:
-     * $comparable->valuations → colección de modelos Valuation
+     * Relación N:M con los avalúos (Tipo LAND, tabla valuation_land_comparables).
      */
-
-    public function valuations()
+    public function landValuations()
     {
         return $this->belongsToMany(
             Valuation::class,
-            'valuation_comparables',
+            'valuation_land_comparables', // Tabla pivote para terrenos
             'comparable_id',
             'valuation_id'
         )
@@ -142,14 +160,18 @@ class ComparableModel extends Model
             ->withTimestamps();
     }
 
-
-
-    //Función para obtener el usuario el dato del usuario que creo el avaluo
-
-    public function createdBy()
+    /**
+     * Relación N:M con los avalúos (Tipo BUILDING, tabla valuation_building_comparables).
+     */
+    public function buildingValuations()
     {
-        // Le decimos a Eloquent: "Este comparable pertenece a un User,
-        // y la llave para buscarlo está en la columna 'created_by'."
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsToMany(
+            Valuation::class,
+            'valuation_building_comparables', // Tabla pivote para construcciones
+            'comparable_id',
+            'valuation_id'
+        )
+            ->withPivot(['position', 'is_active', 'created_by'])
+            ->withTimestamps();
     }
 }

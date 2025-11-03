@@ -39,78 +39,122 @@
         </div>
         <div class="form-container__content">
          {{--    <div class="form-grid form-grid--2 overflow-x-auto"> --}}
-                <livewire:forms.comparables.comparables-table>
+                @if($comparableType === 'land')
+                <livewire:forms.comparables.comparables-land-table>
+                @endif
+
+                @if($comparableType === 'building')
+                <livewire:forms.comparables.comparables-building-table>
+                    @endif
            {{--  </div> --}}
         </div>
     </div>
 
-{{--     <div class="form-container">
-        <div class="form-container__header">
-            Comparables asignados
-        </div>
-        <div class="form-container__content">
-            <div class="form-grid ">
-                <div class="mt-2">
-                    <div class="overflow-x-auto max-w-full">
-                        <table class="min-w-[550px] table-fixed w-full border-2">
-                            <thead>
-                                <tr class="bg-gray-100">
-                                    <th class="px-2 py-1 border">Folio</th>
-                                    <th class="px-2 py-1 border">Propiedad</th>
-                                    <th class="px-2 py-1 border">Estado</th>
-                                    <th class="px-2 py-1 border">Ciudad</th>
-                                    <th class="px-2 py-1 border">Colonia</th>
-                                    <th class="px-2 py-1 border">Calle</th>
-                                    <th class="px-2 py-1 border">N°</th>
-                                    <th class="px-2 py-1 border">CP</th>
-                                    <th class="px-2 py-1 border">Oferta</th>
-                                    <th class="px-2 py-1 border">Terreno</th>
-                                    <th class="px-2 py-1 border">Construida</th>
-                                    <th class="px-2 py-1 border">Unitario</th>
-                                    <th class="w-[100px] py-1 border">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if ($assignedComparables->isEmpty())
-                                <tr>
-                                    <td colspan="13" class="px-2 py-4 text-center text-gray-500">
-                                        No hay comparables asignados
-                                    </td>
-                                </tr>
-                                @else
-                                @foreach ($assignedComparables as $item)
-                                <tr>
-                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->comparable_folio }}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->comparable_property }}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->comparable_entity_name }}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->comparable_locality_name }}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->comparable_colony }}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->comparable_street }}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->comparable_abroad_number }}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->comparable_cp }}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->comparable_offers }}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->comparable_land_area }}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->comparable_built_area }}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{ $item->comparable_unit_value }}</td>
-                                    <td class="my-2 flex justify-evenly">
-                                        <flux:button type="button" icon-leading="pencil"
-                                            class="cursor-pointer btn-intermediary btn-buildins"
-                                            wire:click="editComparable({{ $item->id }})" />
-                                        <flux:button
-                                            onclick="confirm('¿Estás seguro de que deseas eliminar este comparable?') || event.stopImmediatePropagation()"
-                                            wire:click="deleteComparable({{ $item->id }})" icon-leading="trash"
-                                            class="cursor-pointer btn-deleted btn-buildings" />
-                                    </td>
-                                </tr>
-                                @endforeach
-                                @endif
-                            </tbody>
-                        </table>
-                    </div>
+
+
+
+
+{{--
+<div class="form-container">
+    <div class="form-container__header">
+        Comparables asignados
+    </div>
+    <div class="form-container__content">
+        <div class="form-grid">
+            <div class="mt-2">
+                <div class="overflow-x-auto max-w-full">
+                    <table class="min-w-[550px] table-fixed w-full border-2">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="w-[20px] py-2 border">#</th>
+                                <th class="px-2 py-2 border">Mover</th>
+                                <th class="px-2 py-2 border">Estado</th>
+                                <th class="px-2 py-2 border">Ciudad</th>
+                                <th class="px-2 py-2 border">Colonia</th>
+                                <th class="px-2 py-2 border">Calle</th>
+                                <th class="px-2 py-2 border">N°</th>
+                                <th class="px-2 py-2 border">CP</th>
+                                <th class="px-2 py-2 border">Oferta</th>
+                                <th class="px-2 py-2 border">Terreno</th>
+                                <th class="px-2 py-2 border">Construida</th>
+                                <th class="px-2 py-2 border">Unitario</th>
+                                <th class="w-[320px] py-2 border">Acciones</th>
+                            </tr>
+                        </thead>
+                    <tbody>
+                        @if ($assignedComparables->isEmpty())
+                        <tr>
+                            <td colspan="15" class="px-2 py-4 text-center text-gray-500">
+                                No hay comparables asignados
+                            </td>
+                        </tr>
+                        @else
+                        @foreach ($assignedComparables as $item)
+
+
+                        <tr>
+                            <td class="px-2 py-2 border text-sm text-center">{{ $item->pivot->position }}</td>
+                            <td class="px-2 py-2 border text-center">
+                                <div class="flex justify-center gap-2">
+
+                                    <flux:button type="button" icon-leading="chevron-double-down"
+                                        class="cursor-pointer btn-primary btn-buildings"
+                                        wire:click="moveComparable({{ $item->id }}, 'down')" wire:loading.attr="disabled"
+                                        :disabled="$loop->last" />
+
+                                    <flux:button type="button" icon-leading="chevron-double-up"
+                                        class="cursor-pointer btn-primary btn-buildings" wire:click="moveComparable({{ $item->id }}, 'up')"
+                                        wire:loading.attr="disabled" :disabled="$loop->first" />
+                                </div>
+                            </td>
+
+                            <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_entity_name }}</td>
+                            <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_locality_name }}</td>
+                            <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_colony }}</td>
+                            <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_street }}</td>
+                            <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_abroad_number }}</td>
+                            <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_cp }}</td>
+                            <td class="px-2 py-2 border text-sm text-center">$ {{
+                                rtrim(rtrim(number_format($item->comparable_offers, 6, '.', ','), '0'), '.')
+                                }}</td>
+                            <td class="px-2 py-2 border text-sm text-center">{{
+                                rtrim(rtrim(number_format($item->comparable_land_area, 6, '.', ','), '0'), '.')
+                                }}</td>
+                            <td class="px-2 py-2 border text-sm text-center">{{
+                                rtrim(rtrim(number_format($item->comparable_land_area, 6, '.', ','), '0'), '.')
+                                }}</td>
+                            <td class="px-2 py-2 border text-sm text-center">{{
+                                rtrim(rtrim(number_format($item->comparable_built_area, 6, '.', ','), '0'), '.')
+                                }}</td>
+
+                            <td class="px-2 py-2 border text-center">
+                                <div class="flex justify-center gap-4">
+
+                                    <flux:button type="button" class="cursor-pointer btn-change btn-table text-sm"
+                                        wire:click="$dispatch('openSummary', { id: {{ $item->id }} })">Resumen</flux:button>
+
+                                    <flux:button type="button" class="cursor-pointer btn-intermediary btn-table text-sm"
+                                        wire:click="editComparable({{ $item->id }})">Editar</flux:button>
+
+                                    <flux:button type="button"
+                                        onclick="confirm('¿Estás seguro de que deseas eliminar este comparable?') || event.stopImmediatePropagation()"
+                                        wire:click="deallocatedElement({{ $item->id }})"
+                                        class="cursor-pointer btn-deleted btn-table text-sm">Quitar</flux:button>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                        @endif
+                    </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </div> --}}
+    </div>
+</div>
+
+
+ --}}
 
 
 
@@ -129,114 +173,154 @@
     <div class="form-container__content">
         <div class="form-grid">
             <div class="mt-2">
-                <div class="overflow-x-auto max-w-full">
-                    <table class="min-w-[550px] table-fixed w-full border-2">
-                        <thead>
-                            <tr class="bg-gray-100">
-                                <th class="w-[20px] py-2 border">#</th> <!-- Posición -->
-                                {{-- <th class="px-2 py-2 border">Folio</th> --}}
 
-                                <th class="px-2 py-2 border">Mover</th>
-                                {{-- <th class="px-2 py-2 border">Propiedad</th> --}}
-                                <th class="px-2 py-2 border">Estado</th>
-                                <th class="px-2 py-2 border">Ciudad</th>
-                                <th class="px-2 py-2 border">Colonia</th>
-                                <th class="px-2 py-2 border">Calle</th>
-                                <th class="px-2 py-2 border">N°</th>
-                                <th class="px-2 py-2 border">CP</th>
-                                <th class="px-2 py-2 border">Oferta</th>
-                                <th class="px-2 py-2 border">Terreno</th>
-                                <th class="px-2 py-2 border">Construida</th>
-                                <th class="px-2 py-2 border">Unitario</th>
-                                <th class="w-[320px] py-2 border">Acciones</th> <!-- Editar/Eliminar -->
-                                <!-- Nueva columna para flechas -->
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if ($assignedComparables->isEmpty())
-                            <tr>
-                                <td colspan="15" class="px-2 py-4 text-center text-gray-500">
-                                    No hay comparables asignados
-                                </td>
-                            </tr>
-                            @else
-                            @foreach ($assignedComparables as $item)
-                            <tr>
-                                <!-- Posición -->
-                                <td class="px-2 py-2 border text-sm text-center">{{ $item->pivot->position }}</td>
-                                <td class="px-2 py-2 border text-center">
-                                    <div class="flex justify-center gap-2">
-                                        <flux:button type="button" icon-leading="chevron-double-down" class="cursor-pointer btn-primary btn-buildings"
-                                            wire:click="moveComparable({{ $item->id }}, 'down')" wire:loading.attr="disabled" :disabled="$loop->last" />
+                <div class="relative">
 
-                                        <flux:button type="button" icon-leading="chevron-double-up" class="cursor-pointer btn-primary btn-buildings"
-                                            wire:click="moveComparable({{ $item->id }}, 'up')" wire:loading.attr="disabled" :disabled="$loop->first" />
+                    <div class="overflow-x-auto max-w-full">
+                        <table class="min-w-[550px] table-fixed w-full border-2">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="w-[20px] py-2 border">#</th>
+                                    <th class="px-2 py-2 border">Mover</th>
+                                    <th class="px-2 py-2 border">Estado</th>
+                                    <th class="px-2 py-2 border">Ciudad</th>
+                                    <th class="px-2 py-2 border">Colonia</th>
+                                    <th class="px-2 py-2 border">Calle</th>
+                                    <th class="px-2 py-2 border">N°</th>
+                                    <th class="px-2 py-2 border">CP</th>
+                                    <th class="px-2 py-2 border">Oferta</th>
+                                    <th class="px-2 py-2 border">Terreno</th>
+                                    <th class="px-2 py-2 border">Construida</th>
+                                    <th class="px-2 py-2 border">Unitario</th>
+                                    <th class="w-[320px] py-2 border">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if ($assignedComparables->isEmpty())
+                                <tr>
+                                    <td colspan="13" class="px-2 py-4 text-center text-gray-500">
+                                        No hay comparables asignados
+                                    </td>
+                                </tr>
+                                @else
+                                @foreach ($assignedComparables as $item)
 
-                                    </div>
-                                </td>
+                                <!-- INICIO DE LA CORRECCIÓN  -->
+                                <!-- 1. wire:key es ahora ESTABLE (basado solo en el ID) -->
+                                <!-- 2. wire:transition le dice a Livewire que anime los cambios (fade-in/out) -->
+                                <tr wire:key="comparable-{{ $item->id }}" wire:transition>
 
-                               {{--  <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_folio }}</td> --}}
-                                {{-- <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_property }}</td> --}}
-                                <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_entity_name }}
-                                </td>
-                                <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_locality_name }}
-                                </td>
-                                <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_colony }}</td>
-                                <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_street }}</td>
-                                <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_abroad_number }}
-                                </td>
-                                <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_cp }}</td>
-                                <td class="px-2 py-2 border text-sm text-center">$ {{
+                                    <td class="px-2 py-2 border text-sm text-center">{{ $item->pivot->position }}</td>
+                                    <td class="px-2 py-2 border text-center">
+                                        <div class="flex justify-center gap-2">
 
-                                rtrim(rtrim(number_format($item->comparable_offers, 6, '.', ','), '0'), '.')
-                                }}</td>
-                                <td class="px-2 py-2 border text-sm text-center">{{
-                                rtrim(rtrim(number_format($item->comparable_land_area, 6, '.', ','), '0'), '.')
-                                }}</td>
-                                <td class="px-2 py-2 border text-sm text-center">{{
-                                rtrim(rtrim(number_format($item->comparable_land_area, 6, '.', ','), '0'), '.')
-                                }}</td>
-                                <td class="px-2 py-2 border text-sm text-center">{{
-                                rtrim(rtrim(number_format($item->comparable_built_area, 6, '.', ','), '0'), '.')
-                                }}</td>
+                                            <!-- Usamos <button> para un control limpio del spinner -->
+                                            <button type="button" class="cursor-pointer btn-primary btn-buildings"
+                                                wire:click="moveComparable({{ $item->id }}, 'down')"
+                                                wire:loading.target="moveComparable({{ $item->id }}, 'down')"
+                                                wire:loading.attr="disabled" :disabled="$loop->last">
 
-                                <!-- Resumen / Editar / Eliminar  -->
-                               <td class="px-2 py-2 border text-center">
-                                <div class="flex justify-center gap-4">
+                                                <!-- Icono de Spinner (se muestra durante la carga) -->
+                                                <svg class="animate-spin h-5 w-5" wire:loading
+                                                    wire:target="moveComparable({{ $item->id }}, 'down')"
+                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                        stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor"
+                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                    </path>
+                                                </svg>
 
-                                    <flux:button type="button"  class="cursor-pointer btn-change btn-table text-sm"
-                                        wire:click="$dispatch('openSummary', { id: {{ $item->id }} })">Resumen</flux:button>
+                                                <!-- Icono de Flecha (se oculta durante la carga) -->
+                                                <svg class="h-5 w-5" wire:loading.remove
+                                                    wire:target="moveComparable({{ $item->id }}, 'down')"
+                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="1.5" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="m5.25 4.5 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5" />
+                                                </svg>
+                                            </button>
 
-                                    <flux:button type="button" class="cursor-pointer btn-intermediary btn-table text-sm"
-                                        wire:click="editComparable({{ $item->id }})">Editar</flux:button>
+                                            <button type="button" class="cursor-pointer btn-primary btn-buildings"
+                                                wire:click="moveComparable({{ $item->id }}, 'up')"
+                                                wire:loading.target="moveComparable({{ $item->id }}, 'up')"
+                                                wire:loading.attr="disabled" :disabled="$loop->first">
 
-                                    <flux:button type="button"
-                                        onclick="confirm('¿Estás seguro de que deseas eliminar este comparable?') || event.stopImmediatePropagation()"
-                                        wire:click="deallocatedElement({{ $item->id }})" class="cursor-pointer btn-deleted btn-table text-sm">Quitar</flux:button>
-                                </div>
-                             {{--    <div class="flex justify-center gap-2">
+                                                <!-- Icono de Spinner (se muestra durante la carga) -->
+                                                <svg class="animate-spin h-5 w-5" wire:loading
+                                                    wire:target="moveComparable({{ $item->id }}, 'up')"
+                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                        stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor"
+                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                    </path>
+                                                </svg>
 
-                                   <flux:button type="button" icon-leading="document-text" class="cursor-pointer btn-change btn-buildins"
-                                    wire:click="$dispatch('openSummary', { id: {{ $item->id }} })" />
+                                                <!-- Icono de Flecha (se oculta durante la carga) -->
+                                                <svg class="h-5 w-5" wire:loading.remove
+                                                    wire:target="moveComparable({{ $item->id }}, 'up')"
+                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="1.5" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="m19.5 19.5-7.5-7.5-7.5 7.5m15-6-7.5-7.5-7.5 7.5" />
+                                                </svg>
+                                            </button>
+                                            <!-- *** FIN DE LA CORRECCIÓN *** -->
 
-                                    <flux:button type="button" icon-leading="pencil" class="cursor-pointer btn-intermediary btn-buildins"
-                                        wire:click="editComparable({{ $item->id }})" />
+                                        </div>
+                                    </td>
 
-                                    <flux:button type="button" icon-leading="trash"
-                                        onclick="confirm('¿Estás seguro de que deseas eliminar este comparable?') || event.stopImmediatePropagation()"
-                                        wire:click="deleteComparable({{ $item->id }})" class="cursor-pointer btn-deleted btn-buildings" />
-                                </div> --}}
-                            </td>
+                                    <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_entity_name }}
+                                    </td>
+                                    <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_locality_name
+                                        }}</td>
+                                    <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_colony }}</td>
+                                    <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_street }}</td>
+                                    <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_abroad_number
+                                        }}</td>
+                                    <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_cp }}</td>
+                                    <td class="px-2 py-2 border text-sm text-center">$ {{
+                                        rtrim(rtrim(number_format($item->comparable_offers, 6, '.', ','), '0'), '.') }}
+                                    </td>
+                                    <td class="px-2 py-2 border text-sm text-center">{{
+                                        rtrim(rtrim(number_format($item->comparable_land_area, 6, '.', ','), '0'), '.')
+                                        }}</td>
+                                    <td class="px-2 py-2 border text-sm text-center">{{
+                                        rtrim(rtrim(number_format($item->comparable_built_area, 6, '.', ','), '0'), '.')
+                                        }}</td>
+                                    <td class="px-2 py-2 border text-sm text-center">{{
+                                        rtrim(rtrim(number_format($item->comparable_unit_value, 6, '.', ','), '0'), '.')
+                                        }}</td>
 
-                                <!-- Flechas para mover -->
-                              <!-- Flechas para mover -->
+                                    <td class="px-2 py-2 border text-center">
+                                        <div class="flex justify-center gap-4">
 
+                                            <flux:button type="button"
+                                                class="cursor-pointer btn-change btn-table text-sm"
+                                                wire:click="$dispatch('openSummary', { id: {{ $item->id }} })">Resumen
+                                            </flux:button>
 
-                            </tr>
-                            @endforeach
-                            @endif
-                        </tbody>
-                    </table>
+                                            <flux:button type="button"
+                                                class="cursor-pointer btn-intermediary btn-table text-sm"
+                                                wire:click="editComparable({{ $item->id }})"
+                                                wire:loading.target="editComparable" wire:loading.attr="disabled">Editar
+                                            </flux:button>
+
+                                            <flux:button type="button"
+                                                onclick="confirm('¿Estás seguro de que deseas eliminar este comparable?') || event.stopImmediatePropagation()"
+                                                wire:click="deallocatedElement({{ $item->id }})"
+                                                wire:loading.target="deallocatedElement" wire:loading.attr="disabled"
+                                                class="cursor-pointer btn-deleted btn-table text-sm">Quitar
+                                            </flux:button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -246,41 +330,6 @@
 
 
 
-
-
-
-
-
-
-<!-- Loader -->
-{{-- <div wire:loading wire:target="assignedElement, moveComparable, deleteComparable, editComparable"
-    class="fixed inset-0 z-50 bg-black bg-opacity-40 backdrop-blur-sm items-center justify-center">
-    <div class="bg-white rounded-xl p-6 flex flex-col items-center">
-        <svg class="animate-spin h-10 w-10 text-blue-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none"
-            viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor"
-                d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 018 8h-4l3 3 3-3h-4a8 8 0 01-8 8v-4l-3 3 3 3v-4a8 8 0 01-8-8z" />
-        </svg>
-        <span class="text-gray-700 font-medium">Actualizando comparables...</span>
-    </div>
-</div>
-
- --}}
-
-{{-- <div x-data="{ open: @entangle('isLoading') }" x-show="open"
-    class="fixed inset-0 z-50 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center">
-    <div class="bg-white rounded-xl p-6 flex flex-col items-center">
-        <svg class="animate-spin h-10 w-10 text-blue-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none"
-            viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor"
-                d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 018 8h-4l3 3 3-3h-4a8 8 0 01-8 8v-4l-3 3 3 3v-4a8 8 0 01-8-8z" />
-        </svg>
-        <span class="text-gray-700 font-medium">Actualizando comparables...</span>
-    </div>
-</div>
- --}}
 
 
 
@@ -550,6 +599,8 @@
                     <h2><span class="border-b-2 border-gray-300 font-semibold">Datos generales</span></h2>
                 </div>
 
+
+                @if($comparableType === 'land')
                 <flux:field class="flux-field">
                     <flux:label>Uso de suelo<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
@@ -602,7 +653,7 @@
                 <flux:field class="flux-field">
                     <flux:label>Descripción servicios / infraestructura<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
-                        <flux:input type="text" wire:model='comparableDescServicesInfraestructure' />
+                        <flux:textarea wire:model='comparableDescServicesInfraestructure' />
                     </flux:input.group>
                     <div class="error-container">
                         <flux:error name="comparableDescServicesInfraestructure" />
@@ -647,7 +698,7 @@
                         <flux:input type="text" wire:model='comparableFront' />
                     </flux:input.group>
                     <div class="error-container">
-                        <flux:error name="comparableDensity" />
+                        <flux:error name="comparableFront" />
                     </div>
                 </flux:field>
 
@@ -690,6 +741,11 @@
                         <flux:error name="comparableTopography" />
                     </div>
                 </flux:field>
+                @endif
+
+
+
+
 
                 <flux:field class="flux-field">
                     <flux:label>Características<span class="sup-required">*</span></flux:label>
@@ -697,19 +753,186 @@
                         <flux:input type="text" wire:model='comparableCharacteristics' />
                     </flux:input.group>
                     <div class="error-container">
-                        <flux:error name="comparableDescriptionForm" />
+                        <flux:error name="comparableCharacteristics" />
                     </div>
                 </flux:field>
 
                 <flux:field class="flux-field">
                     <flux:label>Características generales</flux:label>
                     <flux:input.group>
-                        <flux:input type="text" wire:model='comparableCharacteristicsGeneral' />
+                        <flux:textarea wire:model='comparableCharacteristicsGeneral' />
                     </flux:input.group>
                     <div class="error-container">
-                        <flux:error name="comparableDescriptionForm" />
+                        <flux:error name="comparableCharacteristicsGeneral" />
                     </div>
                 </flux:field>
+
+
+                @if($comparableType === 'building')
+                {{-- Campos nuevos para tipo building --}}
+                <flux:field class="flux-field">
+                    <flux:label>N° de recámaras</flux:label>
+                    <flux:input.group>
+                        <flux:select wire:model.live="comparableNumberBedrooms" class="text-gray-800 [&_option]:text-gray-900">
+                            <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                             @for($i = 0; $i <= 10; $i++)
+                             <flux:select.option value="{{ $i }}">{{ $i }}</flux:select.option>
+                            @endfor
+                        </flux:select>
+                    </flux:input.group>
+                    <div class="error-container">
+                        <flux:error name="comparableNumberBedrooms" />
+                    </div>
+                </flux:field>
+
+
+                <flux:field class="flux-field">
+                    <flux:label>N° de baños</flux:label>
+                    <flux:input.group>
+                        <flux:select wire:model.live="comparableNumberToilets" class="text-gray-800 [&_option]:text-gray-900">
+                            <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                            @for($i = 0; $i <= 10; $i++) <flux:select.option value="{{ $i }}">{{ $i }}</flux:select.option>
+                                @endfor
+                        </flux:select>
+                    </flux:input.group>
+                    <div class="error-container">
+                        <flux:error name="comparableNumberToilets" />
+                    </div>
+                </flux:field>
+
+
+                <flux:field class="flux-field">
+                    <flux:label>N° 1/2 baños</flux:label>
+                    <flux:input.group>
+                        <flux:select wire:model.live="comparableNumberHalfbaths" class="text-gray-800 [&_option]:text-gray-900">
+                            <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                            @for($i = 0; $i <= 10; $i++) <flux:select.option value="{{ $i }}">{{ $i }}</flux:select.option>
+                                @endfor
+                        </flux:select>
+                    </flux:input.group>
+                    <div class="error-container">
+                        <flux:error name="comparableNumberHalfbaths" />
+                    </div>
+                </flux:field>
+
+
+                <flux:field class="flux-field">
+                    <flux:label>N° estacionamientos</flux:label>
+                    <flux:input.group>
+                        <flux:select wire:model.live="comparableNumberParkings" class="text-gray-800 [&_option]:text-gray-900">
+                            <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                            @for($i = 0; $i <= 10; $i++) <flux:select.option value="{{ $i }}">{{ $i }}</flux:select.option>
+                                @endfor
+                        </flux:select>
+                    </flux:input.group>
+                    <div class="error-container">
+                        <flux:error name="comparableNumberParkings" />
+                    </div>
+                </flux:field>
+
+
+                <flux:field class="flux-field">
+                    <flux:label>Elevador</flux:label>
+                    <flux:input.group>
+                        <flux:checkbox wire:model="comparableElevator" />
+                    </flux:input.group>
+                    <div class="error-container">
+                        <flux:error name="comparableElevator" />
+                    </div>
+                </flux:field>
+
+
+                <flux:field class="flux-field">
+                    <flux:label>Bodega</flux:label>
+                    <flux:input.group>
+                        <flux:checkbox wire:model="comparableStore" />
+                    </flux:input.group>
+                    <div class="error-container">
+                        <flux:error name="comparableStore" />
+                    </div>
+                </flux:field>
+
+                <flux:field class="flux-field">
+                    <flux:label>Roof Garden</flux:label>
+                    <flux:input.group>
+                        <flux:checkbox wire:model="comparableRoofGarden" />
+                    </flux:input.group>
+                    <div class="error-container">
+                        <flux:error name="comparableRoofGarden" />
+                    </div>
+                </flux:field>
+
+
+                <flux:field class="flux-field">
+                        <flux:label>Características amenidades<span class="sup-required">*</span></flux:label>
+                        <flux:input.group>
+                            <flux:textarea wire:model='comparableFeaturesAmenities'/>
+                        </flux:input.group>
+                        <div class="error-container">
+                            <flux:error name="comparableFeaturesAmenities" />
+                        </div>
+                </flux:field>
+
+
+
+                <flux:field class="flux-field">
+                    <flux:label>Piso/Nivel</flux:label>
+                    <flux:input.group>
+                        <flux:select wire:model.live="comparableNumberFloorLevel" class="text-gray-800 [&_option]:text-gray-900">
+                            <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                                @foreach ($levels_input as $value => $label)
+                                <flux:select.option value="{{ $label }}">
+                                {{ $label }}
+                            </flux:select.option>
+                                @endforeach
+                            </flux:select>
+                    </flux:input.group>
+                    <div class="error-container">
+                        <flux:error name="comparableNumberFloorLevel" />
+                    </div>
+                </flux:field>
+
+
+                <flux:field class="flux-field">
+                    <flux:label>Calidad<span class="sup-required">*</span></flux:label>
+                    <flux:input.group>
+                        <flux:input type="text" wire:model='comparableQuality' />
+                    </flux:input.group>
+                    <div class="error-container">
+                        <flux:error name="comparableQuality" />
+                    </div>
+                </flux:field>
+
+                <flux:field class="flux-field">
+                    <flux:label>Conservación<span class="sup-required">*</span></flux:label>
+                    <flux:input.group>
+                        <flux:select wire:model.live="comparableConservation" class="text-gray-800 [&_option]:text-gray-900">
+                            <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                            <flux:select.option value="Ruidoso">Ruidoso</flux:select.option>
+                            <flux:select.option value="Normal">Normal</flux:select.option>
+                            <flux:select.option value="Bueno">Bueno</flux:select.option>
+                            <flux:select.option value="Muy bueno">Muy bueno</flux:select.option>
+                            <flux:select.option value="Nuevo">Nuevo</flux:select.option>
+                            <flux:select.option value="Recientemente remodelado">Recientemente remodelado</flux:select.option>
+                        </flux:select>
+                    </flux:input.group>
+                    <div class="error-container">
+                        <flux:error name="comparableConservation" />
+                    </div>
+                </flux:field>
+                @endif
+
+
+
+
+
+
+
+
+
+
+
+
 
                 <flux:field class="flux-field">
                     <flux:label>Oferta<span class="sup-required">*</span></flux:label>
@@ -745,6 +968,41 @@
                     </div>
                 </flux:field>
 
+
+
+
+                {{-- Más valores para el tipo building --}}
+                @if($comparableType === 'building')
+                <flux:field class="flux-field">
+                    <flux:label>Niveles<span class="sup-required">*</span></flux:label>
+                    <flux:input.group>
+                        <flux:input type="number" wire:model='comparableLevels'/>
+                    </flux:input.group>
+                    <div class="error-container">
+                        <flux:error name="comparableLevles" />
+                    </div>
+                </flux:field>
+
+
+                <flux:field class="flux-field">
+                    <flux:label>Superficie vendible<span class="sup-required">*</span></flux:label>
+                    <flux:input.group>
+                        <flux:input type="number" wire:model='comparableSeleableArea' />
+                    </flux:input.group>
+                    <div class="error-container">
+                        <flux:error name="comparableSeleableArea" />
+                    </div>
+                </flux:field>
+                @endif
+
+
+
+
+
+
+
+
+
                 <flux:field class="flux-field">
                     <flux:label>Valor unitario<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
@@ -755,6 +1013,65 @@
                         <flux:error name="comparableUnitValue" />
                     </div>
                 </flux:field>
+
+
+
+
+
+
+
+
+
+
+                @if ($comparableType === 'building')
+                <flux:field class="flux-field">
+                    <flux:label>Clasificación del inmueble<span class="sup-required">*</span>
+                    </flux:label>
+                    <flux:input.group>
+                        {{--
+                        <flux:input type="text" wire:model='comparableGeneralPropArea' /> --}}
+                        <flux:select wire:model.live="comparableClasification" class="text-gray-800 [&_option]:text-gray-900">
+                            <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                            <flux:select.option value="Superior a moda">Mínima</flux:select.option>
+                            <flux:select.option value="Economica">Económica</flux:select.option>
+                            <flux:select.option value="Interes social">Interés social</flux:select.option>
+                            <flux:select.option value="Media">Media</flux:select.option>
+                            <flux:select.option value="Semilujo">Semilujo</flux:select.option>
+                            <flux:select.option value="Residencial">Residencial</flux:select.option>
+                            <flux:select.option value="Residencial plus">Residencial plus</flux:select.option>
+                            <flux:select.option value="Residencial plus +">Residencial plus +</flux:select.option>
+                            <flux:select.option value="Unica">Unica</flux:select.option>
+                        </flux:select>
+                    </flux:input.group>
+                    <div class="error-container">
+                        <flux:error name="comparableClasification" />
+                    </div>
+                </flux:field>
+
+
+                <flux:field class="flux-field">
+                    <flux:label>Edad<span class="sup-required">*</span></flux:label>
+                    <flux:input.group>
+                        <flux:input type="number" wire:model='comparableAge' />
+                        <flux:button type="button" icon="calculator" disabled></flux:button>
+                    </flux:input.group>
+                    <div class="error-container">
+                        <flux:error name="comparableAge" />
+                    </div>
+                </flux:field>
+
+                <flux:field class="flux-field">
+                    <flux:label>VUT<span class="sup-required">*</span></flux:label>
+                    <flux:input.group>
+                        <flux:input type="number" wire:model='comparableVut'/>
+                        <flux:button type="button" icon="calculator" disabled></flux:button>
+                    </flux:input.group>
+                    <div class="error-container">
+                        <flux:error name="comparableVut" />
+                    </div>
+                </flux:field>
+
+                @endif
 
 
 
