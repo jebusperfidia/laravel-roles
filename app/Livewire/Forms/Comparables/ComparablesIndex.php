@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Services\DipomexService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str; // <-- Import Str to avoid Undefined type error
 //Se importa flux para poder controlar el modal desde aquí
 
 //use Livewire\Attributes\On;
@@ -33,7 +34,7 @@ class ComparablesIndex extends Component
     //public bool $isLoading = false;
 
     //Evento de escucha para ejecutar la función de asignación
-    protected $listeners = ['assignedElement', 'editComparable', 'deallocatedElement', 'deleteElement'];
+    protected $listeners = ['assignedElement', 'editComparable', 'deallocatedElement', 'deleteElement', 'copyComparable'];
 
 
     use WithFileUploads;
@@ -84,7 +85,7 @@ class ComparablesIndex extends Component
  */
 
     // --- CAMPOS COMPARTIDOS (Ambos tipos) ---
-    public $comparableKey, $comparableFolio, $comparableDischargedBy, $comparableProperty,
+    public $comparableFolio, $comparableDischargedBy, $comparableProperty,
         $comparableEntity, $comparableLocality, $comparableColony, $comparableOtherColony, $comparableStreet,
         $comparableBetweenStreet, $comparableAndStreet, $comparableCp,
         $comparableName, $comparableLastName, $comparablePhone, $comparableUrl,
@@ -131,6 +132,9 @@ class ComparablesIndex extends Component
     //Obtenemos el valor del tipo de comparable
     public $comparableType;
 
+    //Variable para mostrar el valor del futuro ID al crear comparable o el valor real al editar
+    public $comparableInformativeId;
+
     public function mount(DipomexService $dipomex)
     {
 
@@ -154,7 +158,7 @@ class ComparablesIndex extends Component
         //$this->loadAssignedComparables();
 
         //Inicializar variables de ejemplos
-        $this->comparableKey = 01;
+        //$this->comparableKey = 01;
         $this->comparableFolio = $this->valuation->folio;
 
         $this->userSession = Auth::user();
@@ -178,6 +182,10 @@ class ComparablesIndex extends Component
 
  */
 
+
+
+
+
      //Generamos una función para actualizar los valores de los comparables asignados al avaluo
     public function loadAssignedComparables(){
 
@@ -192,16 +200,80 @@ class ComparablesIndex extends Component
         //dd($this->comparable);
     }
 
+    //Función del listener que se recibe desde el summary para generar la copia del comparable
+    public function copyComparable(int $id)
+    {
+        // 1. Buscamos el comparable original.
+        $original = ComparableModel::find($id);
 
+        if (!$original) {
+            session()->flash('error', 'No se encontró el comparable original para duplicar.');
+            return;
+        }
+
+        // 2. Usamos replicate() para copiar todos los atributos.
+        $newComparable = $original->replicate();
+
+        // *** CORRECCIÓN CRÍTICA FINAL: Asignar el nuevo comparable al Avalúo actual ($this->id) ***
+        $newComparable->valuation_id = $this->id;
+
+        // 3. Lógica de Copia de Imágenes y Corrección de Nulabilidad
+        $newComparable->comparable_photos = '';
+
+        if ($original->comparable_photos) {
+            try {
+                // Generamos un nombre de archivo único para la copia
+                $newFileName = time() . '_' . Str::random(10) . '_' . $original->comparable_photos;
+
+                // Usamos Storage para copiar el archivo
+                if (Storage::disk('public')->exists('comparables/' . $original->comparable_photos)) {
+                    Storage::disk('public')->copy(
+                        'comparables/' . $original->comparable_photos,
+                        'comparables/' . $newFileName
+                    );
+                    $newComparable->comparable_photos = $newFileName;
+                }
+            } catch (\Exception $e) {
+                session()->flash('warning', 'Comparable duplicado, pero la imagen original no pudo ser copiada. Favor de verificar el archivo.');
+            }
+        }
+
+        // 4. Guardar el nuevo comparable en la BBDD.
+        $newComparable->save();
+
+        // 5. Cerrar el modal y recargar las tablas.
+        Flux::modal('comparable-summary')->close();
+
+        // Disparos para recargar datos en las tablas (Lógica validada por ti)
+        if ($this->comparableType === 'land') {
+            $this->dispatch('pg:eventRefresh-comparables-land-table');
+        } else {
+            $this->dispatch('pg:eventRefresh-comparables-building-table');
+        }
+
+        $this->dispatch('refreshData');
+
+
+        Toaster::success('Comparable copiado exitosamente');
+        //session()->flash('success', '¡Comparable duplicado exitosamente y ligado al avalúo actual!');
+    }
 
 
     //Función para abrirl modal de creación de comparable para el avalúo
     public function addComparable()
     {
+
+        //Reseteamos el valor del comparableId para poder ver el botón de agregar y el título condicional en la vista
+        $this->comparableId = null;
+
         //Reseteamos las validaciones
         $this->resetValidation();
         //Reseteamos los campos del modal
         $this->resetComparableFields();
+
+        //Obtenemos el valor del próximo ID o el que se asignará para el nuevo comparable
+        $this->comparableInformativeId = ComparableModel::max('id') + 1;
+
         //Abrimos el modal
         Flux::modal('modal-comparable')->show();
     }
@@ -295,7 +367,7 @@ class ComparablesIndex extends Component
         // --- 1. DATOS COMUNES (Campos que se guardan sin importar el tipo) ---
         $data = [
             'valuation_id' => $this->id,
-            'comparable_key' => $this->comparableKey,
+            //'comparable_key' => $this->comparableKey,
             'comparable_folio' => $this->comparableFolio,
             'comparable_discharged_by' => $this->comparableDischargedBy,
             'comparable_property' => $this->comparableProperty,
@@ -448,6 +520,9 @@ class ComparablesIndex extends Component
 
         $this->comparableId = $idComparable;
 
+        // *** LÓGICA DE EDICIÓN: Asignar el ID real para mostrar ***
+        $this->comparableInformativeId = $idComparable;
+
         //Usamos el id recibido para obtenemos los valoresl del comparable desde la BD
         $comparable = ComparableModel::find($idComparable);
 
@@ -510,7 +585,7 @@ class ComparablesIndex extends Component
  */
         // --- Mapeo de Campos Comunes ---
         // --- Mapeo de Campos Comunes ---
-        $this->comparableKey = $comparable->comparable_key;
+        //$this->comparableKey = $comparable->comparable_key;
         $this->comparableFolio = $comparable->comparable_folio;
         $this->comparableDischargedBy = $comparable->comparable_discharged_by;
         $this->comparableProperty = $comparable->comparable_property;
@@ -735,7 +810,7 @@ class ComparablesIndex extends Component
 
         // (Campos comunes que siempre se actualizan)
         $data = [
-            'comparable_key' => $this->comparableKey,
+            //'comparable_key' => $this->comparableKey,
             'comparable_folio' => $this->comparableFolio,
             'comparable_discharged_by' => $this->comparableDischargedBy,
             'comparable_property' => $this->comparableProperty,
@@ -977,9 +1052,6 @@ class ComparablesIndex extends Component
 
     public function deleteElement($idComparable)
     {
-
-
-        // --- INICIO DE LA CORRECCIÓN ---
         // 1. Encontrar el comparable y su TIPO
         $comparable = ComparableModel::find($idComparable);
 
@@ -988,22 +1060,22 @@ class ComparablesIndex extends Component
             return;
         }
         $itemType = $comparable->comparable_type;
-        // --- FIN DE LA CORRECCIÓN ---
 
-        if($itemType === 'land') {
-            $assignmentCount = ValuationLandComparableModel::where('comparable_id', $idComparable)->count();
+        // 2. *** NUEVA LÓGICA DE VERIFICACIÓN ***
+        // (En lugar de solo contar, obtenemos los IDs de los avalúos)
+        $assignedValuationIds = null;
+        if ($itemType === 'land') {
+            $assignedValuationIds = ValuationLandComparableModel::where('comparable_id', $idComparable)
+                ->pluck('valuation_id');
         } else {
-            $assignmentCount = ValuationBuildingComparableModel::where('comparable_id', $idComparable)->count();
+            $assignedValuationIds = ValuationBuildingComparableModel::where('comparable_id', $idComparable)
+                ->pluck('valuation_id');
         }
 
+        $assignmentCount = $assignedValuationIds->count();
 
-       // $assignmentCount = ValuationLandComparableModel::where('comparable_id', $idComparable)->count();
-
-        //dd($assignmentCount);
-
+        // 3. LÓGICA DE BORRADO (Si no está asignado)
         if ($assignmentCount < 1) {
-
-            $comparable = ComparableModel::find($idComparable);
 
             // --- Lógica de borrado de foto ---
             if ($comparable && $comparable->comparable_photos) {
@@ -1013,31 +1085,30 @@ class ComparablesIndex extends Component
 
             $comparable->delete();
 
-        //Primero ejecutamos la función de reordenar los elementos
-        $this->reorderPositions($itemType);
+            // Reordenar posiciones
+            $this->reorderPositions($itemType);
 
-        //Refrescamos la tabla de comparables
-        $this->loadAssignedComparables();
+            // Recargar tabla de asignados
+            $this->loadAssignedComparables();
 
-        if($this->comparableType === 'land')  {
-                //Refrescamos la tabla de comparables x asignar
+            // Refrescar PowerGrid
+            if ($this->comparableType === 'land') {
                 $this->dispatch('pg:eventRefresh-comparables-land-table');
-        } else {
-                //Refrescamos la tabla de comparables x asignar
+            } else {
                 $this->dispatch('pg:eventRefresh-comparables-building-table');
-        }
+            }
 
-
-        //Finalmente, enviamos un mensaje en pantalla indicamando que el comparable fue desasignado
-        Toaster::success('Comparable eliminado correctamente.');
-
+            Toaster::success('Comparable eliminado correctamente.');
         } else {
-            Toaster::error('No se puede eliminar comparable, está asiagnado a '.$assignmentCount.' avaluo(s). Desasígnalo primero.');
+            // 4. *** NUEVO MENSAJE DE ERROR CON FOLIOS ***
+            // Consultamos la tabla 'valuations' para obtener los folios
+            $folios = Valuation::whereIn('id', $assignedValuationIds)
+                ->pluck('folio')
+                ->implode(' | ');
+
+            Toaster::error("No se puede eliminar. Asignado a {$assignmentCount} avalúo(s) con folio(s): {$folios}");
+        }
     }
-
-}
-
-
 
 
 
@@ -1390,7 +1461,7 @@ class ComparablesIndex extends Component
 
         // --- 1. REGLAS COMUNES (Siempre se validan) ---
         $commonRules = [
-            'comparableKey' => 'nullable', // readonly
+           // 'comparableKey' => 'nullable', // readonly
             'comparableFolio' => 'required',
             'comparableDischargedBy' => 'required',
             'comparableProperty' => 'required',
@@ -1411,7 +1482,7 @@ class ComparablesIndex extends Component
             'comparableCharacteristicsGeneral' => 'nullable', // Sin *
             'comparableOffers' => 'required|numeric|gt:0',
             'comparableLandArea' => 'required|numeric|gt:0', // <--- CAMBIO: Ahora es común
-            'comparableBuiltArea' => 'required|numeric|gt:0',
+            'comparableBuiltArea' => 'required|numeric|min:0',
             'comparableUnitValue' => 'required|numeric|gt:0', // disabled, pero requerido
             'comparableBargainingFactor' => 'required|numeric|between:0.8,1',
             'comparableLocationBlock' => 'required',
@@ -1513,7 +1584,7 @@ class ComparablesIndex extends Component
     protected function validateModalAttributes(): array
     {
         return [
-            'comparableKey' => 'clave',
+           // 'comparableKey' => 'clave',
             'comparableFolio' => 'folio',
             'comparableDischargedBy' => 'dado de alta por',
             'comparableProperty' => 'tipo de inmueble',
@@ -1678,6 +1749,25 @@ class ComparablesIndex extends Component
         return $this->redirect(route('form.index', ['section' => 'market-focus']), navigate: true);
     }
 
+
+    public function backToHomologationLand(){
+        //Eliminamos la variable de sesión
+        Session::pull('comparables-active-session');
+
+        //Redirigimos al usuario a formIndex, específicamente a enfoque de mercado
+        return $this->redirect(route('form.index', ['section' => 'homologation-lands']), navigate: true);
+    }
+
+
+
+    public function backToHomologationBuilding()
+    {
+        //Eliminamos la variable de sesión
+        Session::pull('comparables-active-session');
+
+        //Redirigimos al usuario a formIndex, específicamente a enfoque de mercado
+        return $this->redirect(route('form.index', ['section' => 'homologation-buildings']), navigate: true);
+    }
 
 
     public function render()

@@ -33,6 +33,8 @@ class FormIndex extends Component
         'finish-capture',
         'pre-appraisal-considerations',
         'market-focus',
+        'homologation-lands',
+        'homologation-buildings',
         'pre-conclusion-considerations',
         'special-installations',
         'd-t-c-infonavit',

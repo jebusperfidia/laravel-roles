@@ -30,7 +30,7 @@ return new class extends Migration
                 ->nullOnDelete();
 
             // --- Datos de Asignación y Control (Comunes) ---
-            $table->string('comparable_key', 50);
+            /* $table->string('comparable_key', 50); */
             $table->string('comparable_folio', 50);
             $table->string('comparable_discharged_by', 100);
 

@@ -50,40 +50,43 @@
         </div>
     </div>
 
-
-
-
-
-{{--
 <div class="form-container">
     <div class="form-container__header">
         Comparables asignados
     </div>
-    <div class="form-container__content">
-        <div class="form-grid">
-            <div class="mt-2">
-                <div class="overflow-x-auto max-w-full">
-                    <table class="min-w-[550px] table-fixed w-full border-2">
-                        <thead>
-                            <tr class="bg-gray-100">
-                                <th class="w-[20px] py-2 border">#</th>
-                                <th class="px-2 py-2 border">Mover</th>
-                                <th class="px-2 py-2 border">Estado</th>
-                                <th class="px-2 py-2 border">Ciudad</th>
-                                <th class="px-2 py-2 border">Colonia</th>
-                                <th class="px-2 py-2 border">Calle</th>
-                                <th class="px-2 py-2 border">N°</th>
-                                <th class="px-2 py-2 border">CP</th>
-                                <th class="px-2 py-2 border">Oferta</th>
-                                <th class="px-2 py-2 border">Terreno</th>
-                                <th class="px-2 py-2 border">Construida</th>
-                                <th class="px-2 py-2 border">Unitario</th>
-                                <th class="w-[320px] py-2 border">Acciones</th>
-                            </tr>
-                        </thead>
+
+    <!-- Contenedor principal, relativo para anclar el overlay -->
+    <div class="form-container__content relative">
+
+        <div class="form-grid mt-2">
+            <!-- Scroll horizontal y vertical sin romper estructura -->
+            <div class="overflow-x-auto overflow-y-auto max-w-full max-h-[70vh] border rounded-lg">
+
+                <!-- 1. min-width aumentado a 1810px para dar espacio al ID -->
+                <table class="table-fixed min-w-[1810px] w-full border-collapse">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="w-[50px] py-2 border">#</th>
+                            <th class="w-[60px] py-2 border">ID</th> <!-- *** AÑADIDO: Columna ID *** -->
+                            <th class="w-[100px] px-2 py-2 border">Mover</th>
+                            <th class="px-2 py-2 border">Estado</th>
+                            <th class="px-2 py-2 border">Ciudad</th>
+                            <th class="px-2 py-2 border">Colonia</th>
+                            <th class="px-2 py-2 border">Calle</th>
+                            <th class="px-2 py-2 border">N°</th>
+                            <th class="px-2 py-2 border">CP</th>
+                            <th class="px-2 py-2 border">Oferta</th>
+                            <th class="px-2 py-2 border">Terreno</th>
+                            <th class="px-2 py-2 border">Construida</th>
+                            <th class="px-2 py-2 border">Unitario</th>
+                            <th class="w-[100px] px-2 py-2 border">Vigencia</th>
+                            <th class="w-[320px] py-2 border">Acciones</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         @if ($assignedComparables->isEmpty())
                         <tr>
+                            <!-- 2. colspan aumentado a 15 -->
                             <td colspan="15" class="px-2 py-4 text-center text-gray-500">
                                 No hay comparables asignados
                             </td>
@@ -91,23 +94,26 @@
                         @else
                         @foreach ($assignedComparables as $item)
 
+                        <tr wire:key="comparable-{{ $item->id }}"
+                            class="{{ $item->is_expired ? 'bg-red-50 opacity-80' : '' }}">
 
-                        <tr>
                             <td class="px-2 py-2 border text-sm text-center">{{ $item->pivot->position }}</td>
+                            <td class="px-2 py-2 border text-sm text-center font-mono">{{ $item->id }}</td>
+                            <!-- *** AÑADIDO: Valor ID *** -->
                             <td class="px-2 py-2 border text-center">
                                 <div class="flex justify-center gap-2">
-
                                     <flux:button type="button" icon-leading="chevron-double-down"
                                         class="cursor-pointer btn-primary btn-buildings"
-                                        wire:click="moveComparable({{ $item->id }}, 'down')" wire:loading.attr="disabled"
-                                        :disabled="$loop->last" />
+                                        wire:click="moveComparable({{ $item->id }}, 'down')"
+                                        wire:loading.attr="disabled"
+                                        wire:target="moveComparable({{ $item->id }}, 'down')" :disabled="$loop->last" />
 
                                     <flux:button type="button" icon-leading="chevron-double-up"
-                                        class="cursor-pointer btn-primary btn-buildings" wire:click="moveComparable({{ $item->id }}, 'up')"
-                                        wire:loading.attr="disabled" :disabled="$loop->first" />
+                                        class="cursor-pointer btn-primary btn-buildings"
+                                        wire:click="moveComparable({{ $item->id }}, 'up')" wire:loading.attr="disabled"
+                                        wire:target="moveComparable({{ $item->id }}, 'up')" :disabled="$loop->first" />
                                 </div>
                             </td>
-
                             <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_entity_name }}</td>
                             <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_locality_name }}</td>
                             <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_colony }}</td>
@@ -115,231 +121,94 @@
                             <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_abroad_number }}</td>
                             <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_cp }}</td>
                             <td class="px-2 py-2 border text-sm text-center">$ {{
-                                rtrim(rtrim(number_format($item->comparable_offers, 6, '.', ','), '0'), '.')
-                                }}</td>
+                                number_format($item->comparable_offers, 2, '.', ',') }}</td>
                             <td class="px-2 py-2 border text-sm text-center">{{
-                                rtrim(rtrim(number_format($item->comparable_land_area, 6, '.', ','), '0'), '.')
-                                }}</td>
+                                number_format($item->comparable_land_area, 2, '.', ',') }}</td>
                             <td class="px-2 py-2 border text-sm text-center">{{
-                                rtrim(rtrim(number_format($item->comparable_land_area, 6, '.', ','), '0'), '.')
-                                }}</td>
+                                number_format($item->comparable_built_area, 2, '.', ',') }}</td>
                             <td class="px-2 py-2 border text-sm text-center">{{
-                                rtrim(rtrim(number_format($item->comparable_built_area, 6, '.', ','), '0'), '.')
-                                }}</td>
+                                number_format($item->comparable_unit_value, 2, '.', ',') }}</td>
+
+                            <td
+                                class="px-2 py-2 border text-sm text-center {{ $item->is_expired ? 'text-red-600 font-semibold' : 'text-green-600' }}">
+                                {{ $item->is_expired ? 'No Vigente' : 'Vigente' }}
+                                <span class="block text-xs text-gray-500">Hasta: {{ $item->vigencia_hasta }}</span>
+                            </td>
 
                             <td class="px-2 py-2 border text-center">
                                 <div class="flex justify-center gap-4">
-
                                     <flux:button type="button" class="cursor-pointer btn-change btn-table text-sm"
-                                        wire:click="$dispatch('openSummary', { id: {{ $item->id }} })">Resumen</flux:button>
+                                        wire:click="$dispatch('openSummary', { id: {{ $item->id }} })">
+                                        Resumen
+                                    </flux:button>
 
-                                    <flux:button type="button" class="cursor-pointer btn-intermediary btn-table text-sm"
-                                        wire:click="editComparable({{ $item->id }})">Editar</flux:button>
+                                    <!-- *** 3. LÓGICA DE "EDITAR" CORREGIDA *** -->
+                                    <flux:button class="btn-intermediary btn-table text-sm cursor-pointer"
+                                        wire:click="editComparable({{ $item->id }})" {{--
+                                        :disabled="$item->valuation_id !== $id" --}} {{-- Lógica anterior --}}
+                                        :disabled="$item->created_by !== $userSession->id" {{-- Nueva Lógica de Creador
+                                        --}}>
+                                        Editar
+                                    </flux:button>
 
                                     <flux:button type="button"
                                         onclick="confirm('¿Estás seguro de que deseas eliminar este comparable?') || event.stopImmediatePropagation()"
-                                        wire:click="deallocatedElement({{ $item->id }})"
-                                        class="cursor-pointer btn-deleted btn-table text-sm">Quitar</flux:button>
+                                        wire:click="deallocatedElement({{ $item->id }})" wire:loading.attr="disabled"
+                                        class="cursor-pointer btn-deleted btn-table text-sm">
+                                        Quitar
+                                    </flux:button>
                                 </div>
                             </td>
                         </tr>
                         @endforeach
                         @endif
                     </tbody>
-                    </table>
+                </table>
+            </div>
+        </div>
+
+        <!-- Overlay centrado dentro del contenedor (sin cambios) -->
+        <div wire:loading.delay.long wire:target="moveComparable"
+            class="absolute inset-0 flex items-center justify-center bg-gray-900/70 rounded-lg z-20">
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="flex flex-col items-center text-white">
+                    <svg class="animate-spin h-8 w-8 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0
+                            0 5.373 0 12h4zm2 5.291A7.962
+                            7.962 0 014 12H0c0 3.042 1.135
+                            5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-lg font-medium">Reordenando...</span>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<div>
 
-
- --}}
-
-
-
-
-
-
-
-
-
-
-
-<div class="form-container">
-    <div class="form-container__header">
-        Comparables asignados
-    </div>
-    <div class="form-container__content">
-        <div class="form-grid">
-            <div class="mt-2">
-
-                <div class="relative">
-
-                    <div class="overflow-x-auto max-w-full">
-                        <table class="min-w-[550px] table-fixed w-full border-2">
-                            <thead>
-                                <tr class="bg-gray-100">
-                                    <th class="w-[20px] py-2 border">#</th>
-                                    <th class="px-2 py-2 border">Mover</th>
-                                    <th class="px-2 py-2 border">Estado</th>
-                                    <th class="px-2 py-2 border">Ciudad</th>
-                                    <th class="px-2 py-2 border">Colonia</th>
-                                    <th class="px-2 py-2 border">Calle</th>
-                                    <th class="px-2 py-2 border">N°</th>
-                                    <th class="px-2 py-2 border">CP</th>
-                                    <th class="px-2 py-2 border">Oferta</th>
-                                    <th class="px-2 py-2 border">Terreno</th>
-                                    <th class="px-2 py-2 border">Construida</th>
-                                    <th class="px-2 py-2 border">Unitario</th>
-                                    <th class="w-[320px] py-2 border">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if ($assignedComparables->isEmpty())
-                                <tr>
-                                    <td colspan="13" class="px-2 py-4 text-center text-gray-500">
-                                        No hay comparables asignados
-                                    </td>
-                                </tr>
-                                @else
-                                @foreach ($assignedComparables as $item)
-
-                                <!-- INICIO DE LA CORRECCIÓN  -->
-                                <!-- 1. wire:key es ahora ESTABLE (basado solo en el ID) -->
-                                <!-- 2. wire:transition le dice a Livewire que anime los cambios (fade-in/out) -->
-                                <tr wire:key="comparable-{{ $item->id }}" wire:transition>
-
-                                    <td class="px-2 py-2 border text-sm text-center">{{ $item->pivot->position }}</td>
-                                    <td class="px-2 py-2 border text-center">
-                                        <div class="flex justify-center gap-2">
-
-                                            <!-- Usamos <button> para un control limpio del spinner -->
-                                            <button type="button" class="cursor-pointer btn-primary btn-buildings"
-                                                wire:click="moveComparable({{ $item->id }}, 'down')"
-                                                wire:loading.target="moveComparable({{ $item->id }}, 'down')"
-                                                wire:loading.attr="disabled" :disabled="$loop->last">
-
-                                                <!-- Icono de Spinner (se muestra durante la carga) -->
-                                                <svg class="animate-spin h-5 w-5" wire:loading
-                                                    wire:target="moveComparable({{ $item->id }}, 'down')"
-                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                        stroke="currentColor" stroke-width="4"></circle>
-                                                    <path class="opacity-75" fill="currentColor"
-                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                    </path>
-                                                </svg>
-
-                                                <!-- Icono de Flecha (se oculta durante la carga) -->
-                                                <svg class="h-5 w-5" wire:loading.remove
-                                                    wire:target="moveComparable({{ $item->id }}, 'down')"
-                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                    stroke-width="1.5" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="m5.25 4.5 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5" />
-                                                </svg>
-                                            </button>
-
-                                            <button type="button" class="cursor-pointer btn-primary btn-buildings"
-                                                wire:click="moveComparable({{ $item->id }}, 'up')"
-                                                wire:loading.target="moveComparable({{ $item->id }}, 'up')"
-                                                wire:loading.attr="disabled" :disabled="$loop->first">
-
-                                                <!-- Icono de Spinner (se muestra durante la carga) -->
-                                                <svg class="animate-spin h-5 w-5" wire:loading
-                                                    wire:target="moveComparable({{ $item->id }}, 'up')"
-                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                        stroke="currentColor" stroke-width="4"></circle>
-                                                    <path class="opacity-75" fill="currentColor"
-                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                    </path>
-                                                </svg>
-
-                                                <!-- Icono de Flecha (se oculta durante la carga) -->
-                                                <svg class="h-5 w-5" wire:loading.remove
-                                                    wire:target="moveComparable({{ $item->id }}, 'up')"
-                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                    stroke-width="1.5" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="m19.5 19.5-7.5-7.5-7.5 7.5m15-6-7.5-7.5-7.5 7.5" />
-                                                </svg>
-                                            </button>
-                                            <!-- *** FIN DE LA CORRECCIÓN *** -->
-
-                                        </div>
-                                    </td>
-
-                                    <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_entity_name }}
-                                    </td>
-                                    <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_locality_name
-                                        }}</td>
-                                    <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_colony }}</td>
-                                    <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_street }}</td>
-                                    <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_abroad_number
-                                        }}</td>
-                                    <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_cp }}</td>
-                                    <td class="px-2 py-2 border text-sm text-center">$ {{
-                                        rtrim(rtrim(number_format($item->comparable_offers, 6, '.', ','), '0'), '.') }}
-                                    </td>
-                                    <td class="px-2 py-2 border text-sm text-center">{{
-                                        rtrim(rtrim(number_format($item->comparable_land_area, 6, '.', ','), '0'), '.')
-                                        }}</td>
-                                    <td class="px-2 py-2 border text-sm text-center">{{
-                                        rtrim(rtrim(number_format($item->comparable_built_area, 6, '.', ','), '0'), '.')
-                                        }}</td>
-                                    <td class="px-2 py-2 border text-sm text-center">{{
-                                        rtrim(rtrim(number_format($item->comparable_unit_value, 6, '.', ','), '0'), '.')
-                                        }}</td>
-
-                                    <td class="px-2 py-2 border text-center">
-                                        <div class="flex justify-center gap-4">
-
-                                            <flux:button type="button"
-                                                class="cursor-pointer btn-change btn-table text-sm"
-                                                wire:click="$dispatch('openSummary', { id: {{ $item->id }} })">Resumen
-                                            </flux:button>
-
-                                            <flux:button type="button"
-                                                class="cursor-pointer btn-intermediary btn-table text-sm"
-                                                wire:click="editComparable({{ $item->id }})"
-                                                wire:loading.target="editComparable" wire:loading.attr="disabled">Editar
-                                            </flux:button>
-
-                                            <flux:button type="button"
-                                                onclick="confirm('¿Estás seguro de que deseas eliminar este comparable?') || event.stopImmediatePropagation()"
-                                                wire:click="deallocatedElement({{ $item->id }})"
-                                                wire:loading.target="deallocatedElement" wire:loading.attr="disabled"
-                                                class="cursor-pointer btn-deleted btn-table text-sm">Quitar
-                                            </flux:button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
-                                @endif
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    @if($comparableType === 'land')
+    <flux:button class="mt-4 cursor-pointer btn-primary" wire:click="backToHomologationLand" variant="primary">Homologar
+        terrenos
+    </flux:button>
+    @else
+    {{-- ($comparableType === 'building') --}}
+    <flux:button class="mt-4 cursor-pointer btn-primary" wire:click="backToHomologationBuilding" variant="primary">Homologar
+    </flux:button>
+    @endif
 </div>
-
-
-
-
-
-
-
-
 
     {{-- MODAL PARA AGREGAR UN NUEVO COMPARABLE --}}
     <flux:modal :dismissible="false" name="modal-comparable" class="md:w-110">
         <div class="space-y-4">
             <div>
-                <flux:heading size="lg"><b class="text-lg">Nuevo comparable</b></flux:heading>
+                @if ($comparableId)
+                <flux:heading size="lg"><b class="text-lg">Editar comparable</b></flux:heading>
+                @else
+                <flux:heading size="lg"><b class="text-lg">Editar comparable</b></flux:heading>
+                @endif
                 <flux:text class="mt-2 font-bold">Indique los valores solicitados</flux:text>
             </div>
             <flux:separator />
@@ -358,10 +227,10 @@
             </div>
 
             <flux:field class="flux-field">
-                <flux:label>Clave</flux:label>
-                <flux:input type="text" wire:model='comparableKey' readonly />
+                <flux:label>ID</flux:label>
+                <flux:input type="text" wire:model='comparableInformativeId' readonly />
                 <div class="error-container">
-                    <flux:error name="comparableKey" />
+                    <flux:error name="comparableInformativeId" />
                 </div>
             </flux:field>
 
@@ -396,8 +265,24 @@
                 <label class="flux-label text-sm">Tipo de inmueble<span class="sup-required">*</span></label>
                 <flux:select wire:model="comparableProperty" class="text-gray-800 [&_option]:text-gray-900">
                     <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                    @if($comparableType === 'land')
                     <flux:select.option value="Terreno">Terreno</flux:select.option>
                     <flux:select.option value="Terreno en condominio">Terreno en condominio</flux:select.option>
+                    @endif
+                    @if($comparableType === 'building')
+                    <flux:select.option value="Casa habitacion">Casa habitacion</flux:select.option>
+                    <flux:select.option value="Casa habitacion en condominio">Casa habitacion en condominio</flux:select.option>
+                    <flux:select.option value="Departamento en condominio">Departamento en condominio</flux:select.option>
+                    <flux:select.option value="Edificio de productos">Edificio de productos</flux:select.option>
+                    <flux:select.option value="Local comercial (aislado)">Local comercial aislado</flux:select.option>
+                    <flux:select.option value="Nave industrial">Nave industrial</flux:select.option>
+                    <flux:select.option value="Oficina">Oficina</flux:select.option>
+                    <flux:select.option value="Oficina en condominio">Oficina en condominio</flux:select.option>
+                    <flux:select.option value="Otro en construccion">Otro en construccion</flux:select.option>
+                    <flux:select.option value="Casas multiples">Casas multiples</flux:select.option>
+                    <flux:select.option value="Vivienda recuperada">Vivienda recuperada</flux:select.option>
+                    @endif
+
                 </flux:select>
                 <div class="error-container">
                     <flux:error name="comparableProperty" />

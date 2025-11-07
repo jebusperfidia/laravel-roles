@@ -32,6 +32,9 @@
         ], */
         ['key' => 'pre-appraisal-considerations', 'icon' => 'printer', 'label' => __('Cons previas avalúo')],
         ['key' => 'market-focus', 'icon' => 'bars-arrow-up', 'label' => __('Enfoque de mercado')],
+        ['key' => 'homologation-lands', 'icon' => 'home-modern', 'label' => __('Terrenos')],
+        ['key' => 'homologation-buildings', 'icon' => 'presentation-chart-line', 'label' => __('Ventas')],
+       /*  ['key' => 'market-focus', 'icon' => 'bars-arrow-up', 'label' => __('Enfoque de mercado')], */
         ['key' => 'photo-report', 'icon' => 'camera', 'label' => __('Reporte fotográfico')],
         ['key' => 'conclusion', 'icon' => 'document-check', 'label' => __('Conclusión')],
         ['key' => 'finish-capture', 'icon' => 'check-badge', 'label' => __('Finalizar captura')],

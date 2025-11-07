@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 // Importamos los modelos de pivote específicos
 use App\Models\Forms\Comparable\ValuationLandComparable;
 use App\Models\Forms\Comparable\ValuationBuildingComparable;
+use Illuminate\Support\Carbon; // *** 1. AÑADIDO PARA MANEJAR FECHAS ***
 
 class ComparableModel extends Model
 {
@@ -127,6 +128,17 @@ class ComparableModel extends Model
         'comparable_roof_garden' => 'boolean',
     ];
 
+
+
+    /**
+     * *** 2. AÑADIDO: ATRIBUTOS VIRTUALES ***
+     * Lista de atributos virtuales (accessors) que se añadirán
+     * automáticamente al modelo (ej. para Livewire).
+     */
+    protected $appends = ['is_expired', 'vigencia_hasta'];
+
+
+
     /**
      * Obtiene el avalúo al que pertenece este comparable.
      */
@@ -173,5 +185,33 @@ class ComparableModel extends Model
         )
             ->withPivot(['position', 'is_active', 'created_by'])
             ->withTimestamps();
+    }
+
+
+    // --- *** 3. AÑADIDO: ACCESSORS DE VIGENCIA *** ---
+
+    /**
+     * Accessor para [is_expired]
+     * Campo virtual que calcula si el comparable tiene más de 6 meses.
+     *
+     * @return bool
+     */
+    public function getIsExpiredAttribute(): bool
+    {
+        // lt() = "Less Than" (menor que)
+        // Si la fecha de creación es anterior a "hoy - 6 meses", está expirado.
+        return $this->created_at->lt(Carbon::now()->subMonths(6));
+    }
+
+    /**
+     * Accessor para [vigencia_hasta]
+     * Campo virtual que calcula la fecha exacta de expiración (6 meses).
+     *
+     * @return string
+     */
+    public function getVigenciaHastaAttribute(): string
+    {
+        // Devuelve la fecha de creación + 6 meses, formateada.
+        return $this->created_at->addMonths(6)->format('d/m/Y');
     }
 }

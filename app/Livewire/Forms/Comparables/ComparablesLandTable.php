@@ -11,8 +11,10 @@ use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
+use PowerComponents\LivewirePowerGrid\Facades\Rule;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Auth;
 
 
 final class ComparablesLandTable extends PowerGridComponent
@@ -27,7 +29,7 @@ final class ComparablesLandTable extends PowerGridComponent
     public function setUp(): array
     {
         /* $this->showCheckBox(); */
-    $this->idValuation = Session::get('valuation_id');
+        $this->idValuation = Session::get('valuation_id');
 
 
         return [
@@ -40,11 +42,11 @@ final class ComparablesLandTable extends PowerGridComponent
         ];
     }
 
-    /*  public function datasource(): Builder
+    /* public function datasource(): Builder
     {
         return ComparableModel::query();
     }
- */
+*/
 
     public function datasource(): Builder
     {
@@ -53,15 +55,19 @@ final class ComparablesLandTable extends PowerGridComponent
         $pivotTableName = 'valuation_land_comparables';
 
         return ComparableModel::query()
-            // *** FILTRO AÑADIDO: Solo registros donde comparable_type es 'building' ***
+            // *** FILTRO AÑADIDO: Solo registros donde comparable_type es 'land' ***
             ->where('comparable_type', $comparableType)
             // Excluye los comparables ya asignados a este avalúo
             ->whereNotIn('id', function ($query) use ($pivotTableName) {
                 $query->select('comparable_id')
                     ->from($pivotTableName)
                     ->where('valuation_id', $this->idValuation);
-            });
+            })
+            // *** FILTRO DE VIGENCIA DE 6 MESES ***
+            // Solo muestra comparables creados en los últimos 6 meses.
+            ->where('comparables.created_at', '>=', Carbon::now()->subMonths(6));
     }
+
 
     public function relationSearch(): array
     {
@@ -70,12 +76,14 @@ final class ComparablesLandTable extends PowerGridComponent
 
     public function fields(): PowerGridFields
     {
+        // *** SE ELIMINARON LAS FUNCIONES AUXILIARES ***
+
         return PowerGrid::fields()
             ->add('id')
             //->add('valuation_id')
             /* ->add('comparable_key') */
             ->add('comparable_folio')
-          /*   ->add('comparable_discharged_by') */
+            /* ->add('comparable_discharged_by') */
             ->add('comparable_property')
             /* ->add('comparable_entity') */
             ->add('comparable_entity_name')
@@ -84,28 +92,42 @@ final class ComparablesLandTable extends PowerGridComponent
             ->add('comparable_colony')
             ->add('comparable_other_colony')
             ->add('comparable_street')
-           /*  ->add('comparable_between_street') */
-           /*  ->add('comparable_and_street') */
-           ->add('comparable_abroad_number')
-           ->add('comparable_cp')
+            /* ->add('comparable_between_street') */
+            /* ->add('comparable_and_street') */
+            ->add('comparable_abroad_number')
+            ->add('comparable_cp')
+
             ->add('comparable_offers')
-            /* ->add('price_offers', fn (ComparableModel $model) => Number::currency($model->comparable_offers, in: 'EUR', locale: 'pt_PT')) */
-            ->add('price_offers', fn (ComparableModel $model) =>  '$' . rtrim(rtrim(number_format($model->comparable_offers, 6, '.', ','), '0'), '.'))
+            // *** CAMBIO: Formato de Oferta (inline) ***
+            ->add('price_offers', fn(ComparableModel $model) => '$' . number_format($model->comparable_offers, 2, '.', ','))
+
             ->add('comparable_land_area')
+            // *** CAMBIO: Formato de Área de Terreno (inline) ***
+            ->add('comparable_land_area_formatted', fn(ComparableModel $model) => number_format($model->comparable_land_area, 2, '.', ','))
+
             ->add('comparable_unit_value')
+            // *** CAMBIO: Formato de Valor Unitario (inline) ***
+            ->add('comparable_unit_value_formatted', fn(ComparableModel $model) => '$' . number_format($model->comparable_unit_value, 2, '.', ','))
+
             ->add('comparable_land_use')
+
             ->add('comparable_built_area')
-            ->add('created_at_formatted', fn (ComparableModel $model) => Carbon::parse($model->created_at)->format('d/m/Y'))
+            // *** CAMBIO: Formato de Área Construida (inline) ***
+            ->add('comparable_built_area_formatted', fn(ComparableModel $model) => number_format($model->comparable_built_area, 2, '.', ','))
+
+            // Este es tu formato de fecha (el ejemplo que debí seguir)
+            ->add('created_at_formatted', fn(ComparableModel $model) => Carbon::parse($model->created_at)->format('d/m/Y'))
+
             ->add(
                 'comparable_url',
                 fn(ComparableModel $model) =>
                 '<a target="_blank" class="underline text-blue-600 hover:text-blue-800" href="' . e($model->comparable_url) . '">' . e($model->comparable_url) . '</a>'
             )
 
-            /*   ->add('comparable_name')
+            /* ->add('comparable_name')
             ->add('comparable_last_name')
             ->add('comparable_phone') */
-            /*        ->add('comparable_desc_services_infraestructure')
+            /* ->add('comparable_desc_services_infraestructure')
             ->add('comparable_services_infraestructure')
             ->add('comparable_shape')
             ->add('comparable_density')
@@ -129,46 +151,43 @@ final class ComparablesLandTable extends PowerGridComponent
             ->add('comparable_slope') */
 
 
-
-
             ->add('comparable_bargaining_factor')
-           /*  ->add('comparable_latitude')
+            /* ->add('comparable_latitude')
             ->add('comparable_longitude') */
             ->add('is_active');
-
     }
 
     public function columns(): array
     {
         return [
             Column::make('Id', 'id'),
-            /* Column::make('Valuation id', 'valuation_id'), */
-           /*  Column::make('Comparable key', 'comparable_key')
+            /* Column::make('Valuation id', 'valuation_id'),
+            /* Column::make('Comparable key', 'comparable_key')
                 ->sortable()
                 ->searchable(),
- */
+*/
             Column::make('Folio', 'comparable_folio')
                 ->sortable()
                 ->searchable()
                 ->bodyAttribute('text-md'),
 
-     /*        Column::make('Comparable discharged by', 'comparable_discharged_by')
+            /* Column::make('Comparable discharged by', 'comparable_discharged_by')
                 ->sortable()
                 ->searchable(), */
 
             Column::make('Propiedad', 'comparable_property')
                 ->sortable()
                 ->searchable(),
-/*
+            /*
             Column::make('Comparable entity', 'comparable_entity')
                 ->sortable()
                 ->searchable(),
- */
+*/
             Column::make('Estado', 'comparable_entity_name')
                 ->sortable()
                 ->searchable(),
 
-           /*  Column::make('Comparable locality', 'comparable_locality')
+            /* Column::make('Comparable locality', 'comparable_locality')
                 ->sortable()
                 ->searchable(), */
 
@@ -188,7 +207,7 @@ final class ComparablesLandTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(),
 
-            /*   Column::make('Comparable between street', 'comparable_between_street')
+            /* Column::make('Comparable between street', 'comparable_between_street')
                 ->sortable()
                 ->searchable(),
 
@@ -206,29 +225,28 @@ final class ComparablesLandTable extends PowerGridComponent
                 ->searchable(),
 
 
-            Column::make('Oferta', 'price_offers' ,'comparable_offers')
-                ->sortable()
-                ->searchable(),
+            // *** CAMBIO: Muestra 'price_offers' (formateado) y ordena/busca por 'comparable_offers' ***
+            Column::make('Oferta', 'price_offers', 'comparable_offers')
+                ->sortable(),
 
+            // *** CAMBIO: Muestra 'comparable_land_area_formatted' (formateado) y ordena/busca por 'comparable_land_area' ***
+            Column::make('Terreno', 'comparable_land_area_formatted', 'comparable_land_area')
+                ->sortable(),
 
-            Column::make('Terreno', 'comparable_land_area')
-                ->sortable()
-                ->searchable(),
-
-            Column::make('Unitario', 'comparable_unit_value')
-                ->sortable()
-                ->searchable(),
+            // *** CAMBIO: Muestra 'comparable_unit_value_formatted' (formateado) y ordena/busca por 'comparable_unit_value' ***
+            Column::make('Unitario', 'comparable_unit_value_formatted', 'comparable_unit_value')
+                ->sortable(),
 
             Column::make('Uso', 'comparable_land_use')
                 ->sortable()
                 ->searchable(),
 
 
-            Column::make('Construida', 'comparable_built_area')
-                ->sortable()
-                ->searchable(),
+            // *** CAMBIO: Muestra 'comparable_built_area_formatted' (formateado) y ordena/busca por 'comparable_built_area' ***
+            Column::make('Construida', 'comparable_built_area_formatted', 'comparable_built_area')
+                ->sortable(),
 
-            Column::make('Creado', 'created_at_formatted','created_at')
+            Column::make('Creado', 'created_at_formatted', 'created_at')
                 ->sortable()
                 ->searchable(),
 
@@ -250,7 +268,7 @@ final class ComparablesLandTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(),
 
-/*
+            /*
 
             Column::make('Comparable desc services infraestructure', 'comparable_desc_services_infraestructure')
                 ->sortable()
@@ -340,8 +358,8 @@ final class ComparablesLandTable extends PowerGridComponent
             Column::make('Comparable bargaining factor', 'comparable_bargaining_factor')
                 ->sortable()
                 ->searchable(),
- */
-           /*  Column::make('Comparable latitude', 'comparable_latitude')
+*/
+            /* Column::make('Comparable latitude', 'comparable_latitude')
                 ->sortable()
                 ->searchable(),
 
@@ -349,14 +367,14 @@ final class ComparablesLandTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(), */
 
-      /*       Column::make('Is active', 'is_active')
+            /* Column::make('Is active', 'is_active')
                 ->sortable()
                 ->searchable(), */
 
-          /*   Column::make('Created at', 'created_at_formatted', 'created_at')
+            /* Column::make('Created at', 'created_at_formatted', 'created_at')
                 ->sortable(),
 
-             */
+            */
 
             Column::action('Acciones')
         ];
@@ -364,61 +382,56 @@ final class ComparablesLandTable extends PowerGridComponent
 
     public function filters(): array
     {
-        return [
-        ];
+        return [];
     }
-/*
+    /*
     #[\Livewire\Attributes\On('edit')]
     public function edit($rowId): void
     {
         $this->js('alert('.$rowId.')');
     }
- */
+*/
     public function actions(ComparableModel $row): array
     {
+        // *** INICIO DE LÓGICA CORREGIDA ***
+        $currentUserId = Auth::id();
+
+        // Condición: ¿El usuario actual es el creador del comparable?
+        $isCreator = ($currentUserId === $row->created_by);
+
+        // Lógica para deshabilitar EDICIÓN y ELIMINACIÓN
+        // Solo se puede editar o eliminar si el usuario es el creador.
+        $disableActions = !$isCreator;
+        // *** FIN DE LÓGICA CORREGIDA ***
+
         return [
-            Button::add()
-                ->slot('Resumen'
-                    // Renderizamos el componente Blade manualmente
-                   /*  Blade::render('<x-icons.document-text class="w-[24px] h-[24px] inline-block" />') */
-                )
-                ->id()
+            Button::add('summary')
+                ->slot('Resumen')
                 ->class('cursor-pointer btn-change')
                 ->dispatch('openSummary', ['id' => $row->id]),
 
-            Button::add()
+            Button::add('assign')
                 ->slot('Asignar')
-                ->id()
                 ->class('cursor-pointer btn-primary')
                 ->dispatch('assignedElement', ['idComparable' => $row->id]),
 
-            Button::add()
+            Button::add('edit')
                 ->slot('Editar')
-                ->id()
-                ->class('cursor-pointer btn-intermediary')
+                ->class(
+                    'btn-intermediary ' .
+                        ($disableActions ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer')
+                )
                 ->dispatch('editComparable', ['idComparable' => $row->id]),
 
-            Button::add()
+            Button::add('delete')
                 ->slot('Eliminar')
                 ->confirm('¿Estás seguro de eliminar el comparable?')
-                ->slot('Eliminar')
-                ->id()
-                ->class('cursor-pointer btn-deleted btn-table')
-                ->dispatch('deleteElement', ['idComparable' => $row->id]),
-
-
+                ->class(
+                    'btn-deleted ' .
+                        ($disableActions ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer')
+                )
+                ->dispatch('deleteElement', ['idComparable' => $row->id])
+            /* ->can(!$isDisabled), */ // evita que se dispare el evento
         ];
     }
-
-    /*
-    public function actionRules($row): array
-    {
-       return [
-            // Hide button edit for ID 1
-            Rule::button('edit')
-                ->when(fn($row) => $row->id === 1)
-                ->hide(),
-        ];
-    }
-    */
 }

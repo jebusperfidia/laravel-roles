@@ -20,7 +20,7 @@
                                     <th class="border px-2 py-1 ">Aplicar</th>
                                 </tr>
                             </thead>
-                          <tbody>
+                            <tbody>
                                 @if ( $buildingConstructionsPrivate->isEmpty())
                                 <tr>
                                     <td colspan="4" class="border px-2 py-1 text-xs text-center text-gray-500">
@@ -33,30 +33,22 @@
                                     {{-- Descripción --}}
                                     <td class="border px-2 py-1 text-xs text-center">{{ $item->description }}</td>
 
-                                    {{-- Superficie --}}
-                                    <td class="border px-2 py-1 text-xs text-center">{{ number_format($item->surface, 2) }}</td>
-
-                                    {{-- Tipo (Asumo que tienes un campo 'type' o similar en tu modelo de construcción) --}}
+                                    {{-- Superficie *** INICIO CORRECCIÓN DE FORMATO *** --}}
                                     <td class="border px-2 py-1 text-xs text-center">
+                                        {{ preg_replace('/(\.\d{2,}?)0+$/', '$1', number_format($item->surface, 6, '.',
+                                        ',')) }}
+                                    </td>
+                                    {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
 
+                                    {{-- Tipo (Asumo que tienes un campo 'type' o similar en tu modelo de construcción)
+                                    --}}
+                                    <td class="border px-2 py-1 text-xs text-center">
                                         {{$item->surface_vad === 'superficie accesoria' ? 'Accesoria' : 'Vendible'}}
-                                     {{--    @php
-
-                                            if($item->surface_vad === 'superficie accesoria')  {
-                                                'Accesoria'
-                                            }
-                                           elseif($item->surface_vad === 'superficie vendible')  {
-                                               'Vendible'
-                                           }
-
-                                        @endphp --}}
                                     </td>
 
                                     {{-- Aplicar (Checkbox vinculado al ID) --}}
                                     <td class="border px-2 py-1 flex justify-center">
-                                        {{-- Usamos wire:model.live='elementApplyState.{{ $item->id }}' para vincular el checkbox a un índice del
-                                        array --}}
-                                       <flux:checkbox wire:model.live='elementApplyState.{{ $item->id }}' />
+                                        <flux:checkbox wire:model.live='elementApplyState.{{ $item->id }}' />
                                     </td>
                                 </tr>
                                 @endforeach
@@ -77,7 +69,8 @@
                         <flux:field>
                             <div class="radio-group-horizontal">
                                 <flux:input.group>
-                                    <flux:input type="number" wire:model='totalSurfacePrivateVendible' readonly step="any"/>
+                                    <flux:input type="number" wire:model='totalSurfacePrivateVendible' readonly
+                                        step="any" />
                                     <flux:button disabled><b>m²</b></flux:button>
                                 </flux:input.group>
                             </div>
@@ -92,7 +85,7 @@
                         <flux:label class="label-variation">Cálculo de superficie<br>construida:</flux:label>
                         <flux:field>
                             <div class="radio-group-horizontal">
-                                <flux:checkbox wire:model.live='calculationBuiltArea'/>
+                                <flux:checkbox wire:model.live='calculationBuiltArea' />
                             </div>
                             <small class="text-[12px] text-gray-500">Si la casilla está seleccionada, el valor en la
                                 celda de abajo será siempre igual al la superficie vendible. Si
@@ -111,9 +104,9 @@
                             <div class="radio-group-horizontal">
                                 <flux:input.group>
                                     @if ($calculationBuiltArea)
-                                    <flux:input type="number" wire:model='builtArea' step="any" readonly/>
+                                    <flux:input type="number" wire:model='builtArea' step="any" readonly />
                                     @else
-                                    <flux:input type="number" wire:model='builtArea' step="any"/>
+                                    <flux:input type="number" wire:model='builtArea' step="any" />
                                     @endif
                                     <flux:button><b>m²</b></flux:button>
                                 </flux:input.group>
@@ -124,15 +117,6 @@
                         </flux:field>
                     </div>
                 </div>
-
-
-
-
-
-
-
-
-
 
                 <div class="mt-[64px] form-grid form-grid--2-center">
                     <div class="overflow-x-auto">
@@ -145,7 +129,6 @@
                                 </tr>
                             </thead>
                             <tbody>
-
                                 <tr>
                                     <td class="border px-2 py-1 text-xs text-center">Total del terreno</td>
                                     <td class="border px-2 py-1 text-xs text-center">
@@ -156,10 +139,15 @@
                                                     <flux:button disabled><b>m²</b></flux:button>
                                                 </flux:input.group>
                                             </div>
-                                            <small class="suggested-text">Valor propuesto: <a wire:click="setSurfaceAreaToSuggested">
-                                             {{--    {{number_format($landSurfacesTotal, 2)}} --}}
-                                                {{ rtrim(rtrim(number_format($landSurfacesTotal, 6, '.', ','), '0'), '.') }}
-                                            </a><b> m²</b></small>
+
+                                            {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                            <small class="suggested-text">Valor propuesto: <a
+                                                    wire:click="setSurfaceAreaToSuggested">
+                                                    {{ preg_replace('/(\.\d{2,}?)0+$/', '$1',
+                                                    number_format($landSurfacesTotal, 6, '.', ',')) }}
+                                                </a><b> m²</b></small>
+                                            {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
+
                                             <div>
                                                 <flux:error name="surfaceArea" />
                                             </div>
@@ -180,87 +168,97 @@
                                             <div>
                                                 <flux:error name="sourceSurfaceArea" />
                                             </div>
-                                            </flux:field>
+                                        </flux:field>
                                     </td>
                                 </tr>
 
-
-
                                 @if ($useExcessCalculation)
-                                    <tr>
-                                        <td class="border px-2 py-1 text-xs text-center">Lote privativo</td>
-                                        <td class="border px-2 py-1 text-xs text-center">
-                                            <flux:field>
-                                                <div class="radio-group-horizontal">
-                                                    <flux:input.group>
-                                                        <flux:input type="number" wire:model='privateLot' step="any" />
-                                                        <flux:button disabled><b>m²</b></flux:button>
-                                                    </flux:input.group>
-                                                </div>
-                                                <small class="suggested-text">Valor propuesto: <a wire:click="setPrivateLotToSuggested">{{number_format($landDetail->surface_private_lot , 2)}}</a><b>
-                                                        m²</b></small>
-                                                <div>
-                                                    <flux:error name="privateLot" />
-                                                </div>
-                                            </flux:field>
-                                        </td>
-                                        <td class="border px-2 py-1 text-xs text-center">
-                                            <flux:field class="radio-group-horizontal">
-                                                <flux:select wire:model="sourcePrivateLot" class=" text-gray-800 [&_option]:text-gray-900">
-                                                    <flux:select.option value="">-- Selecciona una opción --
-                                                    </flux:select.option>
-                                                    @foreach ($construction_source_information as $value => $label)
-                                                    <flux:select.option value="{{ $label }}">
-                                                        {{ $label }}
-                                                    </flux:select.option>
-                                                    @endforeach
-                                                </flux:select>
-                                                <div>
-                                                    <flux:error name="sourcePrivateLot" />
-                                                </div>
-                                            </flux:field>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="border px-2 py-1 text-xs text-center">Lote privativo tipo</td>
-                                        <td class="border px-2 py-1 text-xs text-center">
-                                            <flux:field>
-                                                <div class="radio-group-horizontal">
-                                                    <flux:input.group>
-                                                        <flux:input type="number" wire:model='privateLotType' step="any" />
-                                                        <flux:button disabled><b>m²</b></flux:button>
-                                                    </flux:input.group>
-                                                </div>
-                                                <small class="suggested-text">Valor propuesto: <a wire:click="setPrivateLotTypeToSuggested">{{number_format($landDetail->surface_private_lot_type , 2)}}</a><b> m²</b></small>
-                                                <div>
-                                                    <flux:error name="privateLotType" />
-                                                </div>
-                                            </flux:field>
-                                        </td>
-                                        <td class="border px-2 py-1 text-xs text-center">
-                                            <flux:field class="radio-group-horizontal">
-                                                <flux:select wire:model="sourcePrivateLotType" class=" text-gray-800 [&_option]:text-gray-900">
-                                                    <flux:select.option value="">-- Selecciona una opción --
-                                                    </flux:select.option>
-                                                    @foreach ($construction_source_information as $value => $label)
-                                                    <flux:select.option value="{{ $label }}">
-                                                        {{ $label }}
-                                                    </flux:select.option>
-                                                    @endforeach
-                                                </flux:select>
-                                                <div>
-                                                    <flux:error name="sourcePrivateLotType" />
-                                                </div>
-                                            </flux:field>
-                                        </td>
-                                    </tr>
+                                <tr>
+                                    <td class="border px-2 py-1 text-xs text-center">Lote privativo</td>
+                                    <td class="border px-2 py-1 text-xs text-center">
+                                        <flux:field>
+                                            <div class="radio-group-horizontal">
+                                                <flux:input.group>
+                                                    <flux:input type="number" wire:model='privateLot' step="any" />
+                                                    <flux:button disabled><b>m²</b></flux:button>
+                                                </flux:input.group>
+                                            </div>
+
+                                            {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                            <small class="suggested-text">Valor propuesto: <a
+                                                    wire:click="setPrivateLotToSuggested">{{
+                                                    preg_replace('/(\.\d{2,}?)0+$/', '$1',
+                                                    number_format($landDetail->surface_private_lot, 6, '.', ','))
+                                                    }}</a><b>
+                                                    m²</b></small>
+                                            {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
+
+                                            <div>
+                                                <flux:error name="privateLot" />
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="border px-2 py-1 text-xs text-center">
+                                        <flux:field class="radio-group-horizontal">
+                                            <flux:select wire:model="sourcePrivateLot"
+                                                class=" text-gray-800 [&_option]:text-gray-900">
+                                                <flux:select.option value="">-- Selecciona una opción --
+                                                </flux:select.option>
+                                                @foreach ($construction_source_information as $value => $label)
+                                                <flux:select.option value="{{ $label }}">
+                                                    {{ $label }}
+                                                </flux:select.option>
+                                                @endforeach
+                                            </flux:select>
+                                            <div>
+                                                <flux:error name="sourcePrivateLot" />
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border px-2 py-1 text-xs text-center">Lote privativo tipo</td>
+                                    <td class="border px-2 py-1 text-xs text-center">
+                                        <flux:field>
+                                            <div class="radio-group-horizontal">
+                                                <flux:input.group>
+                                                    <flux:input type="number" wire:model='privateLotType' step="any" />
+                                                    <flux:button disabled><b>m²</b></flux:button>
+                                                </flux:input.group>
+                                            </div>
+
+                                            {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                            <small class="suggested-text">Valor propuesto: <a
+                                                    wire:click="setPrivateLotTypeToSuggested">{{
+                                                    preg_replace('/(\.\d{2,}?)0+$/', '$1',
+                                                    number_format($landDetail->surface_private_lot_type, 6, '.', ','))
+                                                    }}</a><b> m²</b></small>
+                                            {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
+
+                                            <div>
+                                                <flux:error name="privateLotType" />
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                    <td class="border px-2 py-1 text-xs text-center">
+                                        <flux:field class="radio-group-horizontal">
+                                            <flux:select wire:model="sourcePrivateLotType"
+                                                class=" text-gray-800 [&_option]:text-gray-900">
+                                                <flux:select.option value="">-- Selecciona una opción --
+                                                </flux:select.option>
+                                                @foreach ($construction_source_information as $value => $label)
+                                                <flux:select.option value="{{ $label }}">
+                                                    {{ $label }}
+                                                </flux:select.option>
+                                                @endforeach
+                                            </flux:select>
+                                            <div>
+                                                <flux:error name="sourcePrivateLotType" />
+                                            </div>
+                                        </flux:field>
+                                    </td>
+                                </tr>
                                 @endif
-
-
-
-
-
-
 
                                 @if (stripos($propertyType, 'condominio') !== false)
                                 <tr>
@@ -269,13 +267,22 @@
                                         <flux:field>
                                             <div class="radio-group-horizontal">
                                                 <flux:input.group>
-                                                    <flux:input type="number" wire:model='applicableUndivided' step="any"/>
+                                                    <flux:input type="number" wire:model='applicableUndivided'
+                                                        step="any" />
                                                     <flux:button disabled><b>%</b></flux:button>
                                                 </flux:input.group>
                                             </div>
-                                            <small class="suggested-text">Valor propuesto: <a wire:click="setApplicableUndividedToSuggested">{{number_format($landDetail->undivided_only_condominium , 2)}}</a><b> %</b></small>
+
+                                            {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                            <small class="suggested-text">Valor propuesto: <a
+                                                    wire:click="setApplicableUndividedToSuggested">{{
+                                                    preg_replace('/(\.\d{2,}?)0+$/', '$1',
+                                                    number_format($landDetail->undivided_only_condominium, 6, '.', ','))
+                                                    }}</a><b> %</b></small>
+                                            {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
+
                                             <div>
-                                                <flux:error name="applicableUndivided"/>
+                                                <flux:error name="applicableUndivided" />
                                             </div>
                                         </flux:field>
                                     </td>
@@ -303,11 +310,20 @@
                                         <flux:field>
                                             <div class="radio-group-horizontal">
                                                 <flux:input.group>
-                                                    <flux:input type="number" wire:model='proporcionalLand' step="any"/>
+                                                    <flux:input type="number" wire:model='proporcionalLand'
+                                                        step="any" />
                                                     <flux:button disabled><b>m²</b></flux:button>
                                                 </flux:input.group>
                                             </div>
-                                            <small class="suggested-text">Valor propuesto: <a wire:click="setProporcionalLandToSuggested">{{number_format($landDetail->undivided_surface_land , 2)}}</a><b> m²</b></small>
+
+                                            {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                            <small class="suggested-text">Valor propuesto: <a
+                                                    wire:click="setProporcionalLandToSuggested">{{
+                                                    preg_replace('/(\.\d{2,}?)0+$/', '$1',
+                                                    number_format($landDetail->undivided_surface_land, 6, '.', ','))
+                                                    }}</a><b> m²</b></small>
+                                            {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
+
                                             <div>
                                                 <flux:error name="proporcionalLand" />
                                             </div>
@@ -340,114 +356,96 @@
                                         <flux:field>
                                             <div class="radio-group-horizontal">
                                                 <flux:input.group>
-                                                    <flux:input type="number" wire:model='surplusLandArea' step="any"/>
+                                                    <flux:input type="number" wire:model='surplusLandArea' step="any" />
                                                     <flux:button disabled><b>m²</b></flux:button>
                                                 </flux:input.group>
                                             </div>
-                                            <small class="suggested-text">Valor propuesto: <a wire:click="setSurplusLandAreaToSuggested">{{number_format($landDetail->surplus_land_area , 2)}}</a><b> m²</b></small>
+
+                                            {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                            <small class="suggested-text">Valor propuesto: <a
+                                                    wire:click="setSurplusLandAreaToSuggested">{{
+                                                    preg_replace('/(\.\d{2,}?)0+$/', '$1',
+                                                    number_format($landDetail->surplus_land_area, 6, '.', ','))
+                                                    }}</a><b> m²</b></small>
+                                            {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
+
                                             <div>
                                                 <flux:error name="surplusLandArea" />
                                             </div>
                                         </flux:field>
                                     </td>
-
                                 </tr>
                                 @endif
-
-
-
-
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-            <div class="mt-2 form-grid form-grid--3">
-                <div class="overflow-x-auto">
-                    <table class="border-2 ">
-                        <thead>
-                            <tr class="bg-gray-100">
-                                <th class="border px-2 py-1 "></th>
-                                <th class="border px-2 py-1 ">Privativas</th>
-                                <th class="border px-2 py-1 ">Comunes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="border px-2 py-1 text-xs text-center">Superficie total de
-                                    construcciones:
-                                </td>
-                                <td class="border px-2 py-1 text-sm text-center">
-                                    {{-- {{number_format($totalSurfacePrivate, 2)}} --}}
-                                    {{
-                                   rtrim(rtrim(number_format($totalSurfacePrivate, 6, '.', ','), '0'), '.')
-                                    }}
-                                </td>
-                                <td class="border px-2 py-1 text-sm text-center">
-                                    {{-- {{number_format($totalSurfaceCommon, 2)}} --}}
-                                    {{
-                               rtrim(rtrim(number_format($totalSurfaceCommon, 6, '.', ','), '0'), '.')
-                                }}
-                                </td>
-                            </tr>
-                           {{--  <tr>
-                                <td class="border px-2 py-1 text-xs text-center">Valor total de construcciones:
-                                </td>
-                                <td class="border px-2 py-1 text-xs text-center">1</td>
-                                <td class="border px-2 py-1 text-sm text-center">1</td>
-                            </tr> --}}
-                        </tbody>
-                    </table>
+                <div class="mt-2 form-grid form-grid--3">
+                    <div class="overflow-x-auto">
+                        <table class="border-2 ">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="border px-2 py-1 "></th>
+                                    <th class="border px-2 py-1 ">Privativas</th>
+                                    <th class="border px-2 py-1 ">Comunes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="border px-2 py-1 text-xs text-center">Superficie total de
+                                        construcciones:
+                                    </td>
+                                    <td class="border px-2 py-1 text-sm text-center">
+                                        {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                        {{ preg_replace('/(\.\d{2,}?)0+$/', '$1', number_format($totalSurfacePrivate, 6,
+                                        '.', ',')) }}
+                                        {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
+                                    </td>
+                                    <td class="border px-2 py-1 text-sm text-center">
+                                        {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                        {{ preg_replace('/(\.\d{2,}?)0+$/', '$1', number_format($totalSurfaceCommon, 6,
+                                        '.', ',')) }}
+                                        {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
 
-
-            <div class="mt-2 form-grid form-grid--3">
-                <div class="overflow-x-auto">
-                    <table class="border-2 ">
-                        <thead>
-                            <tr class="bg-gray-100">
-                                <th class="border px-2 py-1 "></th>
-                                <th class="border px-2 py-1 ">Vendible</th>
-                                <th class="border px-2 py-1 ">Acessoria</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                            {{-- Valor de ejemplo para usar en los for --}}
-                            <tr>
-                                <td class="border px-2 py-1 text-xs text-center">Superficie total de
-                                    construcciones:
-                                </td>
-                                <td class="border px-2 py-1 text-sm text-center">
-                                    {{
-                                    /* number_format($totalSurfacePrivateVendible, 2) */
-                                    rtrim(rtrim(number_format($totalSurfacePrivateVendible, 6, '.', ','), '0'), '.')
-                                    }}
-                                </td>
-                                <td class="border px-2 py-1 text-sm text-center">
-                                    {{
-                                    /* number_format($totalSurfacePrivateAccesoria, 2) */
-                                    rtrim(rtrim(number_format($totalSurfacePrivateAccesoria, 6, '.', ','), '0'), '.')
-                                    }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="mt-2 form-grid form-grid--3">
+                    <div class="overflow-x-auto">
+                        <table class="border-2 ">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="border px-2 py-1 "></th>
+                                    <th class="border px-2 py-1 ">Vendible</th>
+                                    <th class="border px-2 py-1 ">Acessoria</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="border px-2 py-1 text-xs text-center">Superficie total de
+                                        construcciones:
+                                    </td>
+                                    <td class="border px-2 py-1 text-sm text-center">
+                                        {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                        {{ preg_replace('/(\.\d{2,}?)0+$/', '$1',
+                                        number_format($totalSurfacePrivateVendible, 6, '.', ',')) }}
+                                        {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
+                                    </td>
+                                    <td class="border px-2 py-1 text-sm text-center">
+                                        {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                        {{ preg_replace('/(\.\d{2,}?)0+$/', '$1',
+                                        number_format($totalSurfacePrivateAccesoria, 6, '.', ',')) }}
+                                        {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
 
             </div>
         </div>
