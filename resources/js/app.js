@@ -9,9 +9,15 @@ import "./../../vendor/power-components/livewire-powergrid/dist/powergrid";
 //Toaster
 import "../../vendor/masmerise/livewire-toaster/resources/js";
 
+import Chart from "chart.js/auto";
+window.Chart = Chart;
+
 // Leaflet
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+
+
+
 
 // 3. Haz que las librerías importantes sean globales (si es necesario).
 //    bootstrap.js ya hace "window.Alpine = Alpine".
@@ -33,3 +39,6 @@ setTimeout(() => {
         setTimeout(() => alerta.remove(), 500);
     }
 }, 3000); // 3 segundos
+
+
+

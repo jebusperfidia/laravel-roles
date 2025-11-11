@@ -23,16 +23,26 @@ class ComparableSummary extends Component
 
     public $comparableType;
 
+    public $notCopy;
+
     public function mount(){
 
-        $this->comparableType = Session::get('comparable-type');
 
 
     }
 
 
-    public function openSummary($id){
+    public function openSummary($id, $comparableType = null){
 
+        if ($comparableType) {
+            $this->comparableType = $comparableType;
+            $this->notCopy = false; // Si viene el tipo (desde Homologación), NO mostrar el botón.
+        } else {
+            $this->comparableType = Session::get('comparable-type');
+            $this->notCopy = true; // Si NO viene el tipo (usa Sesión), SÍ mostrar el botón.
+        }
+
+        //dd($comparableType);
         // 1. OBTENER EL COMPARABLE PRINCIPAL (con su creador)
         $comparableData = ComparableModel::with('createdBy')->find($id);
 
@@ -40,6 +50,8 @@ class ComparableSummary extends Component
             // Manejar si no se encuentra el comparable
             return;
         }
+
+        //dd($comparableData);
 
         if($this->comparableType === 'land') $pivotTable = ValuationLandComparableModel::class;
         if($this->comparableType === 'building') $pivotTable = ValuationBuildingComparableModel::class;

@@ -14,7 +14,7 @@
                 </flux:heading>
 
                 {{-- *** BOTÓN DE COPIA (Punto 1 y 3) *** --}}
-                @if ($comparable)
+                @if ($comparable && $notCopy)
                 <flux:button type="button" class="btn-primary btn-sm cursor-pointer" {{-- Confirmación: Pide al usuario que confirme
                     la acción --}}
                     onclick="confirm('Al presionar Aceptar, se creará una copia de este comparable y deshabilitando el actual. ¿Deseas proceder?') || event.stopImmediatePropagation()"
