@@ -8,6 +8,10 @@ use App\Models\PropertyLocationModel;
 use App\Models\Forms\Comparable\ValuationComparableModel;
 use App\Models\Forms\Comparable\ComparableModel;
 
+use App\Models\Forms\Comparable\ValuationLandComparableModel;
+use App\Models\Forms\Comparable\ValuationBuildingComparableModel;
+use App\Models\Forms\Homologation\HomologationValuationFactorModel;
+
 class Valuation extends Model
 {
     protected $fillable = [
@@ -176,7 +180,11 @@ class Valuation extends Model
         return $this->hasOne(PropertyLocationModel::class);
     } */
 
-
+    public function homologationValuationFactors()
+    {
+        // ¡Apunta a tu nuevo modelo!
+        return $this->hasMany(HomologationValuationFactorModel::class, 'valuation_id');
+    }
 
     /**
      * Relación 1:N con la tabla pivote (valuation_comparables).
@@ -234,6 +242,22 @@ class Valuation extends Model
      * Ejemplo:
      * $valuation->comparables → colección de modelos ComparableModel
      */
+
+    /**
+     * Relación DIRECTA a las "HojasDeConexion" de Land
+     */
+    public function landComparablePivots()
+    {
+        return $this->hasMany(ValuationLandComparableModel::class, 'valuation_id');
+    }
+
+    /**
+     * Relación DIRECTA a las "HojasDeConexion" de Building
+     */
+    public function buildingComparablePivots()
+    {
+        return $this->hasMany(ValuationBuildingComparableModel::class, 'valuation_id');
+    }
 
 
 }

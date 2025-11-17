@@ -41,7 +41,7 @@ class HomologationLands extends Component
     public array $comparableFactors = [];
 
     // --- JUSTIFICACIONES ---
-    public $justificationZone, $justificactionLandUse, $justificationNegotiation, $justificationResulting;
+    /* public $justificationZone, $justificactionLandUse, $justificationNegotiation, $justificationResulting; */
 
     // --- CONCLUSIONES (Parte 4) ---
     public array $selectedForStats = [];

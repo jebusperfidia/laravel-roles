@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str; // <-- Import Str to avoid Undefined type error
 //Se importa flux para poder controlar el modal desde aquí
+use App\Services\HomologationComparableService;
 
 //use Livewire\Attributes\On;
 
@@ -489,6 +490,7 @@ class ComparablesIndex extends Component
         //Asignamos el comparable recién creado directo al avalúo
         $this->assignedElement($comparable->id, false);
 
+
         //Actualizamos la tabla (CORREGIDO)
         if ($this->comparableType === 'land') {
             $this->dispatch('pg:eventRefresh-comparables-land-table');
@@ -952,49 +954,63 @@ class ComparablesIndex extends Component
     public function assignedElement($idComparable, $showToaster = true)
     {
 
-        if($this->comparableType === 'land') {
-            //Obtenemos el valor de la última posición asignada
-            $max_position = $this->valuation->landComparables()->max('position');
-        } else {
-            $max_position = $this->valuation->buildingComparables()->max('position');
+
+        // 2. "Sin Complicaciones" - Obtenemos el servicio aquí
+        $comparableService = app(HomologationComparableService::class);
+
+        // 3. ¡¡¡LA CORRECCIÓN CRÍTICA!!!
+        // Buscamos el comparable para saber su TIPO REAL, no usamos el de la sesión.
+        $comparable = ComparableModel::find($idComparable);
+        if (!$comparable) {
+            return;
         }
+        $itemType = $comparable->comparable_type;
 
-        //A ese valor le sumamos un 1 para asignar en la posición del nuevo elemento a asignar
-        $new_position = $max_position + 1;
+        // 1. Obtener posición nueva
+        $max_position = $this->comparableType === 'land'
+            ? $this->valuation->landComparables()->max('position')
+            : $this->valuation->buildingComparables()->max('position');
 
-        if($this->comparableType === 'land') {
-        ValuationLandComparableModel::create([
-            'valuation_id' => $this->id,
-            'comparable_id' => $idComparable,
-            'created_by' => $this->userSession->id,
-            'position' => $new_position
-        ]);
+        $new_position = ($max_position ?? 0) + 1;
+
+        // 2. Crear la relación valuation <-> comparable
+        if ($this->comparableType === 'land') {
+            $pivot =  ValuationLandComparableModel::create([
+                'valuation_id' => $this->id,
+                'comparable_id' => $idComparable,
+                'created_by' => $this->userSession->id,
+                'position' => $new_position
+            ]);
         } else {
-            ValuationBuildingComparableModel::create([
-            'valuation_id' => $this->id,
-            'comparable_id' => $idComparable,
-            'created_by' => $this->userSession->id,
-            'position' => $new_position
+            $pivot = ValuationBuildingComparableModel::create([
+                'valuation_id' => $this->id,
+                'comparable_id' => $idComparable,
+                'created_by' => $this->userSession->id,
+                'position' => $new_position
             ]);
         }
-        //Actualizamos la tabla de los comparables
+
+        // 3. Generar los factores del comparable (AQUÍ VA EL SERVICIO)
+        $comparableService->createComparableFactors(
+            valuationId: $this->id,
+            comparablePivot: $pivot,
+            type: $this->comparableType
+        );
+
+        // 4. Actualizar tabla en frontend
         if ($this->comparableType === 'land') {
             $this->dispatch('pg:eventRefresh-comparables-land-table');
         } else {
             $this->dispatch('pg:eventRefresh-comparables-building-table');
         }
 
-        //Actualizamos los valores de la tabla de las asignaciones de comparables ligadas al avaluo
+        // 5. Recalcular los asignados
         $this->loadAssignedComparables();
 
-        //Enviamos un mensaje para notificar al usuario sobre la correcta asignación
-        // Solo mostramos el toaster si $showToaster es true
+        // 6. Toaster opcional
         if ($showToaster) {
             Toaster::success('Comparable asignado correctamente.');
         }
-
-        //$this->dispatch('refreshComparablesTable');
-        /* $this->isLoading = false; */
     }
 
 
@@ -1417,44 +1433,78 @@ class ComparablesIndex extends Component
 
 
     //FUNCIONES DE WATCHER
-    public function updatedComparableOffers($value){
-        if($value < 0){
+
+    public function updatedComparableOffers($value)
+    {
+        if ($value < 0) {
+            // CORRECCIÓN: Aquí debe ser 'comparableOffers'
             $this->comparableOffers = 0;
         }
 
         $this->calcUnitValue();
     }
 
-    public function updatedComparableLandArea($value){
-        if($value < 0){
+    public function updatedComparableLandArea($value)
+    {
+        if ($value < 0) {
             $this->comparableLandArea = 0;
         }
 
         $this->calcUnitValue();
     }
 
-
-    public function calcUnitValue(){
-
-        // Primero nos aseguramos que ambas variables sean tratadas como floats (o 0 si son null/vacio)
-        $offers = (float) $this->comparableOffers;
-        $area = (float) $this->comparableLandArea;
-
-
-        // El divisor (área) no puede ser cero. Si lo es, o si la oferta es 0, el resultado es 0.
-        if ($area === 0.0 || $offers === 0.0) {
-            $this->comparableUnitValue = 0.0;
-            return;
+    public function updatedComparableBuiltArea($value)
+    {
+        if ($value < 0) {
+            $this->comparableBuiltArea = 0;
         }
 
-        //Obtenemos el cálculo con las variables ya seteadas
-        $result = $offers / $area;
-
-        //Forzamos a que el resultado siempre sea mayor a 0
-        $this->comparableUnitValue = max(0.0, $result);
-
+        $this->calcUnitValue();
     }
 
+
+    /*
+|--------------------------------------------------------------------------
+| FUNCIÓN DE CÁLCULO (LÓGICA CORREGIDA)
+|--------------------------------------------------------------------------
+|
+| REEMPLAZA tu 'calcUnitValue' por esta.
+|
+| Esta versión revisa el TIPO PRIMERO, y solo después
+| valida la división por cero para ESE TIPO.
+|
+*/
+    public function calcUnitValue()
+    {
+        // 1. Convertimos todos los valores a float.
+        $offers = (float) $this->comparableOffers;
+        $landArea = (float) $this->comparableLandArea;
+        $builtArea = (float) $this->comparableBuiltArea;
+
+        // 2. Inicializamos el resultado en 0.0 por seguridad.
+        $result = 0.0;
+
+        // 3. Revisamos el tipo PRIMERO.
+        if ($this->comparableType === 'land') {
+
+            // 4. Si es 'land', SOLO validamos 'landArea' para evitar división por cero.
+            // No nos importa 'builtArea'.
+            if ($landArea > 0) {
+                $result = $offers / $landArea;
+            }
+        } elseif ($this->comparableType === 'building') {
+
+            // 5. Si es 'building', SOLO validamos 'builtArea'.
+            // No nos importa 'landArea'.
+            if ($builtArea > 0) {
+                $result = $offers / $builtArea;
+            }
+        }
+        // Si el tipo es nulo, o el divisor es 0, $result se queda en 0.0
+
+        // 6. Asignamos el resultado final.
+        $this->comparableUnitValue = max(0.0, $result);
+    }
 
     public function validateModal()
     {

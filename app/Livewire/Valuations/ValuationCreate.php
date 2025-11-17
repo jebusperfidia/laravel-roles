@@ -7,6 +7,7 @@ use App\Models\Valuations\Valuation;
 use App\Models\Forms\LandDetails\LandDetailsModel;
 use App\Models\Forms\ConstructionElements\ConstructionElementModel;
 use App\Models\Forms\Building\BuildingModel;
+use App\Services\HomologationValuationService;
 
 class ValuationCreate extends Component
 {
@@ -19,7 +20,7 @@ class ValuationCreate extends Component
     }
 
 
-    public function save(){
+    public function save(HomologationValuationService $homologationValuationService){
 
        /*  $this->validate([
             "type" => 'required',
@@ -51,6 +52,10 @@ class ValuationCreate extends Component
         ]);
 
         $idValuation = $newValuation->id;
+
+        // Justo después de crear el avalúo, llamamos al servicio
+        // para que cree los 7 factores por defecto y los ligue
+        $homologationValuationService->createValuationFactors($newValuation);
 
         //Creamos un registro en la tabla land_details
         LandDetailsModel::create(

@@ -2,16 +2,16 @@
 
 namespace App\Models\Forms\Comparable;
 
-use App\Models\Valuations\Valuation;
+use App\Models\Forms\Comparable\ComparableModel;
 use App\Models\Users\User;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Valuations\Valuation;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
-// CORRECCIÓN: Un modelo pivote debe extender de Pivot
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class ValuationBuildingComparableModel extends Pivot
 {
+    public $incrementing = true;
+
     // Apunta a la nueva tabla pivote de construcciones
     protected $table = 'valuation_building_comparables';
 

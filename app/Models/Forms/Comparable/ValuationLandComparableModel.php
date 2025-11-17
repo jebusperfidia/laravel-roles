@@ -2,13 +2,16 @@
 
 namespace App\Models\Forms\Comparable;
 
-use App\Models\Valuations\Valuation;
+use App\Models\Forms\Comparable\ComparableModel;
 use App\Models\Users\User;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Valuations\Valuation;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class ValuationLandComparableModel extends Model
+class ValuationLandComparableModel extends Pivot
 {
+    public $incrementing = true;
+
     protected $table = 'valuation_land_comparables';
 
     protected $fillable = [

@@ -89,8 +89,19 @@ final class ComparablesLandTable extends PowerGridComponent
             ->add('comparable_entity_name')
             /* ->add('comparable_locality') */
             ->add('comparable_locality_name')
-            ->add('comparable_colony')
-            ->add('comparable_other_colony')
+            // --- INICIO DE LÓGICA DE COLONIA ---
+            ->add('comparable_colony') // Campo original (para búsquedas)
+            ->add('comparable_other_colony') // Campo de respaldo
+            // Campo virtual para mostrar la colonia correcta
+            ->add(
+                'colony_display',
+                fn(ComparableModel $model) =>
+                $model->comparable_colony === 'no-listada'
+                    ? $model->comparable_other_colony
+                    : $model->comparable_colony
+            )
+            // --- FIN DE LÓGICA DE COLONIA ---
+
             ->add('comparable_street')
             /* ->add('comparable_between_street') */
             /* ->add('comparable_and_street') */
@@ -195,7 +206,7 @@ final class ComparablesLandTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Colonia', 'comparable_colony')
+            Column::make('Colonia', 'colony_display', 'comparable_colony')
                 ->sortable()
                 ->searchable(),
 
@@ -397,13 +408,18 @@ final class ComparablesLandTable extends PowerGridComponent
         $currentUserId = Auth::id();
 
         // Condición: ¿El usuario actual es el creador del comparable?
-        $isCreator = ($currentUserId === $row->created_by);
+        //
+        // ¡¡AQUÍ ESTÁ EL CAMBIO!!
+        // Forzamos ambos lados a (int) para asegurar que comparamos números,
+        // ya que el hosting devuelve created_by como string ("1") y Auth::id() es int (1).
+        // El triple igual (===) fallaba porque (int)1 no es idéntico a (string)"1".
+        //
+        $isCreator = ((int)$currentUserId == (int)$row->created_by);
 
         // Lógica para deshabilitar EDICIÓN y ELIMINACIÓN
         // Solo se puede editar o eliminar si el usuario es el creador.
         $disableActions = !$isCreator;
         // *** FIN DE LÓGICA CORREGIDA ***
-
         return [
             Button::add('summary')
                 ->slot('Resumen')

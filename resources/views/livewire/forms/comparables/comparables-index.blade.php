@@ -116,7 +116,9 @@
                             </td>
                             <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_entity_name }}</td>
                             <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_locality_name }}</td>
-                            <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_colony }}</td>
+                            <td class="px-2 py-2 border text-sm text-center">
+                                {{ ($item->comparable_colony == 'no-listada') ? $item->comparable_other_colony : $item->comparable_colony }}
+                            </td>
                             <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_street }}</td>
                             <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_abroad_number }}</td>
                             <td class="px-2 py-2 border text-sm text-center">{{ $item->comparable_cp }}</td>
@@ -126,7 +128,7 @@
                                 number_format($item->comparable_land_area, 2, '.', ',') }}</td>
                             <td class="px-2 py-2 border text-sm text-center">{{
                                 number_format($item->comparable_built_area, 2, '.', ',') }}</td>
-                            <td class="px-2 py-2 border text-sm text-center">{{
+                            <td class="px-2 py-2 border text-sm text-center">$ {{
                                 number_format($item->comparable_unit_value, 2, '.', ',') }}</td>
 
                             <td
@@ -141,12 +143,14 @@
                                         wire:click="$dispatch('openSummary', { id: {{ $item->id }} })">
                                         Resumen
                                     </flux:button>
+                                 {{--  {{  dd($item->created_by, $userSession->id);}} --}}
+
 
                                     <!-- *** 3. LÓGICA DE "EDITAR" CORREGIDA *** -->
                                     <flux:button class="btn-intermediary btn-table text-sm cursor-pointer"
                                         wire:click="editComparable({{ $item->id }})" {{--
                                         :disabled="$item->valuation_id !== $id" --}} {{-- Lógica anterior --}}
-                                        :disabled="$item->created_by !== $userSession->id" {{-- Nueva Lógica de Creador
+                                        :disabled="$item->created_by != $userSession->id" {{-- Nueva Lógica de Creador
                                         --}}>
                                         Editar
                                     </flux:button>
@@ -844,7 +848,7 @@
                 <flux:field class="flux-field">
                     <flux:label>Superficie construida<span class="sup-required">*</span></flux:label>
                     <flux:input.group>
-                        <flux:input type="number" wire:model='comparableBuiltArea' step="any"/>
+                        <flux:input type="number" wire:model.lazy='comparableBuiltArea' step="any"/>
                         <flux:button type="button" class="text-bold" disabled>m²
                         </flux:button>
                     </flux:input.group>
