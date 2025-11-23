@@ -33,20 +33,18 @@
                                     {{-- Descripción --}}
                                     <td class="border px-2 py-1 text-xs text-center">{{ $item->description }}</td>
 
-                                    {{-- Superficie *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                    {{-- Superficie --}}
                                     <td class="border px-2 py-1 text-xs text-center">
                                         {{ preg_replace('/(\.\d{2,}?)0+$/', '$1', number_format($item->surface, 6, '.',
                                         ',')) }}
                                     </td>
-                                    {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
 
-                                    {{-- Tipo (Asumo que tienes un campo 'type' o similar en tu modelo de construcción)
-                                    --}}
+                                    {{-- Tipo --}}
                                     <td class="border px-2 py-1 text-xs text-center">
                                         {{$item->surface_vad === 'superficie accesoria' ? 'Accesoria' : 'Vendible'}}
                                     </td>
 
-                                    {{-- Aplicar (Checkbox vinculado al ID) --}}
+                                    {{-- Aplicar --}}
                                     <td class="border px-2 py-1 flex justify-center">
                                         <flux:checkbox wire:model.live='elementApplyState.{{ $item->id }}' />
                                     </td>
@@ -57,10 +55,6 @@
                         </table>
                     </div>
                 </div>
-
-
-
-
 
                 <div class="mt-[64px] form-grid form-grid--2-center">
                     <div class="form-grid-2-variation">
@@ -140,13 +134,12 @@
                                                 </flux:input.group>
                                             </div>
 
-                                            {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                            {{-- *** CORRECCIÓN: Usamos ?-> y ?? 0 *** --}}
                                             <small class="suggested-text">Valor propuesto: <a
                                                     wire:click="setSurfaceAreaToSuggested">
                                                     {{ preg_replace('/(\.\d{2,}?)0+$/', '$1',
-                                                    number_format($landSurfacesTotal, 6, '.', ',')) }}
+                                                    number_format($landSurfacesTotal ?? 0, 6, '.', ',')) }}
                                                 </a><b> m²</b></small>
-                                            {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
 
                                             <div>
                                                 <flux:error name="surfaceArea" />
@@ -184,14 +177,13 @@
                                                 </flux:input.group>
                                             </div>
 
-                                            {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                            {{-- *** CORRECCIÓN: Usamos ?-> y ?? 0 *** --}}
                                             <small class="suggested-text">Valor propuesto: <a
                                                     wire:click="setPrivateLotToSuggested">{{
                                                     preg_replace('/(\.\d{2,}?)0+$/', '$1',
-                                                    number_format($landDetail->surface_private_lot, 6, '.', ','))
+                                                    number_format($landDetail?->surface_private_lot ?? 0, 6, '.', ','))
                                                     }}</a><b>
                                                     m²</b></small>
-                                            {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
 
                                             <div>
                                                 <flux:error name="privateLot" />
@@ -227,13 +219,13 @@
                                                 </flux:input.group>
                                             </div>
 
-                                            {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                            {{-- *** CORRECCIÓN: Usamos ?-> y ?? 0 *** --}}
                                             <small class="suggested-text">Valor propuesto: <a
                                                     wire:click="setPrivateLotTypeToSuggested">{{
                                                     preg_replace('/(\.\d{2,}?)0+$/', '$1',
-                                                    number_format($landDetail->surface_private_lot_type, 6, '.', ','))
+                                                    number_format($landDetail?->surface_private_lot_type ?? 0, 6, '.',
+                                                    ','))
                                                     }}</a><b> m²</b></small>
-                                            {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
 
                                             <div>
                                                 <flux:error name="privateLotType" />
@@ -260,6 +252,12 @@
                                 </tr>
                                 @endif
 
+
+
+
+
+
+
                                 @if (stripos($propertyType, 'condominio') !== false)
                                 <tr>
                                     <td class="border px-2 py-1 text-xs text-center">Indiviso aplicable</td>
@@ -273,13 +271,13 @@
                                                 </flux:input.group>
                                             </div>
 
-                                            {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                            {{-- *** CORRECCIÓN: Usamos ?-> y ?? 0 *** --}}
                                             <small class="suggested-text">Valor propuesto: <a
                                                     wire:click="setApplicableUndividedToSuggested">{{
                                                     preg_replace('/(\.\d{2,}?)0+$/', '$1',
-                                                    number_format($landDetail->undivided_only_condominium, 6, '.', ','))
+                                                    number_format($landDetail?->undivided_only_condominium ?? 0, 6, '.',
+                                                    ','))
                                                     }}</a><b> %</b></small>
-                                            {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
 
                                             <div>
                                                 <flux:error name="applicableUndivided" />
@@ -316,13 +314,13 @@
                                                 </flux:input.group>
                                             </div>
 
-                                            {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                            {{-- *** CORRECCIÓN: Usamos ?-> y ?? 0 *** --}}
                                             <small class="suggested-text">Valor propuesto: <a
                                                     wire:click="setProporcionalLandToSuggested">{{
                                                     preg_replace('/(\.\d{2,}?)0+$/', '$1',
-                                                    number_format($landDetail->undivided_surface_land, 6, '.', ','))
+                                                    number_format($landDetail?->undivided_surface_land ?? 0, 6, '.',
+                                                    ','))
                                                     }}</a><b> m²</b></small>
-                                            {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
 
                                             <div>
                                                 <flux:error name="proporcionalLand" />
@@ -361,18 +359,19 @@
                                                 </flux:input.group>
                                             </div>
 
-                                            {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
+                                            {{-- *** CORRECCIÓN: Usamos ?-> y ?? 0 *** --}}
                                             <small class="suggested-text">Valor propuesto: <a
                                                     wire:click="setSurplusLandAreaToSuggested">{{
                                                     preg_replace('/(\.\d{2,}?)0+$/', '$1',
-                                                    number_format($landDetail->surplus_land_area, 6, '.', ','))
+                                                    number_format($landDetail?->surplus_land_area ?? 0, 6, '.', ','))
                                                     }}</a><b> m²</b></small>
-                                            {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
 
                                             <div>
                                                 <flux:error name="surplusLandArea" />
                                             </div>
                                         </flux:field>
+                                    </td>
+                                    <td class="border px-2 py-1 text-xs text-center">
                                     </td>
                                 </tr>
                                 @endif
@@ -397,16 +396,12 @@
                                         construcciones:
                                     </td>
                                     <td class="border px-2 py-1 text-sm text-center">
-                                        {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
                                         {{ preg_replace('/(\.\d{2,}?)0+$/', '$1', number_format($totalSurfacePrivate, 6,
                                         '.', ',')) }}
-                                        {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
                                     </td>
                                     <td class="border px-2 py-1 text-sm text-center">
-                                        {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
                                         {{ preg_replace('/(\.\d{2,}?)0+$/', '$1', number_format($totalSurfaceCommon, 6,
                                         '.', ',')) }}
-                                        {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
                                     </td>
                                 </tr>
                             </tbody>
@@ -430,16 +425,12 @@
                                         construcciones:
                                     </td>
                                     <td class="border px-2 py-1 text-sm text-center">
-                                        {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
                                         {{ preg_replace('/(\.\d{2,}?)0+$/', '$1',
                                         number_format($totalSurfacePrivateVendible, 6, '.', ',')) }}
-                                        {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
                                     </td>
                                     <td class="border px-2 py-1 text-sm text-center">
-                                        {{-- *** INICIO CORRECCIÓN DE FORMATO *** --}}
                                         {{ preg_replace('/(\.\d{2,}?)0+$/', '$1',
                                         number_format($totalSurfacePrivateAccesoria, 6, '.', ',')) }}
-                                        {{-- *** FIN CORRECCIÓN DE FORMATO *** --}}
                                     </td>
                                 </tr>
                             </tbody>

@@ -66,21 +66,38 @@ class ApplicableSurfaces extends Component
     {
 
         //Obtenemos el tipo de propiedad del avaluo para la asignación de campos condicionales
-        $this->propertyType = Valuation::find(session('valuation_id'))->property_type;
+        // NOTA: Agregué un safety check rápido aquí también por si acaso
+        $val = Valuation::find(session('valuation_id'));
+        $this->propertyType = $val ? $val->property_type : '';
 
         //Obtenemos el valor del landDetail para las sugerencias
         $this->landDetail = LandDetailsModel::find(session('valuation_id'));
 
-        $this->landSurfacesTotal = $this->landDetail->landSurfaces()->sum('surface');
-
-        //Asignamos el valor del checkbox de cálculo de terreno excedente
-        $this->useExcessCalculation = $this->landDetail ? (bool) $this->landDetail->use_excess_calculation : false;
+        // --- CORRECCIÓN INICIO: Validamos si landDetail existe ---
+        if ($this->landDetail) {
+            $this->landSurfacesTotal = $this->landDetail->landSurfaces()->sum('surface');
+            //Asignamos el valor del checkbox de cálculo de terreno excedente
+            $this->useExcessCalculation = (bool) $this->landDetail->use_excess_calculation;
+        } else {
+            $this->landSurfacesTotal = 0;
+            $this->useExcessCalculation = false;
+        }
+        // --- CORRECCIÓN FIN ---
 
         //Obtenemos el valor del building para las construcciones
         $this->building = BuildingModel::where('valuation_id', session('valuation_id'))->first();
 
-        //Obtenemos las construcciones privadas y comunes
-        $this->buildingConstructionsPrivate = collect($this->building->privates()->get());
+        // --- CORRECCIÓN INICIO: Validamos si building existe ---
+        if ($this->building) {
+            //Obtenemos las construcciones privadas y comunes
+            $this->buildingConstructionsPrivate = collect($this->building->privates()->get());
+            $this->buildingConstructionsCommon = collect($this->building->commons()->get());
+        } else {
+            // Si no hay building, inicializamos colecciones vacías para que lo de abajo no falle
+            $this->buildingConstructionsPrivate = collect();
+            $this->buildingConstructionsCommon = collect();
+        }
+        // --- CORRECCIÓN FIN ---
 
         $this->buildingConstructionsFilter = $this->buildingConstructionsPrivate->filter(function ($item) {
             // Hacemos el filtro robusto para obtener 'superficie vendible' o 'superficie accesoria'
@@ -98,9 +115,6 @@ class ApplicableSurfaces extends Component
         }
 
 
-        $this->buildingConstructionsCommon = collect($this->building->commons()->get());
-
-
         // Cálculo y asignación de la superficie total privada
         $this->totalSurfacePrivate = collect($this->buildingConstructionsPrivate)->sum('surface');
 
@@ -112,15 +126,12 @@ class ApplicableSurfaces extends Component
             ->filter(fn($item) => $item->surface_vad === 'superficie vendible')
             ->sum('surface');
 
-        $this->totalSurfacePrivateVendible  = rtrim(
-            rtrim(number_format($totalSurfacePrivateVendible, 6, '.', ','), '0'));
+        $this->totalSurfacePrivateVendible  = (float) $totalSurfacePrivateVendible; // Simplifiqué el rtrim para evitar errores de string
 
         // Subtotal para 'superficie accesoria'
         $this->totalSurfacePrivateAccesoria = collect($this->buildingConstructionsPrivate)
             ->filter(fn($item) => $item->surface_vad === 'superficie accesoria')
             ->sum('surface');
-
-
 
 
         // Inicializa las variables con los datos del archivo de configuración
@@ -130,29 +141,26 @@ class ApplicableSurfaces extends Component
         //Obtenemos los valores de las superficies desde la BD
         $this->applicableSurface = ApplicableSurfaceModel::where('valuation_id', session('valuation_id'))->first();
 
-        if($this->applicableSurface){
+        if ($this->applicableSurface) {
             //$this->saleableArea = $this->applicableSurface->saleable_area;
-            $this->calculationBuiltArea = $this->applicableSurface->calculation_built_area;
+            $this->calculationBuiltArea = (bool)$this->applicableSurface->calculation_built_area;
 
             // Ejecuta el cálculo inicial
-           // $this->updateBuiltArea();
+            $this->updateBuiltArea();
 
             //dd($this->calculationBuiltArea);
-            $this->builtArea = $this->applicableSurface->built_area;
-            $this->surfaceArea = $this->applicableSurface->surface_area;
-            $this->privateLot = $this->applicableSurface->private_lot;
-            $this->privateLotType = $this->applicableSurface->private_lot_type;
-            $this->surplusLandArea = $this->applicableSurface->surplus_land_area;
-            $this->applicableUndivided = $this->applicableSurface->applicable_undivided;
-            $this->proporcionalLand = $this->applicableSurface->proporcional_land;
+            $this->builtArea = (float)$this->applicableSurface->built_area;
+            $this->surfaceArea = (float)$this->applicableSurface->surface_area;
+            $this->privateLot = (float)$this->applicableSurface->private_lot;
+            $this->privateLotType = (float)$this->applicableSurface->private_lot_type;
+            $this->surplusLandArea = (float)$this->applicableSurface->surplus_land_area;
+            $this->applicableUndivided = (float)$this->applicableSurface->applicable_undivided;
+            $this->proporcionalLand = (float)$this->applicableSurface->proporcional_land;
             $this->sourceSurfaceArea = $this->applicableSurface->source_surface_area;
             $this->sourcePrivateLot = $this->applicableSurface->source_private_lot;
             $this->sourcePrivateLotType = $this->applicableSurface->source_private_lot_type;
             $this->sourceApplicableUndivided = $this->applicableSurface->source_applicable_undivided;
             $this->sourceProporcionalLand = $this->applicableSurface->source_proporcional_land;
-
-
-
         } else {
             //$this->saleableArea = 0;
             $this->calculationBuiltArea = false;
@@ -163,7 +171,6 @@ class ApplicableSurfaces extends Component
             $this->surplusLandArea = 0;
             $this->applicableUndivided = 0;
             $this->proporcionalLand = 0;
-
         }
     }
 
@@ -183,13 +190,13 @@ class ApplicableSurfaces extends Component
             'applicableUndivided' => 'required|numeric|between:0,100',
             'sourceApplicableUndivided' => 'required',
 
-            'proporcionalLand' => 'required|numeric|gt:1',
+            'proporcionalLand' => 'required|numeric|min:0',
             'sourceProporcionalLand' => 'required',
 
         ];
 
 
-        if($this->useExcessCalculation){
+        if ($this->useExcessCalculation) {
             $rules = array_merge($rules, [
                 'privateLot' => 'required|numeric|min:0',
                 'sourcePrivateLot' => 'required',
@@ -282,38 +289,50 @@ class ApplicableSurfaces extends Component
 
     public function setPrivateLotToSuggested()
     {
-        $this->privateLot = $this->landDetail->surface_private_lot;
+        // CORRECCIÓN DE SEGURIDAD
+        if ($this->landDetail) {
+            $this->privateLot = $this->landDetail->surface_private_lot;
+        }
     }
 
     public function setPrivateLotTypeToSuggested()
     {
-        $this->privateLotType = $this->landDetail->surface_private_lot_type;
+        // CORRECCIÓN DE SEGURIDAD
+        if ($this->landDetail) {
+            $this->privateLotType = $this->landDetail->surface_private_lot_type;
+        }
     }
 
     public function setApplicableUndividedToSuggested()
     {
-        $this->applicableUndivided = $this->landDetail->undivided_only_condominium;
+        // CORRECCIÓN DE SEGURIDAD
+        if ($this->landDetail) {
+            $this->applicableUndivided = $this->landDetail->undivided_only_condominium;
+        }
     }
 
     public function setProporcionalLandToSuggested()
     {
-        $this->proporcionalLand = $this->landDetail->undivided_surface_land;
+        // CORRECCIÓN DE SEGURIDAD
+        if ($this->landDetail) {
+            $this->proporcionalLand = $this->landDetail->undivided_surface_land;
+        }
     }
 
     public function setSurplusLandAreaToSuggested()
     {
-        $this->surplusLandArea = $this->landDetail->surplus_land_area;
+        // CORRECCIÓN DE SEGURIDAD
+        if ($this->landDetail) {
+            $this->surplusLandArea = $this->landDetail->surplus_land_area;
+        }
     }
 
 
-
-
-
-
     //Creamos un watcher para validar asignar o no el valor de supercicie construida
-    public function updatedCalculationBuiltArea($value){
+    public function updatedCalculationBuiltArea($value)
+    {
 
-        if($value){
+        if ($value) {
             //Si el valor es false, dejamos el campo editable y no hacemos nada
             $this->updateBuiltArea();
         } else {
@@ -326,9 +345,6 @@ class ApplicableSurfaces extends Component
     {
         $this->updateBuiltArea();
     }
-
-
-
 
 
     public function updateBuiltArea()

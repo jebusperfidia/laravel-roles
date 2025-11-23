@@ -1017,7 +1017,7 @@ class ComparablesIndex extends Component
     //Método para desasignar un comparable
     public function deallocatedElement($idComparable)
     {
-        // --- INICIO DE LA CORRECCIÓN ---
+
         // 1. Encontrar el comparable y su TIPO
         $comparable = ComparableModel::find($idComparable);
 
@@ -1027,24 +1027,35 @@ class ComparablesIndex extends Component
             return;
         }
         $itemType = $comparable->comparable_type;
-        // --- FIN DE LA CORRECCIÓN ---
 
-        if($itemType === 'land') {
+        // Obtener el servicio de homologación
+        $comparableService = app(HomologationComparableService::class);
+
+
+        // --- ¡¡¡LÓGICA CORREGIDA Y LIMPIA!!! ---
+        if ($itemType === 'land') {
             //Primero encontramos el registro de la tabla valuation_comparables
             $valuationLandComparable = ValuationLandComparableModel::where('valuation_id', $this->id)->where('comparable_id', $idComparable)->first();
 
-            //dd($valuationComparable);
+            if ($valuationLandComparable) {
+                // B. ¡BORRAR LOS FACTORES PRIMERO! (Usando el ID del pivote)
+                $comparableService->deleteComparableFactors($valuationLandComparable->id, $itemType);
 
-            //Si existe alguna coincidencia, se elimina el registro, de no ser así, se omite
-            $valuationLandComparable?->delete();
-        } else {
+                // C. Ahora sí, eliminar el pivote
+                $valuationLandComparable->delete();
+            }
+        } else { // 'building'
             $valuationBuildingComparable = ValuationBuildingComparableModel::where('valuation_id', $this->id)->where('comparable_id', $idComparable)->first();
 
-            //dd($valuationComparable);
+            if ($valuationBuildingComparable) {
+                // B. ¡BORRAR LOS FACTORES PRIMERO!
+                $comparableService->deleteComparableFactors($valuationBuildingComparable->id, $itemType);
 
-            //Si existe alguna coincidencia, se elimina el registro, de no ser así, se omite
-            $valuationBuildingComparable?->delete();
+                // C. Ahora sí, eliminar el pivote (¡¡¡LÍNEA DESCOMENTADA!!!)
+                $valuationBuildingComparable->delete();
+            }
         }
+        // --- FIN DE LA CORRECCIÓN ---
 
         //Primero ejecutamos la función de reordenar los elementos
         $this->reorderPositions($itemType);

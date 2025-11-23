@@ -76,108 +76,90 @@ class SpecialInstallations extends Component
 
 
     public $construction_life_values;
-
     public function mount()
     {
-
         $this->construction_life_values = config('properties_inputs.construction_life_values', []);
 
-        //Obtenemos la vida util total del inmueble
+        // 1. Obtenemos el avalúo. Si por alguna razón no existe, detenemos para evitar errores más abajo.
+        $valuationId = Session::get('valuation_id');
+        $this->valuation = Valuation::find($valuationId);
 
-        //Primero obtenemos el valor general de building construction, apartir del id del avaluo de nuestra variable de sesión
+        if (!$this->valuation) {
+            return; // O podrías redirigir, pero esto evita que el componente explote.
+        }
+
+        // --- CORRECCIÓN PRINCIPAL (BUILDING Y DIVISIÓN POR CERO) ---
+
         $this->building = BuildingModel::where('valuation_id', $this->valuation->id)->first();
-        //dd($this->building);
 
-        //Si existe registro en la base de datos, obtenemos el valor
-        if($this->building) {
+        // Inicializamos en 0 por si no entra al IF
+        $this->usefulLifeProperty = 0;
 
-            //inicializamos internamente el valor del total
+        if ($this->building) {
             $totalUsefulLifeProperty = 0;
 
-            //Mediantel la variable de building, obtenemos el valor de todos los registros privativos
-            //ligados al modelo, desde la tabla buildingConstruction
+            // Usamos ?? collect() por seguridad extrema, aunque el modelo suele devolver collection vacía
             $buildingConstructionsPrivate = $this->building->privates()->get();
 
-            //dd($buildingConstructionsPrivate);
-
-            //Generamos la suma del total de todas las superficies para el cálculo
             $totalSurfacePrivate = collect($buildingConstructionsPrivate)->sum('surface');
 
-            //Recorremos todos los resultados obtenidos de buildingConstruction para generar la suma total
-            foreach($buildingConstructionsPrivate as $item) {
-
-                //Obtenemos el valor de la vida útll a partir de la combinación generada en el registro
+            foreach ($buildingConstructionsPrivate as $item) {
                 $claveCombinacion = $item->clasification . '_' . $item->use;
-                //Del valor generado guardamos el valor de la vida útil total
+                // Si no encuentra la clave en el config, usa 0
                 $vidaUtilTotal = $this->construction_life_values[$claveCombinacion] ?? 0;
-
-                //Al total le sumamos el valor de la iteración, obtenido de la vida total * superficie
                 $totalUsefulLifeProperty += ($vidaUtilTotal * $item->surface);
             }
 
-            //Una que termina de iterar todos los elementos, generamos primero el total dividiendo este entre la superficie
-            $this->usefulLifeProperty = $totalUsefulLifeProperty / $totalSurfacePrivate;
-
-            //Al valor obtenido, generamos un redondeo para generar el valor total, 0.5 sube a 1, valores inferiores bajan a 0
-            $this->usefulLifeProperty = round($this->usefulLifeProperty, 0);
-
-            //dd($this->usefulLifeProperty);
+            // >>> AQUÍ EL FIX: Validamos que la superficie sea mayor a 0 antes de dividir <<<
+            if ($totalSurfacePrivate > 0) {
+                $this->usefulLifeProperty = $totalUsefulLifeProperty / $totalSurfacePrivate;
+                $this->usefulLifeProperty = round($this->usefulLifeProperty, 0);
+            } else {
+                $this->usefulLifeProperty = 0;
+            }
         }
 
-
-        //valores para los input de instalaciones especiales
+        // --- CARGA DE VALORES CONFIG ---
         $this->select_SI = config('properties_inputs.special_installations', []);
         $this->select_AE = config('properties_inputs.elements_accessories', []);
         $this->select_CW = config('properties_inputs.complementary_works', []);
         $this->select_units = config('properties_inputs.special_installations_unit', []);
         $this->select_conservation_factor = config('properties_inputs.special_installations_conservationFactor', []);
 
-
-        //Inicializamos el valor de la pestaña que se abrirá por defecto
         $this->activeTab = 'privativas';
 
-        //Obtenemos los valores deL avalúo a partir de la variable de sesión del ID
-        $this->valuation = Valuation::find(Session::get('valuation_id'));
-
-        //Obtenemos los valores de las tablas, así como los subtotales
-        $this->privateInstallations = $this->valuation->privateInstallations;
+        // --- CARGA DE TABLAS (Usamos el operador '??' porsiacaso las relaciones vinieran nulas) ---
+        $this->privateInstallations = $this->valuation->privateInstallations ?? [];
         $this->subTotalPrivateInstallations = collect($this->privateInstallations)->sum('amount');
 
-        $this->privateAccessories = $this->valuation->privateAccessories;
+        $this->privateAccessories = $this->valuation->privateAccessories ?? [];
         $this->subTotalPrivateAccessories = collect($this->privateAccessories)->sum('amount');
 
-        $this->privateWorks = $this->valuation->privateWorks;
+        $this->privateWorks = $this->valuation->privateWorks ?? [];
         $this->subTotalPrivateWorks = collect($this->privateWorks)->sum('amount');
 
-        //Finalmente, obtenemos el total de las instalaciones privativas
         $this->getTotalPrivateInstallations();
 
-        if (stripos($this->valuation->property_type, 'condominio') !== false) {
-        $this->commonInstallations = $this->valuation->commonInstallations;
-        $this->subTotalCommonInstallations = collect($this->commonInstallations)->sum('amount');
+        // --- LÓGICA CONDOMINIO ---
+        // Verificamos con seguridad que property_type no sea null antes de usar stripos
+        if ($this->valuation->property_type && stripos($this->valuation->property_type, 'condominio') !== false) {
 
-        $this->commonAccessories = $this->valuation->commonAccessories;
-        $this->subTotalCommonAccessories = collect($this->commonAccessories)->sum('amount');
+            $this->commonInstallations = $this->valuation->commonInstallations ?? [];
+            $this->subTotalCommonInstallations = collect($this->commonInstallations)->sum('amount');
 
-        $this->commonWorks = $this->valuation->commonWorks;
-        $this->subTotalCommonWorks = collect($this->commonWorks)->sum('amount');
+            $this->commonAccessories = $this->valuation->commonAccessories ?? [];
+            $this->subTotalCommonAccessories = collect($this->commonAccessories)->sum('amount');
 
-        // Obtener el total proporcional del indiviso
-        $this->getTotalCommonProportional();
+            $this->commonWorks = $this->valuation->commonWorks ?? [];
+            $this->subTotalCommonWorks = collect($this->commonWorks)->sum('amount');
 
-        //Finalmente, obtenemos el total de las instalaciones comunes
-        $this->getTotalCommonInstallations();
+            $this->getTotalCommonProportional();
+            $this->getTotalCommonInstallations();
 
-        //Obtenemos el valor del indiviso aplicado en terreno
-        $this->undividedOnlyCondominium = LandDetailsModel::findOrFail(Session::get('valuation_id'))->undivided_only_condominium;
-
-
-        //dd($this->undividedOnlyCondominium);
-
+            // FIX ADICIONAL: Usar find en lugar de findOrFail y asignar 0 si no existe el LandDetails
+            $landDetails = LandDetailsModel::find($valuationId);
+            $this->undividedOnlyCondominium = $landDetails->undivided_only_condominium ?? 0;
         }
-
-
-        //dd($this->commonWorks);
     }
 
     public function nextComponent(){

@@ -18,24 +18,26 @@ return new class extends Migration
 
             // Gancho al avalúo
             $table->foreignId('valuation_id')
-                  ->constrained('valuations')
-                  ->onDelete('cascade');
+                ->constrained('valuations')
+                ->onDelete('cascade');
 
             // --- Columnas de Factores (Estructura Vertical) ---
             $table->string('factor_name', 100);
             $table->string('acronym', 10);
             $table->boolean('is_editable')->default(false);
+            // --- Esta columna nos ayudará a identificar los factores personalizados de building ---
+            $table->boolean('is_custom')->default(false);
 
             // --- Columna de Valor (Tu nombre) ---
             $table->decimal('rating', 10, 4)->default(1.0000);
 
             // --- Columna de Tipo (Tu idea) ---
-            //$table->string('homologation_type', 10); // 'land' or 'building'
+            $table->string('homologation_type', 10); // 'land' or 'building'
 
             $table->timestamps();
 
-            // Asegura que un factor (FZO) solo exista una vez por tipo y por avalúo
-            $table->unique(['valuation_id', 'acronym'], 'valuation_factor_unique');
+            // CLAVE ÚNICA CORREGIDA: Ahora incluye 'homologation_type' para permitir FSU tanto en land como en building.
+            $table->unique(['valuation_id', 'acronym', 'homologation_type'], 'valuation_factor_unique');
         });
     }
 

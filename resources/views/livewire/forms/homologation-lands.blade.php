@@ -1,29 +1,24 @@
+{{--
+============================================================
+== ARCHIVO BLADE COMPLETO Y CORREGIDO FINAL
+== - Se corrigió el error de carga de gráficas (Gráficas 1 y 2).
+== - Se eliminaron los comentarios de la gráfica y se implementó Alpine x-data.
+== - Se añadió el patrón de carga robusta con x-ref y setTimeout/Livewire.on.
+============================================================
+--}}
 <div>
 
     @if($comparablesCount >= 4)
 
-
-
-
-
-
-
-
-
-
-    <!-- 1. SECCIÓN SUJETO (CORREGIDO: Uso de flux:label y Alineación) -->
     <div class="form-container">
         <div class="form-container__header">
             Sujeto
         </div>
 
-        <!-- Contenido Adaptativo -->
         <div class="form-container__content">
-
-            <!-- Header Limpio (Info de Propiedad) -->
             <div class="p-4 bg-white border border-gray-300 rounded-lg mb-6">
+                {{-- ... tu código de dirección ... --}}
                 <p class="font-bold text-md flex items-center text-gray-800">
-                    <!-- Icono de Mapa Simple -->
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="w-6 h-6 mr-2 text-gray-600">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -34,8 +29,8 @@
                     'N/A' }}
                 </p>
                 <p class="text-sm text-gray-600 ml-8">
-                    <!-- Lógica de Colonia 'no-listada' -->
-                    Colonia: @if($valuation->property_colony === 'no-listada')
+                    Colonia:
+                    @if($valuation->property_colony === 'no-listada')
                     {{ $valuation->property_other_colony ?? 'N/A (No listada)' }}
                     @else
                     {{ $valuation->property_colony ?? 'N/A' }}
@@ -44,29 +39,101 @@
                 </p>
             </div>
 
-            <!-- Grid de 2 Columnas (Ajuste de Ancho: Columna 1 más pequeña) -->
             <div class="flex flex-col md:flex-row gap-x-6 gap-y-8">
 
-                <!-- Columna 1: Inputs Sujeto (Wider on mobile, smaller on desktop: ~1/3) -->
                 <div class="space-y-4 md:w-1/3 w-full">
-                    <flux:select label="Superficie aplicable" wire:model.live="subject_surface_type">
-                        <flux:select.option value="total">Superficie total del terreno</flux:select.option>
-                        <flux:select.option value="otro">Otro</flux:select.option>
-                    </flux:select>
 
-                    <!-- Campos Readonly (CUS y COS) -->
-                    <flux:input type="text" label="C.U.S." wire:model.live="subject_cus" readonly />
-                    <flux:input type="text" label="C.O.S." wire:model.live="subject_cos" readonly />
-                    <flux:input type="text" label="Lote moda" wire:model.live="subject_lote_moda"
+                    <flux:field>
+                        <flux:label>SUPERFICIE APLICABLE</flux:label>
+
+                        {{-- Dropdown Personalizado para Superficie Aplicable (CORREGIDO PARA ANCHO Y ALINEACIÓN) --}}
+                        <div class="relative w-full">
+                            <flux:dropdown inline position="bottom" align="start" class="w-full">
+
+                                {{-- BOTÓN DE DESPLIEGUE --}}
+                                <button @click.stop.prevent
+                                    @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
+                                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !
+                                    $errors->has('selectedSurfaceOptionId'),
+                                    'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500
+                                    focus:border-red-500' =>
+                                    $errors->has('selectedSurfaceOptionId'),
+                                    ])>
+                                    <span class="flex-1 text-left text-gray-700">
+                                        {{ $selectedSurfaceDescription }}
+                                    </span>
+                                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+
+                                {{-- MENÚ/TABLA DE OPCIONES (Estático) --}}
+                                <flux:menu class="absolute left-0 top-full mt-1 w-[400px] bg-white
+                                    border border-gray-200 rounded-md shadow-lg z-10">
+
+                                    <flux:menu.item disabled>
+                                        <div
+                                            class="w-full grid grid-cols-[30%_70%] px-2 py-1 text-gray-600 font-medium">
+                                            <span>Superficie m2</span>
+                                            <span>Descripción</span>
+                                        </div>
+                                    </flux:menu.item>
+                                    <flux:menu.separator />
+
+                                    {{-- OPCIÓN 1: Terreno Total (ID 1) --}}
+                                    <flux:menu.item
+                                        wire:click="$set('selectedSurfaceOptionId', 1); $set('selectedSurfaceDescription', 'Terreno Total (2,000.00 m2)')"
+                                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors
+                                        {{ $selectedSurfaceOptionId == 1 ? 'bg-gray-100' : '' }}">
+                                        <div class="w-full grid grid-cols-[30%_70%]">
+                                            <span class="text-left font-semibold">2,000.00</span>
+                                            <span class="text-left">Terreno Total</span>
+                                        </div>
+                                    </flux:menu.item>
+
+                                    {{-- OPCIÓN 2: Lote Privativo (ID 2) --}}
+                                    <flux:menu.item
+                                        wire:click="$set('selectedSurfaceOptionId', 2); $set('selectedSurfaceDescription', 'Lote Privativo (2,000.00 m2)')"
+                                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors
+                                        {{ $selectedSurfaceOptionId == 2 ? 'bg-gray-100' : '' }}">
+                                        <div class="w-full grid grid-cols-[30%_70%]">
+                                            <span class="text-left font-semibold">2,000.00</span>
+                                            <span class="text-left">Lote Privativo</span>
+                                        </div>
+                                    </flux:menu.item>
+
+                                    {{-- OPCIÓN 3: Lote Proporcional (ID 3) --}}
+                                    <flux:menu.item
+                                        wire:click="$set('selectedSurfaceOptionId', 3); $set('selectedSurfaceDescription', 'Lote Proporcional (1,980.00 m2)')"
+                                        class="block w-full px-2 py-2 cursor-pointer hover:bg-gray-100 transition-colors
+                                        {{ $selectedSurfaceOptionId == 3 ? 'bg-gray-100' : '' }}">
+                                        <div class="w-full grid grid-cols-[30%_70%]">
+                                            <span class="text-left font-semibold">1,980.00</span>
+                                            <span class="text-left">Lote Proporcional</span>
+                                        </div>
+                                    </flux:menu.item>
+
+                                </flux:menu>
+                            </flux:dropdown>
+                            {{-- Mantenemos el error dentro del flux:field --}}
+                            <flux:error name="selectedSurfaceOptionId" />
+                        </div>
+                    </flux:field>
+
+                    <flux:input type="text" label="C.U.S." wire:model.lazy="subject_cus" readonly />
+                    <flux:input type="text" label="C.O.S." wire:model.lazy="subject_cos" readonly />
+                    <flux:input type="text" label="Lote moda" wire:model.lazy="subject_lote_moda"
                         placeholder="100.00" />
                 </div>
-
-                <!-- Columna 2: Factores Base Sujeto (Wider on mobile, larger on desktop: ~2/3) -->
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm md:w-2/3 w-full">
-                    <h4 class="font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">Factores base del sujeto
+                    <h4
+                        class="font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2 flex justify-between items-center">
+                        <span>Factores del Sujeto</span>
+                        <span class="text-xs font-normal text-gray-500 bg-gray-200 px-2 py-1 rounded">Building</span>
                     </h4>
 
-                    <!-- Contenedor de tabla con bordes -->
                     <div class="overflow-x-auto border border-gray-300 rounded-md">
                         <table class="w-full text-md table-fixed">
                             <thead>
@@ -76,171 +143,76 @@
                                     <th class="text-left py-2 px-3 w-32">Calificación</th>
                                 </tr>
                             </thead>
+
+                            {{--
+                            ============================================================
+                            == BLOQUE TBODY DEL SUJETO
+                            ============================================================
+                            --}}
                             <tbody class="divide-y divide-gray-200 bg-white">
 
-                                {{-- F. ZONA --}}
-                                <tr class="hover:bg-gray-50">
+                                @foreach($subject_factors_ordered as $index => $factor)
+                                @php
+                                $name = $factor['factor_name'] ?? '';
+                                $sigla = $factor['acronym'] ?? '';
+                                $isEditable = !empty($factor['is_editable']);
+                                @endphp
+
+                                <tr class="hover:bg-gray-50" wire:key="subject-factor-{{ $factor['id'] ?? $index }}">
+
+                                    {{-- Descripción / Nombre --}}
                                     <td class="py-1.5 px-3 align-middle">
-                                        <flux:label for="subject_factor_zona"
-                                            class="!py-0 !px-0 !m-0 font-medium text-gray-700 block">F. Zona
-                                        </flux:label>
+                                        @if($isEditable)
+                                        <flux:input type="text" wire:model.lazy="subject_factors_ordered.{{ $index }}.factor_name"
+                                            placeholder="Nombre factor" class="h-9 text-sm w-full" />
+                                        @else
+                                        <flux:label class="font-medium text-gray-700 block">{{ $name }}</flux:label>
+                                        @endif
                                     </td>
+
+                                    {{-- Siglas --}}
                                     <td class="py-1.5 px-2 text-left align-middle">
-                                        <flux:label class="font-mono text-md text-gray-700">FZO</flux:label>
+                                        @if($isEditable)
+                                        <flux:input type="text" wire:model.lazy="subject_factors_ordered.{{ $index }}.acronym"
+                                            placeholder="SIG" class="font-mono text-xs h-9 w-20" />
+                                        @else
+                                        <flux:label class="font-mono text-md text-gray-700">{{ $sigla }}</flux:label>
+                                        @endif
                                     </td>
+
+                                    {{-- Calificación / Rating --}}
                                     <td class="py-1.5 px-3 align-middle">
-                                        <flux:input type="number" step="0.0001" id="subject_factor_zona"
-                                            wire:model.live="subject_factor_zona" placeholder="1.0000"
+                                        @if(in_array($sigla, ['FSU', 'FCUS']))
+                                        {{-- VERSIÓN READONLY (GRIS) --}}
+                                        <flux:input type="number" step="0.0001"
+                                            wire:model.lazy="subject_factors_ordered.{{ $index }}.rating" placeholder="1.0000" readonly
+                                            class="text-right h-9 text-sm w-full bg-gray-50 cursor-not-allowed" />
+                                        @else
+                                        {{-- VERSIÓN EDITABLE (BLANCO) --}}
+                                        <flux:input type="number" step="0.0001"
+                                            wire:model.lazy="subject_factors_ordered.{{ $index }}.rating" placeholder="1.0000"
                                             class="text-right h-9 text-sm w-full" />
+                                        @endif
                                     </td>
                                 </tr>
+                                @endforeach
 
-                                {{-- F. UBICACION --}}
-                                <tr class="hover:bg-gray-50">
-                                    <td class="py-1.5 px-3 align-middle">
-                                        <flux:label for="subject_factor_ubicacion"
-                                            class="!py-0 !px-0 !m-0 font-medium text-gray-700 block">F. Ubicación
-                                        </flux:label>
-                                    </td>
-                                    <td class="py-1.5 px-2 text-left align-middle">
-                                        <flux:label class="font-mono text-md text-gray-700">FUB</flux:label>
-                                    </td>
-                                    <td class="py-1.5 px-3 align-middle">
-                                        <flux:input type="number" step="0.0001" id="subject_factor_ubicacion"
-                                            wire:model.live="subject_factor_ubicacion" placeholder="1.0000"
-                                            class="text-right h-9 text-sm w-full" />
+                                @if(empty($subject_factors_ordered) || count($subject_factors_ordered) === 0)
+                                <tr>
+                                    <td colspan="3" class="py-4 px-3 text-center text-gray-500">
+                                        No hay factores de tipo <strong>land</strong> definidos.
                                     </td>
                                 </tr>
-
-                                {{-- F. TOPOGRAFIA (EDITABLE) --}}
-                                <tr class="hover:bg-gray-50">
-                                    <td class="py-1.5 px-3 align-middle">
-                                        <!-- Usamos un input normal ya que flux:label+input no funcionan bien juntos en este diseño -->
-                                        <flux:input type="text" id="subject_factor_topografia_desc"
-                                            wire:model.live="subject_factor_topografia_desc" placeholder="F. Topografía"
-                                            class="h-9 text-sm  -ml-2" />
-                                    </td>
-                                    <td class="py-1.5 px-2 text-center align-middle">
-                                        <flux:input type="text" id="subject_factor_topografia_siglas"
-                                            wire:model.live="subject_factor_topografia_siglas" placeholder="FTOP"
-                                            class="font-mono text-xs h-9 w-16 -ml-2 mx-auto" />
-                                    </td>
-                                    <td class="py-1.5 px-3 align-middle">
-                                        <flux:input type="number" step="0.0001" id="subject_factor_topografia_valor"
-                                            wire:model.live="subject_factor_topografia_valor" placeholder="1.0000"
-                                            class="text-right h-9 text-sm w-full" />
-                                    </td>
-                                </tr>
-
-                                {{-- F. FORMA --}}
-                                <tr class="hover:bg-gray-50">
-                                    <td class="py-1.5 px-3 align-middle">
-                                        <flux:label for="subject_factor_forma"
-                                            class="!py-0 !px-0 !m-0 font-medium text-gray-700 block">F. Forma
-                                        </flux:label>
-                                    </td>
-                                    <td class="py-1.5 px-2 text-left align-middle">
-                                        <flux:label class="font-mono text-md text-gray-700">FFO</flux:label>
-                                    </td>
-                                    <td class="py-1.5 px-3 align-middle">
-                                        <flux:input type="number" step="0.0001" id="subject_factor_forma"
-                                            wire:model.live="subject_factor_forma" placeholder="1.0000"
-                                            class="text-right h-9 text-sm w-full" />
-                                    </td>
-                                </tr>
-
-                                {{-- F. SUPERFICIE (READONLY) --}}
-                                <tr class="hover:bg-gray-50">
-                                    <td class="py-1.5 px-3 align-middle">
-                                        <flux:label for="subject_factor_superficie"
-                                            class="!py-0 !px-0 !m-0 font-medium text-gray-700 block">F. Superficie
-                                        </flux:label>
-                                    </td>
-                                    <td class="py-1.5 px-2 text-left align-middle">
-                                        <flux:label class="font-mono text-md text-gray-700">FSU</flux:label>
-                                    </td>
-                                    <td class="py-1.5 px-3 align-middle">
-                                        <flux:input type="number" step="0.0001" id="subject_factor_superficie"
-                                            wire:model.live="subject_factor_superficie" placeholder="1.0000"
-                                            class="text-right h-9 text-sm w-full" readonly />
-                                    </td>
-                                </tr>
-
-                                {{-- F. USO DE SUELO (READONLY) --}}
-                                <tr class="hover:bg-gray-50">
-                                    <td class="py-1.5 px-3 align-middle">
-                                        <flux:label for="subject_factor_uso_suelo"
-                                            class="!py-0 !px-0 !m-0 font-medium text-gray-700 block">F. Uso de suelo
-                                        </flux:label>
-                                    </td>
-                                    <td class="py-1.5 px-2 text-left align-middle">
-                                        <flux:label class="font-mono text-md text-gray-700">FCUS</flux:label>
-                                    </td>
-                                    <td class="py-1.5 px-3 align-middle">
-                                        <flux:input type="number" step="0.0001" id="subject_factor_uso_suelo"
-                                            wire:model.live="subject_factor_uso_suelo" placeholder="0.0000"
-                                            class="text-right h-9 text-sm w-full" readonly />
-                                    </td>
-                                </tr>
+                                @endif
                             </tbody>
+                            {{-- FIN DEL TBODY DEL SUJETO --}}
                         </table>
                     </div>
                 </div>
-            </div>
 
+            </div>
         </div>
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -274,43 +246,34 @@
         </div>
         <div class="form-container__content">
 
-
-
-            <!-- Paginación y Botones (Corregido a tu estilo) -->
             <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4">
-
-                <!-- Paginación Numérica (Izquierda) -->
                 <div class="flex items-center space-x-2">
                     <span class="text-md font-semibold text-gray-600 mr-2">Comparable:</span>
                     @for ($i = 1; $i <= $comparablesCount; $i++) <button type="button" wire:click="gotoPage({{ $i }})"
                         class="px-3 py-1 text-sm rounded-full transition-colors cursor-pointer
-                                    @if($currentPage === $i)
-                                        bg-teal-600 text-white font-bold shadow-md
-                                    @else
-                                        bg-gray-200 text-gray-700 hover:bg-blue-100
-                                    @endif">
+                        @if($currentPage === $i)
+                            bg-teal-600 text-white font-bold shadow-md
+                        @else
+                            bg-gray-200 text-gray-700 hover:bg-blue-100
+                        @endif">
                         {{ $i }}
                         </button>
                         @endfor
                 </div>
-
-                <!-- Botones de Acción (Derecha) -->
                 <div class="flex items-center space-x-3 mt-3 md:mt-0">
                     <flux:button class="btn-primary cursor-pointer" type="button"
-                       wire:click="$dispatch('openSummary', { id: {{ $selectedComparableId }}, comparableType: 'land' })" size="sm">
+                        wire:click="$dispatch('openSummary', { id: {{ $selectedComparableId }}, comparableType: 'land' })"
+                        size="sm">
                         Resumen
                     </flux:button>
-                    <flux:button class="btn-primary cursor-pointer" type="button"
-                       wire:click='openComparablesLand' size="sm">
+                    <flux:button class="btn-primary cursor-pointer" type="button" wire:click='openComparablesLand'
+                        size="sm">
                         Cambiar Comparables
                     </flux:button>
                 </div>
             </div>
 
-            <!-- Contenedor Relativo para el Loader (Punto 3) -->
             <div class="relative">
-
-                <!-- Loader (Solo cubre esta sección) -->
                 <div wire:loading.flex wire:target="gotoPage"
                     class="transition-all duration-200 ease-in-out absolute inset-0 bg-white bg-opacity-75 z-20 flex items-center justify-center rounded-lg">
                     <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -323,85 +286,62 @@
                     </svg>
                 </div>
 
-                <!-- Grid de 2 Columnas (Ficha vs. Factores) - El loader se pondrá encima de esto -->
                 <div class="flex flex-col md:flex-row gap-x-6 gap-y-8" wire:loading.class="opacity-50">
 
-                    <!-- Columna 1: Ficha Limpia -->
                     <div class="md:w-1/3 w-full space-y-3" wire:key="ficha-{{ $selectedComparableId }}">
-
                         <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-md">
-
-                            <!-- Columna Izquierda -->
                             <div>
                                 <dt class="font-semibold text-gray-800">Ciudad:</dt>
                                 <dd class="text-gray-600">{{ $selectedComparable->comparable_locality_name ?? 'N/A' }}
                                 </dd>
-
                                 <dt class="font-semibold text-gray-800 mt-2">Calle y núm:</dt>
                                 <dd class="text-gray-600">{{ $selectedComparable->comparable_street ?? 'N/A' }}</dd>
-
                                 <dt class="font-semibold text-gray-800 mt-2">Alc./Mpio:</dt>
-                                <dd class="text-gray-600">{{ $selectedComparable->comparable_municipality_name ?? 'N/A'
+                                <dd class="text-gray-600">{{ $selectedComparable->comparable_locality_name ?? 'N/A'
                                     }}</dd>
-
                                 <dt class="font-semibold text-gray-800 mt-2">Colonia:</dt>
-                                <dd class="text-gray-600">{{ $selectedComparable->comparable_colony ?? 'N/A' }}</dd>
-
+                                <dd class="text-gray-600">{{ $selectedComparable->comparable_colony ??
+                                    $selectedComparable->comparable_other_colony ?? 'N/A'}}</dd>
                                 <dt class="font-semibold text-gray-800 mt-2">Fuente:</dt>
                                 <dd class="text-gray-600">{{ $selectedComparable->comparable_source ?? 'N/A' }}</dd>
-
                                 <dt class="font-semibold text-gray-800 mt-2">Oferta:</dt>
                                 <dd class="text-gray-600">${{ number_format($selectedComparable->comparable_offers, 2)
                                     }}</dd>
-
                                 <dt class="font-semibold text-gray-800 mt-2">Superficie:</dt>
                                 <dd class="text-gray-600">{{ number_format($selectedComparable->comparable_land_area, 2)
-                                    }} m²
-                                </dd>
-
+                                    }} m²</dd>
                                 <dt class="font-semibold text-gray-800 mt-2">Valor Unitario:</dt>
                                 <dd class="text-gray-600">${{ number_format($selectedComparable->comparable_unit_value,
-                                    2) }}
-                                </dd>
-
+                                    2) }}</dd>
                                 <dt class="font-semibold text-gray-800 mt-2">Vigencia/Fecha:</dt>
                                 <dd class="text-gray-600">
                                     {{ $selectedComparable->comparable_date ?
                                     \Carbon\Carbon::parse($selectedComparable->comparable_date)->format('d/m/Y') : 'N/A'
                                     }}
                                 </dd>
-
                                 <dt class="font-semibold text-gray-800 mt-2">Características:</dt>
-                                <dd class="text-gray-600">{{ $selectedComparable->comparable_features ?? 'N/A' }}</dd>
+                                <dd class="text-gray-600">{{ $selectedComparable->comparable_characteristics ?? 'N/A' }}
+                                </dd>
                             </div>
-
-                            <!-- Columna Derecha -->
                             <div>
                                 <dt class="font-semibold text-gray-800">Área libre:</dt>
                                 <dd class="text-gray-600">{{ $selectedComparable->comparable_free_area ?? 'N/A' }}</dd>
-
                                 <dt class="font-semibold text-gray-800 mt-2">Niv. max:</dt>
                                 <dd class="text-gray-600">{{ $selectedComparable->comparable_max_levels ?? 'N/A' }}</dd>
-
                                 <dt class="font-semibold text-gray-800 mt-2">Uso de Suelo:</dt>
                                 <dd class="text-gray-600">{{ $selectedComparable->comparable_land_use ?? 'N/A' }}</dd>
-
                                 <dt class="font-semibold text-gray-800 mt-2">CUS:</dt>
                                 <dd class="text-gray-600">{{ $selectedComparable->comparable_cus ?? 'N/A' }}</dd>
-
                                 <dt class="font-semibold text-gray-800 mt-2">Diferencia:</dt>
                                 <dd class="text-gray-600">% 0.00</dd>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Columna 2: Factores de Ajuste -->
                     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm md:w-2/3 w-full"
                         wire:key="factores-{{ $selectedComparableId }}">
                         <h4 class="font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">Factores de Ajuste
-                            Aplicados
-                        </h4>
-
+                            Aplicados</h4>
                         <div class="overflow-x-auto border border-gray-300 rounded-md">
                             <table class="w-full text-md table-fixed">
                                 <thead>
@@ -414,71 +354,118 @@
                                         <th class="text-left py-2 px-3 w-24">Aplicable</th>
                                     </tr>
                                 </thead>
+
                                 <tbody class="divide-y divide-gray-200 bg-white">
-                                    @foreach ($masterFactors as $factor)
-                                    <tr class="hover:bg-gray-50">
+                                    {{-- ITERA SOBRE LA PROPIEDAD COMPUTADA QUE GARANTIZA EL ORDEN [FNEG, FZO, ..., FSU,
+                                    FCUS] --}}
+                                    @foreach ($this->orderedComparableFactorsForView as $index => $factor)
+                                    @php
+                                    $sigla = $factor['acronym'];
+                                    $sujetoRating = $factor['rating'];
+                                    $inputType = $factor['input_type'] ?? 'number';
+
+                                    // Valores calculados del array (con defaults)
+                                    $factorData = $comparableFactors[$selectedComparableId][$sigla] ?? [];
+                                    $compCalificacion = $factorData['calificacion'] ?? '1.0000';
+                                    $diferencia = $factorData['diferencia'] ?? '0.0000';
+                                    $aplicableCalc = $factorData['factor_ajuste'] ?? '1.0000';
+                                    $aplicableFNEG = $factorData['aplicable'] ?? '0.9000';
+                                    @endphp
+
+                                    <tr class="hover:bg-gray-50"
+                                        wire:key="comp-factor-{{ $selectedComparableId }}-{{ $sigla }}">
+
+                                        {{-- Factor (Sigla) --}}
                                         <td class="py-1.5 px-3 align-middle">
                                             <flux:label class="!py-0 !px-0 !m-0 font-medium text-gray-700 block">
-                                                {{ $factor['label'] }}
+                                                {{ $sigla }}
                                             </flux:label>
                                         </td>
+
+                                        {{-- Cal. Sujeto --}}
                                         <td class="py-1.5 px-2 text-left align-middle">
-                                            <flux:label class="font-mono text-md text-gray-700">
-                                                @if($factor['code'] === 'FNEG')
-                                                1.0000
+                                            <flux:label class="text-gray-700">
+                                                @if($sigla === 'FNEG') - @else {{ $sujetoRating }} @endif
+                                            </flux:label>
+                                        </td>
+
+                                        {{-- Cal. Comp. (Manejo de Inputs) --}}
+                                        <td class="py-1.5 px-2 text-left align-middle">
+                                            @if($inputType === 'read_only')
+                                            {{-- FSU y FCUS: Readonly (label) --}}
+                                            <flux:label class="text-gray-700 h-9 flex items-center px-1">
+                                                {{ $compCalificacion }}
+                                            </flux:label>
+
+                                            @elseif($inputType === 'select_calificacion')
+                                            {{-- FZO y FUB: Select --}}
+                                            <flux:select
+                                                wire:model.lazy="comparableFactors.{{ $selectedComparableId }}.{{ $sigla }}.calificacion"
+                                                class="!text-sm !py-1 w-full">
+
+                                                {{-- Opciones fijas requeridas: 0.8000, 1.0000 y 1.2000 --}}
+                                                <flux:select.option value="0.8">0.8000</flux:select.option>
+                                                <flux:select.option value="1.0">1.0000</flux:select.option>
+                                                <flux:select.option value="1.2">1.2000</flux:select.option>
+
+                                            </flux:select>
+
+                                            @elseif($sigla === 'FNEG')
+                                            {{-- FNEG: Sin Calificación. Mostramos un guion. --}}
+                                            <flux:label class="text-gray-700 h-9 flex items-center px-1">-</flux:label>
+
+                                            @else
+                                            {{-- FFO, FLOC, OTRO (y cualquier otro, por defecto): Input Numérico
+                                            editable --}}
+                                            <flux:input type="number" step="0.0001"
+                                                wire:model.lazy="comparableFactors.{{ $selectedComparableId }}.{{ $sigla }}.calificacion"
+                                                placeholder="1.0000" class="text-left h-9 text-sm w-full" />
+                                            @endif
+                                        </td>
+
+                                        {{-- Dif. (Calculado) --}}
+                                        <td class="py-1.5 px-3 text-left align-middle">
+                                            <flux:label class="text-gray-900">
+                                                @if($sigla === 'FNEG')
+                                                -
                                                 @else
-                                                {{ $this->{$factor['subject_model']} ?? '1.0000' }}
+                                                {{ $diferencia }}
                                                 @endif
                                             </flux:label>
                                         </td>
-                                        <td class="py-1.5 px-2 text-left align-middle">
-                                            @if($factor['type'] === 'select')
-                                            <flux:select class="text-left h-9 text-sm w-full"
-                                                wire:model.live="comparableFactors.{{ $selectedComparable->id }}.{{ $factor['code'] }}.calificacion">
-                                                <flux:select.option value="0.80">0.80</flux:select.option>
-                                                <flux:select.option value="1.00">1.00</flux:select.option>
-                                                <flux:select.option value="1.20">1.20</flux:select.option>
-                                            </flux:select>
-                                            @elseif($factor['type'] === 'number')
-                                            <flux:input type="number" step="0.0001" placeholder="1.0000"
-                                                wire:model.live="comparableFactors.{{ $selectedComparable->id }}.{{ $factor['code'] }}.calificacion"
-                                                class="text-left h-9 text-sm w-full" />
+
+                                        {{-- Aplicable (Factor Ajuste) --}}
+                                        <td class="py-1.5 px-3 text-left align-middle">
+                                            @if($sigla === 'FNEG')
+                                            {{-- FNEG: Editable --}}
+                                            <flux:input type="number" step="0.0001"
+                                                wire:model.lazy="comparableFactors.{{ $selectedComparableId }}.{{ $sigla }}.aplicable"
+                                                placeholder="0.9000" class="text-left h-9 text-sm w-full" />
                                             @else
-                                            <flux:label class="font-mono text-md text-gray-700">
-                                                {{
-                                                $comparableFactors[$selectedComparable->id][$factor['code']]['calificacion']
-                                                }}
+                                            {{-- Los demás "Aplicable" son el Factor Ajuste calculado (read-only) --}}
+                                            <flux:label class="text-gray-900">{{ $aplicableCalc }}
                                             </flux:label>
-                                            @endif
-                                        </td>
-                                        <td class="py-1.5 px-3 text-left align-middle">
-                                            <flux:label class="font-semibold text-gray-900">0.0000</flux:label>
-                                        </td>
-                                        <td class="py-1.5 px-3 text-left align-middle">
-                                            @if($factor['type'] === 'number_aplicable')
-                                            <flux:input type="number" step="0.0001" placeholder="0.9000"
-                                                wire:model.live="comparableFactors.{{ $selectedComparable->id }}.{{ $factor['code'] }}.aplicable"
-                                                class="text-left h-9 text-sm w-full" />
-                                            @else
-                                            <flux:label class="font-semibold text-gray-900">1.0000</flux:label>
                                             @endif
                                         </td>
                                     </tr>
                                     @endforeach
                                 </tbody>
+                                {{-- FIN DEL TBODY DEL COMPARABLE --}}
+
                                 <tfoot class="bg-gray-100 border-t-2 border-gray-300">
                                     <tr class="font-extrabold text-md">
                                         <td colspan="4" class="py-2 px-3 text-right">FACTOR RESULTANTE (FRE):</td>
                                         <td class="py-2 px-3 text-left text-gray-900">
-                                            {{ $comparableFactors[$selectedComparable->id]['FRE']['factor_ajuste'] }}
+                                            {{ $comparableFactors[$selectedComparableId]['FRE']['factor_ajuste'] ??
+                                            '1.0000' }}
                                         </td>
                                     </tr>
                                     <tr class="font-extrabold text-md">
                                         <td colspan="4" class="py-2 px-3 text-right">Valor Unitario Homologado:</td>
                                         <td class="py-2 px-3 text-left text-gray-900">
                                             ${{
-                                            number_format($comparableFactors[$selectedComparable->id]['FRE']['valor_homologado'],
-                                            2)
+                                            number_format($comparableFactors[$selectedComparableId]['FRE']['valor_homologado']
+                                            ?? 0, 2)
                                             }}
                                         </td>
                                     </tr>
@@ -487,177 +474,9 @@
                         </div>
                     </div>
                 </div>
-
             </div>
-
-
-
         </div>
-
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{{--
-
-    <div class="form-container">
-        <div class="form-container__header">
-            Justificaciones
-        </div>
-        <div class="form-container__content">
-
-
-
-            <div class="form-grid form-grid--3 form-grid-3-variation">
-                <div class="label-variation">
-                    <flux:label>F. Zona<span class="sup-required">*</span></flux:label>
-                </div>
-                <div class="radio-input">
-                    <flux:field>
-                        <div class="radio-group-horizontal">
-                            <flux:input type='text' wire:model="justificationZone" />
-                        </div>
-                        <div>
-                            <flux:error name="justificationZone" />
-                        </div>
-                    </flux:field>
-                </div>
-            </div>
-
-            <div class="form-grid form-grid--3 form-grid-3-variation">
-                <div class="label-variation">
-                    <flux:label>F. Uso de suelo<span class="sup-required">*</span></flux:label>
-                </div>
-                <div class="radio-input">
-                    <flux:field>
-                        <div class="radio-group-horizontal">
-                            <flux:input type='text' wire:model="justificactionLandUse" />
-                        </div>
-                        <div>
-                            <flux:error name="justificactionLandUse" />
-                        </div>
-                    </flux:field>
-                </div>
-            </div>
-
-            <div class="form-grid form-grid--3 form-grid-3-variation">
-                <div class="label-variation">
-                    <flux:label>Negociación<span class="sup-required">*</span></flux:label>
-                </div>
-                <div class="radio-input">
-                    <flux:field>
-                        <div class="radio-group-horizontal">
-                            <flux:input type='text' wire:model="justificationNegotiation" />
-                        </div>
-                        <div>
-                            <flux:error name="justificationNegotiation" />
-                        </div>
-                    </flux:field>
-                </div>
-            </div>
-
-            <div class="form-grid form-grid--3 form-grid-3-variation">
-                <div class="label-variation">
-                    <flux:label>Resultante<span class="sup-required">*</span></flux:label>
-                </div>
-                <div class="radio-input">
-                    <flux:field>
-                        <div class="radio-group-horizontal">
-                            <flux:input type='text' wire:model="justificationResulting" />
-                        </div>
-                        <div>
-                            <flux:error name="justificationResulting" />
-                        </div>
-                    </flux:field>
-                </div>
-            </div>
-
-        </div>
-
-    </div>
- --}}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{{-- <div wire:ignore class="w-full h-full">
-    <canvas id="chartHomologationLands" class="w-full h-64"></canvas>
-</div>
-
-<div wire:ignore class="w-full h-full mt-6">
-    <canvas id="chartHomologationStats" class="w-full h-64"></canvas>
-</div>
-
-
-
-
-
-
-
- --}}
-
-
 
 
     <div class="form-container">
@@ -666,16 +485,12 @@
         </div>
         <div class="form-container__content">
 
-            <!-- TABLA DE COMPARABLES Y GRÁFICO SUPERIOR -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-
-                <!-- Tabla de Resumen de Comparables (Lado Izquierdo) -->
                 <div>
                     <div class="overflow-x-auto border border-gray-300 rounded-md shadow-sm">
                         <table class="w-full text-md">
                             <thead>
                                 <tr class="bg-gray-100 text-md font-semibold text-gray-500 border-b border-gray-300">
-                                    <!-- CAMBIO: 7 columnas + cabecera de Factor de Ajuste -->
                                     <th class="py-2 px-3 text-left min-w-[150px]" rowspan="2">N. Comparable</th>
                                     <th class="py-2 px-3 text-center min-w-[120px]" rowspan="2">Valor Oferta</th>
                                     <th class="py-2 px-3 text-center min-w-[120px]" rowspan="2">Val Unit Hom</th>
@@ -689,80 +504,70 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white">
-
-                                <!-- Loop sobre todos los comparables -->
                                 @if($comparables && $comparables->count() > 0)
                                 @foreach ($comparables as $index => $comparable)
                                 @php
-                                // Asegurarnos que las claves existan antes de leerlas
-                                $factorFRE = $comparableFactors[$comparable->id]['FRE']['factor_ajuste'] ?? 0.0;
-                                $valorHomologado = $comparableFactors[$comparable->id]['FRE']['valor_homologado'] ?? 0.0;
-                                $factor2 = $comparableFactors[$comparable->id]['COL_FACTOR_2_PLACEHOLDER'] ?? '0.00';
-                                $ajustePct = $comparableFactors[$comparable->id]['COL_AJUSTE_PCT_PLACEHOLDER'] ?? '0.00%';
-                                $valorFinal = $comparableFactors[$comparable->id]['COL_VALOR_FINAL_PLACEHOLDER'] ?? '0.00';
-                                $isOutOfRange = ((float)$factorFRE < 0.8 || (float)$factorFRE> 1.2);
-                                    @endphp
-
-                                    <tr class="hover:bg-gray-50 {{ $isOutOfRange ? 'bg-red-50' : '' }}">
-                                        <td class="py-1.5 px-3 align-middle text-sm">
-                                            <input type="checkbox" wire:model.live='selectedForStats' value="{{ $comparable->id }}"
-                                                class="rounded text-blue-600 focus:ring-blue-500 mr-2">
-                                            <!-- CAMBIO: Mostrando ID real -->
-                                            {{ $comparable->id }}
-                                        </td>
-                                        <td class="py-1.5 px-3 align-middle text-sm text-center">${{
-                                            number_format($comparable->comparable_offers, 2) }}</td>
-                                        <td class="py-1.5 px-3 align-middle text-sm text-center">${{ number_format($valorHomologado,
-                                            2) }}</td>
-                                        <!-- CAMBIO: Añadidas las celdas de las nuevas columnas -->
-                                        <td class="py-1.5 px-3 align-middle text-sm text-center">{{ number_format($factorFRE, 4) }}
-                                        </td>
-                                        <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $factor2 }}</td>
-                                        <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $ajustePct }}</td>
-                                        <td class="py-1.5 px-3 align-middle text-sm text-center">${{ $valorFinal }}</td>
-                                    </tr>
-                                    @endforeach
-                                    @else
-                                    <tr>
-                                        <td colspan="7" class="py-4 px-3 text-center text-gray-500">No hay comparables cargados.
-                                        </td>
-                                    </tr>
-                                    @endif
-
-                                    <!-- Fila de Promedio -->
-                                    <tr class="font-bold bg-gray-100">
-                                        <td class="py-1.5 px-3 align-middle text-sm">Promedio</td>
-                                        <!-- CAMBIO: Añadidos los promedios calculados -->
-                                        <td class="py-1.5 px-3 align-middle text-sm text-center">${{ $conclusion_promedio_oferta }}
-                                        </td>
-                                        <td class="py-1.5 px-3 align-middle text-sm text-center">${{
-                                            $conclusion_valor_unitario_homologado_promedio }}</td>
-                                        <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $conclusion_factor_promedio }}
-                                        </td>
-                                        <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                            $conclusion_promedio_factor2_placeholder }}</td>
-                                        <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                            $conclusion_promedio_ajuste_pct_placeholder }}</td>
-                                        <td class="py-1.5 px-3 align-middle text-sm text-center">${{
-                                            $conclusion_promedio_valor_final_placeholder }}</td>
-                                    </tr>
+                                $compData = $comparableFactors[$comparable->id] ?? [];
+                                $factorFRE = $compData['FRE']['factor_ajuste'] ?? 0.0;
+                                $valorHomologado = $compData['FRE']['valor_homologado'] ?? 0.0;
+                                $factor2 = '0.00'; // Placeholder
+                                $ajustePct = '0.00%'; // Placeholder
+                                $valorFinal = '0.00'; // Placeholder
+                                @endphp
+                                <tr class="hover:bg-gray-50 ">
+                                    <td class="py-1.5 px-3 align-middle text-sm">
+                                        <input type="checkbox" wire:model.live='selectedForStats'
+                                            value="{{ $comparable->id }}"
+                                            class="rounded text-blue-600 focus:ring-blue-500 mr-2">
+                                        {{ $comparable->id }}
+                                    </td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">${{
+                                        number_format($comparable->comparable_offers, 2) }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">${{
+                                        number_format($valorHomologado, 2) }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        number_format((float)$factorFRE, 4) }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $factor2 }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $ajustePct }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">${{ $valorFinal }}</td>
+                                </tr>
+                                @endforeach
+                                @else
+                                <tr>
+                                    <td colspan="7" class="py-4 px-3 text-center text-gray-500">No hay comparables
+                                        cargados.</td>
+                                </tr>
+                                @endif
+                                <tr class="font-bold bg-gray-100">
+                                    <td class="py-1.5 px-3 align-middle text-sm">Promedio</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">${{
+                                        $conclusion_promedio_oferta }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">${{
+                                        $conclusion_valor_unitario_homologado_promedio }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_factor_promedio }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_promedio_factor2_placeholder }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_promedio_ajuste_pct_placeholder }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">${{
+                                        $conclusion_promedio_valor_final_placeholder }}</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Gráfico Superior (Chart.js + Alpine.js) -->
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm flex items-center justify-center min-h-[300px]">
-                    <div x-data="chartHomologationLands()" wire:ignore class="w-full h-full">
-                        <canvas x-ref="chartCanvas"></canvas>
+                {{-- GRÁFICA 1: MIXTA (Arriba a la derecha) --}}
+                <div x-data="chartHomologationLands()" x-init="init()" wire:ignore
+                    class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm flex items-center justify-center min-h-[300px]">
+                    <div class="w-full h-full">
+                        <canvas x-ref="chart1"></canvas>
                     </div>
                 </div>
             </div>
 
-            <!-- TABLA DE ESTADÍSTICAS Y GRÁFICO INFERIOR -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-
-                <!-- Tabla de Desviación (Lado Izquierdo) -->
                 <div>
                     <div class="overflow-x-auto border border-gray-300 rounded-md shadow-sm">
                         <table class="w-full text-md">
@@ -774,14 +579,6 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white">
-                                <!-- CAMBIO: Añadida Media Aritmética -->
-                           {{--      <tr>
-                                    <td class="py-1.5 px-3 align-middle text-sm font-semibold">Media aritmética</td>
-                                    <td class="py-1.5 px-3 align-middle text-sm text-center">${{ $conclusion_media_aritmetica_oferta
-                                        }}</td>
-                                    <td class="py-1.5 px-3 align-middle text-sm text-center">${{
-                                        $conclusion_media_aritmetica_homologado }}</td>
-                                </tr> --}}
                                 <tr>
                                     <td class="py-1.5 px-3 align-middle text-sm font-semibold">Desviación Estándar</td>
                                     <td class="py-1.5 px-3 align-middle text-sm text-center">{{
@@ -790,105 +587,75 @@
                                         $conclusion_desviacion_estandar_homologado }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="py-1.5 px-3 align-middle text-sm font-semibold">Coeficiente de Variación</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm font-semibold">Coeficiente de Variación
+                                    </td>
                                     <td class="py-1.5 px-3 align-middle text-sm text-center">{{
                                         $conclusion_coeficiente_variacion_oferta }} %</td>
                                     <td class="py-1.5 px-3 align-middle text-sm text-center">{{
                                         $conclusion_coeficiente_variacion_homologado }} %</td>
                                 </tr>
-                                <tr>
-                                    <td class="py-1.5 px-3 align-middle text-sm font-semibold">Dispersión</td>
-                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $conclusion_dispersion_oferta }} %
-                                    </td>
-                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $conclusion_dispersion_homologado }}
-                                        %</td>
-                                </tr>
                                 <tr class="font-bold bg-gray-50">
                                     <td class="py-1.5 px-3 align-middle text-sm font-semibold">Máximo</td>
-                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $conclusion_maximo_oferta }}</td>
-                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $conclusion_maximo_homologado }}
-                                    </td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_maximo_oferta }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_maximo_homologado }}</td>
                                 </tr>
                                 <tr class="font-bold bg-gray-50">
                                     <td class="py-1.5 px-3 align-middle text-sm font-semibold">Mínimo</td>
-                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $conclusion_minimo_oferta }}</td>
-                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $conclusion_minimo_homologado }}
-                                    </td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_minimo_oferta }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_minimo_homologado }}</td>
                                 </tr>
                                 <tr class="font-bold bg-gray-50">
                                     <td class="py-1.5 px-3 align-middle text-sm font-semibold">Diferencia</td>
-                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $conclusion_diferencia_oferta }}
-                                    </td>
-                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $conclusion_diferencia_homologado }}
-                                    </td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_diferencia_oferta }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_diferencia_homologado }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Gráfico Inferior (Chart.js + Alpine.js) -->
-             <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm flex items-center justify-center min-h-[300px]">
-                <div x-data="chartHomologationLands()" wire:ignore class="w-full h-full">
-                    <canvas x-ref="chartCanvas"></canvas>
+                {{-- GRÁFICA 2: BARRAS ROJAS (Abajo a la derecha) --}}
+                <div x-data="chartHomologationStats()" x-init="init()" wire:ignore
+                    class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm flex items-center justify-center min-h-[300px]">
+                    <div class="w-full h-full">
+                        <canvas x-ref="chart2"></canvas>
+                    </div>
                 </div>
             </div>
-            </div>
 
-            <!-- VALOR UNITARIO LOTE TIPO Y REDONDEO -->
-            <!-- CAMBIO: Re-maquetado con Grid para layout de imagen y responsividad -->
-           <div class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
-            <!-- Contenedor principal que apila las dos filas verticalmente con un espacio -->
-            <div class="flex flex-col space-y-4">
-
-                <!--
-                  FILA 1: VALOR UNITARIO LOTE TIPO
-                  - Móvil (default): flex-col (label arriba, valor abajo)
-                  - Desktop (md:): flex-row (label izquierda, valor derecha), alineados y justificados.
-                -->
-                <div class="flex flex-col md:flex-row md:justify-between md:items-center">
-                    <!-- Izquierda: Label -->
-                    <span class="text-xl font-bold text-gray-800">VALOR UNITARIO LOTE TIPO:</span>
-
-                    <!-- Derecha: Valor -->
-                    <!-- 'mt-1' para dar espacio en móvil, 'md:mt-0' lo resetea en desktop -->
-                    <span class="text-3xl font-extrabold text-gray-900 mt-1 md:mt-0">
-                        {{ $conclusion_valor_unitario_lote_tipo }}
-                    </span>
+            <div class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
+                <div class="flex flex-col space-y-4">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center">
+                        <span class="text-xl font-bold text-gray-800">VALOR UNITARIO LOTE TIPO:</span>
+                        <span class="text-3xl font-extrabold text-gray-900 mt-1 md:mt-0">
+                            {{ $conclusion_valor_unitario_lote_tipo }}
+                        </span>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center">
+                        <label for="tipo_redondeo"
+                            class="block text-sm font-medium text-gray-700 whitespace-nowrap mb-1 md:mb-0">
+                            TIPO DE REDONDEO SOBRE EL VALOR UNITARIO LOTE TIPO:
+                        </label>
+                        <flux:select wire:model.live="conclusion_tipo_redondeo" id="tipo_redondeo"
+                            class="w-full md:w-40 text-sm mt-1 md:mt-0">
+                            <flux:select.option value="Unidades">Unidades</flux:select.option>
+                            <flux:select.option value="Decenas">Decenas</flux:select.option>
+                            <flux:select.option value="Centenas">Centenas</flux:select.option>
+                            <flux:select.option value="Miles">Miles</flux:select.option>
+                            <flux:select.option value="Sin decimales">Sin decimales</flux:select.option>
+                            <flux:select.option value="Sin redondeo">Sin redondeo</flux:select.option>
+                        </flux:select>
+                    </div>
                 </div>
-
-                <!--
-                  FILA 2: TIPO DE REDONDEO
-                  - Misma lógica: flex-col en móvil, flex-row en desktop.
-                -->
-                <div class="flex flex-col md:flex-row md:justify-between md:items-center">
-                    <!-- Izquierda: Label -->
-                    <label for="tipo_redondeo" class="block text-sm font-medium text-gray-700 whitespace-nowrap mb-1 md:mb-0">
-                        TIPO DE REDONDEO SOBRE EL VALOR UNITARIO LOTE TIPO:
-                    </label>
-
-                    <!-- Derecha: Select -->
-                    <!-- 'w-full' para móvil, 'md:w-40' para desktop. 'mt-1' para espacio en móvil -->
-                    <flux:select wire:model.live="conclusion_tipo_redondeo" id="tipo_redondeo"
-                        class="w-full md:w-40 text-sm mt-1 md:mt-0">
-                        <flux:select.option value="UNIDADES">UNIDADES</flux:select.option>
-                        <flux:select.option value="DECENAS">DECENAS</flux:select.option>
-                        <flux:select.option value="CENTENAS">CENTENAS</flux:select.option>
-                        <flux:select.option value="MILLARES">MILLARES</flux:select.option>
-                    </flux:select>
-                </div>
-
             </div>
         </div>
-
-        </div>
-
     </div>
-
-
-
-
-
 
     @else
     <div>
@@ -897,100 +664,76 @@
     </div>
     @endif
 
-
-
-
     {{-- Añadimos el componente del modal para el resumen del comparable --}}
     <livewire:forms.comparables.comparable-summary />
 
 
-    <!-- CÓDIGO ALPINE.JS PARA LOS GRÁFICOS (DEBE IR AL FINAL DE TU VISTA) -->
-<script>
-    document.addEventListener('alpine:init', () => {
+    <script>
+        // Función general para crear y actualizar gráficas de manera robusta
+        function createChartManager(chartType, eventName, refName) {
+            return {
+                chart: null,
 
-    // 📊 Gráfica de homologación de terrenos
-    Alpine.data('chartHomologationLands', () => ({
-        chart: null,
+                init() {
+                    // 1. Asegura que el DOM está listo antes de dibujar (Truco del mapManager)
+                    setTimeout(() => this.drawInitialChart(), 100);
 
-        initChart(data) {
-            const ctx = this.$root.querySelector('canvas');
-            this.chart = new Chart(ctx, {
-                type: 'bar',
-                data: data,
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'top' },
-                        title: {
-                            display: true,
-                            text: 'Homologación de Terrenos'
-                        }
+                    // 2. Escucha el evento Livewire que el controlador despacha
+                    Livewire.on(eventName, (event) => {
+                        const data = event[0].data;
+                        this.createOrUpdateChart(data);
+                    });
+                },
+
+                drawInitialChart() {
+                    // Inicializa con datos vacíos para montar el objeto Chart
+                    const initialData = { labels: [], datasets: [] };
+                    this.createOrUpdateChart(initialData);
+                },
+
+                createOrUpdateChart(data) {
+                    const ctx = this.$refs[refName];
+                    if (!ctx) return;
+
+                    if (this.chart) {
+                        // Si ya existe, solo actualiza los datos y redibuja
+                        this.chart.data = data;
+                        this.chart.update();
+                    } else {
+                        // Si no existe, inicializa la gráfica
+                        this.chart = new Chart(ctx, {
+                            type: chartType,
+                            data: data,
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: { mode: 'index', intersect: false }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        // La Gráfica 1 (Mixta, arriba) tiene líneas de cuadrícula más suaves (drawBorder: false)
+                                        grid: { display: true, drawBorder: (refName === 'chart2') }
+                                    },
+                                    x: {
+                                        grid: { display: false }
+                                    }
+                                }
+                            }
+                        });
                     }
                 }
-            });
-        },
-
-        updateChart(newData) {
-            if (this.chart) {
-                this.chart.data = newData;
-                this.chart.update();
-            }
-        },
-
-        init() {
-            // 👇 Aquí está el cambio: sin paréntesis
-            const newData = this.$wire.chartData;
-            this.initChart(newData);
-
-            Livewire.hook('element.updated', (el, component) => {
-                if (el.contains(this.$root)) {
-                    this.updateChart(this.$wire.chartData);
-                }
-            });
+            };
         }
-    }));
 
-    // 📈 Gráfica de estadísticas de homologación
-    Alpine.data('chartHomologationStats', () => ({
-        chart: null,
+        document.addEventListener('alpine:init', () => {
+            // 📊 GRÁFICA 1: MIXTA (Arriba) - Tipo base 'bar' para que la línea se dibuje correctamente
+            Alpine.data('chartHomologationLands', () => createChartManager('bar', 'updateLandChart1', 'chart1'));
 
-        initStatsChart(data) {
-            const ctx = this.$root.querySelector('canvas');
-            this.chart = new Chart(ctx, {
-                type: 'line',
-                data: data,
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'top' },
-                        title: {
-                            display: true,
-                            text: 'Estadísticas de Homologación'
-                        }
-                    }
-                }
-            });
-        },
-
-        updateStatsChart(newData) {
-            if (this.chart) {
-                this.chart.data = newData;
-                this.chart.update();
-            }
-        },
-
-        init() {
-            // 👇 Igual aquí: sin paréntesis
-            const newData = this.$wire.chartData;
-            this.initStatsChart(newData);
-
-            Livewire.hook('element.updated', (el, component) => {
-                if (el.contains(this.$root)) {
-                    this.updateStatsChart(this.$wire.chartData);
-                }
-            });
-        }
-    }));
-});
-</script>
+            // 📊 GRÁFICA 2: BARRAS ROJAS (Abajo) - Tipo base 'bar'
+            Alpine.data('chartHomologationStats', () => createChartManager('bar', 'updateLandChart2', 'chart2'));
+        });
+    </script>
 </div>

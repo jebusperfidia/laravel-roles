@@ -2,110 +2,145 @@
 
 namespace App\Services;
 
-// --- BLOQUE DE 'USE' CORREGIDO ---
-use Illuminate\Database\Eloquent\Model as EloquentModel; // <-- ¡AQUÍ ESTÁ EL ARREGLO! Se renombra el alias
+use Illuminate\Database\Eloquent\Model as EloquentModel;
 use App\Models\Forms\Homologation\HomologationValuationFactorModel;
 use App\Models\Forms\Homologation\HomologationComparableFactorModel;
 use Illuminate\Support\Facades\Log;
 
-/**
- * Servicio encargado de CLONAR los factores del Sujeto (Tabla 1)
- * en la tabla de factores del Comparable (Tabla 2)
- * cuando un comparable es asignado o desasignado.
- */
 class HomologationComparableService
 {
-    /**
-     * Crea los factores para un Comparable (Tabla 2) basándose
-     * en la lista de factores del Sujeto (Tabla 1).
-     */
-    // --- SE USA EL NUEVO ALIAS AQUÍ ---
     public function createComparableFactors(int $valuationId, EloquentModel $comparablePivot, string $type): void
     {
-        // --- TRAMPA 1: (Ver en storage/logs/laravel.log) ---
-      /*   Log::debug("HomologationComparableService INICIADO", [
-            'valuationId' => $valuationId,
-            'pivot_id' => $comparablePivot->id,
-            'pivot_class' => get_class($comparablePivot),
-            'type' => $type
-        ]);
- */
-        // --- TRAMPA 2: ¿Encontramos factores del Sujeto? ---
         $subjectFactors = HomologationValuationFactorModel::where('valuation_id', $valuationId)
             ->where('homologation_type', $type)
             ->get();
 
-       /*  if ($subjectFactors->isEmpty()) {
-            dd(
-                '¡ERROR DE DEPURACIÓN! (Paso 1)',
-                'El servicio SÍ se ejecutó, pero NO encontró factores "subject" (Tabla 1) para clonar.',
-                'valuationId:' . $valuationId,
-                'type:' . $type
-            );
-        } */
-
-        // --- TRAMPA 3: ¿El ID del Pivote es NULO? ---
-    /*     if (is_null($comparablePivot->id)) {
-            dd(
-                '¡ERROR DE DEPURACIÓN! (Paso 2)',
-                '¡¡EL ID DEL PIVOTE ES NULO!!',
-                'El modelo del pivote (ValuationBuildingComparableModel) no está devolviendo un ID después de crearse.',
-                $comparablePivot
-            );
-        }
- */
         $factorsToInsert = [];
         $now = now();
 
+        $landId = $type === 'land' ? $comparablePivot->id : null;
+        $buildingId = $type === 'building' ? $comparablePivot->id : null;
+
+        /*
+        |--------------------------------------------------------------------------
+        | BLOQUE LAND
+        |--------------------------------------------------------------------------
+        */
         if ($type === 'land') {
+
             foreach ($subjectFactors as $subjectFactor) {
                 $factorsToInsert[] = [
-                    'valuation_land_comparable_id' => $comparablePivot->id,
-                    'homologation_type' => $subjectFactor->homologation_type,
-                    'factor_name' => $subjectFactor->factor_name,
-                    'acronym' => $subjectFactor->acronym,
-                    'is_editable' => $subjectFactor->is_editable,
-                    'rating' => 1.0000,
-                    'applicable' => 1.0000,
-                    'created_at' => $now,
-                    'updated_at' => $now,
+                    'valuation_land_comparable_id'     => $landId,
+                    'valuation_building_comparable_id' => null,
+                    'homologation_type'                => $subjectFactor->homologation_type,
+                    'factor_name'                      => $subjectFactor->factor_name,
+                    'acronym'                          => $subjectFactor->acronym,
+                    'is_editable'                      => $subjectFactor->is_editable,
+                    'rating'                           => 1.0000,
+                    'applicable'                       => 1.0000,
+                    'created_at'                       => $now,
+                    'updated_at'                       => $now,
                 ];
             }
-        } else { // 'building'
-            foreach ($subjectFactors as $subjectFactor) {
-                $factorsToInsert[] = [
-                    'valuation_building_comparable_id' => $comparablePivot->id,
-                    'homologation_type' => $subjectFactor->homologation_type,
-                    'factor_name' => $subjectFactor->factor_name,
-                    'acronym' => $subjectFactor->acronym,
-                    'is_editable' => $subjectFactor->is_editable,
-                    'rating' => 1.0000,
-                    'applicable' => 1.0000,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ];
-            }
+
+            // FNEG para LAND
+            $factorsToInsert[] = [
+                'valuation_land_comparable_id'     => $landId,
+                'valuation_building_comparable_id' => null,
+                'homologation_type'                => 'land',
+                'factor_name'                      => 'F. Negociación',
+                'acronym'                          => 'FNEG',
+                'is_editable'                      => false,
+                'rating'                           => 1.0000,
+                'applicable'                       => 1.0000,
+                'created_at'                       => $now,
+                'updated_at'                       => $now,
+            ];
         }
 
-        // --- TRAMPA 4: ¿Cómo se ve el array? ---
-    /*     if ($type === 'building') {
-            dd(
-                '¡OK! DEPURACIÓN (Paso 3)',
-                'El array final que se intentará insertar es:',
-                $factorsToInsert
-            );
+        /*
+        |--------------------------------------------------------------------------
+        | BLOQUE BUILDING
+        |--------------------------------------------------------------------------
+        */ else {
+
+            foreach ($subjectFactors as $subjectFactor) {
+                $factorsToInsert[] = [
+                    'valuation_land_comparable_id'     => null,
+                    'valuation_building_comparable_id' => $buildingId,
+                    'homologation_type'                => $subjectFactor->homologation_type,
+                    'factor_name'                      => $subjectFactor->factor_name,
+                    'acronym'                          => $subjectFactor->acronym,
+                    'is_editable'                      => $subjectFactor->is_editable,
+                    'rating'                           => 1.0000,
+                    'applicable'                       => 1.0000,
+                    'created_at'                       => $now,
+                    'updated_at'                       => $now,
+                ];
+            }
+
+            // FNEG para BUILDING
+            $factorsToInsert[] = [
+                'valuation_land_comparable_id'     => null,
+                'valuation_building_comparable_id' => $buildingId,
+                'homologation_type'                => 'building',
+                'factor_name'                      => 'F. Negociación',
+                'acronym'                          => 'FNEG',
+                'is_editable'                      => false,
+                'rating'                           => 1.0000,
+                'applicable'                       => 1.0000,
+                'created_at'                       => $now,
+                'updated_at'                       => $now,
+            ];
         }
- */
+
+        /*
+        |--------------------------------------------------------------------------
+        | NORMALIZAR FILAS ANTES DEL INSERT
+        |--------------------------------------------------------------------------
+        | Aseguramos que todas las filas tengan EXACTAMENTE las mismas claves,
+        | en el mismo orden. Esto elimina errores de "column count doesn't match".
+        |--------------------------------------------------------------------------
+        */
         if (!empty($factorsToInsert)) {
-            HomologationComparableFactorModel::insert($factorsToInsert);
+            // Definimos el set completo de columnas que queremos insertar (mismo orden).
+            $columns = [
+                'valuation_land_comparable_id',
+                'valuation_building_comparable_id',
+                'homologation_type',
+                'factor_name',
+                'acronym',
+                'is_editable',
+                'rating',
+                'applicable',
+                'created_at',
+                'updated_at',
+            ];
+
+            // Normalizamos cada fila: rellenamos keys faltantes con null y preservamos el orden.
+            $normalized = array_map(function ($row) use ($columns) {
+                // Rellena con null las claves que falten
+                $base = array_fill_keys($columns, null);
+                // Sobrescribe con los valores reales
+                foreach ($row as $k => $v) {
+                    $base[$k] = $v;
+                }
+                // Asegura el orden según $columns
+                $ordered = [];
+                foreach ($columns as $col) {
+                    $ordered[$col] = $base[$col];
+                }
+                return $ordered;
+            }, $factorsToInsert);
+
+            // Inserción masiva con arrays normalizados
+            HomologationComparableFactorModel::insert($normalized);
         }
 
         Log::debug("HomologationComparableService FINALIZADO CON ÉXITO");
     }
 
-    /**
-     * Elimina todos los factores de homologación (Tabla 2) asociados a un PIVOTE.
-     */
+
     public function deleteComparableFactors(int $pivotId, string $type): void
     {
         $fkColumn = $type === 'land'

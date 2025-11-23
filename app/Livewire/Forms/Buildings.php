@@ -215,6 +215,22 @@ class Buildings extends Component
     }
 
 
+
+
+
+    private function calculateAverages()
+    {
+        // Protección contra división entre cero
+        $surface = $this->totalSurfacePrivate ?: 1;
+
+        $this->ageProperty = $this->totalAgeProperty / $surface;
+        $this->usefulLifeProperty = $this->totalUsefulLifeProperty / $surface;
+    }
+
+
+
+
+
     //Funciones auxiliares para actualizar los valores de cada tabla
     public function loadPrivateConstructions()
     {
@@ -246,6 +262,9 @@ class Buildings extends Component
             ->sum('surface');
 
         //dd($this->totalSurfacePrivateVendible, $this->totalSurfacePrivateAccesoria);
+
+        // IMPORTANTE: calcular promedios aquí
+        $this->calculateAverages();
     }
 
     public function loadCommonConstructions()
@@ -315,6 +334,12 @@ class Buildings extends Component
             // ... Asigna aquí los demás inputs calculados o asignados ...
         }
     }
+
+
+
+
+
+
 
 
 

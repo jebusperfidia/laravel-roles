@@ -375,7 +375,7 @@
                                     @endforeach
                                     @endif
 
-                                    @php
+                                    {{-- @php
 
 
                                     $this->ageProperty = $this->totalAgeProperty/$this->totalSurfacePrivate;
@@ -383,8 +383,8 @@
                                     $this->usefulLifeProperty = $this->totalUsefulLifeProperty/$this->totalSurfacePrivate;
 
 
-                                    //dd($this->totalAgeProperty, $this->totalSurfacePrivate, $this->totalUsefulLifeProperty, $this->usefulLifeProperty, $this->ageProperty);
-                                    @endphp
+
+                                    @endphp --}}
                                 </tbody>
                                 <tfoot>
                                     <tr class="font-bold">

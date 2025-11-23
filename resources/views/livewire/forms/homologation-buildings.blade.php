@@ -375,17 +375,16 @@
                                     </td>
                                 </tr>
                                 {{-- Localización --}}
-                                <tr>
-                                    <td class="py-1.5 align-middle text-gray-800 font-medium">Localización:</td>
-                                    <td class="py-1.5 align-middle">
-                                        <flux:select
-                                            wire:model.live="comparableFactors.{{ $selectedComparableId }}.localizacion"
-                                            placeholder="Lote intermedio" class="!text-sm !py-1">
-                                            <flux:select.option value="Lote intermedio">Lote intermedio
-                                                </flux:select.select>
-                                                <flux:select.option value="Esquina">Esquina</flux:select.option>
-                                        </flux:select>
-                                    </td>
+                          <tr>
+ <td class="py-1.5 align-middle text-gray-800 font-medium">Localización:</td>
+ <td class="py-1.5 align-middle">
+ <flux:select
+ wire:model.live="comparableFactors.{{ $selectedComparableId }}.localizacion"
+ placeholder="Lote intermedio" class="!text-sm !py-1">
+ <flux:select.option value="Lote intermedio">Lote intermedio</flux:select.option>
+ <flux:select.option value="Esquina">Esquina</flux:select.option>
+ </flux:select>
+ </td>
                                     <!-- CAMBIO AQUÍ: Añadido pl-3 -->
                                     <td class="py-1.5 pl-3 align-middle text-gray-700 font-semibold">
                                         {{
@@ -536,7 +535,7 @@
 
 
     <!-- 3. SECCIÓN JUSTIFICACIONES (Simplificada) -->
-    <div class="form-container">
+  {{--   <div class="form-container">
         <div class="form-container__header">
             Justificaciones
         </div>
@@ -558,7 +557,7 @@
             </div>
         </div>
     </div>
-
+ --}}
 
     <!-- 4. SECCIÓN CONCLUSIONES (Punto 7 y 8) -->
     <div class="form-container">

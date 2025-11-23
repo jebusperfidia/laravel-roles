@@ -17,12 +17,14 @@ class HomologationValuationFactorModel extends Model
         'factor_name',
         'acronym',
         'is_editable',
+        'is_custom',
         'rating',
         'homologation_type',
     ];
 
     protected $casts = [
         'is_editable' => 'boolean',
+        'is_custom' => 'boolean',
         'rating' => 'float',
     ];
 
