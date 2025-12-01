@@ -91,8 +91,13 @@ class UrbanFeatures extends Component
             // Variables tercer contenedor (luse_)
             $this->luse_landUse = $urbanFeatures->land_use;
             $this->luse_descriptionSourceLand = $urbanFeatures->description_source_land;
+
+            //
             $this->luse_mandatoryFreeArea = $urbanFeatures->mandatory_free_area;
+
             $this->luse_allowedLevels = $urbanFeatures->allowed_levels;
+
+            //
             $this->luse_landCoefficientArea = $urbanFeatures->land_coefficient_area;
 
         } else {

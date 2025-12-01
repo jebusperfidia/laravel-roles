@@ -35,6 +35,7 @@ class FormIndex extends Component
         'market-focus',
         'homologation-lands',
         'homologation-buildings',
+        'cost-approach',
         'pre-conclusion-considerations',
         'special-installations',
         'd-t-c-infonavit',

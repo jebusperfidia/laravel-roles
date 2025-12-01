@@ -16,6 +16,7 @@ class HomologationValuationEquipmentModel extends Model
         'valuation_id',
         'description',
         'unit',
+        'custom_description',
         'quantity',
         'total_value',
     ];

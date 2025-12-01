@@ -3,12 +3,22 @@
 namespace App\Services;
 
 use Illuminate\Database\Eloquent\Model as EloquentModel;
+use Illuminate\Support\Facades\Log;
+
+// Modelos de Factores
 use App\Models\Forms\Homologation\HomologationValuationFactorModel;
 use App\Models\Forms\Homologation\HomologationComparableFactorModel;
-use Illuminate\Support\Facades\Log;
+
+// Modelos de Equipamiento
+use App\Models\Forms\Homologation\HomologationValuationEquipmentModel;
+use App\Models\Forms\Homologation\HomologationComparableEquipmentModel;
 
 class HomologationComparableService
 {
+    // =========================================================================
+    // FACTORES: CREACIÓN Y COPIA (Ejecutado en assignedElement)
+    // =========================================================================
+
     public function createComparableFactors(int $valuationId, EloquentModel $comparablePivot, string $type): void
     {
         $subjectFactors = HomologationValuationFactorModel::where('valuation_id', $valuationId)
@@ -98,12 +108,9 @@ class HomologationComparableService
         |--------------------------------------------------------------------------
         | NORMALIZAR FILAS ANTES DEL INSERT
         |--------------------------------------------------------------------------
-        | Aseguramos que todas las filas tengan EXACTAMENTE las mismas claves,
-        | en el mismo orden. Esto elimina errores de "column count doesn't match".
-        |--------------------------------------------------------------------------
         */
         if (!empty($factorsToInsert)) {
-            // Definimos el set completo de columnas que queremos insertar (mismo orden).
+            // Definimos el set completo de columnas (asegurando el orden)
             $columns = [
                 'valuation_land_comparable_id',
                 'valuation_building_comparable_id',
@@ -117,15 +124,12 @@ class HomologationComparableService
                 'updated_at',
             ];
 
-            // Normalizamos cada fila: rellenamos keys faltantes con null y preservamos el orden.
+            // Normalizamos cada fila: rellena keys faltantes con null y preservamos el orden.
             $normalized = array_map(function ($row) use ($columns) {
-                // Rellena con null las claves que falten
                 $base = array_fill_keys($columns, null);
-                // Sobrescribe con los valores reales
                 foreach ($row as $k => $v) {
                     $base[$k] = $v;
                 }
-                // Asegura el orden según $columns
                 $ordered = [];
                 foreach ($columns as $col) {
                     $ordered[$col] = $base[$col];
@@ -133,14 +137,67 @@ class HomologationComparableService
                 return $ordered;
             }, $factorsToInsert);
 
-            // Inserción masiva con arrays normalizados
+            // Inserción masiva
             HomologationComparableFactorModel::insert($normalized);
         }
 
-        Log::debug("HomologationComparableService FINALIZADO CON ÉXITO");
+        Log::debug("Factores sincronizados con éxito.");
     }
 
+    // =========================================================================
+    // EQUIPAMIENTO: CREACIÓN Y COPIA (NUEVA LÓGICA FEQ)
+    // =========================================================================
 
+    /**
+     * Copia el equipamiento del Avalúo (Sujeto) al Comparable recién asignado (solo Buildings).
+     */
+    public function createComparableEquipment(int $valuationId, int $pivotId, string $type): void
+    {
+        // 1. Solo ejecutamos si es tipo 'building'
+        if ($type !== 'building') {
+            return;
+        }
+
+        // 2. Obtenemos el equipamiento base del Avalúo (Sujeto)
+        $subjectEquipments = HomologationValuationEquipmentModel::where('valuation_id', $valuationId)->get();
+
+        if ($subjectEquipments->isEmpty()) {
+            return;
+        }
+
+        $equipmentsToInsert = [];
+        $now = now();
+
+        // 3. Preparamos el array para inserción masiva
+        foreach ($subjectEquipments as $subjectEq) {
+            $equipmentsToInsert[] = [
+                'valuation_equipment_id'           => $subjectEq->id,
+                'valuation_building_comparable_id' => $pivotId, // ID de la tabla PIVOTE (Construcción)
+                'description'                      => $subjectEq->description,
+                'unit'                             => $subjectEq->unit,
+                'quantity'                         => $subjectEq->quantity, // Copiamos cantidad inicial del sujeto
+                'difference'                       => 0.00,
+                'percentage'                       => 0.00,
+                'created_at'                       => $now,
+                'updated_at'                       => $now,
+            ];
+        }
+
+        // 4. Insertar
+        if (!empty($equipmentsToInsert)) {
+            HomologationComparableEquipmentModel::insert($equipmentsToInsert);
+        }
+
+        Log::debug("Equipamiento (FEQ) sincronizado para Comparable Pivot ID: $pivotId");
+    }
+
+    // =========================================================================
+    // DATOS: ELIMINACIÓN (Ejecutado en deallocatedElement)
+    // =========================================================================
+
+    /**
+     * Elimina los factores de homologación asociados a un comparable desasignado.
+     */
     public function deleteComparableFactors(int $pivotId, string $type): void
     {
         $fkColumn = $type === 'land'
@@ -148,5 +205,21 @@ class HomologationComparableService
             : 'valuation_building_comparable_id';
 
         HomologationComparableFactorModel::where($fkColumn, $pivotId)->delete();
+        Log::debug("Factores eliminados para Comparable Pivot ID: $pivotId");
+    }
+
+    /**
+     * Elimina el equipamiento asociado a un comparable desasignado (solo Buildings).
+     */
+    public function deleteComparableEquipment(int $pivotId, string $type): void
+    {
+        if ($type !== 'building') {
+            return;
+        }
+
+        // Borramos usando el ID de la tabla pivot de building
+        HomologationComparableEquipmentModel::where('valuation_building_comparable_id', $pivotId)->delete();
+
+        Log::debug("Equipamiento (FEQ) eliminado para Comparable Pivot ID: $pivotId");
     }
 }

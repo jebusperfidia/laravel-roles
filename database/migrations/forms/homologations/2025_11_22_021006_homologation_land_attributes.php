@@ -21,8 +21,8 @@ return new class extends Migration
             $table->decimal('surface_applicable_area', 16, 10)->default(0);
 
             // Inputs del Sujeto
-            $table->string('cus')->nullable();
-            $table->string('cos')->nullable();
+            $table->decimal('cus', 16, 10)->nullable();
+            $table->decimal('cos', 16, 10)->nullable();
             $table->decimal('mode_lot', 16, 10)->nullable();
 
             // Campo solicitado (Valor Unitario Lote Tipo)

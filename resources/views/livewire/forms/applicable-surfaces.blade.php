@@ -112,6 +112,11 @@
                     </div>
                 </div>
 
+
+
+
+
+                {{-- ESTOS VALORES SON LOS QUE SE DEBEN MOSTRAR EN EL SELECT DE HOMOLOGATION LANDS DE SUPERFICIE APLICABLE --}}
                 <div class="mt-[64px] form-grid form-grid--2-center">
                     <div class="overflow-x-auto">
                         <table class="border-2 ">

@@ -34,6 +34,7 @@
         ['key' => 'market-focus', 'icon' => 'bars-arrow-up', 'label' => __('Enfoque de mercado')],
         ['key' => 'homologation-lands', 'icon' => 'home-modern', 'label' => __('Terrenos')],
         ['key' => 'homologation-buildings', 'icon' => 'presentation-chart-line', 'label' => __('Ventas')],
+        ['key' => 'cost-approach', 'icon' => 'document-currency-dollar', 'label' => __('Enfoque de costos')],
        /*  ['key' => 'market-focus', 'icon' => 'bars-arrow-up', 'label' => __('Enfoque de mercado')], */
         ['key' => 'photo-report', 'icon' => 'camera', 'label' => __('Reporte fotográfico')],
         ['key' => 'conclusion', 'icon' => 'document-check', 'label' => __('Conclusión')],

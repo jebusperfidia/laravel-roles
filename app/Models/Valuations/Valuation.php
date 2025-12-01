@@ -225,7 +225,8 @@ class Valuation extends Model
             'valuation_id',
             'comparable_id'
         )
-            ->withPivot(['position', 'is_active', 'created_by'])
+            ->withPivot(['id','position', 'is_active', 'created_by'])
+            //->withPivot(['position', 'is_active', 'created_by'])
             ->withTimestamps()
             ->orderBy('pivot_position');
     }

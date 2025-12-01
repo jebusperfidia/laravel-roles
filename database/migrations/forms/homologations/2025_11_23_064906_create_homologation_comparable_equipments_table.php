@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('unit', 10);
 
             $table->decimal('quantity', 10, 4);
-            $table->decimal('difference', 14, 10);
-            $table->decimal('percentage', 14, 10);
+            $table->decimal('difference', 20, 6);
+            $table->decimal('percentage', 12, 6);
 
             $table->timestamps();
 

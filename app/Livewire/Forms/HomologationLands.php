@@ -9,18 +9,16 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Session;
 use Flux\Flux;
 use Masmerise\Toaster\Toaster;
-
-// Modelos Generales
 use App\Models\Valuations\Valuation;
 use App\Models\Forms\Comparable\ComparableModel;
+use App\Models\Forms\UrbanFeatures\UrbanFeaturesModel;
 use App\Models\Forms\Comparable\ValuationLandComparableModel;
 use App\Models\Forms\ApplicableSurface\ApplicableSurfaceModel;
 use App\Models\Forms\LandDetails\LandDetailsModel;
-
-// Modelos de Homologación
 use App\Models\Forms\Homologation\HomologationComparableFactorModel;
 use App\Models\Forms\Homologation\HomologationValuationFactorModel;
 use App\Models\Forms\Homologation\HomologationLandAttributeModel;
+use Masmerise\Toaster\Toast;
 
 class HomologationLands extends Component
 {
@@ -34,8 +32,8 @@ class HomologationLands extends Component
 
     // --- ATRIBUTOS DE TIERRA ---
     public $subject_surface_type = 'total';
-    public $subject_cus = '1.00 vsp';
-    public $subject_cos = '50.00 %';
+    public $subject_cus = '0.00';
+    public $subject_cos = '0.00';
     public $subject_lote_moda = '100.00';
 
     // --- ESTRUCTURAS DE DATOS ---
@@ -43,7 +41,7 @@ class HomologationLands extends Component
     public array $subject_factors_ordered = [];
     public ?array $fneg_factor_meta = null;
 
-    // Opciones para Selects (FZO, FUB) - Claves como string simple para evitar bugs de livewire
+    // Opciones para Selects (YA NO SE USAN, PERO SE DEJAN POR SI ACASO)
     public array $selectFactorOptions = [
         'FZO' => ['1.2' => '1.2000', '1.0' => '1.0000', '0.8' => '0.8000'],
         'FUB' => ['1.2' => '1.2000', '1.0' => '1.0000', '0.8' => '0.8000'],
@@ -74,7 +72,7 @@ class HomologationLands extends Component
     public string $conclusion_coeficiente_variacion_oferta = '0.00';
     public string $conclusion_coeficiente_variacion_homologado = '0.00';
 
-    // Dispersión (Mantenidas por compatibilidad con la vista)
+    // Dispersión
     public string $conclusion_dispersion_oferta = '0.00';
     public string $conclusion_dispersion_homologado = '0.00';
 
@@ -95,8 +93,19 @@ class HomologationLands extends Component
     public $propertyType;
     public $useExcessCalculation;
 
-    public $selectedSurfaceOptionId = 1;
-    public $selectedSurfaceDescription = 'Terreno Total (2,000.00 m2)';
+    public $selectedSurfaceDescription = 'Seleccione superficie...';
+
+    // --- VARIABLES PARA SELECT DINÁMICO DE SUPERFICIE ---
+    public $applicableSurface;
+    public string $selectedSurfaceOptionId = '';
+    public float $subject_actual_surface = 1.0;
+
+    // --- VARIABLES PARA CÁLCULO FCUS (Nuevas) ---
+    public float $subject_max_levels = 1.0;
+    public float $subject_free_area = 0.0;
+
+    // --- Obtener valores de caracteristicas urbanas ----
+    public $urbanFeatures;
 
     // ==========================================================
     // == COMPUTED PROPERTIES
@@ -123,6 +132,59 @@ class HomologationLands extends Component
         return $this->getEmptyChartData();
     }
 
+    #[Computed]
+    public function surfaceOptions(): array
+    {
+        $options = [];
+        $appSurf = $this->applicableSurface;
+
+        if (!$appSurf) return $options;
+
+        // 1. Total del terreno
+        $area = (float) $appSurf->surface_area;
+        $options['surface_area'] = [
+            'area' => $area,
+            'description' => 'Total del terreno',
+            'formatted' => number_format($area, 2, '.', ',') . ' m²'
+        ];
+
+        // 2. Lote Privativo y Tipo
+        if ($this->useExcessCalculation) {
+            $area = (float) $appSurf->private_lot;
+            $options['private_lot'] = [
+                'area' => $area,
+                'description' => 'Lote privativo',
+                'formatted' => number_format($area, 2, '.', ',') . ' m²'
+            ];
+
+            $area = (float) $appSurf->private_lot_type;
+            $options['private_lot_type'] = [
+                'area' => $area,
+                'description' => 'Lote privativo tipo',
+                'formatted' => number_format($area, 2, '.', ',') . ' m²'
+            ];
+
+            $area = (float) $appSurf->surplus_land_area;
+            $options['surplus_land_area'] = [
+                'area' => $area,
+                'description' => 'Sup. terreno excedente',
+                'formatted' => number_format($area, 2, '.', ',') . ' m²'
+            ];
+        }
+
+        // 3. Terreno Proporcional
+        if (stripos($this->propertyType, 'condominio') !== false) {
+            $area = (float) $appSurf->proporcional_land;
+            $options['proporcional_land'] = [
+                'area' => $area,
+                'description' => 'Terreno proporcional',
+                'formatted' => number_format($area, 2, '.', ',') . ' m²'
+            ];
+        }
+
+        return $options;
+    }
+
     // ==========================================================
     // == INIT & MOUNT
     // ==========================================================
@@ -137,8 +199,16 @@ class HomologationLands extends Component
         }
 
         $this->propertyType = $this->valuation->property_type;
-        $this->loadAssignedElements();
+
+        // 1. Carga de datos base (LandDetails y ApplicableSurface)
+        $this->landDetail = LandDetailsModel::find($this->idValuation);
+        $this->useExcessCalculation = (bool)($this->landDetail->use_excess_calculation ?? false);
+        $this->applicableSurface = ApplicableSurfaceModel::where('valuation_id', $this->idValuation)->first();
+
+        // 2. SINCRONIZACIÓN Y CARGA DE ATRIBUTOS
         $this->loadLandAttributes();
+
+        // 3. Cargar Comparables y Factores
         $this->loadComparables();
 
         if ($this->comparablesCount > 0) {
@@ -147,7 +217,6 @@ class HomologationLands extends Component
             $this->selectedForStats = $this->comparables->pluck('id')->toArray();
             $this->currentPage = 1;
             $this->updateComparableSelection();
-            // Llama a recalculateConclusions para inicializar los promedios al cargar.
             $this->recalculateConclusions();
         }
     }
@@ -159,25 +228,103 @@ class HomologationLands extends Component
         $this->resetConclusionProperties();
     }
 
-    private function loadAssignedElements()
+    // ==========================================================
+    // == CARGA Y SINCRONIZACIÓN DE ATRIBUTOS
+    // ==========================================================
+    private function loadLandAttributes()
     {
-        $this->assignedElements = ApplicableSurfaceModel::where('valuation_id', $this->idValuation)->get();
-        if ($this->assignedElements->isEmpty()) {
-            $this->useExcessCalculation = 0;
-            $this->landDetail = null;
-        } else {
-            $this->landDetail = LandDetailsModel::find($this->idValuation);
-            $this->useExcessCalculation = $this->landDetail->use_excess_calculation ?? 0;
+        $this->urbanFeatures = UrbanFeaturesModel::where('valuation_id', $this->idValuation)->first();
+
+        $newCus = 0.0;
+        $newCos = 0.0;
+        $freeAreaPercent = 0.0;
+
+        if ($this->urbanFeatures) {
+            $newCus = (float)($this->urbanFeatures->land_coefficient_area ?? 0);
+            $mandatoryFreeArea = (float)($this->urbanFeatures->mandatory_free_area ?? 0);
+            $newCos = 100.0 - $mandatoryFreeArea;
+            $freeAreaPercent = $mandatoryFreeArea;
+        }
+
+        $attributes = HomologationLandAttributeModel::updateOrCreate(
+            ['valuation_id' => $this->idValuation],
+            [
+                'cus' => $newCus,
+                'cos' => $newCos,
+            ]
+        );
+
+        $this->subject_cus = number_format($newCus, 2) . ' vsp';
+        $this->subject_cos = number_format($newCos, 2) . ' %';
+
+        $this->subject_free_area = $freeAreaPercent / 100.0;
+        $this->subject_lote_moda = $attributes->mode_lot ?? '100.00';
+        $this->conclusion_tipo_redondeo = $attributes->conclusion_type_rounding ?? 'DECENAS';
+        $this->subject_max_levels = (float)($this->landDetail->levels ?? $this->landDetail->allowed_levels ?? 1.0);
+
+        // FCUS Sujeto
+        $fcusRating = ($newCus > 0) ? sqrt($newCus) : 1.0;
+
+        HomologationValuationFactorModel::where('valuation_id', $this->idValuation)
+            ->where('homologation_type', 'land')
+            ->where('acronym', 'FCUS')
+            ->update(['rating' => $fcusRating]);
+
+        // Select de Superficie
+        $savedKey = $attributes->subject_surface_option_id ?? null;
+        $savedValue = (float)($attributes->subject_surface_value ?? 0);
+
+        if ($savedKey && $savedValue > 0) {
+            $this->selectedSurfaceOptionId = $savedKey;
+            $this->subject_actual_surface = $savedValue;
+            $options = $this->surfaceOptions();
+            if (isset($options[$savedKey])) {
+                $this->selectedSurfaceDescription = $options[$savedKey]['description'] . " (" . $options[$savedKey]['formatted'] . ")";
+            } else {
+                $this->selectedSurfaceDescription = "Valor guardado (" . number_format($savedValue, 2) . " m²)";
+            }
+        } elseif ($this->applicableSurface) {
+            $this->selectSurfaceOption('surface_area');
         }
     }
 
-    private function loadLandAttributes()
+    public function selectSurfaceOption(string $key)
     {
-        $attributes = HomologationLandAttributeModel::firstOrCreate(
-            ['valuation_id' => $this->idValuation]
+        $options = $this->surfaceOptions();
+        $selectedOption = $options[$key] ?? null;
+
+        if (!$selectedOption) {
+            if ($key !== 'surface_area') {
+                Toaster::error('Opción no válida.');
+            }
+            return;
+        }
+
+        $newSurfaceArea = $selectedOption['area'];
+
+        $this->selectedSurfaceOptionId = $key;
+        $this->subject_actual_surface = $newSurfaceArea;
+        $this->selectedSurfaceDescription = $selectedOption['description'] . " (" . $selectedOption['formatted'] . ")";
+
+        HomologationLandAttributeModel::updateOrCreate(
+            ['valuation_id' => $this->idValuation],
+            [
+                'subject_surface_option_id' => $key,
+                'subject_surface_value' => $newSurfaceArea
+            ]
         );
-        $this->subject_lote_moda = $attributes->mode_lot ?? '100.00';
-        $this->conclusion_tipo_redondeo = $attributes->conclusion_type_rounding ?? 'DECENAS';
+
+        // 🔄 LOGICA DE RECARGA FORZADA
+        if ($this->comparables) {
+            foreach ($this->comparables->pluck('id') as $compId) {
+                $this->recalculateSingleComparable($compId);
+            }
+
+            // 🚨 RECARGAR DESDE DB: Esto asegura que la vista tenga el dato nuevo
+            $this->loadAllComparableFactors();
+
+            $this->recalculateConclusions();
+        }
     }
 
     private function loadComparables()
@@ -191,7 +338,7 @@ class HomologationLands extends Component
     }
 
     // ==========================================================
-    // == LÓGICA DE FACTORES SUJETO (ESTRATEGIA SÁNDWICH)
+    // == LÓGICA DE FACTORES
     // ==========================================================
     private function prepareSubjectFactorsForView(): void
     {
@@ -245,18 +392,17 @@ class HomologationLands extends Component
         $this->subject_factors_ordered = array_merge($topList, $middleList, $bottomList);
     }
 
-
     private function getFactorInputType(string $acronym): string
     {
         return match ($acronym) {
-            'FZO', 'FUB' => 'select_calificacion',
+            // FIX: FZO y FUB ahora son 'number' igual que el resto
             'FSU', 'FCUS' => 'read_only',
             default => 'number',
         };
     }
 
     // ==========================================================
-    // == LÓGICA DE FACTORES COMPARABLES
+    // == CARGA DE FACTORES (CORREGIDA PARA SINCRONIZAR APLICABLE)
     // ==========================================================
     private function loadAllComparableFactors(): void
     {
@@ -276,21 +422,17 @@ class HomologationLands extends Component
 
             $this->initializeComparableFactor($compId, $factor->acronym);
 
-            // TRUCO: Si es FZO/FUB, usamos el valor tal cual (ej "1.2") para que coincida con el Select
-            $calif = in_array($factor->acronym, ['FZO', 'FUB'])
-                ? (string)($factor->rating + 0) // +0 remueve ceros extra visualmente si es necesario, o usa raw
-                : number_format((float)($factor->rating ?? 1.0), 4, '.', '');
+            // 🚨 LEEMOS EL VALOR REAL DE LA BD
+            $dbApplicable = (float)($factor->applicable ?? 1.0);
 
-            // Ajuste fino para que coincida con las keys del array $selectFactorOptions ('1.2', '1.0', etc)
-            if (in_array($factor->acronym, ['FZO', 'FUB'])) {
-                $calif = number_format((float)$factor->rating, 1, '.', ''); // Forza "1.2" o "1.0"
-            }
+            // FIX: Formateo consistente a 4 decimales para todos los factores numéricos
+            $calif = number_format((float)($factor->rating ?? 1.0), 4, '.', '');
 
             $this->comparableFactors[$compId][$factor->acronym] = [
                 'factor_id' => $factor->id,
                 'calificacion' => $calif,
-                'aplicable' => number_format((float)($factor->applicable ?? 1.0), 4, '.', ''),
-                'factor_ajuste' => '1.0000',
+                'aplicable' => number_format($dbApplicable, 4, '.', ''), // Input de FNEG
+                'factor_ajuste' => number_format($dbApplicable, 4, '.', ''), // 🚨 AQUÍ EL SECRETO: Inicializamos con el valor de la BD
                 'diferencia' => '0.0000',
             ];
         }
@@ -303,6 +445,7 @@ class HomologationLands extends Component
                     $this->initializeComparableFactor($compId, $sigla);
                 }
             }
+            // Recalculamos para refrescar diferencias y FRE
             $this->recalculateSingleComparable($compId);
         }
     }
@@ -319,8 +462,8 @@ class HomologationLands extends Component
             ];
         }
         if (!isset($this->comparableFactors[$comparableId][$sigla])) {
-            // Valor inicial '1.0' para selects, '1.0000' para inputs
-            $initialRating = in_array($sigla, ['FZO', 'FUB']) ? '1.0' : '1.0000';
+            // FIX: Inicialización consistente en 1.0000
+            $initialRating = '1.0000';
 
             $this->comparableFactors[$comparableId][$sigla] = [
                 'factor_id' => null,
@@ -333,20 +476,37 @@ class HomologationLands extends Component
     }
 
     // ==========================================================
-    // == HOOKS DE ACTUALIZACIÓN (UPDATED)
+    // == UPDATED HOOKS
     // ==========================================================
 
     public function updatedSubjectLoteModa($value)
     {
-        if ($value === '' || $value === null || (float)$value <= 0) {
-            Toaster::error('El Lote Moda es obligatorio y debe ser mayor a cero.');
+        if ($value === '' || $value === null || !is_numeric($value) || (float)$value <= 0) {
+            Toaster::error('El Lote Moda debe ser mayor a cero.');
+            $old = HomologationLandAttributeModel::where('valuation_id', $this->idValuation)->value('mode_lot');
+            $this->subject_lote_moda = $old ?? '100.00';
             return;
         }
+
+        $numericValue = (float)$value;
         HomologationLandAttributeModel::updateOrCreate(
             ['valuation_id' => $this->idValuation],
-            ['mode_lot' => $value]
+            ['mode_lot' => $numericValue]
         );
+        $this->subject_lote_moda = number_format($numericValue, 2, '.', '');
         Toaster::success('Lote Moda guardado.');
+
+        // 🔄 LOGICA DE RECARGA FORZADA
+        if ($this->comparables) {
+            foreach ($this->comparables->pluck('id') as $compId) {
+                $this->recalculateSingleComparable($compId);
+            }
+
+            // 🚨 RECARGAR DESDE DB (Borra la memoria temporal y trae la verdad absoluta)
+            $this->loadAllComparableFactors();
+
+            $this->recalculateConclusions();
+        }
     }
 
     public function updatedConclusionTipoRedondeo($value)
@@ -389,7 +549,6 @@ class HomologationLands extends Component
         $factorModel = HomologationValuationFactorModel::find($factorId);
         if (!$factorModel) return;
 
-        // --- VALIDACIONES ---
         if (($property === 'factor_name' || $property === 'acronym') && empty(trim($value))) {
             Toaster::error('El campo de texto no puede quedar vacío.');
             $this->subject_factors_ordered[$index][$property] = $factorModel->$property;
@@ -412,19 +571,16 @@ class HomologationLands extends Component
 
         $originalAcronym = $factorModel->acronym;
         $valueToSave = $value;
-
         $factorModel->update([$property => $valueToSave]);
 
-        // Actualizar localmente con formato
         if ($property === 'rating') {
             $this->subject_factors_ordered[$index]['rating'] = number_format((float)$valueToSave, 4, '.', '');
         }
 
         if ($property === 'factor_name' || $property === 'acronym') {
-            // LLAMADA FALTANTE: Sincroniza nombres/siglas en los comparables
             $this->syncComparableFactorNames($originalAcronym, $property, $valueToSave);
             $this->prepareSubjectFactorsForView();
-            $this->loadAllComparableFactors();
+            $this->loadAllComparableFactors(); // Recarga aquí también
         }
 
         if ($property === 'rating') {
@@ -450,11 +606,9 @@ class HomologationLands extends Component
         $property = array_pop($parts);
         $acronym = implode('.', $parts);
 
-        // LLAMADA FALTANTE: Obtiene el ID del pivote
         $pivotId = $this->getPivotIdForComparable($comparableId);
         if (!$pivotId) return;
 
-        // --- VALIDACIONES ---
         if ($value === '' || $value === null) {
             Toaster::error('El valor no puede estar vacío.');
             $existingFactor = HomologationComparableFactorModel::where('valuation_land_comparable_id', $pivotId)
@@ -467,15 +621,14 @@ class HomologationLands extends Component
         }
 
         $numericValue = (float)$value;
-        $errorMessage = '';
         $valid = true;
+        $errorMessage = '';
 
         if ($property === 'calificacion') {
-            if ($acronym !== 'FZO' && $acronym !== 'FUB') {
-                if ($numericValue < 0.01 || $numericValue > 2.0) {
-                    $valid = false;
-                    $errorMessage = 'La calificación debe estar entre 0.0100 y 2.0000.';
-                }
+            // FIX: Eliminada la excepción de FZO/FUB. Ahora se valida todo.
+            if ($numericValue < 0.01 || $numericValue > 2.0) {
+                $valid = false;
+                $errorMessage = 'La calificación debe estar entre 0.0100 y 2.0000.';
             }
         } elseif ($property === 'aplicable' && $acronym === 'FNEG') {
             if ($numericValue < 0.8 || $numericValue > 1.0) {
@@ -495,19 +648,13 @@ class HomologationLands extends Component
             return;
         }
 
-        // --- LOGICA PARA SELECTS PEGAJOSOS ---
-        if ($acronym === 'FZO' || $acronym === 'FUB') {
-            // Mantenemos el valor simple "1.2" para que el select no se rompa
-            $formattedValue = $value;
-        } else {
-            $formattedValue = number_format($numericValue, 4, '.', '');
-        }
+        // FIX: Ahora SIEMPRE formatea a 4 decimales
+        $formattedValue = number_format($numericValue, 4, '.', '');
 
         if (isset($this->comparableFactors[$comparableId][$acronym])) {
             $this->comparableFactors[$comparableId][$acronym][$property] = $formattedValue;
         }
 
-        // Persistencia
         $factorModel = HomologationComparableFactorModel::where('valuation_land_comparable_id', $pivotId)
             ->where('acronym', $acronym)
             ->where('homologation_type', 'land')
@@ -543,36 +690,46 @@ class HomologationLands extends Component
         Toaster::success('Factor guardado.');
     }
 
-
-
-
-
-
-
     public function updatedSelectedForStats()
     {
-        // Se llama automáticamente cada vez que el array $selectedForStats cambia (al marcar/desmarcar)
         $this->recalculateConclusions();
-        // Si el array queda vacío, recalculateConclusions llama a resetConclusionProperties() y pone todo en '0.00'.
-        //Toaster::info('Estadísticas actualizadas por selección.');
     }
 
-
-
-
-
-
-
-
-
-
     // ==========================================================
-    // == CÁLCULOS MATEMÁTICOS (CORE)
+    // == CÁLCULOS MATEMÁTICOS (NUCLEAR + CARGA SEGURA)
     // ==========================================================
+
+    private function persistAutomaticFactor($comparableId, $acronym, $rating, $applicable)
+    {
+        $pivotId = $this->getPivotIdForComparable($comparableId);
+        if (!$pivotId) return null;
+
+        $subjectFactor = collect($this->subject_factors_ordered)->firstWhere('acronym', $acronym);
+        $factorName = $subjectFactor['factor_name'] ?? $acronym;
+
+        return HomologationComparableFactorModel::updateOrCreate(
+            [
+                'valuation_land_comparable_id' => $pivotId,
+                'acronym' => $acronym,
+                'homologation_type' => 'land'
+            ],
+            [
+                'factor_name' => $factorName,
+                'rating' => $rating,
+                'applicable' => $applicable
+            ]
+        );
+    }
 
     public function recalculateSingleComparable($comparableId)
     {
+        // 1. PREPARACIÓN DE DATOS
         $allFactors = $this->orderedComparableFactorsForView;
+
+        // Limpieza del lote moda (Necesario para el cálculo del FSU)
+        $subjectLoteModa = (float) str_replace(',', '', $this->subject_lote_moda);
+
+        // Mapa de calificaciones del Sujeto
         $subjectRatings = collect($this->subject_factors_ordered)
             ->keyBy('acronym')
             ->map(fn($f) => (float)$f['rating']);
@@ -580,50 +737,164 @@ class HomologationLands extends Component
 
         if (!isset($this->comparableFactors[$comparableId])) return;
 
+        // BÚSQUEDA DEL PIVOTE (ID para guardar factores)
+        $pivotId = ValuationLandComparableModel::where('valuation_id', (int)$this->idValuation)
+            ->where('comparable_id', (int)$comparableId)
+            ->value('id');
+
+        if (!$pivotId) return;
+
+        $comparableModel = $this->comparables->find($comparableId);
         $factorResultante = 1.0;
 
         foreach ($allFactors as $factor) {
             $sigla = $factor['acronym'];
             if (!isset($this->comparableFactors[$comparableId][$sigla])) continue;
 
-            $factorData = &$this->comparableFactors[$comparableId][$sigla];
-            $sujetoRating = $subjectRatings->get($sigla, 1.0);
-            if ($sujetoRating == 0) $sujetoRating = 1.0;
+            $factorData = $this->comparableFactors[$comparableId][$sigla];
 
-            $compRating = (float)($factorData['calificacion'] ?? 1.0);
+            // Valores base
+            $sujetoRating = $subjectRatings->get($sigla, 1.0) ?: 1.0; // <-- VARIABLE DE CALIFICACIÓN DEL SUJETO
+            $compRating = (float)($factorData['calificacion'] ?? 1.0) ?: 1.0;
 
-            $diferencia = ($compRating / $sujetoRating) - 1;
+            $factor_ajuste = 1.0;
+            $diferencia_math = 0.0;
 
-            if ($sigla === 'FNEG') {
+            // =========================================================
+            // === LÓGICA ESPECÍFICA POR FACTOR ===
+            // =========================================================
+
+            if ($sigla === 'FSU') {
+                // ---------------------------------------------------------
+                // 1. FSU (FACTOR SUPERFICIE) - Se mantiene la lógica de POTENCIA
+                // ---------------------------------------------------------
+                $rawSurface = $comparableModel->comparable_land_area ?? 0;
+                $compSurface = (float) str_replace(',', '', (string)$rawSurface);
+
+                if ($subjectLoteModa > 0 && $compSurface > 0) {
+                    $coeficiente = $compSurface / $subjectLoteModa;
+                    $factor_ajuste_potencia = pow($coeficiente, (1 / 12));
+                } else {
+                    $factor_ajuste_potencia = 1.0;
+                }
+
+                // Cal. Comp. para FSU es el factor de ajuste
+                $compRating = $factor_ajuste_potencia;
+
+                // 1. CÁLCULO DE DIFERENCIA: Sujeto - Comp
+                // Usamos la variable $sujetoRating, no el '1.0' codificado.
+                $diferencia_math = $sujetoRating - $compRating;
+
+                // 2. CÁLCULO DE AJUSTE (Aplicable): Diferencia + 1.0
+                $factor_ajuste = $diferencia_math + 1.0; // Corregido: Siempre + 1.0
+
+                // 3. Guardado en la base de datos
+                $factorRecord = HomologationComparableFactorModel::firstOrNew([
+                    'valuation_land_comparable_id' => $pivotId,
+                    'acronym' => 'FSU',
+                    'homologation_type' => 'land'
+                ]);
+
+                $factorRecord->factor_name = 'Factor Superficie';
+                $factorRecord->rating = $compRating;
+                $factorRecord->applicable = $factor_ajuste;
+
+                try {
+                    $factorRecord->save();
+                    $factorData['factor_id'] = $factorRecord->id;
+                } catch (\Exception $e) {
+                }
+
+                $factorData['calificacion'] = number_format($compRating, 4, '.', '');
+                $factorData['aplicable'] = number_format($factor_ajuste, 4, '.', '');
+            } elseif ($sigla === 'FCUS') {
+                // ---------------------------------------------------------
+                // 2. FCUS (FACTOR CUS) - Lógica de RAÍZ
+                // ---------------------------------------------------------
+
+                // CÁLCULO DE RATING COMPARABLE (Raíz de CUS)
+                $niveles = (float)($comparableModel->comparable_allowed_levels ?? $comparableModel->comparable_max_levels ?? 0);
+                $areaLibre = (float)($comparableModel->comparable_free_area_required ?? $comparableModel->comparable_free_area ?? 0);
+                $areaLibreDec = ($areaLibre > 1) ? ($areaLibre / 100) : $areaLibre;
+                $cusCalculado = $niveles * (1 - $areaLibreDec);
+                $compRatingCalculated = ($cusCalculado > 0) ? sqrt($cusCalculado) : 1.0;
+
+                $compRating = $compRatingCalculated;
+                $factorData['calificacion'] = number_format($compRating, 4, '.', '');
+
+                // 1. CÁLCULO DE DIFERENCIA: Sujeto - Comp
+                // Usa directamente la variable $sujetoRating, no '1.0'
+                $diferencia_math = $sujetoRating - $compRating;
+
+                // 2. CÁLCULO DE AJUSTE (Aplicable): Diferencia + 1.0
+                $factor_ajuste = $diferencia_math + 1.0; // FÓRMULA CLAVE: DIF + 1.0
+
+                // 3. GUARDADO MANUAL
+                $factorRecord = HomologationComparableFactorModel::firstOrNew([
+                    'valuation_land_comparable_id' => $pivotId,
+                    'acronym' => 'FCUS',
+                    'homologation_type' => 'land'
+                ]);
+                $factorRecord->factor_name = 'Factor CUS';
+                $factorRecord->rating = $compRating;
+                $factorRecord->applicable = $factor_ajuste;
+
+                try {
+                    $factorRecord->save();
+                    $factorData['factor_id'] = $factorRecord->id;
+                } catch (\Exception $e) {
+                }
+
+                $factorData['aplicable'] = number_format($factor_ajuste, 4, '.', '');
+            } elseif ($sigla === 'FNEG') {
+                // ---------------------------------------------------------
+                // 3. FNEG (FACTOR NEGOCIACIÓN) - 100% manual
+                // ---------------------------------------------------------
+                // El valor de Aplicable viene directo del input del usuario.
                 $factor_ajuste = (float)($factorData['aplicable'] ?? 1.0);
+
+                // Calculamos la diferencia según la regla (Diferencia = Aplicable - 1.0)
+                $diferencia_math = $factor_ajuste - 1.0;
             } else {
-                $factor_ajuste = 1.0 - $diferencia;
+                // ---------------------------------------------------------
+                // 4. RESTO DE FACTORES MANUALES (FZO, FUB, FFO, etc.)
+                //    APLICANDO LA LÓGICA GENERAL: DIFERENCIA = RESTA
+                // ---------------------------------------------------------
+
+                // 1. Diferencia Matemática = Calificación Sujeto - Calificación Comparable
+                $diferencia_math = $sujetoRating - $compRating;
+
+                // 2. Factor Ajuste (Aplicable) = Diferencia + 1
+                $factor_ajuste = $diferencia_math + 1.0;
             }
 
-            $factorData['diferencia'] = number_format($diferencia, 4, '.', '');
+            // =========================================================
+            // === ACTUALIZACIÓN MEMORIA Y ACUMULADOS ===
+            // =========================================================
+
+            // Formateo y asignación
+            $factorData['diferencia'] = number_format($diferencia_math, 4, '.', '');
             $factorData['factor_ajuste'] = number_format($factor_ajuste, 4, '.', '');
 
-            if ($sigla !== 'FSU' && $sigla !== 'FCUS') {
-                $factorResultante *= $factor_ajuste;
-            }
+            $this->comparableFactors[$comparableId][$sigla] = $factorData;
+            $factorResultante *= $factor_ajuste;
         }
-        unset($factorData);
 
-        $comparableModel = $this->comparables->find($comparableId);
+        // FRE FINAL
         $unitValue = (float)($comparableModel->comparable_unit_value ?? 0);
-        $valorHomologado = $unitValue * $factorResultante;
-
         $this->comparableFactors[$comparableId]['FRE']['factor_ajuste'] = number_format($factorResultante, 4, '.', '');
-        $this->comparableFactors[$comparableId]['FRE']['valor_homologado'] = $valorHomologado;
+        $this->comparableFactors[$comparableId]['FRE']['valor_homologado'] = $unitValue * $factorResultante;
     }
 
     public function recalculateConclusions()
     {
+        // 1. VALIDACIONES DE SEGURIDAD
         if (!$this->comparables || $this->comparables->isEmpty()) {
             $this->resetConclusionProperties();
             return;
         }
 
+        // 2. FILTRADO (Si hay selección específica para estadísticas)
         $selectedComparables = empty($this->selectedForStats)
             ? $this->comparables
             : $this->comparables->whereIn('id', $this->selectedForStats);
@@ -633,103 +904,109 @@ class HomologationLands extends Component
             return;
         }
 
-        // 🔥 FIX CRÍTICO: Forzar el cálculo del VUH para todos los comparables seleccionados
-        // Esto garantiza que los promedios y las gráficas no sean cero.
+        // --------------------------------------------------------
+        // 3. EXTRACCIÓN DE DATOS Y MATEMÁTICA (RESTITUIDO)
+        // --------------------------------------------------------
+
+        // Recalcular individualmente para asegurar frescura de datos
         foreach ($selectedComparables->pluck('id') as $compId) {
             $this->recalculateSingleComparable($compId);
         }
 
-        // Lógica de cálculo STATS (usa 'comparable_offers' para los valores grandes de la tabla)
+        // Extraer colecciones para cálculos
         $valoresOferta = $selectedComparables->pluck('comparable_offers')->map(fn($v) => (float)$v);
         $valoresHomologados = $selectedComparables->map(fn($c) => (float)($this->comparableFactors[$c->id]['FRE']['valor_homologado'] ?? 0));
         $factoresFRE = $selectedComparables->map(fn($c) => (float)($this->comparableFactors[$c->id]['FRE']['factor_ajuste'] ?? 0));
 
-        // --- CÁLCULOS ESTADÍSTICOS ---
+        // Calcular Promedios y Desviaciones (Helpers)
         $avgOferta = $valoresOferta->avg();
         $stdDevOferta = $this->std_deviation($valoresOferta);
+
         $avgHomologado = $valoresHomologados->avg();
         $stdDevHomologado = $this->std_deviation($valoresHomologados);
+
         $avgFRE = $factoresFRE->avg();
 
-        // Asignación de resultados a propiedades públicas...
+        // --------------------------------------------------------
+        // 4. ASIGNACIÓN A VARIABLES DE LA VISTA (RESTITUIDO)
+        // --------------------------------------------------------
+
+        // Resumen Principal
         $this->conclusion_promedio_oferta = $this->format_currency($avgOferta, false);
         $this->conclusion_valor_unitario_homologado_promedio = $this->format_currency($avgHomologado, false);
         $this->conclusion_factor_promedio = number_format($avgFRE, 4);
 
+        // Estadísticas Oferta
         $this->conclusion_media_aritmetica_oferta = $this->format_currency($avgOferta, false);
-        $this->conclusion_media_aritmetica_homologado = $this->format_currency($avgHomologado, false);
-
         $this->conclusion_maximo_oferta = $this->format_currency($valoresOferta->max());
         $this->conclusion_minimo_oferta = $this->format_currency($valoresOferta->min());
         $this->conclusion_diferencia_oferta = $this->format_currency($valoresOferta->max() - $valoresOferta->min());
         $this->conclusion_desviacion_estandar_oferta = number_format($stdDevOferta, 2);
         $this->conclusion_coeficiente_variacion_oferta = ($avgOferta > 0) ? number_format(($stdDevOferta / $avgOferta) * 100, 2) : '0.00';
 
+        // Estadísticas Homologado
+        $this->conclusion_media_aritmetica_homologado = $this->format_currency($avgHomologado, false);
         $this->conclusion_maximo_homologado = $this->format_currency($valoresHomologados->max());
         $this->conclusion_minimo_homologado = $this->format_currency($valoresHomologados->min());
         $this->conclusion_diferencia_homologado = $this->format_currency($valoresHomologados->max() - $valoresHomologados->min());
         $this->conclusion_desviacion_estandar_homologado = number_format($stdDevHomologado, 2);
         $this->conclusion_coeficiente_variacion_homologado = ($avgHomologado > 0) ? number_format(($stdDevHomologado / $avgHomologado) * 100, 2) : '0.00';
 
-        // Placeholders y redondeo final
+        // Placeholders de UI
         $this->conclusion_promedio_factor2_placeholder = '0.0000';
         $this->conclusion_promedio_ajuste_pct_placeholder = '100.00%';
         $this->conclusion_promedio_valor_final_placeholder = $this->conclusion_valor_unitario_homologado_promedio;
 
+        // Cálculo Final con Redondeo
         $valorBase = $avgHomologado;
         $valorRedondeado = $this->redondearValor($valorBase, $this->conclusion_tipo_redondeo);
         $this->conclusion_valor_unitario_lote_tipo = $this->format_currency($valorRedondeado, true);
 
+        // Guardar valor final en BD
         HomologationLandAttributeModel::updateOrCreate(
             ['valuation_id' => $this->idValuation],
             ['unit_value_mode_lot' => $valorRedondeado]
         );
 
-        // ============================================================
-        // == PREPARACIÓN DE DATOS PARA GRÁFICAS (USANDO UNIT VALUE PARA ESCALA)
-        // ============================================================
+        // --------------------------------------------------------
+        // 5. PREPARACIÓN DE GRÁFICAS (Versión "Bonita" con línea y barras)
+        // --------------------------------------------------------
 
-        // 🔥 CRÍTICO: Creamos un set de datos de Oferta basado en Unit Value SÓLO para la gráfica.
-        // Esto es necesario porque el Valor Oferta (stats) es el valor TOTAL, y la gráfica necesita el UNITARIO.
-        $valoresOfertaUnit = $selectedComparables->pluck('comparable_unit_value')->map(fn($v) => (float)$v);
-
-        $labels = $selectedComparables->pluck('id')->map(fn($id) => "$id")->values()->toArray();
-
-        // Usamos los valores Unitarios para que la escala funcione
-        $dataOfertaChart = $valoresOfertaUnit->values()->toArray();
+        // Datos para gráficas
+        $labels = $selectedComparables->pluck('id')->map(fn($id) => "C-$id")->values()->toArray();
+        $dataOfertaChart = $valoresOferta->values()->toArray();
         $dataHomologadoChart = $valoresHomologados->values()->toArray();
 
-        // --- GRÁFICA 1: MIXTA (Barras Teal + Línea Roja Curva) ---
+        // GRÁFICA 1: MIXTA (Arriba)
         $chartData1 = [
             'labels' => $labels,
             'datasets' => [
                 [
                     'type' => 'line',
-                    'label' => 'Valor Homologado',
+                    'label' => 'Valor Homologado', // Línea Roja
                     'data' => $dataHomologadoChart,
-                    'borderColor' => '#DC2626',
+                    'borderColor' => '#DC2626', // Rojo
                     'backgroundColor' => '#DC2626',
-                    'borderWidth' => 5,
-                    'tension' => 0.4,
-                    'pointRadius' => 4,
+                    'borderWidth' => 2,
+                    'pointRadius' => 4, // Puntos visibles
+                    'pointBackgroundColor' => '#DC2626',
                     'fill' => false,
-                    'order' => 1,
-                    'yAxisID' => 'y',
+                    'tension' => 0.1,
+                    'order' => 0, // Dibuja la línea ENCIMA de las barras
                 ],
                 [
                     'type' => 'bar',
-                    'label' => 'Valor Oferta',
-                    'data' => $dataOfertaChart, // Unit Value (para que la escala coincida)
-                    'backgroundColor' => '#14B8A6',
+                    'label' => 'Valor Oferta', // Barras Azules/Verdes
+                    'data' => $dataOfertaChart,
+                    'backgroundColor' => '#14B8A6', // Teal
                     'borderColor' => '#14B8A6',
                     'borderWidth' => 1,
-                    'order' => 2,
-                    'yAxisID' => 'y',
+                    'order' => 1,
                 ]
             ]
         ];
 
-        // --- GRÁFICA 2: SOLO BARRAS ROJAS (Valor Homologado) ---
+        // GRÁFICA 2: SOLO BARRAS ROJAS (Abajo)
         $chartData2 = [
             'labels' => $labels,
             'datasets' => [
@@ -737,17 +1014,17 @@ class HomologationLands extends Component
                     'type' => 'bar',
                     'label' => 'Valor Unit. Hom.',
                     'data' => $dataHomologadoChart,
-                    'backgroundColor' => '#DC2626',
-                    'borderRadius' => 2,
+                    'backgroundColor' => '#DC2626', // Rojo
+                    'borderRadius' => 4,
+                    'barPercentage' => 0.6,
                 ]
             ]
         ];
 
-        // Enviamos eventos separados para cada gráfica (Asegúrate que tu JS escuche 'updateLandChart1' y 'updateLandChart2')
-        $this->dispatch('updateLandChart1', [['data' => $chartData1]]);
-        $this->dispatch('updateLandChart2', [['data' => $chartData2]]);
+        // Disparo de eventos (Usando sintaxis PHP 8 named arguments que tenías en la versión A)
+        $this->dispatch('updateLandChart1', data: $chartData1);
+        $this->dispatch('updateLandChart2', data: $chartData2);
     }
-
     private function std_deviation(Collection $values): float
     {
         $count = $values->count();
@@ -767,11 +1044,11 @@ class HomologationLands extends Component
     {
         $valor = $valor ?? 0;
         return match ($tipo) {
-            'Unidades', 'Sin decimales' => round($valor, 0), // Redondear a la unidad más cercana (0 decimales)
+            'Unidades', 'Sin decimales' => round($valor, 0),
             'Decenas' => round($valor / 10) * 10,
             'Centenas' => round($valor / 100) * 100,
             'Miles' => round($valor / 1000) * 1000,
-            'Sin redondeo' => $valor, // Dejar el valor tal cual (sin redondear)
+            'Sin redondeo' => $valor,
             default => round($valor / 10) * 10,
         };
     }
@@ -781,7 +1058,6 @@ class HomologationLands extends Component
         $this->conclusion_promedio_oferta = '0.00';
         $this->conclusion_valor_unitario_homologado_promedio = '0.00';
         $this->conclusion_factor_promedio = '0.0000';
-        // Reset de las demás propiedades para asegurar limpieza
         $this->conclusion_maximo_oferta = '0.00';
         $this->conclusion_minimo_oferta = '0.00';
         $this->conclusion_diferencia_oferta = '0.00';
@@ -802,34 +1078,9 @@ class HomologationLands extends Component
 
     private function getStatsChartData(): array
     {
-        // Enviar datos dinámicos de la conclusión (ej. promedios) si se requiere la gráfica de stats
-        $valoresOferta = $this->comparables->pluck('comparable_offers')->map(fn($v) => (float)$v);
-        $valoresHomologados = $this->comparables->map(fn($c) => (float)($this->comparableFactors[$c->id]['FRE']['valor_homologado'] ?? 0));
-
-        return [
-            'labels' => $this->comparables->pluck('id')->map(fn($id) => "C$id")->values()->toArray(),
-            'datasets' => [
-                [
-                    'label' => 'Oferta',
-                    'data' => $valoresOferta->values()->toArray(),
-                    'borderColor' => '#3b82f6', // blue-500
-                ],
-                [
-                    'label' => 'Homologado',
-                    'data' => $valoresHomologados->values()->toArray(),
-                    'borderColor' => '#10b981', // emerald-500
-                ]
-            ]
-        ];
+        return $this->getEmptyChartData();
     }
 
-    // ==========================================================
-    // == MÉTODOS AUXILIARES FALTANTES (AGREGADOS)
-    // ==========================================================
-
-    /**
-     * Obtiene el ID primario de la tabla pivote de terreno.
-     */
     private function getPivotIdForComparable($comparableId)
     {
         return ValuationLandComparableModel::where('valuation_id', $this->idValuation)
@@ -837,9 +1088,6 @@ class HomologationLands extends Component
             ->value('id');
     }
 
-    /**
-     * Sincroniza los cambios de nombre o sigla de un factor Sujeto.
-     */
     private function syncComparableFactorNames($originalAcronym, $field, $newValue)
     {
         $pivotIds = $this->valuation->landComparablePivots()->pluck('id');
@@ -851,6 +1099,31 @@ class HomologationLands extends Component
             ->where('acronym', $originalAcronym)
             ->where('homologation_type', 'land')
             ->update([$dbCol => $newValue]);
+    }
+
+    private function calculateFCUSRating($levels, $freeArea)
+    {
+        $levels = (float)$levels;
+        $freeArea = (float)$freeArea;
+
+        if ($freeArea > 1) {
+            $freeArea = $freeArea / 100;
+        }
+
+        if ($levels <= 0) return 1.0;
+
+        $term = $levels * (1 - $freeArea);
+
+        if ($term <= 0) return 0.0;
+
+        return sqrt($term);
+    }
+
+    public function openComparablesLand()
+    {
+        Session::put('comparables-active-session', true);
+        Session::put('comparable-type', 'land');
+        return redirect()->route('form.comparables.index');
     }
 
 

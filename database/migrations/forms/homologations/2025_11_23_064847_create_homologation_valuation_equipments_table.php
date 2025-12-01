@@ -13,7 +13,8 @@ return new class extends Migration
             $table->foreignId('valuation_id')->constrained('valuations')->onDelete('cascade');
 
             $table->string('description', 255);
-            // Sin campo unit (según tu indicación anterior)
+            $table->string('unit', 50)->nullable();
+            $table->string('custom_description', 255)->nullable();
 
             // Eliminamos default(0), ahora son OBLIGATORIOS
             $table->decimal('quantity', 10, 4);

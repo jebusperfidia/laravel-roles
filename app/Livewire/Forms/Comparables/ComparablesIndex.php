@@ -997,6 +997,13 @@ class ComparablesIndex extends Component
             type: $this->comparableType
         );
 
+        // INYECCIÓN DEL EQUIPAMIENTO (FEQ)
+        $comparableService->createComparableEquipment(
+            valuationId: $this->id,
+            pivotId: $pivot->id, // Usamos el ID del pivot creado
+            type: $this->comparableType
+        );
+
         // 4. Actualizar tabla en frontend
         if ($this->comparableType === 'land') {
             $this->dispatch('pg:eventRefresh-comparables-land-table');
@@ -1050,6 +1057,13 @@ class ComparablesIndex extends Component
             if ($valuationBuildingComparable) {
                 // B. ¡BORRAR LOS FACTORES PRIMERO!
                 $comparableService->deleteComparableFactors($valuationBuildingComparable->id, $itemType);
+
+                // ✅ INYECCIÓN DE BORRADO DE EQUIPAMIENTO (FEQ) - ¡SEGURO DE EJECUTAR!
+                $comparableService->deleteComparableEquipment(
+                    pivotId: $valuationBuildingComparable->id,
+                    type: $itemType // 'building'
+                );
+
 
                 // C. Ahora sí, eliminar el pivote (¡¡¡LÍNEA DESCOMENTADA!!!)
                 $valuationBuildingComparable->delete();
