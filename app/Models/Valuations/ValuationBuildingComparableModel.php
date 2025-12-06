@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Forms\Homologation\HomologationComparableFactorModel; // ¡Tu modelo!
 use App\Models\Valuations\Valuation; // ¡Necesitamos esta!
 use App\Models\Forms\Comparable\ComparableModel; // ¡Y esta!
+use App\Models\Forms\Homologation\HomologationComparableSelectionModel;
 
 /**
  * Modelo para la "HojaDeConexion" (tabla pivote) 'valuation_building_comparables'.
@@ -34,6 +35,13 @@ class ValuationBuildingComparableModel extends Model // <-- ¡NO ES PIVOT!
     {
         // ¡Apunta a tu modelo con tu FK!
         return $this->hasMany(HomologationComparableFactorModel::class, 'valuation_building_comparable_id');
+    }
+
+
+    public function selections()
+    {
+        // 'valuation_building_comparable_id' es la FK que definimos en la migración corta
+        return $this->hasMany(HomologationComparableSelectionModel::class, 'valuation_building_comparable_id');
     }
 
     // --- ¡Relaciones que tu controlador necesita! ---

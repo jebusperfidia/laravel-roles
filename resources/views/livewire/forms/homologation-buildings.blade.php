@@ -2,7 +2,7 @@
     {{-- Mínimo 2 para pruebas, mensaje de 6 para producción --}}
     @if($comparablesCount >= 2)
 
-    <div class="form-container">
+    <div class="form-container" wire:init="recalculateConclusions">
         <div class="form-container__header">
             Sujeto
         </div>
@@ -33,23 +33,23 @@
                 Características:
             </div>
 
-{{--             <div class="text-lg font-bold text-gray-800 mb-4 text-center">
-                Características: <span class="font-normal">{{ $valuation->building_description_placeholder ?? 'Prueba'
-                    }}</span>
-            </div> --}}
-
             <div class="flex flex-col md:flex-row gap-x-8 gap-y-8">
                 <div class="space-y-4 md:w-1/3 w-full p-2">
                     <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-base">
+                        {{-- Superficie (Terreno) obtenida de ApplicableSurface->surface_area --}}
                         <dt class="text-gray-500 font-semibold">Superficie:</dt>
-                        <dd class="text-gray-900 font-medium text-lg">{{ number_format($subject_surface_construction, 2) ??
-                            '0.00' }}</dd>
+                        <dd class="text-gray-900 font-medium text-lg">{{ number_format($subject_surface_land, 2) ??
+                            '0.00'
+                            }}</dd>
 
+                        {{-- Construcción obtenida de ApplicableSurface->built_area --}}
                         <dt class="text-gray-500 font-semibold">Construcción:</dt>
-                        <dd class="text-gray-900 font-medium text-lg"> {{ $building->general_class_property ?? '0' }} </dd>
+                        <dd class="text-gray-900 font-medium text-lg"> {{ number_format($subject_surface_construction,
+                            2) ??
+                            '0.00' }} </dd>
 
                         <dt class="text-gray-500 font-semibold">Rel. Ter/Const:</dt>
-                        <dd class="text-gray-900 font-medium text-lg">{{  number_format($subject_rel_tc, 2)  ?? '0'
+                        <dd class="text-gray-900 font-medium text-lg">{{ number_format($subject_rel_tc, 2) ?? '0'
                             }}</dd>
 
                         <dt class="text-gray-500 font-semibold">Avance de obra:</dt>
@@ -61,11 +61,13 @@
                             }}</dd>
 
                         <dt class="text-gray-500 font-semibold">V.U.R.:</dt>
-                        <dd class="text-gray-900 font-medium text-lg">{{ number_format($subject_vur_weighted, 1) ?? '0' }}
+                        <dd class="text-gray-900 font-medium text-lg">{{ number_format($subject_vur_weighted, 1) ?? '0'
+                            }}
                         </dd>
 
                         <dt class="text-gray-500 font-semibold">V.U.T.:</dt>
-                        <dd class="text-gray-900 font-medium text-lg">{{ number_format($subject_vut_weighted, 1) ?? '0' }}
+                        <dd class="text-gray-900 font-medium text-lg">{{ number_format($subject_vut_weighted, 1) ?? '0'
+                            }}
                         </dd>
                     </dl>
                 </div>
@@ -113,7 +115,7 @@
                                         @if($canEdit)
                                         @if($isEditing)
                                         <flux:input type="number" step="0.0001" min="0.8" max="1.2"
-                                            wire:model.defer="edit_factor_rating"
+                                            wire:model.defer="edit_factor_rating" wire:key="edit-rating-{{ $factor['id'] ?? $index }}"
                                             class="text-right h-9 text-sm w-full bg-white border-blue-500 ring-1 ring-blue-200" />
                                         @else
                                         <flux:input type="text" value="{{ $factor['rating'] }}" readonly
@@ -170,6 +172,10 @@
             </div>
         </div>
     </div>
+
+
+
+
 
     <div class="form-container">
         <div class="form-container__header">
@@ -232,9 +238,8 @@
                                         $selectedComparable->comparable_colony ?? 'N/A' }}</dd>
 
                                     <dt class="font-semibold text-gray-800 mt-2">Características:</dt>
-                                    <dd class="text-gray-600 truncate"
-                                        title="{{ $selectedComparable->comparable_features }}">{{
-                                        $selectedComparable->comparable_features ?? 'N/A' }}</dd>
+                                    <dd class="text-gray-600">{{
+                                        $selectedComparable->comparable_characteristics ?? 'N/A' }}</dd>
 
                                     <dt class="font-semibold text-gray-800 mt-2">Oferta:</dt>
                                     <dd class="text-gray-600">${{ number_format($selectedComparable->comparable_offers,
@@ -257,28 +262,40 @@
                                         '1.2500' }}</dd>
 
                                     <dt class="font-semibold text-gray-800 mt-2">Fecha:</dt>
-                                    <dd class="text-gray-600">{{ $selectedComparable->comparable_date ?
-                                        \Carbon\Carbon::parse($selectedComparable->comparable_date)->format('d/m/Y') :
+                                    <dd class="text-gray-600">{{ $selectedComparable->created_at ?
+                                        \Carbon\Carbon::parse($selectedComparable->created_at)->format('d/m/Y') :
                                         '23/10/2025' }}</dd>
                                 </div>
                                 <div>
                                     <dt class="font-semibold text-gray-800">Niveles:</dt>
-                                    <dd class="text-gray-600">{{ $selectedComparable->niveles ?? '1' }}</dd>
+                                    <dd class="text-gray-600">{{ $selectedComparable->comparable_levels ?? '1' }}</dd>
 
                                     <dt class="font-semibold text-gray-800 mt-2">Edad:</dt>
-                                    <dd class="text-gray-600">{{ $selectedComparable->edad ?? '10' }} años</dd>
+                                    <dd class="text-gray-600">{{ $selectedComparable->comparable->age ?? '0' }} años
+                                    </dd>
 
                                     <dt class="font-semibold text-gray-800 mt-2">VUT:</dt>
-                                    <dd class="text-gray-600">{{ $selectedComparable->vut ?? '0.0000' }}</dd>
+                                    <dd class="text-gray-600">{{ $selectedComparable->comparable_vut ?? '0' }}</dd>
+
 
                                     <dt class="font-semibold text-gray-800 mt-2">VUR:</dt>
-                                    <dd class="text-gray-600">{{ $selectedComparable->vur ?? '0.0000' }}</dd>
+                                    <dd class="text-gray-600">{{ ($selectedComparable->comparable_vut -
+                                        $selectedComparable->comparable_age) ?? '0.0000' }}</dd>
 
                                     <dt class="font-semibold text-gray-800 mt-2">Clasificación:</dt>
-                                    <dd class="text-gray-600">{{ $selectedComparable->clasificacion ?? 'A' }}</dd>
+                                    <dd class="text-gray-600">{{ $selectedComparable->comparable_clasification ?? '' }}
+                                    </dd>
 
                                     <dt class="font-semibold text-gray-800 mt-2">Vigencia:</dt>
-                                    <dd class="text-gray-600">{{ $selectedComparable->vigencia ?? '164' }} Días</dd>
+                                    <dd class="text-gray-600">
+                                        @php
+                                        // Lógica traída de Lands para calcular vigencia real
+                                        $fechaBase = $selectedComparable->comparable_date ?? $selectedComparable->created_at;
+                                        $carbonDate = $fechaBase ? \Carbon\Carbon::parse($fechaBase) : null;
+                                        $diasVigencia = $carbonDate ? (int) $carbonDate->diffInDays(now()) : 0;
+                                        @endphp
+                                        {{ $diasVigencia }} Días
+                                    </dd>
                                 </div>
                             </div>
                         </div>
@@ -297,28 +314,45 @@
                                     <tr>
                                         <td class="py-1.5 align-middle text-gray-800 font-medium">Clase:</td>
                                         <td class="py-1.5 align-middle">
-                                            <flux:select
-                                                wire:model.live="comparableFactors.{{ $selectedComparableId }}.clase"
-                                                placeholder="Precario" class="!text-sm !py-1">
-                                                <flux:select.option value="Precario">Precario</flux:select.option>
-                                                <flux:select.option value="Clase B">Clase B</flux:select.option>
-                                                <flux:select.option value="Clase C">Clase C</flux:select.option>
+                                            <flux:select wire:model.live="comparableFactors.{{ $selectedComparableId }}.clase" placeholder="-"
+                                                class="!text-sm !py-1" disabled>
+                                                <flux:select.option value="">-- Selecciona una opción --
+                                                </flux:select.option>
+                                                <flux:select.option value="Superior a moda">Mínima</flux:select.option>
+                                                <flux:select.option value="Economica">Económica</flux:select.option>
+                                                <flux:select.option value="Interes social">Interés social
+                                                </flux:select.option>
+                                                <flux:select.option value="Media">Media</flux:select.option>
+                                                <flux:select.option value="Semilujo">Semilujo</flux:select.option>
+                                                <flux:select.option value="Residencial">Residencial</flux:select.option>
+                                                <flux:select.option value="Residencial plus">Residencial plus
+                                                </flux:select.option>
+                                                <flux:select.option value="Residencial plus +">Residencial plus +
+                                                </flux:select.option>
+                                                <flux:select.option value="Unica">Unica</flux:select.option>
                                             </flux:select>
                                         </td>
-                                        <td class="py-1.5 pl-3 align-middle text-gray-700 font-semibold">{{
-                                            $comparableFactors[$selectedComparableId]['clase_factor'] ?? '1.7500' }}
+                                        <td class="py-1.5 pl-3 align-middle text-gray-700 font-semibold">
+                                            {{-- {{$comparableFactors[$selectedComparableId]['clase_factor'] ?? '1.7500' }} --}}
+                                            -
                                         </td>
                                     </tr>
                                     {{-- Conservación --}}
                                     <tr>
                                         <td class="py-1.5 align-middle text-gray-800 font-medium">Conserv.:</td>
                                         <td class="py-1.5 align-middle">
-                                            <flux:select
-                                                wire:model.live="comparableFactors.{{ $selectedComparableId }}.conservacion"
-                                                placeholder="[Seleccione]" class="!text-sm !py-1">
-                                                <flux:select.option value="Buena">Buena</flux:select.option>
-                                                <flux:select.option value="Regular">Regular</flux:select.option>
-                                                <flux:select.option value="Mala">Mala</flux:select.option>
+                                            <flux:select wire:model.live="comparableFactors.{{ $selectedComparableId }}.conservacion" placeholder="[Seleccione]"
+                                                class="!text-sm !py-1">
+                                                <flux:select.option value="">-- Selecciona una opción --
+                                                </flux:select.option>
+                                                <flux:select.option value="Bueno">Bueno</flux:select.option>
+                                                <flux:select.option value="Malo">Malo</flux:select.option>
+                                                <flux:select.option value="Muy bueno">Muy bueno</flux:select.option>
+                                                <flux:select.option value="Normal">Normal</flux:select.option>
+                                                <flux:select.option value="Nuevo">Nuevo</flux:select.option>
+                                                <flux:select.option value="Recientemente remodelado">Recientemente
+                                                    remodelado</flux:select.option>
+                                                <flux:select.option value="Ruidoso">Ruidoso</flux:select.option>
                                             </flux:select>
                                         </td>
                                         <td class="py-1.5 pl-3 align-middle text-gray-700 font-semibold">{{
@@ -329,17 +363,28 @@
                                     <tr>
                                         <td class="py-1.5 align-middle text-gray-800 font-medium">Localización:</td>
                                         <td class="py-1.5 align-middle">
-                                            <flux:select
-                                                wire:model.live="comparableFactors.{{ $selectedComparableId }}.localizacion"
-                                                placeholder="Lote intermedio" class="!text-sm !py-1">
-                                                <flux:select.option value="Lote intermedio">Lote intermedio
+                                            <flux:select wire:model.live="comparableFactors.{{ $selectedComparableId }}.localizacion" placeholder="[Seleccione]"
+                                                class="!text-sm !py-1">
+                                                <flux:select.option value="">-- Selecciona una opción --
                                                 </flux:select.option>
-                                                <flux:select.option value="Esquina">Esquina</flux:select.option>
+                                                <flux:select.option value="Cabecera de manzana">Cabecera de manzana
+                                                </flux:select.option>
+                                                <flux:select.option value="Lote con dos frentes no continuos">Lote con
+                                                    dos frentes no continuos</flux:select.option>
+                                                <flux:select.option value="Lote en esquina">Lote en esquina
+                                                </flux:select.option>
+                                                <flux:select.option value="Lote interior">Lote interior
+                                                </flux:select.option>
+                                                <flux:select.option value="Manzana completa">Manzana completa
+                                                </flux:select.option>
+                                                <flux:select.option value="Recientemente remodelado">Recientemente
+                                                    remodelado</flux:select.option>
                                             </flux:select>
                                         </td>
-                                        <td class="py-1.5 pl-3 align-middle text-gray-700 font-semibold">{{
-                                            $comparableFactors[$selectedComparableId]['localizacion_factor'] ?? '1.0000'
-                                            }}</td>
+                                        <td class="py-1.5 pl-3 align-middle text-gray-700 font-semibold">
+                                        {{--     {{$comparableFactors[$selectedComparableId]['localizacion_factor'] ?? '1.0000'}} --}}
+                                        -
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -376,68 +421,96 @@
                                         <th class="text-left py-2 px-3 w-24">Aplicable</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-200 bg-white">
-                                    @foreach ($this->orderedComparableFactorsForView as $factor)
-                                    @php
-                                    $sigla = $factor['acronym'];
-                                    $isFNEG = ($sigla === 'FNEG');
-                                    $isEditableCalificacion = ($factor['is_custom'] ?? false) || $sigla === 'FLOC' ||
-                                    $sigla === 'AVANC';
-                                    @endphp
-                                    <tr class="hover:bg-gray-50">
-                                        {{-- 1. FACTOR --}}
-                                        <td class="py-1.5 px-3 align-middle">
-                                            <flux:label class="!py-0 !px-0 !m-0 font-medium text-gray-700 block">{{
-                                                $sigla }}</flux:label>
-                                        </td>
-                                        {{-- 2. Cal. Sujeto --}}
-                                        <td class="py-1.5 px-2 text-left align-middle">
-                                            <flux:label class="text-gray-700">
-                                                @if($isFNEG) - @else {{ $factor['rating'] ?? '1.0000' }} @endif
-                                            </flux:label>
-                                        </td>
-                                        {{-- 3. Cal. Comp. --}}
-                                        <td class="py-1.5 px-2 text-left align-middle">
-                                            @if($isEditableCalificacion)
-                                            <flux:input type="number" step="0.0001" placeholder="1.0000"
-                                                wire:model.blur="comparableFactors.{{ $selectedComparableId }}.{{ $sigla }}.calificacion"
-                                                class="text-left h-9 text-sm w-full font-semibold" />
-                                            @elseif($isFNEG)
-                                            <flux:label class="text-gray-700 h-9 flex items-center px-1">-</flux:label>
-                                            @else
-                                            <flux:label class="text-gray-700 h-9 flex items-center px-1">
-                                                {{ $comparableFactors[$selectedComparableId][$sigla]['calificacion'] ??
-                                                '1.0000' }}
-                                            </flux:label>
-                                            @endif
-                                        </td>
-                                        {{-- 4. Dif. --}}
-                                        <td class="py-1.5 px-3 text-left align-middle">
-                                            <flux:label class="text-gray-900">
-                                                @if($isFNEG) - @else
-                                                {{ $comparableFactors[$selectedComparableId][$sigla]['diferencia'] ??
-                                                '0.0000' }}
-                                                @endif
-                                            </flux:label>
-                                        </td>
-                                        {{-- 5. Aplicable --}}
-                                        <td class="py-1.5 px-3 text-left align-middle">
-                                            @if($isFNEG)
-                                            {{-- Editable solo en FNEG --}}
-                                            <flux:input type="number" step="0.0001" placeholder="0.9000"
-                                                wire:model.blur="comparableFactors.{{ $selectedComparableId }}.{{ $sigla }}.aplicable"
-                                                class="text-left h-9 text-sm w-full font-semibold" />
-                                            @else
-                                            {{-- Readonly (calculado) en los demás --}}
-                                            <flux:label class="text-gray-900 font-bold">
-                                                {{ $comparableFactors[$selectedComparableId][$sigla]['aplicable'] ??
-                                                '1.0000' }}
-                                            </flux:label>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
+                        <tbody class="divide-y divide-gray-200 bg-white">
+                            @foreach ($this->orderedComparableFactorsForView as $factor)
+                 @php
+                $sigla = $factor['acronym'];
+
+                // BÚSQUEDA MAESTRA DE BANDERAS
+                $masterFactor = collect($subject_factors_ordered)->firstWhere('acronym', $sigla);
+
+                $isFNEG = ($sigla === 'FNEG');
+                $isFEQ = $masterFactor['is_feq'] ?? false;
+
+                // USAMOS EL FLAG PURO: Si FLOC tiene is_editable=1 en DB, esto es TRUE.
+                $isEditableBase = $masterFactor['is_editable'] ?? false;
+
+                $isCustom = $masterFactor['is_custom'] ?? false;
+
+                // Forzar AVANC como editable en el comparable.
+                $isAVANCEditable = ($sigla === 'AVANC');
+
+               // El input se muestra si:
+            // (Es Editable/Custom PURO) OR (Es AVANC forzado)
+            $mustShowInput = ($isEditableBase || $isCustom || $isAVANCEditable);
+
+            // DETERMINACIÓN FINAL: Si debe mostrar INPUT en la columna Calificación Comparable
+            $showInputCalificacion = $mustShowInput && !$isFNEG && !$isFEQ;
+
+                @endphp
+
+                            {{-- wire:key robusto para evitar fantasmas --}}
+                            <tr class="hover:bg-gray-50" wire:key="row-{{ $selectedComparableId }}-{{ $sigla }}">
+
+                                {{-- 1. FACTOR --}}
+                                <td class="py-1.5 px-3 align-middle">
+                                    <flux:label class="!py-0 !px-0 !m-0 font-medium text-gray-700 block">
+                                        {{ $sigla }}
+                                    </flux:label>
+                                </td>
+
+                                {{-- 2. CALIFICACIÓN SUJETO --}}
+                                <td class="py-1.5 px-2 text-left align-middle text-center">
+                                    <flux:label class="text-gray-700">
+                                        @if($isFNEG) - @else {{ $masterFactor['rating'] ?? '1.0000' }} @endif
+                                    </flux:label>
+                                </td>
+
+                                {{-- 3. CALIFICACIÓN COMPARABLE --}}
+                                <td class="py-1.5 px-2 text-left align-middle text-center">
+                                    @if($showInputCalificacion)
+                                    {{-- INPUT HABILITADO PARA FLOC, AVANC Y CUSTOMS --}}
+                                    <flux:input type="number" step="0.0001" placeholder="1.0000"
+                                        wire:model.blur="comparableFactors.{{ $selectedComparableId }}.{{ $sigla }}.calificacion"
+                                        class="text-left h-9 text-sm w-full font-semibold" />
+
+                                    @elseif($isFNEG)
+                                    {{-- FNEG: Guion --}}
+                                    <flux:label class="text-gray-400 h-9 flex items-center justify-center font-bold">-</flux:label>
+                                    @else
+                                    {{-- FEQ, FIC, FSU: Texto Plano (Calculado) --}}
+                                    <flux:label class="text-gray-700 h-9 flex items-center justify-center px-1">
+                                        {{ $comparableFactors[$selectedComparableId][$sigla]['calificacion'] ?? '1.0000' }}
+                                    </flux:label>
+                                    @endif
+                                </td>
+
+                                {{-- 4. DIFERENCIA --}}
+                                <td class="py-1.5 px-3 text-left align-middle text-center">
+                                    <flux:label class="text-gray-900">
+                                        @if($isFNEG) - @else
+                                        {{ $comparableFactors[$selectedComparableId][$sigla]['diferencia'] ?? '0.0000' }}
+                                        @endif
+                                    </flux:label>
+                                </td>
+
+                                {{-- 5. APLICABLE --}}
+                                <td class="py-1.5 px-3 text-left align-middle">
+                                    @if($isFNEG)
+                                    {{-- INPUT PARA FNEG --}}
+                                    <flux:input type="number" step="0.0001" placeholder="1.0000"
+                                        wire:model.blur="comparableFactors.{{ $selectedComparableId }}.{{ $sigla }}.aplicable"
+                                        class="text-left h-9 text-sm w-full font-bold text-blue-800 bg-blue-50 border-blue-200" />
+                                    @else
+                                    {{-- TEXTO PARA LOS DEMÁS --}}
+                                    <flux:label class="text-gray-900 font-bold block text-center">
+                                        {{ $comparableFactors[$selectedComparableId][$sigla]['aplicable'] ?? '1.0000' }}
+                                    </flux:label>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
                                 <tfoot class="bg-gray-100 border-t-2 border-gray-300">
                                     <tr class="font-extrabold text-md">
                                         <td colspan="4" class="py-2 px-3 text-right">FACTOR RESULTANTE (FRE):</td>
@@ -461,195 +534,191 @@
         </div>
     </div>
 
-   {{-- ======================================================================== --}}
-{{-- SECCIÓN 3: CONCLUSIONES (BUILDING) - CORREGIDO --}}
-{{-- ======================================================================== --}}
-<div class="form-container">
-    <div class="form-container__header">
-        Conclusiones
-    </div>
-    <div class="form-container__content">
+    {{-- ======================================================================== --}}
+    {{-- SECCIÓN 3: CONCLUSIONES (BUILDING) - CORREGIDO --}}
+    {{-- ======================================================================== --}}
+    <div class="form-container">
+        <div class="form-container__header">
+            Conclusiones
+        </div>
+        <div class="form-container__content">
 
-        {{-- FILA 1: TABLA PRINCIPAL + GRÁFICA 1 --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {{-- Columna Izquierda: Tabla --}}
-            <div>
-                <div class="overflow-x-auto border border-gray-300 rounded-md shadow-sm">
-                    <table class="w-full text-md">
-                        <thead>
-                            <tr class="bg-gray-100 text-md font-semibold text-gray-500 border-b border-gray-300">
-                                <th class="py-2 px-3 text-left min-w-[150px]" rowspan="2">N. Comparable</th>
-                                <th class="py-2 px-3 text-center min-w-[120px]" rowspan="2">Valor Oferta</th>
-                                <th class="py-2 px-3 text-center min-w-[120px]" rowspan="2">Val Unit Hom</th>
-                                <th class="py-2 px-3 text-center" colspan="2">Factor de Ajuste</th>
-                                <th class="py-2 px-3 text-center min-w-[100px]" rowspan="2">Ajuste %</th>
-                                <th class="py-2 px-3 text-center min-w-[120px]" rowspan="2">Valor Final</th>
-                            </tr>
-                            <tr class="bg-gray-100 text-sm font-semibold text-gray-500 border-b border-gray-300">
-                                <th class="py-1 px-3 text-center min-w-[100px]">(FRE)</th>
-                                <th class="py-1 px-3 text-center min-w-[100px]">(F. Aj. 2)</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
-                            @if($comparables && $comparables->count() > 0)
-                            @foreach ($comparables as $index => $comparable)
-                            @php
-                            $compData = $comparableFactors[$comparable->id] ?? [];
-                            $factorFRE = $compData['FRE']['factor_ajuste'] ?? 0.0;
-                            $valorHomologado = $compData['FRE']['valor_homologado'] ?? 0.0;
-                            // Ajusta estas claves si en Building se llaman diferente, pero usualmente son iguales
-                            $factor2 = '0.00';
-                            $ajustePct = '0.00%';
-                            $valorFinal = '0.00';
-                            @endphp
-                            <tr class="hover:bg-gray-50">
-                                <td class="py-1.5 px-3 align-middle text-sm">
-                                    <input type="checkbox" wire:model.live='selectedForStats'
-                                        value="{{ $comparable->id }}"
-                                        class="rounded text-blue-600 focus:ring-blue-500 mr-2">
-                                    {{ $comparable->id }}
-                                </td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">${{
-                                    number_format($comparable->comparable_offers, 2) }}</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">${{
-                                    number_format($valorHomologado, 2) }}</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                    number_format((float)$factorFRE, 4) }}</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $factor2 }}</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $ajustePct }}</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">${{ $valorFinal }}</td>
-                            </tr>
-                            @endforeach
-                            @else
-                            <tr>
-                                <td colspan="7" class="py-4 px-3 text-center text-gray-500">No hay comparables
-                                    cargados.</td>
-                            </tr>
-                            @endif
+            {{-- FILA 1: TABLA PRINCIPAL + GRÁFICA 1 --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {{-- Columna Izquierda: Tabla --}}
+                <div>
+                    <div class="overflow-x-auto border border-gray-300 rounded-md shadow-sm">
+                        <table class="w-full text-md">
+                            <thead>
+                                <tr class="bg-gray-100 text-md font-semibold text-gray-500 border-b border-gray-300">
+                                    <th class="py-2 px-3 text-left min-w-[150px]" rowspan="2">N. Comparable</th>
+                                    <th class="py-2 px-3 text-center min-w-[120px]" rowspan="2">Valor Unitario</th>
+                                    <th class="py-2 px-3 text-center min-w-[120px]" rowspan="2">Val Unit Hom</th>
+                                    <th class="py-2 px-3 text-center" colspan="2">Factor de Ajuste</th>
+                                    <th class="py-2 px-3 text-center min-w-[100px]" rowspan="2">Ajuste %</th>
+                                    <th class="py-2 px-3 text-center min-w-[120px]" rowspan="2">Valor Final</th>
+                                </tr>
+                                <tr class="bg-gray-100 text-sm font-semibold text-gray-500 border-b border-gray-300">
+                                    <th class="py-1 px-3 text-center min-w-[100px]">(FRE)</th>
+                                    <th class="py-1 px-3 text-center min-w-[100px]">(F. Aj. 2)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 bg-white">
+                                @if($comparables && $comparables->count() > 0)
+                                @foreach ($comparables as $index => $comparable)
+                                @php
+                                $compData = $comparableFactors[$comparable->id] ?? [];
+                                $factorFRE = $compData['FRE']['factor_ajuste'] ?? 0.0;
+                                $valorHomologado = $compData['FRE']['valor_homologado'] ?? 0.0;
+                                // Ajusta estas claves si en Building se llaman diferente, pero usualmente son iguales
+                                $factor2 = '0.00';
+                                $ajustePct = '0.00%';
+                                $valorFinal = '0.00';
+                                @endphp
+                                <tr class="hover:bg-gray-50">
+                                    <td class="py-1.5 px-3 align-middle text-sm">
+                                        <input type="checkbox" wire:model.live='selectedForStats'
+                                            value="{{ $comparable->id }}"
+                                            class="rounded text-blue-600 focus:ring-blue-500 mr-2">
+                                        {{ $comparable->id }}
+                                    </td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">${{
+                                        number_format($comparable->comparable_unit_value, 2) }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">${{
+                                        number_format($valorHomologado, 2) }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        number_format((float)$factorFRE, 4) }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $factor2 }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{ $ajustePct }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">${{ $valorFinal }}</td>
+                                </tr>
+                                @endforeach
+                                @else
+                                <tr>
+                                    <td colspan="7" class="py-4 px-3 text-center text-gray-500">No hay comparables
+                                        cargados.</td>
+                                </tr>
+                                @endif
 
-                            {{-- FILA PROMEDIO --}}
-                            <tr class="font-bold bg-gray-100">
-                                <td class="py-1.5 px-3 align-middle text-sm">Promedio</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">${{
-                                    $conclusion_promedio_oferta }}</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">${{
-                                    $conclusion_valor_unitario_homologado_promedio }}</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                    $conclusion_factor_promedio }}</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                    $conclusion_promedio_factor2_placeholder }}</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                    $conclusion_promedio_ajuste_pct_placeholder }}</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">${{
-                                    $conclusion_promedio_valor_final_placeholder }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                {{-- FILA PROMEDIO --}}
+                                <tr class="font-bold bg-gray-100">
+                                    <td class="py-1.5 px-3 align-middle text-sm">Promedio</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">${{
+                                        $conclusion_promedio_oferta }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">${{
+                                        $conclusion_valor_unitario_homologado_promedio }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_factor_promedio }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_promedio_factor2_placeholder }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_promedio_ajuste_pct_placeholder }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">${{
+                                        $conclusion_promedio_valor_final_placeholder }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
 
-            {{-- Gráfica 1 (MIXTA) --}}
-            <div class="relative flex flex-col h-full">
-                <div x-data="chartHomologationLands()" x-init="init()" wire:ignore
+                {{-- Gráfica 1 (MIXTA) --}}
+                <div class="relative flex flex-col h-full">
+                <div x-data="chartHomologationBuildings()" x-init="init()" wire:ignore
                     class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm w-full relative"
                     style="height: 300px; min-height: 300px;">
-                    {{-- Asegúrate que el x-ref coincida con el script de building chart1 --}}
                     <canvas x-ref="chart1"></canvas>
                 </div>
-            </div>
-        </div>
-
-        {{-- FILA 2: TABLA ESTADÍSTICAS + GRÁFICA 2 (BARRAS) --}}
-        {{-- ¡AQUÍ ES DONDE FALTABAN LAS FILAS! --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {{-- Columna Izquierda: Tabla Estadísticas --}}
-            <div>
-                <div class="overflow-x-auto border border-gray-300 rounded-md shadow-sm">
-                    <table class="w-full text-md">
-                        <thead>
-                            <tr class="bg-gray-100 text-md font-semibold text-gray-500 border-b border-gray-300">
-                                <th class="text-left py-2 px-3 w-1/3"></th>
-                                <th class="text-center py-2 px-3 w-1/3">Valor Oferta</th>
-                                <th class="text-center py-2 px-3 w-1/3">Valor Unit. Hom.</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
-                            <tr>
-                                <td class="py-1.5 px-3 align-middle text-sm font-semibold">Desviación Estándar</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                    $conclusion_desviacion_estandar_oferta }}</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                    $conclusion_desviacion_estandar_homologado }}</td>
-                            </tr>
-                            <tr>
-                                <td class="py-1.5 px-3 align-middle text-sm font-semibold">Coeficiente de Variación
-                                </td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                    $conclusion_coeficiente_variacion_oferta }} %</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                    $conclusion_coeficiente_variacion_homologado }} %</td>
-                            </tr>
-                            <tr class="font-bold bg-gray-50">
-                                <td class="py-1.5 px-3 align-middle text-sm font-semibold">Máximo</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                    $conclusion_maximo_oferta }}</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                    $conclusion_maximo_homologado }}</td>
-                            </tr>
-                            <tr class="font-bold bg-gray-50">
-                                <td class="py-1.5 px-3 align-middle text-sm font-semibold">Mínimo</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                    $conclusion_minimo_oferta }}</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                    $conclusion_minimo_homologado }}</td>
-                            </tr>
-                            <tr class="font-bold bg-gray-50">
-                                <td class="py-1.5 px-3 align-middle text-sm font-semibold">Diferencia</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                    $conclusion_diferencia_oferta }}</td>
-                                <td class="py-1.5 px-3 align-middle text-sm text-center">{{
-                                    $conclusion_diferencia_homologado }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
 
-            {{-- Gráfica 2 (BARRAS ROJAS) --}}
-            <div class="relative flex flex-col h-full">
-                <div x-data="chartHomologationStats()" x-init="init()" wire:ignore
+            {{-- FILA 2: TABLA ESTADÍSTICAS + GRÁFICA 2 (BARRAS) --}}
+            {{-- ¡AQUÍ ES DONDE FALTABAN LAS FILAS! --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {{-- Columna Izquierda: Tabla Estadísticas --}}
+                <div>
+                    <div class="overflow-x-auto border border-gray-300 rounded-md shadow-sm">
+                        <table class="w-full text-md">
+                            <thead>
+                                <tr class="bg-gray-100 text-md font-semibold text-gray-500 border-b border-gray-300">
+                                    <th class="text-left py-2 px-3 w-1/3"></th>
+                                    <th class="text-center py-2 px-3 w-1/3">Valor Oferta</th>
+                                    <th class="text-center py-2 px-3 w-1/3">Valor Unit. Hom.</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 bg-white">
+                                <tr>
+                                    <td class="py-1.5 px-3 align-middle text-sm font-semibold">Desviación Estándar</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_desviacion_estandar_oferta }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_desviacion_estandar_homologado }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1.5 px-3 align-middle text-sm font-semibold">Coeficiente de Variación
+                                    </td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_coeficiente_variacion_oferta }} %</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_coeficiente_variacion_homologado }} %</td>
+                                </tr>
+                                <tr class="font-bold bg-gray-50">
+                                    <td class="py-1.5 px-3 align-middle text-sm font-semibold">Máximo</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_maximo_oferta }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_maximo_homologado }}</td>
+                                </tr>
+                                <tr class="font-bold bg-gray-50">
+                                    <td class="py-1.5 px-3 align-middle text-sm font-semibold">Mínimo</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_minimo_oferta }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_minimo_homologado }}</td>
+                                </tr>
+                                <tr class="font-bold bg-gray-50">
+                                    <td class="py-1.5 px-3 align-middle text-sm font-semibold">Diferencia</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_diferencia_oferta }}</td>
+                                    <td class="py-1.5 px-3 align-middle text-sm text-center">{{
+                                        $conclusion_diferencia_homologado }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div x-data="chartHomologationBuildingStats()" x-init="init()" wire:ignore
                     class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm w-full relative"
                     style="height: 300px; min-height: 300px;">
                     <canvas x-ref="chart2"></canvas>
                 </div>
             </div>
-        </div>
 
-        {{-- RESULTADOS FINALES --}}
-        <div class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
-            <div class="flex flex-col space-y-4">
-                <div class="flex flex-col md:flex-row md:justify-between md:items-center">
-                    <span class="text-xl font-bold text-gray-800">VALOR UNITARIO DE VENTA:</span>
-                    <span class="text-3xl font-extrabold text-gray-900 mt-1 md:mt-0">{{
-                        $conclusion_valor_unitario_de_venta }}</span>
-                </div>
-                <div class="flex flex-col md:flex-row md:justify-between md:items-center">
-                    <label for="tipo_redondeo_venta"
-                        class="block text-sm font-medium text-gray-700 whitespace-nowrap mb-1 md:mb-0">
-                        TIPO DE REDONDEO SOBRE EL VALOR UNITARIO:
-                    </label>
-                    <flux:select wire:model.live="conclusion_tipo_redondeo" id="tipo_redondeo_venta"
-                        class="w-full md:w-40 text-sm mt-1 md:mt-0">
-                        <flux:select.option value="UNIDADES">UNIDADES</flux:select.option>
-                        <flux:select.option value="DECENAS">DECENAS</flux:select.option>
-                        <flux:select.option value="CENTENAS">CENTENAS</flux:select.option>
-                        <flux:select.option value="MILLARES">MILLARES</flux:select.option>
-                    </flux:select>
+            {{-- RESULTADOS FINALES --}}
+            <div class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
+                <div class="flex flex-col space-y-4">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center">
+                        <span class="text-xl font-bold text-gray-800">VALOR UNITARIO DE VENTA:</span>
+                        <span class="text-3xl font-extrabold text-gray-900 mt-1 md:mt-0">{{
+                            $conclusion_valor_unitario_de_venta }}</span>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center">
+                        <label for="tipo_redondeo_venta"
+                            class="block text-sm font-medium text-gray-700 whitespace-nowrap mb-1 md:mb-0">
+                            TIPO DE REDONDEO SOBRE EL VALOR UNITARIO:
+                        </label>
+                        <flux:select wire:model.live="conclusion_tipo_redondeo" id="tipo_redondeo_venta"
+                            class="w-full md:w-40 text-sm mt-1 md:mt-0">
+                            <flux:select.option value="UNIDADES">UNIDADES</flux:select.option>
+                            <flux:select.option value="DECENAS">DECENAS</flux:select.option>
+                            <flux:select.option value="CENTENAS">CENTENAS</flux:select.option>
+                            <flux:select.option value="MILLARES">MILLARES</flux:select.option>
+                        </flux:select>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
     @else
     <div>
@@ -803,32 +872,75 @@
         </div>
     </flux:modal>
 
-    <script>
-        document.addEventListener('alpine:init', () => {
-        Alpine.data('chartHomologationLands', () => ({
-            chart: null,
-            init() {
-                this.$wire.on('updateChart', (event) => {
-                    this.updateChart(event.data);
-                });
-            },
-            updateChart(data) {
-                const ctx = this.$root.querySelector('canvas');
-                if (!ctx) return;
-                if (this.chart) this.chart.destroy();
+<script>
+    // 1. La Fábrica (Global)
+    // La definimos en window para asegurar que esté disponible siempre
+    window.createChartManager = function(chartType, eventName, refName) {
+        let chartInstance = null;
 
-                this.chart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.labels,
-                        datasets: [
-                            { label: 'Homologado', data: data.homologated, backgroundColor: '#DC2626', type: 'line', borderColor: '#DC2626' },
-                            { label: 'Oferta', data: data.oferta, backgroundColor: '#14B8A6' }
-                        ]
+        return {
+            init() {
+                // BLINDAJE: Si el elemento no existe, abortar misión
+                if (!this.$refs[refName]) return;
+
+                this.drawChart({ labels: [], datasets: [] });
+
+                // Escucha de eventos
+                window.addEventListener(eventName, (event) => {
+                    // Doble chequeo por si el usuario cambió de página rápido
+                    if (!this.$refs[refName]) return;
+
+                    let payload = event.detail;
+                    const dataToUse = (payload && payload.data) ? payload.data : payload;
+
+                    if (dataToUse) {
+                        this.drawChart(dataToUse);
                     }
                 });
+            },
+
+            drawChart(data) {
+                try {
+                    const ctx = this.$refs[refName];
+                    if (!ctx) return;
+
+                    if (chartInstance) {
+                        chartInstance.destroy();
+                        chartInstance = null;
+                    }
+
+                    chartInstance = new Chart(ctx, {
+                        type: chartType,
+                        data: data,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: { duration: 500 },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { mode: 'index', intersect: false }
+                            },
+                            scales: {
+                                y: { display: false, beginAtZero: true, grid: { display: false } },
+                                x: { grid: { display: false }, ticks: { display: true, font: { size: 10 } } }
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error("Error chart:", error);
+                }
             }
-        }));
-    });
-    </script>
+        };
+    }
+
+    // 2. Funciones Específicas (Globales)
+    // Al ser funciones normales, Alpine las encuentra siempre, sin importar la navegación.
+    function chartHomologationBuildings() {
+        return createChartManager('bar', 'updateBuildingChart1', 'chart1');
+    }
+
+    function chartHomologationBuildingStats() {
+        return createChartManager('bar', 'updateBuildingChart2', 'chart2');
+    }
+</script>
 </div>

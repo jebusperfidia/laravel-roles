@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('acronym', 10);
             $table->boolean('is_editable')->default(false);
             $table->boolean('is_custom')->default(false);
+            $table->boolean('is_feq')->default(false);
 
             // --- Columnas de Valor (Tus nombres) ---
             $table->decimal('rating', 10, 4)->default(1.0000);

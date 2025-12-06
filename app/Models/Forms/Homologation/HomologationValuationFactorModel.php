@@ -18,6 +18,7 @@ class HomologationValuationFactorModel extends Model
         'acronym',
         'is_editable',
         'is_custom',
+        'is_feq',
         'rating',
         'homologation_type',
     ];

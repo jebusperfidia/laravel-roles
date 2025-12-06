@@ -25,12 +25,19 @@ class HomologationValuationService
         $now = now(); // Para los timestamps
 
         foreach ($defaultFactors as $factorData) {
+
+
+            $isFeq = ($factorData['homologation_type'] === 'building' && $factorData['acronym'] === 'FEQ');
+
+
             $factorsToInsert[] = [
                 'valuation_id' => $valuation->id,
                 'factor_name' => $factorData['factor_name'],
                 'acronym' => $factorData['acronym'],
                 'is_editable' => $factorData['is_editable'],
                 'homologation_type' => $factorData['homologation_type'],
+                'is_custom' => false,
+                'is_feq' => $isFeq,
                 'rating' => 1.0000,
                 'created_at' => $now,
                 'updated_at' => $now,

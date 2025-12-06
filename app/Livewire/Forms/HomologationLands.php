@@ -34,7 +34,7 @@ class HomologationLands extends Component
     public $subject_surface_type = 'total';
     public $subject_cus = '0.00';
     public $subject_cos = '0.00';
-    public $subject_lote_moda = '100.00';
+    public $subject_lote_moda = '0.00';
 
     // --- ESTRUCTURAS DE DATOS ---
     public array $comparableFactors = [];
@@ -314,13 +314,13 @@ class HomologationLands extends Component
             ]
         );
 
-        // 🔄 LOGICA DE RECARGA FORZADA
+        //  LOGICA DE RECARGA FORZADA
         if ($this->comparables) {
             foreach ($this->comparables->pluck('id') as $compId) {
                 $this->recalculateSingleComparable($compId);
             }
 
-            // 🚨 RECARGAR DESDE DB: Esto asegura que la vista tenga el dato nuevo
+            //  RECARGAR DESDE DB: Esto asegura que la vista tenga el dato nuevo
             $this->loadAllComparableFactors();
 
             $this->recalculateConclusions();
@@ -335,6 +335,7 @@ class HomologationLands extends Component
             $this->comparables = $this->valuation->landComparables()->orderBy('position')->get();
         }
         $this->comparablesCount = $this->comparables->count();
+
     }
 
     // ==========================================================
@@ -422,7 +423,7 @@ class HomologationLands extends Component
 
             $this->initializeComparableFactor($compId, $factor->acronym);
 
-            // 🚨 LEEMOS EL VALOR REAL DE LA BD
+            //  LEEMOS EL VALOR REAL DE LA BD
             $dbApplicable = (float)($factor->applicable ?? 1.0);
 
             // FIX: Formateo consistente a 4 decimales para todos los factores numéricos
@@ -724,20 +725,18 @@ class HomologationLands extends Component
     public function recalculateSingleComparable($comparableId)
     {
         // 1. PREPARACIÓN DE DATOS
+        // Esto YA trae los factores del sujeto ordenados y con su rating (incluyendo FNEG)
         $allFactors = $this->orderedComparableFactorsForView;
 
-        // Limpieza del lote moda (Necesario para el cálculo del FSU)
-        $subjectLoteModa = (float) str_replace(',', '', $this->subject_lote_moda);
+        // Limpieza del lote moda (para FSU)
+        $subjectLoteModa = (float) str_replace(',', '', (string)$this->subject_lote_moda);
 
-        // Mapa de calificaciones del Sujeto
-        $subjectRatings = collect($this->subject_factors_ordered)
-            ->keyBy('acronym')
-            ->map(fn($f) => (float)$f['rating']);
-        $subjectRatings->put('FNEG', 1.0);
+        // --- ELIMINAMOS EL MAPEO REDUNDANTE DE $subjectRatings ---
+        // No es necesario crear un map auxiliar, ya tienes el rating en $allFactors.
 
         if (!isset($this->comparableFactors[$comparableId])) return;
 
-        // BÚSQUEDA DEL PIVOTE (ID para guardar factores)
+        // BÚSQUEDA DEL PIVOTE (Se mantiene igual)
         $pivotId = ValuationLandComparableModel::where('valuation_id', (int)$this->idValuation)
             ->where('comparable_id', (int)$comparableId)
             ->value('id');
@@ -749,135 +748,106 @@ class HomologationLands extends Component
 
         foreach ($allFactors as $factor) {
             $sigla = $factor['acronym'];
-            if (!isset($this->comparableFactors[$comparableId][$sigla])) continue;
+
+            // Inicializar si no existe en el array del comparable
+            if (!isset($this->comparableFactors[$comparableId][$sigla])) {
+                $this->initializeComparableFactor($comparableId, $sigla);
+            }
 
             $factorData = $this->comparableFactors[$comparableId][$sigla];
 
-            // Valores base
-            $sujetoRating = $subjectRatings->get($sigla, 1.0) ?: 1.0; // <-- VARIABLE DE CALIFICACIÓN DEL SUJETO
-            $compRating = (float)($factorData['calificacion'] ?? 1.0) ?: 1.0;
+            // =========================================================
+            // 🔥 AQUÍ ESTÁ EL FIX: OBTENER RATING DIRECTO DEL LOOP 🔥
+            // =========================================================
+            // Ya no buscamos en $subjectRatings. El $factor actual YA es el factor del sujeto.
+            $sujetoRating = (float)($factor['rating'] ?? 1.0);
 
+            // Aseguramos que FNEG sea siempre 1.0 base
+            if ($sigla === 'FNEG') {
+                $sujetoRating = 1.0;
+            }
+
+            $compRating = (float)($factorData['calificacion'] ?? 1.0) ?: 1.0;
             $factor_ajuste = 1.0;
             $diferencia_math = 0.0;
+            $ratingCalculatedAutomatically = null;
 
             // =========================================================
-            // === LÓGICA ESPECÍFICA POR FACTOR ===
+            // === LÓGICA ESPECÍFICA POR FACTOR (Se mantiene igual) ===
             // =========================================================
 
             if ($sigla === 'FSU') {
-                // ---------------------------------------------------------
-                // 1. FSU (FACTOR SUPERFICIE) - Se mantiene la lógica de POTENCIA
-                // ---------------------------------------------------------
+                // ... (Tu lógica FSU intacta)
                 $rawSurface = $comparableModel->comparable_land_area ?? 0;
                 $compSurface = (float) str_replace(',', '', (string)$rawSurface);
 
                 if ($subjectLoteModa > 0 && $compSurface > 0) {
                     $coeficiente = $compSurface / $subjectLoteModa;
-                    $factor_ajuste_potencia = pow($coeficiente, (1 / 12));
+                    $compRating = pow($coeficiente, (1 / 12));
                 } else {
-                    $factor_ajuste_potencia = 1.0;
+                    $compRating = 1.0;
                 }
-
-                // Cal. Comp. para FSU es el factor de ajuste
-                $compRating = $factor_ajuste_potencia;
-
-                // 1. CÁLCULO DE DIFERENCIA: Sujeto - Comp
-                // Usamos la variable $sujetoRating, no el '1.0' codificado.
+                $ratingCalculatedAutomatically = $compRating;
                 $diferencia_math = $sujetoRating - $compRating;
-
-                // 2. CÁLCULO DE AJUSTE (Aplicable): Diferencia + 1.0
-                $factor_ajuste = $diferencia_math + 1.0; // Corregido: Siempre + 1.0
-
-                // 3. Guardado en la base de datos
-                $factorRecord = HomologationComparableFactorModel::firstOrNew([
-                    'valuation_land_comparable_id' => $pivotId,
-                    'acronym' => 'FSU',
-                    'homologation_type' => 'land'
-                ]);
-
-                $factorRecord->factor_name = 'Factor Superficie';
-                $factorRecord->rating = $compRating;
-                $factorRecord->applicable = $factor_ajuste;
-
-                try {
-                    $factorRecord->save();
-                    $factorData['factor_id'] = $factorRecord->id;
-                } catch (\Exception $e) {
-                }
-
-                $factorData['calificacion'] = number_format($compRating, 4, '.', '');
-                $factorData['aplicable'] = number_format($factor_ajuste, 4, '.', '');
+                $factor_ajuste = $diferencia_math + 1.0;
             } elseif ($sigla === 'FCUS') {
-                // ---------------------------------------------------------
-                // 2. FCUS (FACTOR CUS) - Lógica de RAÍZ
-                // ---------------------------------------------------------
-
-                // CÁLCULO DE RATING COMPARABLE (Raíz de CUS)
+                // ... (Tu lógica FCUS intacta)
                 $niveles = (float)($comparableModel->comparable_allowed_levels ?? $comparableModel->comparable_max_levels ?? 0);
                 $areaLibre = (float)($comparableModel->comparable_free_area_required ?? $comparableModel->comparable_free_area ?? 0);
                 $areaLibreDec = ($areaLibre > 1) ? ($areaLibre / 100) : $areaLibre;
+
                 $cusCalculado = $niveles * (1 - $areaLibreDec);
-                $compRatingCalculated = ($cusCalculado > 0) ? sqrt($cusCalculado) : 1.0;
-
-                $compRating = $compRatingCalculated;
-                $factorData['calificacion'] = number_format($compRating, 4, '.', '');
-
-                // 1. CÁLCULO DE DIFERENCIA: Sujeto - Comp
-                // Usa directamente la variable $sujetoRating, no '1.0'
+                $compRating = ($cusCalculado > 0) ? sqrt($cusCalculado) : 1.0;
+                $ratingCalculatedAutomatically = $compRating;
                 $diferencia_math = $sujetoRating - $compRating;
-
-                // 2. CÁLCULO DE AJUSTE (Aplicable): Diferencia + 1.0
-                $factor_ajuste = $diferencia_math + 1.0; // FÓRMULA CLAVE: DIF + 1.0
-
-                // 3. GUARDADO MANUAL
-                $factorRecord = HomologationComparableFactorModel::firstOrNew([
-                    'valuation_land_comparable_id' => $pivotId,
-                    'acronym' => 'FCUS',
-                    'homologation_type' => 'land'
-                ]);
-                $factorRecord->factor_name = 'Factor CUS';
-                $factorRecord->rating = $compRating;
-                $factorRecord->applicable = $factor_ajuste;
-
-                try {
-                    $factorRecord->save();
-                    $factorData['factor_id'] = $factorRecord->id;
-                } catch (\Exception $e) {
-                }
-
-                $factorData['aplicable'] = number_format($factor_ajuste, 4, '.', '');
+                $factor_ajuste = $diferencia_math + 1.0;
             } elseif ($sigla === 'FNEG') {
-                // ---------------------------------------------------------
-                // 3. FNEG (FACTOR NEGOCIACIÓN) - 100% manual
-                // ---------------------------------------------------------
-                // El valor de Aplicable viene directo del input del usuario.
+                // FNEG usa directo el aplicable
                 $factor_ajuste = (float)($factorData['aplicable'] ?? 1.0);
-
-                // Calculamos la diferencia según la regla (Diferencia = Aplicable - 1.0)
                 $diferencia_math = $factor_ajuste - 1.0;
             } else {
-                // ---------------------------------------------------------
-                // 4. RESTO DE FACTORES MANUALES (FZO, FUB, FFO, etc.)
-                //    APLICANDO LA LÓGICA GENERAL: DIFERENCIA = RESTA
-                // ---------------------------------------------------------
-
-                // 1. Diferencia Matemática = Calificación Sujeto - Calificación Comparable
+                // GENÉRICOS
                 $diferencia_math = $sujetoRating - $compRating;
-
-                // 2. Factor Ajuste (Aplicable) = Diferencia + 1
                 $factor_ajuste = $diferencia_math + 1.0;
             }
 
             // =========================================================
-            // === ACTUALIZACIÓN MEMORIA Y ACUMULADOS ===
+            // === ACTUALIZACIÓN MEMORIA Y BD ===
             // =========================================================
 
-            // Formateo y asignación
             $factorData['diferencia'] = number_format($diferencia_math, 4, '.', '');
             $factorData['factor_ajuste'] = number_format($factor_ajuste, 4, '.', '');
+            $factorData['aplicable'] = number_format($factor_ajuste, 4, '.', '');
+
+            if ($ratingCalculatedAutomatically !== null) {
+                $factorData['calificacion'] = number_format($ratingCalculatedAutomatically, 4, '.', '');
+            }
 
             $this->comparableFactors[$comparableId][$sigla] = $factorData;
             $factorResultante *= $factor_ajuste;
+
+            // ... (Tu lógica de guardado en DB se mantiene igual)
+            $dataToSave = [
+                'applicable' => $factor_ajuste,
+                'factor_name' => $factor['factor_name'] ?? $sigla
+            ];
+
+            if ($ratingCalculatedAutomatically !== null) {
+                $dataToSave['rating'] = $ratingCalculatedAutomatically;
+            }
+
+            // Guardado silencioso
+            try {
+                HomologationComparableFactorModel::updateOrCreate(
+                    [
+                        'valuation_land_comparable_id' => $pivotId,
+                        'acronym' => $sigla,
+                        'homologation_type' => 'land'
+                    ],
+                    $dataToSave
+                );
+            } catch (\Exception $e) {
+            }
         }
 
         // FRE FINAL
@@ -914,7 +884,7 @@ class HomologationLands extends Component
         }
 
         // Extraer colecciones para cálculos
-        $valoresOferta = $selectedComparables->pluck('comparable_offers')->map(fn($v) => (float)$v);
+        $valoresOferta = $selectedComparables->pluck('comparable_unit_value')->map(fn($v) => (float)$v);
         $valoresHomologados = $selectedComparables->map(fn($c) => (float)($this->comparableFactors[$c->id]['FRE']['valor_homologado'] ?? 0));
         $factoresFRE = $selectedComparables->map(fn($c) => (float)($this->comparableFactors[$c->id]['FRE']['factor_ajuste'] ?? 0));
 

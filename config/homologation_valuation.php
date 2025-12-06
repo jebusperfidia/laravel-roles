@@ -75,7 +75,7 @@ return [
         [
             'factor_name' => 'Equipamiento',
             'acronym' => 'FEQ',
-            'is_editable' => false,
+            'is_editable' => true,
             'homologation_type' => 'building',
         ],
         [
@@ -87,7 +87,7 @@ return [
         [
             'factor_name' => 'F.Localización',
             'acronym' => 'FLOC',
-            'is_editable' => false,
+            'is_editable' => true,
             'homologation_type' => 'building',
         ],
         [

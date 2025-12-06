@@ -19,7 +19,7 @@ class HomologationComparableService
     // FACTORES: CREACIÓN Y COPIA (Ejecutado en assignedElement)
     // =========================================================================
 
-    public function createComparableFactors(int $valuationId, EloquentModel $comparablePivot, string $type): void
+   public function createComparableFactors(int $valuationId, EloquentModel $comparablePivot, string $type): void
     {
         $subjectFactors = HomologationValuationFactorModel::where('valuation_id', $valuationId)
             ->where('homologation_type', $type)
@@ -46,6 +46,9 @@ class HomologationComparableService
                     'factor_name'                      => $subjectFactor->factor_name,
                     'acronym'                          => $subjectFactor->acronym,
                     'is_editable'                      => $subjectFactor->is_editable,
+                    // [CORRECCIÓN 1] Agregar estas líneas:
+                    'is_custom'                        => $subjectFactor->is_custom,
+                    'is_feq'                           => $subjectFactor->is_feq,
                     'rating'                           => 1.0000,
                     'applicable'                       => 1.0000,
                     'created_at'                       => $now,
@@ -61,6 +64,9 @@ class HomologationComparableService
                 'factor_name'                      => 'F. Negociación',
                 'acronym'                          => 'FNEG',
                 'is_editable'                      => false,
+                // [CORRECCIÓN 1b] FNEG defaults:
+                'is_custom'                        => false,
+                'is_feq'                           => false,
                 'rating'                           => 1.0000,
                 'applicable'                       => 1.0000,
                 'created_at'                       => $now,
@@ -82,6 +88,9 @@ class HomologationComparableService
                     'factor_name'                      => $subjectFactor->factor_name,
                     'acronym'                          => $subjectFactor->acronym,
                     'is_editable'                      => $subjectFactor->is_editable,
+                    // [CORRECCIÓN 2] Copiar el ADN del padre:
+                    'is_custom'                        => $subjectFactor->is_custom,
+                    'is_feq'                           => $subjectFactor->is_feq,
                     'rating'                           => 1.0000,
                     'applicable'                       => 1.0000,
                     'created_at'                       => $now,
@@ -97,6 +106,9 @@ class HomologationComparableService
                 'factor_name'                      => 'F. Negociación',
                 'acronym'                          => 'FNEG',
                 'is_editable'                      => false,
+                // [CORRECCIÓN 2b] FNEG defaults:
+                'is_custom'                        => false,
+                'is_feq'                           => false,
                 'rating'                           => 1.0000,
                 'applicable'                       => 1.0000,
                 'created_at'                       => $now,
@@ -110,7 +122,7 @@ class HomologationComparableService
         |--------------------------------------------------------------------------
         */
         if (!empty($factorsToInsert)) {
-            // Definimos el set completo de columnas (asegurando el orden)
+            // [CORRECCIÓN 3] Agregar is_custom e is_feq al array permitido
             $columns = [
                 'valuation_land_comparable_id',
                 'valuation_building_comparable_id',
@@ -118,6 +130,8 @@ class HomologationComparableService
                 'factor_name',
                 'acronym',
                 'is_editable',
+                'is_custom', // <--- ¡AQUÍ!
+                'is_feq',    // <--- ¡Y AQUÍ!
                 'rating',
                 'applicable',
                 'created_at',

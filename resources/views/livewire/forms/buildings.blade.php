@@ -2,21 +2,17 @@
     <div class="flex justify-end font-semibold text-sm text-red-600 pt-2 -mb-3"><span>* Campos obligatorios</span></div>
     <form wire:submit='save'>
 
-
         <div class="form-container">
             <div class="form-container__header">
                 De las construcciones
             </div>
             <div class="form-container__content">
-                {{-- {{$valuation->property_type}} --}}
-
 
                 {{-- Navbar responsivo con hamburguesa --}}
                 <div x-data="{ open: false }" class="w-full">
                     @php
                     $tabs = [
                     'privativas' => 'Privativas',
-                    /* 'comunes' => 'Comunes', */
                     ];
 
                     if(stripos($valuation->property_type, 'condominio')){
@@ -31,9 +27,9 @@
                         @foreach ($tabs as $key => $label)
                         <flux:navbar.item wire:click.prevent="setTab('{{ $key }}')"
                             :active="$activeTab === '{{ $key }}'" class="cursor-pointer px-4 py-2 transition-colors
-                                                        {{ $activeTab === $key
-                                                            ? ' border-b-2 border-[#43A497] text-[#3A8B88] font-semibold'
-                                                            : 'text-gray-600 hover:text-[#5CBEB4]' }}">
+                                                                {{ $activeTab === $key
+                                                                    ? ' border-b-2 border-[#43A497] text-[#3A8B88] font-semibold'
+                                                                    : 'text-gray-600 hover:text-[#5CBEB4]' }}">
                             <span class="text-[16px]">{{ $label }}</span>
                         </flux:navbar.item>
 
@@ -45,7 +41,6 @@
 
                     {{-- Menú hamburguesa para pantallas pequeñas (<950px) --}} <div
                         class="xl:hidden flex justify-end p-4 bg-white border-b-2">
-                        {{-- <span class="text-lg font-semibold text-[#3A8B88]">Opciones</span> --}}
                         <button type="button" @click="open = !open"
                             class="text-[#000000] focus:outline-none cursor-pointer">
                             <template x-if="!open">
@@ -80,20 +75,11 @@
                 </div>
 
 
-
-
-
-               {{--  @if ($activeTab === 'privativas') --}}
-
-               <div class="{{ $activeTab === 'privativas' ? 'block' : 'hidden' }}">
-                {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
-                {{-- <flux:modal.trigger name="add-element" class="flex justify-end pt-8"> --}}
+                <div class="{{ $activeTab === 'privativas' ? 'block' : 'hidden' }}">
                     <div class="flex justify-end pt-4">
                         <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
                             wire:click="openAddElement('private')"></flux:button>
                     </div>
-
-
 
                     <div class="mt-2">
                         <div class="overflow-x-auto max-w-full">
@@ -118,7 +104,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if ($buildingConstructionsPrivate->isEmpty())
+                                    @if (count($buildingConstructionsPrivate) == 0)
                                     <tr>
                                         <td colspan="18" class="px-2 py-4 text-center text-gray-500">
                                             No hay elementos registrados
@@ -225,9 +211,7 @@
                         <h2 class="border-b-2 border-gray-300">Resultados de las construcciones</h2>
                     </div>
 
-
-
-                    {{-- TABLA DE ELEMENTOS --}}
+                    {{-- TABLA DE RESULTADOS --}}
                     <div class="mt-2">
                         <div class="overflow-x-auto max-w-full">
                             <table class="min-w-[550px] table-fixed w-full border-2 ">
@@ -248,15 +232,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                               {{--      @php
-                                    $this->ageProperty = 0;
-                                    $this->totalAgeProperty = 0;
-
-                                    $this->usefulLifeProperty = 0;
-                                    $this->totalUsefulLifeProperty = 0;
-
-                                    @endphp --}}
-                                    @if ($buildingConstructionsPrivate->isEmpty())
+                                    @if (count($buildingConstructionsPrivate) == 0)
                                     <tr>
                                         <td colspan="12" class="px-2 py-4 text-center text-gray-500">
                                             No hay elementos registrados para calcular resultados
@@ -265,21 +241,18 @@
                                     @else
 
                                     @php
-                                    $this->totalAgeProperty = 0;
-                                    $this->totalUsefulLifeProperty = 0;
+                                    // Inicializamos variable de suma visual solo para esta tabla
+                                    $sumValuesTotalsPriv = 0;
                                     @endphp
+
                                     @foreach ($buildingConstructionsPrivate as $item)
 
                                     @php
-
-                                    // CÁLCULOS DE AVALUÓ POR CONSTRUCCIÓN
-
+                                    // CÁLCULOS DE AVALUÓ POR CONSTRUCCIÓN (Individuales para mostrar en tabla)
 
                                     // 1. Obtener la vida útil total según combinación (Clasificación + Uso)
                                     $claveCombinacion = $item->clasification . '_' . $item->use;
                                     $vidaUtilTotal = $this->construction_life_values[$claveCombinacion] ?? 0;
-
-
 
                                     // 2. Edad de la construcción
                                     $edad = $item->age;
@@ -287,14 +260,12 @@
                                     // 3. Vida útil remanente
                                     $vidaUtilRemanente = $vidaUtilTotal > 0 ? max($vidaUtilTotal - $edad, 0) : 0;
 
-                                    // 4. Factor de edad (FEd) a partir de la formula proporcionada
-                                    // FEd = (0.100 × VP + 0.900 × (VP - E)) / VP
+                                    // 4. Factor de edad (FEd)
                                     $factorEdad = $vidaUtilTotal > 0
                                     ? (0.100 * $vidaUtilTotal + 0.900 * ($vidaUtilTotal - $edad)) / $vidaUtilTotal
                                     : 0;
 
                                     // 5. Factor de conservación
-                                    //Hacemos match con el valor asignado para mostrarlo en la tabla
                                     $factorConservacion = match ($item->conservation_state) {
                                     '0. Ruidoso' => 0.0,
                                     '0.8 Malo' => 0.8,
@@ -304,32 +275,18 @@
                                     };
 
                                     // 6. Factor resultante
-                                    // Fórmula: Factor resultante = FEd × FCons × (Avance de obra / 100)
                                     $factorResultante = $factorEdad * $factorConservacion * ($item->progress_work /
                                     100);
                                     // El factor resultante no puede ser menor a 0.600 (valor minimo permitido)
                                     $factorResultante = max($factorResultante, 0.600);
 
                                     // 7. Costo unitario neto de reposición
-                                    // Costo neto = Costo nuevo × Factor resultante
                                     $costoUnitarioNeto = $item->unit_cost_replacement * $factorResultante;
 
                                     // 8. Valor total
-                                    // Valor total = Superficie × Costo unitario neto
                                     $valorTotal = $item->surface * $costoUnitarioNeto;
 
                                     $sumValuesTotalsPriv = $sumValuesTotalsPriv + $valorTotal;
-
-                                    // 9. Una vez obtenidos los valores, obtenemos el total para el cálculo de vida util total del inmueble
-                                    // Y la edad del inmueble, en cada iteración solo se sumaran los totales, el cálculo final
-                                    // Se hará cuando se vaya a mostrar en pantalla, con lo cual se actualiza en cada cambio y alta de las tablas automáticamente
-                                    $this->totalAgeProperty += ($item->age * $item->surface);
-                                    $this->totalUsefulLifeProperty += ($vidaUtilTotal * $item->surface);
-                                    /* $this->totalUsefulLifeProperty = $this->totalUsefulLifeProperty + ($vidaUtilTotal * $item->surface); */
-
-                                    //dd($totalAgeProperty);
-
-
 
                                     @endphp
                                     <tr wire:key="result-private-{{ $item->id }}">
@@ -375,16 +332,6 @@
                                     @endforeach
                                     @endif
 
-                                    {{-- @php
-
-
-                                    $this->ageProperty = $this->totalAgeProperty/$this->totalSurfacePrivate;
-
-                                    $this->usefulLifeProperty = $this->totalUsefulLifeProperty/$this->totalSurfacePrivate;
-
-
-
-                                    @endphp --}}
                                 </tbody>
                                 <tfoot>
                                     <tr class="font-bold">
@@ -395,52 +342,22 @@
                                             ${{ number_format($sumValuesTotalsPriv, 4)
                                             }}
                                         </td>
-
-                                        {{-- <td colspan="7" class="px-2 py-1"></td> --}}
                                     </tr>
                                 </tfoot>
                             </table>
                         </div>
                     </div>
+                </div>
+
+
+                {{-- COMUNES --}}
+                <div class="{{ $activeTab === 'comunes' ? 'block' : 'hidden' }}">
+
+                    <div class="flex justify-end pt-4">
+                        <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
+                            wire:click="openAddElement('common')">
+                        </flux:button>
                     </div>
-
-                    {{-- @endif --}}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    {{-- @if ($activeTab === 'comunes') --}}
-
-                    <div class="{{ $activeTab === 'comunes' ? 'block' : 'hidden' }}">
-
-                    {{-- BOTÓN MODAL PARA NUEVO ELEMENTO --}}
-                    {{-- <flux:modal.trigger name="add-element" class="flex justify-end pt-8"> --}}
-                        <div class="flex justify-end pt-4">
-                            <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
-                                wire:click="openAddElement('common')">
-                            </flux:button>
-                        </div>
-                        {{--
-                    </flux:modal.trigger> --}}
 
                     {{-- TABLA DE ELEMENTOS --}}
                     <div class="mt-2">
@@ -466,7 +383,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if ($buildingConstructionsCommon->isEmpty())
+                                  @if (count($buildingConstructionsCommon) == 0)
                                     <tr>
                                         <td colspan="15" class="px-2 py-4 text-center text-gray-500">
                                             No hay elementos registrados
@@ -547,29 +464,6 @@
                                         </td>
                                         @endforeach
 
-                                        {{-- <td class="px-2 py-1 border text-sm text-center">
-                                            <input type="radio" name="surface_vad_group_{{ $item->id }}"
-                                                value="superficie vendible" class="w-4 h-4 text-blue-500" disabled {{
-                                                $item->surface_vad === 'superficie vendible' ?
-                                            'checked' : '' }}>
-                                        </td>
-
-
-                                        <td class="px-2 py-1 border text-sm text-center">
-                                            <input type="radio" name="surface_vad_group_{{ $item->id }}"
-                                                value="superficie accesoria" class="w-4 h-4 text-blue-500" disabled {{
-                                                $item->surface_vad === 'superficie accesoria' ?
-                                            'checked' : '' }}>
-                                        </td>
-
-
-                                        <td class="px-2 py-1 border text-sm text-center">
-                                            <input type="radio" name="surface_vad_group_{{ $item->id }}"
-                                                value="construccion superficie descubierta"
-                                                class="w-4 h-4 text-blue-500" disabled {{ $item->surface_vad ===
-                                            'construccion superficie descubierta' ? 'checked' : '' }}>
-                                        </td> --}}
-
                                         {{-- Acciones --}}
                                         <td class="px-2 py-1 border">
                                             <div class="flex justify-evenly gap-2">
@@ -609,7 +503,7 @@
 
 
 
-                    {{-- TABLA DE ELEMENTOS --}}
+                    {{-- TABLA DE RESULTADOS COMUNES --}}
                     <div class="mt-2">
                         <div class="overflow-x-auto max-w-full">
                             <table class="min-w-[550px] table-fixed w-full border-2 ">
@@ -630,17 +524,18 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if ($buildingConstructionsCommon->isEmpty())
+                                    @if (count($buildingConstructionsCommon) == 0)
                                     <tr>
                                         <td colspan="12" class="px-2 py-4 text-center text-gray-500">
                                             No hay elementos registrados para calcular resultados
                                         </td>
                                     </tr>
                                     @else
+                                    @php
+                                    $sumValuesTotalsCom = 0;
+                                    @endphp
                                     @foreach ($buildingConstructionsCommon as $item)
 
-                                    {{-- AQUI GENERAMOS LOS CÁLCULOS NECESARIOS PARA ASIGNAR A LOS VALORES SEGÚN SE
-                                    NECESITE --}}
                                     @php
 
                                     // CÁLCULOS DE AVALUÓ POR CONSTRUCCIÓN
@@ -656,14 +551,12 @@
                                     // 3. Vida útil remanente
                                     $vidaUtilRemanente = $vidaUtilTotal > 0 ? max($vidaUtilTotal - $edad, 0) : 0;
 
-                                    // 4. Factor de edad (FEd) a partir de la formula proporcionada
-                                    // FEd = (0.100 × VP + 0.900 × (VP - E)) / VP
+                                    // 4. Factor de edad (FEd)
                                     $factorEdad = $vidaUtilTotal > 0
                                     ? (0.100 * $vidaUtilTotal + 0.900 * ($vidaUtilTotal - $edad)) / $vidaUtilTotal
                                     : 0;
 
                                     // 5. Factor de conservación
-                                    //Hacemos match con el valor asignado para mostrarlo en la tabla
                                     $factorConservacion = match ($item->conservation_state) {
                                     '0. Ruidoso' => 0.0,
                                     '0.8 Malo' => 0.8,
@@ -673,18 +566,15 @@
                                     };
 
                                     // 6. Factor resultante
-                                    // Fórmula: Factor resultante = FEd × FCons × (Avance de obra / 100)
                                     $factorResultante = $factorEdad * $factorConservacion * ($item->progress_work /
                                     100);
                                     // El factor resultante no puede ser menor a 0.600 (valor minimo permitido)
                                     $factorResultante = max($factorResultante, 0.600);
 
                                     // 7. Costo unitario neto de reposición
-                                    // Costo neto = Costo nuevo × Factor resultante
                                     $costoUnitarioNeto = $item->unit_cost_replacement * $factorResultante;
 
                                     // 8. Valor total
-                                    // Valor total = Superficie × Costo unitario neto
                                     $valorTotal = $item->surface * $costoUnitarioNeto;
 
                                     $sumValuesTotalsCom = $sumValuesTotalsCom + $valorTotal;
@@ -739,115 +629,98 @@
                                         <td colspan="11" class="px-2 py-1"></td>
 
                                         <td class="px-2 py-1 text-xs text-center">
+
                                             ${{ number_format($sumValuesTotalsCom, 4)
                                             }}
                                         </td>
-
-                                        {{-- <td colspan="7" class="px-2 py-1"></td> --}}
                                     </tr>
                                 </tfoot>
                             </table>
                         </div>
                     </div>
+                </div>
+
+
+                <div class="form-grid form-grid--3 mt-[64px] mb-2 text-lg">
+                    <h2 class="border-b-2 border-gray-300">Resumen de superficies y valores </h2>
+                </div>
+
+
+                <div class="mt-2 form-grid form-grid--3">
+                    <div class="overflow-x-auto">
+                        <table class="border-2 ">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="border px-2 py-1 "></th>
+                                    <th class="border px-2 py-1 ">Privativas</th>
+                                    <th class="border px-2 py-1 ">Comunes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="border px-2 py-1 text-xs text-center">Superficie total de
+                                        construcciones:
+                                    </td>
+                                    <td class="border px-2 py-1 text-sm text-center">
+                                        {{
+                                        rtrim(rtrim(number_format($totalSurfacePrivate, 6, '.', ','), '0'), '.')
+                                        }}
+                                    </td>
+                                    <td class="border px-2 py-1 text-sm text-center">
+                                        {{
+                                        rtrim(rtrim(number_format($totalSurfaceCommon, 6, '.', ','), '0'), '.')
+                                        }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border px-2 py-1 text-xs text-center">Valor total de construcciones:
+                                    </td>
+                                    <td class="border px-2 py-1 text-xs text-center">
+                                        {{number_format($sumValuesTotalsPriv, 4)}}</td>
+                                    <td class="border px-2 py-1 text-xs text-center">
+                                        {{number_format($sumValuesTotalsCom, 4)}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                   {{--  @endif --}}
+                </div>
 
 
-                    <div class="form-grid form-grid--3 mt-[64px] mb-2 text-lg">
-                        <h2 class="border-b-2 border-gray-300">Resumen de superficies y valores </h2>
+                <div class="mt-2 form-grid form-grid--3">
+                    <div class="overflow-x-auto">
+                        <table class="border-2 ">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="border px-2 py-1 "></th>
+                                    <th class="border px-2 py-1 ">Vendible</th>
+                                    <th class="border px-2 py-1 ">Acessoria</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                {{-- Valor de ejemplo para usar en los for --}}
+                                <tr>
+                                    <td class="border px-2 py-1 text-xs text-center">Superficie total de
+                                        construcciones:
+                                    </td>
+                                    <td class="border px-2 py-1 text-sm text-center">
+                                        {{
+                                        rtrim(rtrim(number_format($totalSurfacePrivateVendible, 6, '.', ','), '0'),
+                                        '.')
+                                        }}</td>
+                                    <td class="border px-2 py-1 text-sm text-center">
+                                        {{
+                                        rtrim(rtrim(number_format($totalSurfacePrivateAccesoria, 6, '.', ','), '0'),
+                                        '.')
+                                        }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-
-
-                    <div class="mt-2 form-grid form-grid--3">
-                        <div class="overflow-x-auto">
-                            <table class="border-2 ">
-                                <thead>
-                                    <tr class="bg-gray-100">
-                                        <th class="border px-2 py-1 "></th>
-                                        <th class="border px-2 py-1 ">Privativas</th>
-                                        <th class="border px-2 py-1 ">Comunes</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="border px-2 py-1 text-xs text-center">Superficie total de
-                                            construcciones:
-                                        </td>
-                                        <td class="border px-2 py-1 text-sm text-center">
-                                            {{
-                                            /* number_format($totalSurfacePrivate, 2) */
-                                            rtrim(rtrim(number_format($totalSurfacePrivate, 6, '.', ','), '0'), '.')
-                                            }}
-                                        </td>
-                                        <td class="border px-2 py-1 text-sm text-center">
-                                            {{
-                                            /* number_format($totalSurfaceCommon, 2) */
-                                            rtrim(rtrim(number_format($totalSurfaceCommon, 6, '.', ','), '0'), '.')
-                                            }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="border px-2 py-1 text-xs text-center">Valor total de construcciones:
-                                        </td>
-                                        <td class="border px-2 py-1 text-xs text-center">
-                                            {{number_format($sumValuesTotalsPriv, 4)}}</td>
-                                        <td class="border px-2 py-1 text-xs text-center">
-                                            {{number_format($sumValuesTotalsCom, 4)}}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-
-                    <div class="mt-2 form-grid form-grid--3">
-                        <div class="overflow-x-auto">
-                            <table class="border-2 ">
-                                <thead>
-                                    <tr class="bg-gray-100">
-                                        <th class="border px-2 py-1 "></th>
-                                        <th class="border px-2 py-1 ">Vendible</th>
-                                        <th class="border px-2 py-1 ">Acessoria</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-
-                                    {{-- Valor de ejemplo para usar en los for --}}
-                                    <tr>
-                                        <td class="border px-2 py-1 text-xs text-center">Superficie total de
-                                            construcciones:
-                                        </td>
-                                        <td class="border px-2 py-1 text-sm text-center">
-                                            {{
-                                            /* number_format($totalSurfacePrivateVendible, 2) */
-                                            rtrim(rtrim(number_format($totalSurfacePrivateVendible, 6, '.', ','), '0'),
-                                            '.')
-                                            }}</td>
-                                        <td class="border px-2 py-1 text-sm text-center">
-                                            {{
-                                            /* number_format($totalSurfacePrivateAccesoria, 2) */
-                                            rtrim(rtrim(number_format($totalSurfacePrivateAccesoria, 6, '.', ','), '0'),
-                                            '.')
-                                            }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-
-
-
-
+                </div>
             </div>
         </div>
 </div>
-
-
-
-
-
-
 
 
 <div class="form-container">
@@ -871,20 +744,19 @@
                         {{-- Valor de ejemplo para usar en los for --}}
                         <tr>
                             <td class="border px-2 py-1 text-xs text-center">Vida útil total del inmueble:</td>
-                            {{-- <td class="border px-2 py-1 text-xs text-center">{{$this->totalUsefulLifeProperty/$totalSurfacePrivate}}</td> --}}
-                            <td class="border px-2 py-1 text-xs text-center">{{ round($this->usefulLifeProperty, 0) }}</td>
+                            <td class="border px-2 py-1 text-xs text-center">{{ round($this->usefulLifeProperty, 0) }}
+                            </td>
                         </tr>
 
                         <tr>
                             <td class="border px-2 py-1 text-xs text-center">Edad del inmueble del inmueble:</td>
-                            {{-- <td class="border px-2 py-1 text-xs text-center">{{$this->totalsAgeProperty/$totalSurfacePrivate}}</td> --}}
                             <td class="border px-2 py-1 text-xs text-center">{{ round($this->ageProperty, 0) }}</td>
                         </tr>
 
                         <tr>
                             <td class="border px-2 py-1 text-xs text-center">Vida útil remanente del inmueble:</td>
-                            {{-- <td class="border px-2 py-1 text-xs text-center">{{ ($this->totalUsefulLifeProperty/$totalSurfacePrivate)-($this->totalsAgeProperty/$totalSurfacePrivate) }}</td> --}}
-                           <td class="border px-2 py-1 text-xs text-center">{{ round($this->usefulLifeProperty - $this->ageProperty, 0) }}</td>
+                            <td class="border px-2 py-1 text-xs text-center">{{ round($this->usefulLifeProperty -
+                                $this->ageProperty, 0) }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1143,15 +1015,6 @@
     </div>
 </div>
 
-
-
-
-
-
-
-
-
-
 {{-- MODAL PARA CREAR NUEVO ELEMENTO --}}
 <flux:modal name="add-element" class="md:w-96">
     <div class="space-y-2">
@@ -1275,16 +1138,7 @@
             </div>
         </flux:field>
 
-        {{-- <flux:field class="flux-field">
-            <flux:label>Rango con base en la altura<span class="sup-required">*</span></flux:label>
-            <flux:checkbox wire:model='rangeBasedHeight' class="cursor-pointer" />
-            <div class="error-container">
-                <flux:error name="adjacent" />
-            </div>
-        </flux:field> --}}
-
         <flux:field class="flux-field">
-            {{-- <flux:label>Avance obra<span class="sup-required">*</span></flux:label> --}}
             <flux:radio.group wire:model="surfaceVAD">
                 <flux:radio value="superficie vendible" label="Superficie vendible" checked />
                 <flux:radio value="superficie accesoria" label="Superficie accesoria" />
@@ -1304,21 +1158,6 @@
         </div>
     </div>
 </flux:modal>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 {{-- MODAL PARA EDITAR ELEMENTO --}}
 <flux:modal name="edit-element" class="md:w-96">
@@ -1443,16 +1282,7 @@
             </div>
         </flux:field>
 
-        {{-- <flux:field class="flux-field">
-            <flux:label>Rango con base en la altura<span class="sup-required">*</span></flux:label>
-            <flux:checkbox wire:model='rangeBasedHeight' class="cursor-pointer" />
-            <div class="error-container">
-                <flux:error name="adjacent" />
-            </div>
-        </flux:field> --}}
-
         <flux:field class="flux-field">
-            {{-- <flux:label>Superficie<span class="sup-required">*</span></flux:label> --}}
             <flux:radio.group wire:model="surfaceVAD">
                 <flux:radio value="superficie vendible" label="Superficie vendible" checked />
                 <flux:radio value="superficie accesoria" label="Superficie accesoria" />
@@ -1471,45 +1301,6 @@
         </div>
     </div>
 </flux:modal>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos
 </flux:button>

@@ -15,7 +15,11 @@ use App\Models\Forms\Homologation\HomologationValuationFactorModel;
 use App\Models\Forms\Homologation\HomologationComparableFactorModel;
 use App\Models\Forms\Homologation\HomologationValuationEquipmentModel;
 use App\Models\Forms\Homologation\HomologationComparableEquipmentModel;
+// [NUEVO] Modelo de Selecciones
+use App\Models\Forms\Homologation\HomologationComparableSelectionModel;
 use App\Models\Forms\Building\BuildingModel;
+use App\Models\Forms\ApplicableSurface\ApplicableSurfaceModel;
+use App\Models\Forms\Homologation\HomologationBuildingAttributeModel;
 
 class HomologationBuildings extends Component
 {
@@ -35,6 +39,8 @@ class HomologationBuildings extends Component
     public $edit_factor_name;
     public $edit_factor_acronym;
     public $edit_factor_rating;
+
+
 
     // --- INPUTS NUEVO FACTOR CUSTOM ---
     public $new_factor_name = '';
@@ -89,17 +95,15 @@ class HomologationBuildings extends Component
     public $edit_eq_total_value = 0.00;
     public $edit_eq_other_description = '';
 
-
     //Variables para valores de construcciones
     public $building;
-    public $subject_surface_construction = 0; // Superficie total construida
-    public $subject_surface_land = 0;         // Superficie terreno (para Rel T/C)
-    public $subject_age_weighted = 0;         // Edad Ponderada
-    public $subject_vut_weighted = 0;         // Vida Útil Total Ponderada
-    public $subject_vur_weighted = 0;         // Vida Útil Remanente Ponderada
-    public $subject_rel_tc = 0;               // Relación Terreno / Construcción
-    public $subject_progress_work = 0;        // Avance de obra (Directo de BD)
-
+    public $subject_surface_construction = 0;
+    public $subject_surface_land = 0;
+    public $subject_age_weighted = 0;
+    public $subject_vut_weighted = 0;
+    public $subject_vur_weighted = 0;
+    public $subject_rel_tc = 0;
+    public $subject_progress_work = 0;
 
     public const EQUIPMENT_MAP = [
         'Baño completo' => ['unit' => 'PZA', 'value' => 16768.00],
@@ -115,6 +119,17 @@ class HomologationBuildings extends Component
         'Otro' => ['unit' => 'PZA', 'value' => 0.00],
     ];
 
+    // [NUEVO] Mapa de valores para Conservación
+    const CONSERVACION_MAP = [
+        'Bueno' => 1.00,
+        'Normal' => 1.00,
+        'Nuevo' => 1.00,
+        'Malo' => 0.80,
+        'Muy bueno' => 1.10,
+        'Recientemente remodelado' => 1.10,
+        'Ruidoso' => 0.00
+    ];
+
     #[Computed]
     public function orderedComparableFactorsForView(): array
     {
@@ -128,21 +143,7 @@ class HomologationBuildings extends Component
     #[Computed]
     public function chartData(): array
     {
-        if (!$this->comparables) return $this->getEmptyChartData();
-        $selected = $this->comparables->whereIn('id', $this->selectedForStats)->values();
-        if ($selected->isEmpty()) return $this->getEmptyChartData();
-
-        $labels = $selected->pluck('id')->map(fn($id) => "Comp. " . $id)->toArray();
-        $homologated = $selected->map(fn($c) => (float)($this->comparableFactors[$c->id]['FRE']['valor_homologado'] ?? 0))->toArray();
-        $oferta = $selected->pluck('comparable_offers')->map(fn($v) => (float)$v)->toArray();
-
-        return [
-            'labels' => $labels,
-            'homologated' => $homologated,
-            'oferta' => $oferta,
-            'coeficiente_variacion_oferta' => (float)str_replace(['%', ','], ['', '.'], $this->conclusion_coeficiente_variacion_oferta),
-            'coeficiente_variacion_homologado' => (float)str_replace(['%', ','], ['', '.'], $this->conclusion_coeficiente_variacion_homologado)
-        ];
+        return $this->getEmptyChartData();
     }
 
     public function mount()
@@ -155,28 +156,31 @@ class HomologationBuildings extends Component
             return;
         }
 
+        $attributes = HomologationBuildingAttributeModel::where('valuation_id', $this->idValuation)->first();
+
+        if ($attributes) {
+            // Recuperamos la preferencia de redondeo
+            $this->conclusion_tipo_redondeo = $attributes->conclusion_type_rounding ?? 'Unidades';
+        }
+
         try {
             $this->comparables = $this->valuation->buildingComparables()->orderByPivot('position')->get();
         } catch (\Throwable $e) {
             $this->comparables = collect();
         }
 
-
         $this->building = BuildingModel::where('valuation_id', $this->idValuation)->first();
-
-        //dd($this->building);
-
         $this->calculateSubjectValues();
-
-
-
         $this->comparablesCount = $this->comparables->count();
-
         $this->prepareSubjectFactorsForView();
 
         if ($this->comparablesCount > 0) {
             $this->currentPage = 1;
+            // 1. Cargar Factores Numéricos
             $this->loadAllComparableFactors();
+            // 2. Cargar Selecciones (Clase, Conservación, Localización)
+            $this->loadComparableSelections();
+
             $this->updateComparableSelection();
         }
 
@@ -184,93 +188,66 @@ class HomologationBuildings extends Component
         $this->recalculateConclusions();
     }
 
-
-
-
     public function calculateSubjectValues()
     {
-        // A. Obtener el modelo Building con sus construcciones privadas
-        // Asegúrate de tener cargada la relación 'privates'
-        // $this->building ya debería estar definido en tu mount()
-
-
-
-        $building = $this->building;
-
-        if (!$building) return;
-
-        // B. Obtener valor directo de BD (Avance de obra)
-        $this->subject_progress_work = $building->progress_general_works ?? 0;
-
-        // C. Cargar construcciones privadas
-        $constructions = $building->privates()->get();
-
-        if ($constructions->isEmpty()) {
-            return; // Si no hay construcciones, todo se queda en 0
+        // 1. Obtener Avance de Obra
+        if ($this->building) {
+            $this->subject_progress_work = $this->building->progress_general_works ?? 0;
         }
 
-        // D. Inicializar acumuladores para ponderación
-        $totalSurface = 0;
-        $weightedAgeAccumulator = 0;
-        $weightedVUTAccumulator = 0;
+        // 2. Obtener Superficies
+        $applicableSurface = ApplicableSurfaceModel::where('valuation_id', $this->idValuation)->first();
 
-        // E. Obtener catálogo de vidas útiles (igual que en Buildings.php)
-        $lifeValuesConfig = config('properties_inputs.construction_life_values', []);
-
-        // F. Iterar y calcular (Lógica calcada de Buildings.php -> loadPrivateConstructions)
-        foreach ($constructions as $item) {
-            $surface = $item->surface;
-
-            // 1. Vida Útil Total (VUT) basada en Clasificación y Uso
-            $claveCombinacion = $item->clasification . '_' . $item->use;
-            $vutItem = $lifeValuesConfig[$claveCombinacion] ?? 0;
-
-            // 2. Acumular Ponderados
-            $totalSurface += $surface;
-            $weightedAgeAccumulator += ($item->age * $surface);
-            $weightedVUTAccumulator += ($vutItem * $surface);
+        if ($applicableSurface) {
+            $this->subject_surface_land = $applicableSurface->surface_area ?? 0;
+            $this->subject_surface_construction = $applicableSurface->built_area ?? 0;
         }
 
-        // G. Calcular Promedios Finales
-        if ($totalSurface > 0) {
-            $this->subject_surface_construction = $totalSurface;
-            $this->subject_age_weighted = $weightedAgeAccumulator / $totalSurface;
-            $this->subject_vut_weighted = $weightedVUTAccumulator / $totalSurface;
-
-            // VUR = VUT - Edad
-            $this->subject_vur_weighted = max($this->subject_vut_weighted - $this->subject_age_weighted, 0);
-        }
-
-        // H. Calcular Relación Terreno / Construcción (Rel. T/C)
-        // Necesitamos la superficie del terreno. Asumo que tienes el modelo $valuation cargado.
-        // Ajusta 'land_surface' al nombre real de tu campo en la tabla de Terrenos (LandModel)
-
-        // OPCION 1: Si tienes relación directa valuation->land
-        $landSurface = $this->valuation->land->surface ?? 0;
-        // OPCION 2: Si necesitas buscarlo manual
-        // $land = \App\Models\Forms\Land\LandModel::where('valuation_id', $this->valuation->id)->first();
-        // $landSurface = $land->surface ?? 0;
-
-        $this->subject_surface_land = $landSurface;
-
+        // 3. Relación T/C
         if ($this->subject_surface_construction > 0) {
-            // Relación = Terreno / Construcción (A veces es al revés Const/Terr, valida tu criterio)
-            // Usualmente en avalúos es: Cuántas veces cabe el terreno en la construcción o viceversa.
-            // Fórmula estándar CUV: Superficie Construida / Superficie Terreno (CUS)
-            // Fórmula Relación T/C (Market Approach): Superficie Terreno / Superficie Construida
-
-            // Voy a usar: Terreno / Construcción (ajusta si tu criterio es inverso)
             $this->subject_rel_tc = $this->subject_surface_land / $this->subject_surface_construction;
+        } else {
+            $this->subject_rel_tc = 0;
+        }
+
+        // 4. Calcular Ponderados
+        if (!$this->building) return;
+
+        $constructions = $this->building->privates()->get();
+
+        if ($constructions->isNotEmpty()) {
+            $totalSurfaceForWeighting = 0;
+            $weightedAgeAccumulator = 0;
+            $weightedVUTAccumulator = 0;
+
+            $lifeValuesConfig = config('properties_inputs.construction_life_values', []);
+
+            foreach ($constructions as $item) {
+                $surface = $item->surface;
+                $claveCombinacion = $item->clasification . '_' . $item->use;
+                $vutItem = $lifeValuesConfig[$claveCombinacion] ?? 0;
+
+                $totalSurfaceForWeighting += $surface;
+                $weightedAgeAccumulator += ($item->age * $surface);
+                $weightedVUTAccumulator += ($vutItem * $surface);
+            }
+
+            if ($totalSurfaceForWeighting > 0) {
+                $this->subject_age_weighted = $weightedAgeAccumulator / $totalSurfaceForWeighting;
+                $this->subject_vut_weighted = $weightedVUTAccumulator / $totalSurfaceForWeighting;
+                $this->subject_vur_weighted = max($this->subject_vut_weighted - $this->subject_age_weighted, 0);
+            }
         }
     }
 
-
     private function prepareSubjectFactorsForView(): void
     {
+        // 1. Traemos todo de la BD
         $allFactors = HomologationValuationFactorModel::where('valuation_id', $this->idValuation)
             ->where('homologation_type', 'building')
             ->get();
 
+        // 2. Definimos FNEG (Meta)
         $this->fneg_factor_meta = [
             'id' => null,
             'factor_name' => 'Factor Negociación',
@@ -281,40 +258,111 @@ class HomologationBuildings extends Component
             'can_edit' => false,
         ];
 
-        $systemOrder = ['FSU', 'FIC', 'FEQ', 'FEDAC', 'FLOC', 'AVANC'];
-        $systemEditableInSubject = ['FEQ', 'FLOC'];
-
         $orderedList = [];
+        $processedIds = [];
 
-        $formatFactor = function ($factor) use ($systemEditableInSubject) {
-            $canEditSubject = $factor->is_custom || in_array($factor->acronym, $systemEditableInSubject);
-            return [
-                'id' => $factor->id,
-                'factor_name' => $factor->factor_name,
-                'label' => $factor->factor_name,
-                'acronym' => $factor->acronym,
-                'code' => $factor->acronym,
-                'rating' => number_format((float)$factor->rating, 4, '.', ''),
-                'is_custom' => (bool)$factor->is_custom,
-                'can_edit' => $canEditSubject,
-            ];
-        };
+        // =========================================================
+        // CONSTRUCCIÓN DEL ORDEN ESTRICTO (POR LÓGICA, NO POR NOMBRE)
+        // =========================================================
 
-        foreach ($systemOrder as $acronym) {
-            $f = $allFactors->firstWhere('acronym', $acronym);
-            if ($f) {
-                $orderedList[] = $formatFactor($f);
-            }
+        // 1. FSU (Superficie) - Estricto por sigla
+        $fsu = $allFactors->firstWhere('acronym', 'FSU');
+        if ($fsu) {
+            $orderedList[] = $this->formatFactorForView($fsu);
+            $processedIds[] = $fsu->id;
         }
 
+        // 2. FIC (Intensidad) - Estricto por sigla
+        $fic = $allFactors->firstWhere('acronym', 'FIC');
+        if ($fic) {
+            $orderedList[] = $this->formatFactorForView($fic);
+            $processedIds[] = $fic->id;
+        }
+
+        // 3. FEQ (Equipamiento) - Por Bandera
+        $feq = $allFactors->first(fn($i) => $i->is_feq || $i->acronym === 'FEQ');
+        if ($feq) {
+            $orderedList[] = $this->formatFactorForView($feq);
+            $processedIds[] = $feq->id;
+        }
+
+        // 4. FEDAD (Edad) - Estricto por sigla
+        $fedad = $allFactors->firstWhere('acronym', 'FEDAD');
+        if ($fedad) {
+            $orderedList[] = $this->formatFactorForView($fedad);
+            $processedIds[] = $fedad->id;
+        }
+
+        // 5. EL FACTOR EDITABLE DE SISTEMA (Antes FLOC) - 🔥 POR BANDERAS 🔥
+        // Aquí está la magia: Buscamos al factor que sea editable, NO sea custom y NO sea equipo.
+        // Se llame "FLOC", "UBIC", "ZONA" o "PATITO", siempre caerá aquí.
+        $editableSystem = $allFactors->first(
+            fn($i) =>
+            $i->is_editable &&
+                !$i->is_custom &&
+                !$i->is_feq
+        );
+
+        if ($editableSystem) {
+            $orderedList[] = $this->formatFactorForView($editableSystem);
+            $processedIds[] = $editableSystem->id;
+        }
+
+        // 6. AVANC (Avance) - Estricto por sigla
+        $avanc = $allFactors->firstWhere('acronym', 'AVANC');
+        if ($avanc) {
+            $orderedList[] = $this->formatFactorForView($avanc);
+            $processedIds[] = $avanc->id;
+        }
+
+        // =========================================================
+        // RESTO DE FACTORES (Customs o Nuevos)
+        // =========================================================
         foreach ($allFactors as $factor) {
-            if (!in_array($factor->acronym, $systemOrder) && $factor->acronym !== 'FNEG') {
-                $orderedList[] = $formatFactor($factor);
+            if (!in_array($factor->id, $processedIds)) {
+                $orderedList[] = $this->formatFactorForView($factor);
             }
         }
 
         $this->subject_factors_ordered = $orderedList;
     }
+
+
+
+
+
+    private function formatFactorForView($factor)
+    {
+        // ...
+        $isFeq = (bool)$factor->is_feq;
+        $isCustom = (bool)$factor->is_custom;
+        $isEditableDb = (bool)$factor->is_editable;
+
+        // Si la lógica de edición del SUJETO depende solo de flags puros:
+        $canEditSubject = $isFeq || $isCustom || $isEditableDb;
+
+        // Lógica pura de edición (la que no depende de la sigla FLOC)
+        $isEditableComparable = $isCustom || $isEditableDb;
+
+        return [
+            'id' => $factor->id,
+            'factor_name' => $factor->factor_name,
+            'acronym' => $factor->acronym,
+            'rating' => number_format((float)$factor->rating, 4, '.', ''),
+            'is_custom' => $isCustom,
+            'is_feq' => $isFeq,
+
+            // 🔥 1. RESTAURAMOS can_edit para la tabla Sujeto (ARRIBA)
+            'can_edit' => $canEditSubject,
+
+            // 🔥 2. Usamos esta clave para la tabla Comparables (ABAJO)
+            'is_editable' => $isEditableComparable,
+        ];
+    }
+
+
+
+
 
     private function loadAllComparableFactors()
     {
@@ -335,7 +383,6 @@ class HomologationBuildings extends Component
             $this->initializeComparableFactorStructure($compId, $factor->acronym);
 
             $this->comparableFactors[$compId][$factor->acronym]['calificacion'] = number_format((float)($factor->rating ?? 1.0), 4, '.', '');
-            // AQUÍ ESTABA EL ERROR: El FEQ guardado no se leía correctamente si venía de equipamiento
             $this->comparableFactors[$compId][$factor->acronym]['aplicable'] = number_format((float)($factor->applicable ?? 1.0), 4, '.', '');
         }
 
@@ -344,8 +391,75 @@ class HomologationBuildings extends Component
             foreach ($allFactors as $mf) {
                 $this->initializeComparableFactorStructure($comparable->id, $mf['acronym']);
             }
-            $this->initializeExtraDefaults($comparable->id, $comparable);
+            // Aquí ya no llamamos a initializeExtraDefaults, se hace en loadComparableSelections
             $this->recalculateSingleComparable($comparable->id);
+        }
+    }
+
+    // [NUEVO] Carga y Sincroniza Selecciones (Clase, Conservación, Localización)
+    private function loadComparableSelections()
+    {
+        $pivots = $this->valuation->buildingComparablePivots;
+
+        foreach ($pivots as $pivot) {
+            $comparableId = $pivot->comparable_id;
+            $comparableModel = $this->comparables->where('id', $comparableId)->first();
+
+            if (!$comparableModel) continue;
+
+            // 1. Obtener registros existentes de la BD
+            $selections = HomologationComparableSelectionModel::where('valuation_building_comparable_id', $pivot->id)->get();
+
+            // --- LÓGICA DE CLASE (SINCRONIZACIÓN) ---
+            $dbClase = $selections->where('variable', 'clase')->first();
+            $realClass = $comparableModel->comparable_clasification ?? '';
+
+            if (!$dbClase) {
+                HomologationComparableSelectionModel::create([
+                    'valuation_building_comparable_id' => $pivot->id,
+                    'variable' => 'clase',
+                    'value' => $realClass,
+                    'factor' => null
+                ]);
+                $this->comparableFactors[$comparableId]['clase'] = $realClass;
+            } elseif ($dbClase->value !== $realClass) {
+                // Sincronización: Si cambió en el comparable original, actualizamos
+                $dbClase->update(['value' => $realClass]);
+                $this->comparableFactors[$comparableId]['clase'] = $realClass;
+            } else {
+                $this->comparableFactors[$comparableId]['clase'] = $dbClase->value;
+            }
+
+            // --- LÓGICA CONSERVACIÓN ---
+            $dbConserv = $selections->where('variable', 'conservacion')->first();
+            if ($dbConserv) {
+                $this->comparableFactors[$comparableId]['conservacion'] = $dbConserv->value;
+            } else {
+                HomologationComparableSelectionModel::create([
+                    'valuation_building_comparable_id' => $pivot->id,
+                    'variable' => 'conservacion',
+                    'value' => null,
+                    'factor' => null
+                ]);
+                $this->comparableFactors[$comparableId]['conservacion'] = null;
+            }
+
+            // --- LÓGICA LOCALIZACIÓN ---
+            $dbLocal = $selections->where('variable', 'localizacion')->first();
+            if ($dbLocal) {
+                $this->comparableFactors[$comparableId]['localizacion'] = $dbLocal->value;
+            } else {
+                HomologationComparableSelectionModel::create([
+                    'valuation_building_comparable_id' => $pivot->id,
+                    'variable' => 'localizacion',
+                    'value' => null,
+                    'factor' => null
+                ]);
+                $this->comparableFactors[$comparableId]['localizacion'] = null;
+            }
+
+            // URL (Se mantiene en memoria)
+            $this->comparableFactors[$comparableId]['url'] = $comparableModel->comparable_source ?? '';
         }
     }
 
@@ -372,33 +486,67 @@ class HomologationBuildings extends Component
         }
     }
 
-    private function initializeExtraDefaults($comparableId, $comparableModel)
-    {
-        $defaults = [
-            'clase' => 'Clase B',
-            'clase_factor' => '1.0000',
-            'conservacion' => 'Buena',
-            'conservacion_factor' => '1.0000',
-            'localizacion' => 'Lote intermedio',
-            'localizacion_factor' => '1.0000',
-            'url' => $comparableModel->comparable_source ?? 'http://valua.me/...'
-        ];
-        foreach ($defaults as $key => $val) {
-            if (!isset($this->comparableFactors[$comparableId][$key])) {
-                $this->comparableFactors[$comparableId][$key] = $val;
-            }
-        }
-    }
-
+    // [MODIFICADO] "El Agente de Tránsito"
     public function updatedComparableFactors($value, $key)
     {
         $parts = explode('.', $key);
-        if (count($parts) < 3) return;
+        // Estructura esperada Factor: ID.ACRONIMO.PROPIEDAD (3 partes)
+        // Estructura esperada Selección: ID.VARIABLE (2 partes)
 
         $comparableId = array_shift($parts);
-        $property = array_pop($parts);
-        $acronym = implode('.', $parts);
 
+        // Si solo quedan 1 parte, es una Selección (ej. 'clase', 'conservacion')
+        if (count($parts) === 1) {
+            $variable = array_shift($parts);
+            $this->updateSelection($comparableId, $variable, $value);
+            return;
+        }
+
+        // Si quedan 2 partes, es un Factor Numérico (ej. 'FNEG', 'aplicable')
+        if (count($parts) >= 2) {
+            $property = array_pop($parts);
+            $acronym = implode('.', $parts);
+
+            $this->updateNumericFactor($comparableId, $acronym, $property, $value);
+        }
+    }
+
+    // [NUEVO] Método separado para guardar Selecciones (Clase, Conservación, Localización)
+    private function updateSelection($comparableId, $variable, $value)
+    {
+        $pivotId = $this->valuation->buildingComparablePivots()->where('comparable_id', $comparableId)->value('id');
+        if (!$pivotId) return;
+
+        // Buscar registro
+        $selection = HomologationComparableSelectionModel::where('valuation_building_comparable_id', $pivotId)
+            ->where('variable', $variable)
+            ->first();
+
+        if ($selection) {
+            $dataToUpdate = ['value' => $value];
+
+            // Si es conservación, calculamos y guardamos el factor también
+            if ($variable === 'conservacion') {
+                $factorValue = self::CONSERVACION_MAP[$value] ?? 1.00;
+                $dataToUpdate['factor'] = $factorValue;
+            }
+
+            $selection->update($dataToUpdate);
+
+            // Actualizar memoria
+            $this->comparableFactors[$comparableId][$variable] = $value;
+
+            // Recalcular
+            $this->recalculateSingleComparable($comparableId);
+            $this->recalculateConclusions();
+
+            Toaster::success(ucfirst($variable) . ' actualizado correctamente.');
+        }
+    }
+
+    // [REFACTOR] Método separado para guardar Factores Numéricos (Copia de tu lógica original)
+    private function updateNumericFactor($comparableId, $acronym, $property, $value)
+    {
         $pivotId = $this->valuation->buildingComparablePivots()->where('comparable_id', $comparableId)->value('id');
 
         if ($value === '' || $value === null) {
@@ -472,11 +620,14 @@ class HomologationBuildings extends Component
         }
     }
 
+    // ... (MÉTODOS DE EDICIÓN DE NOMBRES DE FACTORES - IGUALES) ...
     public function toggleEditFactor($acronym, $index)
     {
         if ($this->editing_factor_index === $index) {
             $this->saveEditedFactor($index);
         } else {
+
+            $this->reset(['edit_factor_name', 'edit_factor_acronym', 'edit_factor_rating']);
             $factorData = $this->subject_factors_ordered[$index];
             $this->edit_factor_name = $factorData['factor_name'];
             $this->edit_factor_acronym = $factorData['acronym'];
@@ -485,36 +636,94 @@ class HomologationBuildings extends Component
         }
     }
 
-    private function saveEditedFactor($index)
+    public function saveEditedFactor()
     {
-        $factorData = $this->subject_factors_ordered[$index];
-        $factorModel = HomologationValuationFactorModel::find($factorData['id']);
-        if (!$factorModel) return;
+        // 1. Validaciones
+        $this->validate([
+            'edit_factor_name' => 'required|string|max:255',
+            'edit_factor_acronym' => 'required|string|max:10',
+            'edit_factor_rating' => 'required|numeric|min:0.1',
+        ]);
 
-        if (empty(trim($this->edit_factor_name)) || empty(trim($this->edit_factor_acronym))) {
-            Toaster::error('Campos vacíos.');
-            return;
+        if ($this->editing_factor_index === null) return;
+
+        $currentIndex = $this->editing_factor_index;
+        $factorId = $this->subject_factors_ordered[$currentIndex]['id'];
+        $oldAcronym = $this->subject_factors_ordered[$currentIndex]['acronym'];
+
+        $newAcronym = strtoupper(trim($this->edit_factor_acronym));
+        $newName = trim($this->edit_factor_name);
+        $newRating = (float)$this->edit_factor_rating;
+
+        // 2. Update BD Sujeto
+        HomologationValuationFactorModel::where('id', $factorId)->update([
+            'factor_name' => $newName,
+            'acronym' => $newAcronym,
+            'rating' => $newRating,
+        ]);
+
+        // 3. Propagación a Comparables (Limpieza de duplicados)
+        $pivotIds = $this->valuation->buildingComparablePivots()->pluck('id');
+
+        if ($pivotIds->isNotEmpty()) {
+            if ($oldAcronym !== $newAcronym) {
+                HomologationComparableFactorModel::whereIn('valuation_building_comparable_id', $pivotIds)
+                    ->where('acronym', $newAcronym)
+                    ->where('homologation_type', 'building')
+                    ->delete();
+            }
+
+            HomologationComparableFactorModel::whereIn('valuation_building_comparable_id', $pivotIds)
+                ->where('acronym', $oldAcronym)
+                ->where('homologation_type', 'building')
+                ->update([
+                    'acronym' => $newAcronym,
+                    'factor_name' => $newName,
+                ]);
         }
-        $numericRating = (float)$this->edit_factor_rating;
-        if ($numericRating < 0.8 || $numericRating > 1.2) {
-            Toaster::error('Rango inválido (0.8 - 1.2).');
-            return;
-        }
 
-        $oldAcronym = $factorModel->acronym;
-        $newAcronym = strtoupper($this->edit_factor_acronym);
-        $newName = $this->edit_factor_name;
+        // 4. Actualizar Memoria
+        $this->subject_factors_ordered[$currentIndex]['factor_name'] = $newName;
+        $this->subject_factors_ordered[$currentIndex]['acronym'] = $newAcronym;
+        $this->subject_factors_ordered[$currentIndex]['rating'] = number_format($newRating, 4, '.', '');
 
-        $factorModel->update(['factor_name' => $newName, 'acronym' => $newAcronym, 'rating' => $numericRating]);
+        // 5. ORDENAMIENTO TIPO "SÁNDWICH" (Strict Mode) 🥪
+        // Esto evita que FLOC se mueva aunque le cambies el nombre a "ZZZ".
+        $this->subject_factors_ordered = collect($this->subject_factors_ordered)
+            ->sortBy(function ($factor) {
+                $acronym = strtoupper($factor['acronym'] ?? '');
+                $isCustom = $factor['is_custom'] ?? false;
+                $id = $factor['id'];
 
-        $this->syncComparableFactorNames($oldAcronym, $newName, $newAcronym);
-        $this->prepareSubjectFactorsForView();
-        $this->loadAllComparableFactors();
+                // --- CAPA 1: SÓTANO (FNEG) ---
+                // FNEG siempre va al final de todo, pase lo que pase.
+                if ($acronym === 'FNEG') {
+                    return 300000;
+                }
 
-        Toaster::success('Factor guardado.');
-        $this->editing_factor_index = null;
+                // --- CAPA 2: RELLENO (Customs) ---
+                // Los factores creados por el usuario van después de los estándares.
+                // Usamos el ID para mantener su orden de creación.
+                if ($isCustom) {
+                    return 200000 + $id;
+                }
 
+                // --- CAPA 3: TECHO (Estándares: FSU, FLOC, FIC, etc.) ---
+                // Estos van primero. Usamos el ID original.
+                // Así, FLOC (id 5) siempre irá antes que AVANC (id 8), sin importar el nombre.
+                return 100000 + $id;
+            })
+            ->values()
+            ->toArray();
+
+        // 6. Recalcular
         $this->recalculateConclusions();
+
+        // 7. Cerrar y Notificar
+        $this->cancelEdit();
+
+        // El Toaster limpio de Flux
+        Flux::toast('Factor actualizado correctamente.', variant: 'success');
     }
 
     public function cancelEdit()
@@ -527,97 +736,154 @@ class HomologationBuildings extends Component
     // ==========================================================
     public function recalculateSingleComparable($comparableId)
     {
-        $allFactors = $this->orderedComparableFactorsForView;
+        // 1. MAPA MAESTRO DEL SUJETO (De aquí sacamos flags y ratings reales)
+        // Usamos la colección original que viene de la BD
+        $subjectMasterMap = collect($this->subject_factors_ordered)->keyBy('acronym');
 
-        $subjectRatings = collect($this->subject_factors_ordered)->keyBy('acronym')->map(fn($f) => (float)$f['rating']);
-        $subjectRatings->put('FNEG', 1.0);
+        // FNEG siempre existe virtualmente en el sujeto con valor 1.0
+        if (!$subjectMasterMap->has('FNEG')) {
+            $subjectMasterMap->put('FNEG', ['rating' => 1.0, 'is_editable' => false, 'is_feq' => false]);
+        }
+
+        // 2. Detectar FEQ dinámico
+        $feqDef = collect($this->subject_factors_ordered)->firstWhere('is_feq', true);
+        $currentFeqAcronym = $feqDef ? $feqDef['acronym'] : 'FEQ';
+        $currentFsuAcronym = 'FSU';
 
         if (!isset($this->comparableFactors[$comparableId])) return;
 
+        // 3. Datos del Comparable
         $pivotId = $this->valuation->buildingComparablePivots()->where('comparable_id', $comparableId)->value('id');
         $comparableModel = $this->comparables->find($comparableId);
-        $factorResultante = 1.0;
 
-        // Factores Select (Clase, Conservación, Localización)
+        // 4. Calcular Selects (FIC, Conservación)
+        $conservacionTxt = $this->comparableFactors[$comparableId]['conservacion'] ?? '';
+        $conservacion_factor = self::CONSERVACION_MAP[$conservacionTxt] ?? 1.0000;
+        $this->comparableFactors[$comparableId]['conservacion_factor'] = number_format($conservacion_factor, 4);
+
         $clase_factor = $this->mapSelectValue($this->comparableFactors[$comparableId]['clase'] ?? 'Clase B', 'clase');
-        $conservacion_factor = $this->mapSelectValue($this->comparableFactors[$comparableId]['conservacion'] ?? 'Buena', 'conservacion');
         $localizacion_factor = $this->mapSelectValue($this->comparableFactors[$comparableId]['localizacion'] ?? 'Lote intermedio', 'localizacion');
 
+        // Guardamos visuales
         $this->comparableFactors[$comparableId]['clase_factor'] = number_format($clase_factor, 4);
-        $this->comparableFactors[$comparableId]['conservacion_factor'] = number_format($conservacion_factor, 4);
         $this->comparableFactors[$comparableId]['localizacion_factor'] = number_format($localizacion_factor, 4);
 
-        // --- LECTURA DEL FEQ DESDE BD ---
-        $feqFactorAplicable = 1.0;
+        // 5. OBTENER VALOR REAL DE FEQ (Desde BD del Modal)
+        $feqFactorAplicable = 1.0; // Valor por defecto si no hay nada
         if ($pivotId) {
             $dbFeq = HomologationComparableFactorModel::where('valuation_building_comparable_id', $pivotId)
-                ->where('acronym', 'FEQ')
+                ->where('acronym', $currentFeqAcronym)
                 ->where('homologation_type', 'building')
                 ->first();
 
             if ($dbFeq) {
                 $feqFactorAplicable = (float)$dbFeq->applicable;
-                $this->comparableFactors[$comparableId]['FEQ']['aplicable'] = number_format($feqFactorAplicable, 4, '.', '');
             }
         }
 
-        foreach ($allFactors as $factor) {
-            $sigla = $factor['acronym'];
-            if (!isset($this->comparableFactors[$comparableId][$sigla])) continue;
+        // 6. BUCLE DE CÁLCULO
+        $factorResultante = 1.0;
+        $allFactorsView = $this->orderedComparableFactorsForView;
 
-            $factorData = $this->comparableFactors[$comparableId][$sigla];
-            $sujetoRating = $subjectRatings->get($sigla, 1.0) ?: 1.0;
-            $compRating = (float)($factorData['calificacion'] ?? 1.0) ?: 1.0;
+        foreach ($allFactorsView as $factorView) {
+            $sigla = $factorView['acronym'];
 
-            if ($sigla === 'FIC') $compRating = $clase_factor;
-            if ($sigla === 'FLOC') $compRating = $localizacion_factor;
-
+            // --- LIMPIEZA DE VARIABLES (Anti-Mezcla) ---
+            $compRating = 1.0;
             $aplicable = 1.0;
             $diferencia_math = 0.0;
-            $rating_to_save = $compRating; // Default: usamos el rating actual
+            $rating_to_save = 1.0;
+
+            // Recuperamos definición MAESTRA para leer flags correctos
+            $masterDef = $subjectMasterMap->get($sigla);
+
+            // Rating del sujeto para este factor
+            $sujetoRating = isset($masterDef['rating']) ? (float)$masterDef['rating'] : 1.0;
+
+            // Flags Reales
+            $isFeq = $masterDef['is_feq'] ?? false;
+            $isCustom = $masterDef['is_custom'] ?? false;
+            $isEditable = $masterDef['is_editable'] ?? false;
+
+            //  Identificar AVANC para forzar lectura manual
+            $isAVANC = ($sigla === 'AVANC');
+
+            // Data actual del comparable (inputs)
+            $factorData = $this->comparableFactors[$comparableId][$sigla] ?? [];
+
+            // --- LÓGICA DE NEGOCIO ---
 
             if ($sigla === 'FNEG') {
+                // FNEG: Solo importa el aplicable manual
                 $aplicable = (float)($factorData['aplicable'] ?? 1.0);
-                $diferencia_math = 0.0;
-            } elseif ($sigla === 'FEQ') {
-                // USAMOS EL VALOR REAL CALCULADO DEL EQUIPAMIENTO
-                $aplicable = $feqFactorAplicable;
                 $diferencia_math = $aplicable - 1.0;
-
-                // 🔥 ASIGNAMOS EL VALOR A LA CALIFICACIÓN PARA LA VISTA Y GUARDADO
-                $compRating = $feqFactorAplicable;
-                $rating_to_save = $feqFactorAplicable; // <--- ¡ASIGNACIÓN PARA GUARDAR!
-
-            } else {
+                $compRating = 1.0;
+                $rating_to_save = 1.0;
+            } elseif ($isFeq) {
+                // FEQ: Toma el valor calculado en paso 5
+                $aplicable = $feqFactorAplicable;
+                $compRating = $feqFactorAplicable; // La calificación ES el factor
+                $diferencia_math = $aplicable - 1.0;
+                $rating_to_save = $feqFactorAplicable;
+            } elseif ($sigla === $currentFsuAcronym) {
+                // FSU: Superficie
+                $subjectLand = (float)$this->subject_surface_land;
+                $compLand = (float)($comparableModel->comparable_land_area ?? 0);
+                if ($subjectLand > 0 && $compLand > 0) {
+                    $coeficiente = $compLand / $subjectLand;
+                    $compRating = pow($coeficiente, (1 / 12));
+                }
                 $diferencia_math = $sujetoRating - $compRating;
                 $aplicable = 1.0 + $diferencia_math;
+                $rating_to_save = $compRating;
+            } elseif ($sigla === 'FIC') {
+                // FIC: Select Clase
+                $compRating = $clase_factor;
+                $diferencia_math = $sujetoRating - $compRating;
+                $aplicable = 1.0 + $diferencia_math;
+                $rating_to_save = $compRating;
+            } elseif ($isEditable || $isCustom || $isAVANC) { // <--- ¡CAMBIO AQUÍ! AÑADIR $isAVANC
+                // FLOC, CUSTOMS y AVANC: Leemos el input manual.
+                $userInput = (float)($factorData['calificacion'] ?? 1.0);
+                $compRating = $userInput ?: 1.0;
+
+                $diferencia_math = $sujetoRating - $compRating;
+                $aplicable = 1.0 + $diferencia_math;
+                $rating_to_save = $compRating;
+            } else {
+                // Default (Otros factores fijos no contemplados)
+                $diferencia_math = $sujetoRating - $compRating;
+                $aplicable = 1.0 + $diferencia_math;
+                $rating_to_save = $compRating;
             }
 
-            // 1. Actualizamos el array visual
+            // 7. ACTUALIZAR ARRAY VISUAL
+            $this->comparableFactors[$comparableId][$sigla]['calificacion'] = number_format($compRating, 4, '.', '');
             $this->comparableFactors[$comparableId][$sigla]['diferencia'] = number_format($diferencia_math, 4, '.', '');
             $this->comparableFactors[$comparableId][$sigla]['aplicable'] = number_format($aplicable, 4, '.', '');
 
-            // 2. Si es FEQ, actualizamos la calificación en el array visual
-            if ($sigla === 'FEQ') {
-                $this->comparableFactors[$comparableId][$sigla]['calificacion'] = number_format($compRating, 4, '.', '');
-            }
-
             $factorResultante *= $aplicable;
 
-            // 3. 🔥 GUARDADO DE PERSISTENCIA PARA FEQ Y OTROS
+            // 8. GUARDAR EN BD
             if ($pivotId) {
-                $rating_value = ($sigla === 'FNEG') ? 1.0 : $rating_to_save;
-
                 HomologationComparableFactorModel::updateOrCreate(
-                    ['valuation_building_comparable_id' => $pivotId, 'acronym' => $sigla, 'homologation_type' => 'building'],
-                    ['rating' => $rating_value, 'applicable' => $aplicable, 'factor_name' => $factor['factor_name']]
+                    [
+                        'valuation_building_comparable_id' => $pivotId,
+                        'acronym' => $sigla,
+                        'homologation_type' => 'building'
+                    ],
+                    [
+                        'rating' => $rating_to_save,
+                        'applicable' => $aplicable,
+                    ]
                 );
             }
         }
 
+        // Finales
         $factorResultante *= $conservacion_factor;
-
         $unitValue = (float)($comparableModel->comparable_unit_value ?? 0);
+
         $this->comparableFactors[$comparableId]['FRE']['factor_ajuste'] = number_format($factorResultante, 4, '.', '');
         $this->comparableFactors[$comparableId]['FRE']['valor_homologado'] = $unitValue * $factorResultante;
         $this->comparableFactors[$comparableId]['FRE']['valor_unitario_vendible'] = number_format($unitValue * $factorResultante, 2, '.', '');
@@ -643,7 +909,7 @@ class HomologationBuildings extends Component
             $this->recalculateSingleComparable($compId);
         }
 
-        $valoresOferta = $selectedComparables->pluck('comparable_offers')->map('floatval');
+        $valoresOferta = $selectedComparables->pluck('comparable_unit_value')->map(fn($v) => (float)$v);
         $valoresHomologados = $selectedComparables->map(fn($c) => (float)($this->comparableFactors[$c->id]['FRE']['valor_homologado'] ?? 0));
         $factoresFRE = $selectedComparables->map(fn($c) => (float)($this->comparableFactors[$c->id]['FRE']['factor_ajuste'] ?? 0));
 
@@ -664,33 +930,122 @@ class HomologationBuildings extends Component
         $this->conclusion_maximo_homologado = $this->format_currency($valoresHomologados->max());
         $this->conclusion_minimo_homologado = $this->format_currency($valoresHomologados->min());
         $this->conclusion_diferencia_homologado = $this->format_currency($valoresHomologados->max() - $valoresHomologados->min());
+
         $this->conclusion_desviacion_estandar_oferta = number_format($stdDevOferta, 2);
         $this->conclusion_coeficiente_variacion_oferta = ($avgOferta > 0) ? number_format(($stdDevOferta / $avgOferta) * 100, 2) : '0.00';
+
         $this->conclusion_desviacion_estandar_homologado = number_format($stdDevHomologado, 2);
         $this->conclusion_coeficiente_variacion_homologado = ($avgHomologado > 0) ? number_format(($stdDevHomologado / $avgHomologado) * 100, 2) : '0.00';
 
         $valorRedondeado = $this->redondearValor($avgHomologado, $this->conclusion_tipo_redondeo);
         $this->conclusion_valor_unitario_de_venta = $this->format_currency($valorRedondeado, true);
 
-        $this->dispatch('updateChart', data: $this->chartData);
+
+
+
+
+        // ==========================================================
+        // == LÓGICA DE CIERRE Y PERSISTENCIA (AQUÍ ESTÁ EL CAMBIO) ==
+        // ==========================================================
+
+        // 1. Aplicar Redondeo al Promedio Homologado (Segunda columna)
+        // Esto cumple tu requisito: "El total asignado sea el promedio de los valores homologados"
+        $valorRedondeado = $this->redondearValor($avgHomologado, $this->conclusion_tipo_redondeo);
+
+        // 2. Actualizar Vista
+        $this->conclusion_valor_unitario_de_venta = $this->format_currency($valorRedondeado, true);
+
+        // 3. GUARDAR EN BD AUTOMÁTICAMENTE
+        // Usamos updateOrCreate para que si ya existe, solo actualice el valor y el tipo de redondeo
+        HomologationBuildingAttributeModel::updateOrCreate(
+            ['valuation_id' => $this->idValuation],
+            [
+                // Guardamos el valor YA calculado y redondeado
+                'unit_value_mode_lot' => $valorRedondeado,
+
+                // Guardamos la configuración del select
+                'conclusion_type_rounding' => $this->conclusion_tipo_redondeo
+            ]
+        );
+
+
+
+
+
+
+        // GRAFICAS
+        $labels = $selectedComparables->pluck('id')->map(fn($id) => "C-$id")->values()->toArray();
+        $dataOfertaChart = $valoresOferta->values()->toArray();
+        $dataHomologadoChart = $valoresHomologados->values()->toArray();
+
+        $chartData1 = [
+            'labels' => $labels,
+            'datasets' => [
+                [
+                    'type' => 'line',
+                    'label' => 'Valor Homologado',
+                    'data' => $dataHomologadoChart,
+                    'borderColor' => '#DC2626',
+                    'backgroundColor' => '#DC2626',
+                    'borderWidth' => 2,
+                    'pointRadius' => 4,
+                    'pointBackgroundColor' => '#DC2626',
+                    'fill' => false,
+                    'tension' => 0.1,
+                    'order' => 0,
+                ],
+                [
+                    'type' => 'bar',
+                    'label' => 'Valor Unitario',
+                    'data' => $dataOfertaChart,
+                    'backgroundColor' => '#14B8A6',
+                    'borderColor' => '#14B8A6',
+                    'borderWidth' => 1,
+                    'order' => 1,
+                ]
+            ]
+        ];
+
+        $chartData2 = [
+            'labels' => $labels,
+            'datasets' => [
+                [
+                    'type' => 'bar',
+                    'label' => 'Valor Homologado',
+                    'data' => $dataHomologadoChart,
+                    'backgroundColor' => '#DC2626',
+                    'borderRadius' => 4,
+                    'barPercentage' => 0.6,
+                ]
+            ]
+        ];
+
+        $this->dispatch('updateBuildingChart1', data: $chartData1);
+        $this->dispatch('updateBuildingChart2', data: $chartData2);
     }
 
-    private function syncComparableFactorNames($oldAcronym, $newName, $newAcronym)
+   /*  private function syncComparableFactorNames($oldAcronym, $newName, $newAcronym)
     {
         $pivotIds = $this->valuation->buildingComparablePivots()->pluck('id');
         if ($pivotIds->isEmpty()) return;
         HomologationComparableFactorModel::whereIn('valuation_building_comparable_id', $pivotIds)
             ->where('acronym', $oldAcronym)->where('homologation_type', 'building')
             ->update(['factor_name' => $newName, 'acronym' => $newAcronym]);
-    }
+    } */
+
     private function mapSelectValue(string $key, string $optionType): float
     {
-        $options = ['clase' => ['Precario' => 1.7500, 'Clase B' => 1.0000, 'Clase C' => 0.8000], 'conservacion' => ['Buena' => 1.0000, 'Regular' => 0.9000, 'Mala' => 0.8000], 'localizacion' => ['Lote intermedio' => 1.0000, 'Esquina' => 1.0500]];
+        $options = [
+            'clase' => ['Precario' => 1.7500, 'Clase B' => 1.0000, 'Clase C' => 0.8000],
+            'conservacion' => ['Buena' => 1.0000, 'Regular' => 0.9000, 'Mala' => 0.8000],
+            'localizacion' => ['Lote intermedio' => 1.0000, 'Esquina' => 1.0500]
+        ];
         return $options[$optionType][$key] ?? 1.0000;
     }
+
     private function getEmptyChartData(): array
     {
-        return ['labels' => [], 'homologated' => [], 'oferta' => [], 'coeficiente_variacion_oferta' => 0, 'coeficiente_variacion_homologado' => 0];
+        return ['labels' => [], 'datasets' => []];
     }
     private function std_deviation(Collection $values): float
     {
@@ -709,7 +1064,7 @@ class HomologationBuildings extends Component
             'DECENAS' => round($v, -1),
             'CENTENAS' => round($v, -2),
             'MILLARES' => round($v, -3),
-            default => round($v, 0)
+            'default' => round($v, 0)
         };
     }
     private function resetConclusionProperties()
@@ -719,10 +1074,33 @@ class HomologationBuildings extends Component
     }
 
     // --- MÉTODOS PÚBLICOS DE INTERFAZ ---
+    // En public function saveNewFactor()
+
     public function saveNewFactor()
     {
-        $this->validate(['new_factor_name' => 'required|string|max:100', 'new_factor_acronym' => 'required|string|max:10|alpha_num', 'new_factor_rating' => 'required|numeric|min:0.8|max:1.2']);
-        HomologationValuationFactorModel::create([
+        // 1. Validaciones (Aseguramos que la sigla sea única para que el loop no truene)
+        $this->validate([
+            'new_factor_name' => 'required|string|max:100',
+            'new_factor_acronym' => [
+                'required',
+                'string',
+                'max:10',
+                'alpha_num',
+                function ($attribute, $value, $fail) {
+                    // Validación para evitar duplicados en la tabla de Sujetos
+                    if (HomologationValuationFactorModel::where('valuation_id', $this->idValuation)
+                        ->where('acronym', strtoupper($value))
+                        ->where('homologation_type', 'building')->exists()
+                    ) {
+                        $fail('Ya existe esta sigla.');
+                    }
+                },
+            ],
+            'new_factor_rating' => 'required|numeric|min:0.8|max:1.2'
+        ]);
+
+        // 2. CREACIÓN DEL FACTOR EN EL SUJETO (¡OK!)
+        $newSubjectFactor = HomologationValuationFactorModel::create([
             'valuation_id' => $this->idValuation,
             'factor_name' => $this->new_factor_name,
             'acronym' => strtoupper($this->new_factor_acronym),
@@ -731,10 +1109,38 @@ class HomologationBuildings extends Component
             'is_editable' => true,
             'is_custom' => true,
         ]);
+
+        // 3. RECUPERAR IDS DE COMPARABLES (Se obtienen los 3 IDs)
+        $pivotIds = $this->valuation->buildingComparablePivots()->pluck('id');
+
+        // 4. 🔥 SINCRONIZACIÓN CORREGIDA EN TODOS LOS COMPARABLES (ANTI-1364) 🔥
+        foreach ($pivotIds as $pivotId) {
+
+            // El firstOrCreate intenta la inserción para CADA PIVOT ID.
+            HomologationComparableFactorModel::firstOrCreate(
+                [
+                    'valuation_building_comparable_id' => $pivotId,
+                    'acronym' => $newSubjectFactor->acronym,
+                    'homologation_type' => 'building'
+                ],
+                [
+                    // ATRIBUTOS PARA LA INSERCIÓN: Aquí estaban faltando los campos obligatorios
+                    'factor_name' => $newSubjectFactor->factor_name,  // <-- CRÍTICO
+                    'rating' => 1.0000,
+                    'applicable' => 1.0000,
+                    'is_custom' => true,
+                    'is_editable' => true,
+                ]
+            );
+        }
+
+        // 5. Limpieza y Recarga
         $this->reset(['new_factor_name', 'new_factor_acronym', 'new_factor_rating']);
         $this->prepareSubjectFactorsForView();
         $this->loadAllComparableFactors();
-        Toaster::success('Factor agregado.');
+        $this->loadComparableSelections();
+        $this->recalculateConclusions();
+        Toaster::success('Factor agregado correctamente.');
     }
     public function deleteCustomFactor($factorId)
     {
@@ -746,6 +1152,7 @@ class HomologationBuildings extends Component
         $factor->delete();
         $this->prepareSubjectFactorsForView();
         $this->loadAllComparableFactors();
+        $this->loadComparableSelections();
         $this->recalculateConclusions();
         Toaster::success('Factor eliminado.');
     }
@@ -777,10 +1184,12 @@ class HomologationBuildings extends Component
     {
         $this->recalculateConclusions();
     }
+
     public function updatedConclusionTipoRedondeo()
     {
         $this->recalculateConclusions();
     }
+
     public function openComparablesBuilding()
     {
         Session::put('comparables-active-session', true);
@@ -822,7 +1231,6 @@ class HomologationBuildings extends Component
 
         $equipmentData = self::EQUIPMENT_MAP[$sourceKey] ?? ['unit' => 'PZA', 'value' => 0.00];
 
-        // 1. Crear el equipamiento SUJETO
         $qtySujeto = (float)$this->new_eq_quantity;
         $totalVal = $isOther ? (float)$this->new_eq_total_value : ($qtySujeto * $equipmentData['value']);
 
@@ -835,40 +1243,32 @@ class HomologationBuildings extends Component
             'total_value' => $totalVal,
         ]);
 
-        // 2. Calcular valores iniciales para comparables (Qty = 0)
         $unitPrice = ($qtySujeto > 0) ? ($totalVal / $qtySujeto) : 0;
-
-        // La diferencia es el valor total del sujeto, porque el comparable tiene 0
         $differenceMoneyInitial = $totalVal;
-
         $pivotIds = $this->valuation->buildingComparablePivots()->pluck('id');
 
         foreach ($pivotIds as $pivotId) {
             $comparable = $this->comparables->where('id', $this->valuation->buildingComparablePivots->where('id', $pivotId)->first()->comparable_id)->first();
             $valorOfertaComparable = (float)($comparable->comparable_offers ?? 0);
-
-            // Porcentaje inicial (Calculado con la diferencia total de dinero)
             $pctInitial = ($valorOfertaComparable > 0) ? ($differenceMoneyInitial / $valorOfertaComparable) * 100 : 0;
 
-            // Crear registro en COMPARABLE
             HomologationComparableEquipmentModel::create([
                 'valuation_equipment_id' => $subjectEq->id,
                 'valuation_building_comparable_id' => $pivotId,
                 'description' => $subjectEq->description,
                 'unit' => $subjectEq->unit,
-                'quantity' => 0.00, // <--- INICIALIZADO EN CERO CORRECTAMENTE
+                'quantity' => 0.00,
                 'difference' => $differenceMoneyInitial,
                 'percentage' => $pctInitial,
             ]);
 
-            // Recalcular FEQ para incluir el nuevo ítem
             $this->calculateEquipmentFactor($pivotId);
         }
 
         $this->reset(['new_eq_description', 'new_eq_quantity', 'new_eq_total_value', 'new_eq_other_description']);
         $this->loadEquipmentData();
         $this->recalculateConclusions();
-        Toaster::success('Equipamiento agregado y factores actualizados.');
+        Toaster::success('Equipamiento agregado.');
     }
 
     public function toggleEditEquipment($eqId)
@@ -903,7 +1303,6 @@ class HomologationBuildings extends Component
 
         $isOther = !empty($eq->custom_description);
         $totalVal = $isOther ? $this->edit_eq_total_value : ($this->edit_eq_quantity * (self::EQUIPMENT_MAP[$eq->description]['value'] ?? 0));
-
         $newDescription = $isOther ? $this->edit_eq_other_description : $eq->description;
 
         $eq->update([
@@ -948,20 +1347,12 @@ class HomologationBuildings extends Component
         $comparable = $this->comparables->where('id', $pivot->comparable_id)->first();
         $valorOfertaComparable = (float)($comparable->comparable_offers ?? 0);
 
-        // 1. Costo Unitario del Sujeto
         $unitPrice = ($subjectEq->quantity > 0) ? ($subjectEq->total_value / $subjectEq->quantity) : 0;
-
-        // 2. Diferencia en Cantidad (Sujeto - Comparable)
-        // Si Sujeto tiene 3 y Comparable 0: (3 - 0) = 3 (Positivo, ganancia para el sujeto)
         $qtySujeto = (float)$subjectEq->quantity;
         $qtyComparable = (float)$newQty;
 
         $diffQty = $qtySujeto - $qtyComparable;
-
-        // 3. Diferencia en Dinero
         $differenceMoney = $diffQty * $unitPrice;
-
-        // 4. Porcentaje
         $pct = ($valorOfertaComparable > 0) ? ($differenceMoney / $valorOfertaComparable) * 100 : 0;
 
         $compEq->update([
@@ -970,10 +1361,7 @@ class HomologationBuildings extends Component
             'percentage' => $pct
         ]);
 
-        // 5. Disparar recálculo de Factores
         $this->calculateEquipmentFactor($pivot->id);
-
-        // 6. Recargar vistas
         $this->loadEquipmentData();
         $this->recalculateConclusions();
     }
@@ -984,22 +1372,17 @@ class HomologationBuildings extends Component
         $sumPercentages = $equipments->sum('percentage');
         $decimalSum = $sumPercentages / 100;
 
-        // FÓRMULA FINAL: 1 + Suma
-        // Si la suma es positiva (Sujeto mejor), FEQ > 1.
         $feq = 1 + $decimalSum;
 
-        // 1. Guardar en Base de Datos (Factor FEQ)
         HomologationComparableFactorModel::updateOrCreate(
             ['valuation_building_comparable_id' => $pivotId, 'acronym' => 'FEQ', 'homologation_type' => 'building'],
             [
                 'rating' => 1.0000,
-                'applicable' => $feq, // Este es el valor clave
+                'applicable' => $feq,
                 'factor_name' => 'Factor Equipamiento'
             ]
         );
 
-        // 2. IMPORTANTE: Actualizar el array en MEMORIA ($this->comparableFactors)
-        // Esto hace que la tabla "Factores de Ajuste Aplicados" se actualice al instante sin F5
         $comparableId = $this->valuation->buildingComparablePivots()->find($pivotId)->comparable_id;
 
         if (!isset($this->comparableFactors[$comparableId]['FEQ'])) {
@@ -1009,7 +1392,6 @@ class HomologationBuildings extends Component
         $this->comparableFactors[$comparableId]['FEQ']['aplicable'] = number_format($feq, 4, '.', '');
         $this->comparableFactors[$comparableId]['FEQ']['diferencia'] = number_format($decimalSum, 4, '.', '');
 
-        // 3. Recalcular el FRE completo del comparable con el nuevo FEQ
         $this->recalculateSingleComparable($comparableId);
     }
 

@@ -27,6 +27,7 @@ return new class extends Migration
             $table->boolean('is_editable')->default(false);
             // --- Esta columna nos ayudará a identificar los factores personalizados de building ---
             $table->boolean('is_custom')->default(false);
+            $table->boolean('is_feq')->default(false);
 
             // --- Columna de Valor (Tu nombre) ---
             $table->decimal('rating', 10, 4)->default(1.0000);

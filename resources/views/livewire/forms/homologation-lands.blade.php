@@ -471,7 +471,7 @@
                             <thead>
                                 <tr class="bg-gray-100 text-md font-semibold text-gray-500 border-b border-gray-300">
                                     <th class="py-2 px-3 text-left min-w-[150px]" rowspan="2">N. Comparable</th>
-                                    <th class="py-2 px-3 text-center min-w-[120px]" rowspan="2">Valor Oferta</th>
+                                    <th class="py-2 px-3 text-center min-w-[120px]" rowspan="2">Valor Unitario</th>
                                     <th class="py-2 px-3 text-center min-w-[120px]" rowspan="2">Val Unit Hom</th>
                                     <th class="py-2 px-3 text-center" colspan="2">Factor de Ajuste</th>
                                     <th class="py-2 px-3 text-center min-w-[100px]" rowspan="2">Ajuste %</th>
@@ -501,7 +501,7 @@
                                         {{ $comparable->id }}
                                     </td>
                                     <td class="py-1.5 px-3 align-middle text-sm text-center">${{
-                                        number_format($comparable->comparable_offers, 2) }}</td>
+                                        number_format($comparable->comparable_unit_value, 2) }}</td>
                                     <td class="py-1.5 px-3 align-middle text-sm text-center">${{
                                         number_format($valorHomologado, 2) }}</td>
                                     <td class="py-1.5 px-3 align-middle text-sm text-center">{{
@@ -661,79 +661,82 @@
 
     {{-- ======================================================================== --}}
     {{-- SCRIPT: LÓGICA DE GRÁFICAS - VERSIÓN "EVENTO NATIVO" --}}
-    {{-- ======================================================================== --}}
-    <script>
-        // Función constructora del gestor de gráficas
-        function createChartManager(chartType, eventName, refName) {
+ <script>
+    // 1. La Fábrica Global (Igualita que en Building)
+    // Usamos window para que no importe si navegas o recargas
+    if (typeof window.createChartManager === 'undefined') {
+        window.createChartManager = function(chartType, eventName, refName) {
             let chartInstance = null;
 
             return {
                 init() {
-                    // 1. Dibujar gráfica vacía al inicio para que no se vea feo
+                    // Si el elemento no existe (porque cambiaste de tab), adiós
+                    if (!this.$refs[refName]) return;
+
                     this.drawChart({ labels: [], datasets: [] });
 
-                    // 2. ESCUCHA ROBUSTA (La clave del arreglo)
-                    // En lugar de depender de Livewire.on, escuchamos el evento nativo del navegador.
-                    // Livewire 3 dispara eventos al 'window' automáticamente.
+                    // Escuchamos el evento
                     window.addEventListener(eventName, (event) => {
+                        // Doble validación por si la navegación mató el componente
+                        if (!this.$refs[refName]) return;
 
-                        // Detectamos dónde vienen los datos (Livewire a veces los mete en 'detail')
                         let payload = event.detail;
-
-                        // Si usaste el argumento nombrado 'data:' en PHP, estará en payload.data
-                        const dataToUse = payload.data ? payload.data : payload;
+                        const dataToUse = (payload && payload.data) ? payload.data : payload;
 
                         if (dataToUse) {
-                            console.log(`Gráfica ${refName} actualizando...`, dataToUse); // Para que veas en consola si llega
                             this.drawChart(dataToUse);
                         }
                     });
                 },
 
                 drawChart(data) {
-                    const ctx = this.$refs[refName];
-                    if (!ctx) return;
+                    try {
+                        const ctx = this.$refs[refName];
+                        if (!ctx) return;
 
-                    // Destruir instancia previa para evitar superposiciones (memory leaks)
-                    if (chartInstance) {
-                        chartInstance.destroy();
-                        chartInstance = null;
-                    }
+                        if (chartInstance) {
+                            chartInstance.destroy();
+                            chartInstance = null;
+                        }
 
-                    // Crear nueva instancia
-                    chartInstance = new Chart(ctx, {
-                        type: chartType,
-                        data: data,
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            animation: { duration: 500 }, // Animación suave
-                            plugins: {
-                                legend: { display: false }, // Ocultamos leyenda global si quieres
-                                tooltip: { mode: 'index', intersect: false }
-                            },
-                            scales: {
-                                y: {
-                                    display: false, // Eje Y invisible para limpieza visual
-                                    beginAtZero: true,
-                                    grid: { display: false }
+                        chartInstance = new Chart(ctx, {
+                            type: chartType,
+                            data: data,
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                animation: { duration: 500 },
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: { mode: 'index', intersect: false }
                                 },
-                                x: {
-                                    grid: { display: false },
-                                    ticks: { display: true, font: { size: 10 } }
+                                scales: {
+                                    y: { display: false, beginAtZero: true, grid: { display: false } },
+                                    x: { grid: { display: false }, ticks: { display: true, font: { size: 10 } } }
                                 }
                             }
-                        }
-                    });
+                        });
+                    } catch (error) {
+                        console.error("Error chart:", error);
+                    }
                 }
             };
         }
+    }
 
-        // Inicialización de Alpine
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('chartHomologationLands', () => createChartManager('bar', 'updateLandChart1', 'chart1'));
-            Alpine.data('chartHomologationStats', () => createChartManager('bar', 'updateLandChart2', 'chart2'));
-        });
-    </script>
+    // 2. Funciones Específicas para LANDS
+    // Aquí es donde ajustamos los nombres para que coincidan con tu HTML y tu PHP
+
+    function chartHomologationLands() {
+        // Escucha 'updateLandChart1' y busca la ref 'chart1'
+        return window.createChartManager('bar', 'updateLandChart1', 'chart1');
+    }
+
+    function chartHomologationStats() {
+        // Escucha 'updateLandChart2' y busca la ref 'chart2'
+        // NOTA: En tu error log vi que llamabas a esta función 'chartHomologationStats'
+        return window.createChartManager('bar', 'updateLandChart2', 'chart2');
+    }
+</script>
 
 </div>

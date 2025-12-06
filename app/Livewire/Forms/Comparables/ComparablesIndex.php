@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str; // <-- Import Str to avoid Undefined type error
 //Se importa flux para poder controlar el modal desde aquí
 use App\Services\HomologationComparableService;
+use App\Models\Forms\Homologation\HomologationComparableSelectionModel;
 
 //use Livewire\Attributes\On;
 
@@ -169,8 +170,7 @@ class ComparablesIndex extends Component
         //dd($this->userSession->id);
 
         $this->comparableDischargedBy = $this->userSession->name;
-
-     }
+    }
 
     // NUEVA FUNCIÓN PARA ACTUALIZAR COORDENADAS DESDE EL MAPA (JAVASCRIPT)
     /*  public function setMapCoordinates($latitude, $longitude)
@@ -187,13 +187,14 @@ class ComparablesIndex extends Component
 
 
 
-     //Generamos una función para actualizar los valores de los comparables asignados al avaluo
-    public function loadAssignedComparables(){
+    //Generamos una función para actualizar los valores de los comparables asignados al avaluo
+    public function loadAssignedComparables()
+    {
 
-        if($this->comparableType === 'land') {
-        $this->assignedComparables = $this->valuation->landComparables()->orderByPivot('position')->get();
+        if ($this->comparableType === 'land') {
+            $this->assignedComparables = $this->valuation->landComparables()->orderByPivot('position')->get();
         } else {
-        $this->assignedComparables = $this->valuation->buildingComparables()->orderByPivot('position')->get();
+            $this->assignedComparables = $this->valuation->buildingComparables()->orderByPivot('position')->get();
         }
 
         //dd($this->assignedComparables);
@@ -514,7 +515,8 @@ class ComparablesIndex extends Component
 
 
 
-    public function editComparable($idComparable, DipomexService $dipomex) {
+    public function editComparable($idComparable, DipomexService $dipomex)
+    {
         //Reseteamos las validaciones
         $this->resetValidation();
         //Reseteamos los campos del modal
@@ -658,7 +660,7 @@ class ComparablesIndex extends Component
         $this->comparableSeleableArea = (float) $comparable->comparable_seleable_area;
 
 
-     // 1. Verificamos que tengamos un CP para buscar
+        // 1. Verificamos que tengamos un CP para buscar
         if ($this->comparableCp) {
             $data = $dipomex->buscarPorCodigoPostal($this->comparableCp);
 
@@ -666,7 +668,7 @@ class ComparablesIndex extends Component
                 // 2. Buscar el ID del estado con base en el nombre devuelto
                 // (Asumiendo que $this->states ya fue cargado en el mount() o aquí)
                 if (empty($this->states)) {
-                     $this->states = $dipomex->getEstados(); // Aseguramos que los estados estén cargados
+                    $this->states = $dipomex->getEstados(); // Aseguramos que los estados estén cargados
                 }
                 $estadoId = array_search($data['estado'], $this->states);
 
@@ -693,7 +695,8 @@ class ComparablesIndex extends Component
     }
 
 
-    public function comparableUpdate(){
+    public function comparableUpdate()
+    {
         // 1. Validaciones
         $validator = $this->validateModal();
 
@@ -988,7 +991,50 @@ class ComparablesIndex extends Component
                 'created_by' => $this->userSession->id,
                 'position' => $new_position
             ]);
+
+
+
+
+
+
+
+
+
+            // LÓGICA DE SELECCIONES (Solo para Building)
+            if ($itemType === 'building') {
+
+                // 1. CLASE: Toma el valor de comparable_clasification
+                HomologationComparableSelectionModel::create([
+                    'valuation_building_comparable_id' => $pivot->id,
+                    'variable' => 'clase',
+                    'value' => $comparable->comparable_clasification ?? null,
+                    'factor' => null,
+                ]);
+
+                // 2. CONSERVACIÓN: Inicia en NULL
+                HomologationComparableSelectionModel::create([
+                    'valuation_building_comparable_id' => $pivot->id,
+                    'variable' => 'conservacion',
+                    'value' => null,
+                    'factor' => null,
+                ]);
+
+                // 3. LOCALIZACIÓN: Inicia en NULL
+                HomologationComparableSelectionModel::create([
+                    'valuation_building_comparable_id' => $pivot->id,
+                    'variable' => 'localizacion',
+                    'value' => null,
+                    'factor' => null,
+                ]);
+            }
         }
+
+
+
+
+
+
+
 
         // 3. Generar los factores del comparable (AQUÍ VA EL SERVICIO)
         $comparableService->createComparableFactors(
@@ -1058,12 +1104,14 @@ class ComparablesIndex extends Component
                 // B. ¡BORRAR LOS FACTORES PRIMERO!
                 $comparableService->deleteComparableFactors($valuationBuildingComparable->id, $itemType);
 
-                // ✅ INYECCIÓN DE BORRADO DE EQUIPAMIENTO (FEQ) - ¡SEGURO DE EJECUTAR!
+                // INYECCIÓN DE BORRADO DE EQUIPAMIENTO (FEQ)
                 $comparableService->deleteComparableEquipment(
                     pivotId: $valuationBuildingComparable->id,
                     type: $itemType // 'building'
                 );
 
+                // BORRADO DE SELECCIONES
+                HomologationComparableSelectionModel::where('valuation_building_comparable_id', $idComparable)->delete();
 
                 // C. Ahora sí, eliminar el pivote (¡¡¡LÍNEA DESCOMENTADA!!!)
                 $valuationBuildingComparable->delete();
@@ -1086,8 +1134,6 @@ class ComparablesIndex extends Component
 
         //Finalmente, enviamos un mensaje en pantalla indicamando que el comparable fue desasignado
         Toaster::success('Comparable desasignado correctamente.');
-
-
     }
 
 
@@ -1438,7 +1484,7 @@ class ComparablesIndex extends Component
 
 
 
-           /*  // Obtenemos todos los comparables asignados, ordenados por posición actual
+        /*  // Obtenemos todos los comparables asignados, ordenados por posición actual
             $comparables = $this->valuation->landComparables()->orderByPivot('position')->get();
 
             $position = 1; // Empezamos a contar desde 1
@@ -1452,7 +1498,6 @@ class ComparablesIndex extends Component
 
                 $position++; // Incrementamos para el siguiente comparable
             } */
-
     }
 
 
@@ -1536,7 +1581,7 @@ class ComparablesIndex extends Component
 
         // --- 1. REGLAS COMUNES (Siempre se validan) ---
         $commonRules = [
-           // 'comparableKey' => 'nullable', // readonly
+            // 'comparableKey' => 'nullable', // readonly
             'comparableFolio' => 'required',
             'comparableDischargedBy' => 'required',
             'comparableProperty' => 'required',
@@ -1659,7 +1704,7 @@ class ComparablesIndex extends Component
     protected function validateModalAttributes(): array
     {
         return [
-           // 'comparableKey' => 'clave',
+            // 'comparableKey' => 'clave',
             'comparableFolio' => 'folio',
             'comparableDischargedBy' => 'dado de alta por',
             'comparableProperty' => 'tipo de inmueble',
@@ -1803,7 +1848,7 @@ class ComparablesIndex extends Component
         ]);
 
         // Reiniciar valores por defecto que no son null
-  /*       $this->comparableActive = true; */
+        /*       $this->comparableActive = true; */
         $this->comparableElevator = false;
         $this->comparableStore = false;
         $thisRouteGuard = false;
@@ -1825,7 +1870,8 @@ class ComparablesIndex extends Component
     }
 
 
-    public function backToHomologationLand(){
+    public function backToHomologationLand()
+    {
         //Eliminamos la variable de sesión
         Session::pull('comparables-active-session');
 
