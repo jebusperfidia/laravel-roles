@@ -46,8 +46,8 @@ return new class extends Migration
             $table->string('comparable_street', 255);
             $table->string('comparable_abroad_number', 50);
             $table->string('comparable_inside_number', 50)->nullable();
-            $table->string('comparable_between_street', 100);
-            $table->string('comparable_and_street', 100);
+            $table->string('comparable_between_street', 100)->nullable();
+            $table->string('comparable_and_street', 100)->nullable();
 
             // --- Datos del Informante / Fuente (Comunes) ---
             $table->string('comparable_name', 100);
@@ -86,7 +86,7 @@ return new class extends Migration
             $table->decimal('comparable_slope', 20, 10)->nullable();
             $table->string('comparable_density', 50)->nullable();
             $table->decimal('comparable_front', 20, 10)->nullable();
-            $table->string('comparable_front_type', 50)->nullable();
+            $table->decimal('comparable_front_type', 50)->nullable();
             $table->string('comparable_description_form', 255)->nullable();
             $table->string('comparable_topography', 50)->nullable();
 

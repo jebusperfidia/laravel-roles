@@ -29,10 +29,37 @@
                 </p>
             </div>
 
-            <div class="flex flex-start text-lg font-bold text-gray-800 mb-4 text-center">
-                Características:
+
+
+            <div x-data="{ open: false }" class="border border-gray-200 rounded-lg mb-4">
+                <div @click="open = !open" class="flex justify-between items-center px-4 py-3 cursor-pointer border-b">
+                    <div class="flex items-center gap-2 flex-grow">
+                        <span class="text-gray-800 font-medium">Características</span>
+                    </div>
+                    <svg :class="{ 'rotate-180': open }" class="w-5 h-5 text-gray-500 transform transition-transform duration-300"
+                        fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+
+                <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 max-h-0" x-transition:enter-end="opacity-100 max-h-screen"
+                    x-transition:leave="transition duration-75" x-transition:leave-start="opacity-100 max-h-screen"
+                    x-transition:leave-end="opacity-0 max-h-0" class="overflow-hidden px-4 py-3 text-gray-700">
+                    <div class="flex w-full">
+                        <div>
+                         {{ $property_description ?? 'No disponible' }}
+                        </div>
+                    </div>
+                </div>
             </div>
 
+
+
+          {{--   <div class="flex flex-start text-lg font-bold text-gray-800 mb-4 text-center">
+                Características:
+            </div>
+ --}}
             <div class="flex flex-col md:flex-row gap-x-8 gap-y-8">
                 <div class="space-y-4 md:w-1/3 w-full p-2">
                     <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-base">
@@ -49,7 +76,7 @@
                             '0.00' }} </dd>
 
                         <dt class="text-gray-500 font-semibold">Rel. Ter/Const:</dt>
-                        <dd class="text-gray-900 font-medium text-lg">{{ number_format($subject_rel_tc, 2) ?? '0'
+                        <dd class="text-gray-900 font-medium text-lg">{{ number_format($subject_rel_tc, 4) ?? '0'
                             }}</dd>
 
                         <dt class="text-gray-500 font-semibold">Avance de obra:</dt>
@@ -288,13 +315,15 @@
 
                                     <dt class="font-semibold text-gray-800 mt-2">Vigencia:</dt>
                                     <dd class="text-gray-600">
-                                        @php
-                                        // Lógica traída de Lands para calcular vigencia real
-                                        $fechaBase = $selectedComparable->comparable_date ?? $selectedComparable->created_at;
-                                        $carbonDate = $fechaBase ? \Carbon\Carbon::parse($fechaBase) : null;
-                                        $diasVigencia = $carbonDate ? (int) $carbonDate->diffInDays(now()) : 0;
-                                        @endphp
-                                        {{ $diasVigencia }} Días
+                                       @php
+                                    $dias = $selectedComparable->dias_para_vencer;
+                                    @endphp
+
+                                    @if($dias > 0)
+                                    <span class="text-teal-700 font-bold">Vigente (Quedan {{ $dias }} días)</span>
+                                    @else
+                                    <span class="text-red-600 font-bold">Vencido hace {{ abs($dias) }} días</span>
+                                    @endif
                                     </dd>
                                 </div>
                             </div>
@@ -726,7 +755,7 @@
     </div>
     @endif
 
-    <flux:modal name="equipment-modal" variant="flyout" max-width="max-w-lg">
+    <flux:modal name="equipment-modal" variant="flyout" position="left" max-width="max-w-lg">
         <div class="flex flex-col h-full" wire:key="equipment-modal-{{ $selectedComparableId }}">
             <div class="p-6 border-b border-gray-200">
                 <flux:heading size="lg" class="text-gray-900">Equipamiento</flux:heading>
@@ -769,13 +798,13 @@
                                     <td class="py-2 pl-2">
                                         <div class="flex justify-center space-x-2">@if($isEditingEq)
                                             <flux:button icon="check" wire:click="saveEditedEquipment"
-                                                class="btn-primary btn-table" />
+                                                class="btn-primary btn-table cursor-pointer" />
                                             <flux:button icon="x-mark" wire:click="cancelEditEquipment"
-                                                class="btn-deleted btn-table" /> @else
+                                                class="btn-deleted btn-table cursor-pointer" /> @else
                                             <flux:button icon="pencil" wire:click="toggleEditEquipment({{ $eq->id }})"
-                                                class="btn-intermediary btn-table" />
+                                                class="btn-intermediary btn-table cursor-pointer" />
                                             <flux:button icon="trash" wire:click="deleteEquipment({{ $eq->id }})"
-                                                wire:confirm="¿Seguro?" class="btn-deleted btn-table" /> @endif
+                                                wire:confirm="¿Seguro?" class="btn-deleted btn-table cursor-pointer" /> @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -784,6 +813,39 @@
                                 </tr> @endforelse
                             </tbody>
                             <tfoot class="border-t-2">
+                                <tr class="align-middle bg-gray-50">
+                                    <td class="py-3 px-2">
+                                        {{-- CORRECCIÓN 1: Usamos la computada equipmentOptions --}}
+                                        <flux:select wire:model.live="new_eq_description" placeholder="Seleccionar" allow-custom>
+                                            @foreach($this->equipmentOptions as $key)
+                                            <flux:select.option value="{{ $key }}">{{ $key }}</flux:select.option>
+                                            @endforeach
+                                        </flux:select>
+
+                                        @if ($new_eq_description === 'Otro')
+                                        <flux:input type="text" wire:model.live="new_eq_other_description" placeholder="Nombre"
+                                            class="!text-sm w-full mt-2" />
+                                        @endif
+                                    </td>
+                                    <td class="py-3 px-2 align-top">
+                                        <flux:input type="number" wire:model.live="new_eq_quantity" placeholder="1" class="!text-sm" step="0.01" />
+                                    </td>
+                                    <td class="py-3 px-2 align-top">
+                                        @if ($new_eq_description === 'Otro')
+                                        <flux:input type="number" wire:model="new_eq_total_value" placeholder="$" class="!text-sm" step="100" />
+                                        @else
+                                        {{-- CORRECCIÓN 2: Usamos la computada selectedEquipmentUnitPrice --}}
+                                        <div class="text-gray-500 text-center text-sm pt-2">
+                                            ${{ number_format($new_eq_quantity * $this->selectedEquipmentUnitPrice, 2) }}
+                                        </div>
+                                        @endif
+                                    </td>
+                                    <td class="py-3 pl-2 text-center align-top">
+                                        <flux:button icon="plus" wire:click="saveNewEquipment" class="btn-primary btn-table cursor-pointer" type="button" />
+                                    </td>
+                                </tr>
+                            </tfoot>
+                          {{--   <tfoot class="border-t-2">
                                 <tr class="align-middle bg-gray-50">
                                     <td class="py-3 px-2">
                                         <flux:select wire:model.live="new_eq_description" placeholder="Seleccionar"
@@ -812,7 +874,7 @@
                                             class="btn-primary btn-table" />
                                     </td>
                                 </tr>
-                            </tfoot>
+                            </tfoot> --}}
                         </table>
                     </div>
                 </div>
@@ -871,6 +933,12 @@
             </div>
         </div>
     </flux:modal>
+
+
+ {{-- MODAL RESUMEN --}}
+    <livewire:forms.comparables.comparable-summary />
+
+
 
 <script>
     // 1. La Fábrica (Global)

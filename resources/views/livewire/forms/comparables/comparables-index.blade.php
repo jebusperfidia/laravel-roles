@@ -394,7 +394,7 @@
                 </flux:field>
 
                 <flux:field class="flux-field">
-                    <flux:label>Entre calle<span class="sup-required">*</span></flux:label>
+                    <flux:label>Entre calle</flux:label>
                     <flux:input.group>
                         <flux:input type="text" wire:model='comparableBetweenStreet' />
                     </flux:input.group>
@@ -404,7 +404,7 @@
                 </flux:field>
 
                 <flux:field class="flux-field">
-                    <flux:label>Y la calle<span class="sup-required">*</span></flux:label>
+                    <flux:label>Y la calle</flux:label>
                     <flux:input.group>
                         <flux:input type="text" wire:model='comparableAndStreet' />
                     </flux:input.group>
@@ -560,7 +560,7 @@
                 </flux:field>
 
                 <flux:field class="flux-field">
-                    <flux:label>De pendiente<span class="sup-required">*</span></flux:label>
+                    <flux:label>De pendiente</flux:label>
                     <flux:input.group>
                         <flux:input type="number" wire:model='comparableSlope' step="any" />
                         <flux:button type="button" class="font-bold" disabled><b>%</b>
@@ -572,7 +572,7 @@
                 </flux:field>
 
                 <flux:field class="flux-field">
-                    <flux:label>Densidad<span class="sup-required">*</span></flux:label>
+                    <flux:label>Densidad</flux:label>
                     <flux:input.group>
                         <flux:input type="text" wire:model='comparableDensity' />
                     </flux:input.group>
@@ -582,9 +582,9 @@
                 </flux:field>
 
                 <flux:field class="flux-field">
-                    <flux:label>Frente(ML):<span class="sup-required">*</span></flux:label>
+                    <flux:label>Frente(ML):</flux:label>
                     <flux:input.group>
-                        <flux:input type="text" wire:model='comparableFront' />
+                        <flux:input type="number" wire:model='comparableFront' />
                     </flux:input.group>
                     <div class="error-container">
                         <flux:error name="comparableFront" />

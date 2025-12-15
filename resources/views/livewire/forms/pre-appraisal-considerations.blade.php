@@ -1,12 +1,15 @@
 <div>
     <div class="flex justify-end font-semibold text-sm text-red-600 pt-2 -mb-3"><span>* Campos obligatorios</span></div>
     <form wire:submit="save">
+
+        {{-- ========================================== --}}
+        {{-- CONTENEDOR 1: CONSIDERACIONES PREVIAS --}}
+        {{-- ========================================== --}}
         <div class="form-container">
             <div class="form-container__header">
                 Consideraciones previas al avalúo
             </div>
             <div class="form-container__content">
-
 
                 <div>
                     {{-- INICIA ACORDEÓN --}}
@@ -94,9 +97,6 @@
                 </div>
 
 
-
-
-
                 <div>
                     {{-- INICIA ACORDEÓN --}}
                     <div x-data="{ open: false }" class="border border-gray-200 rounded-lg mb-4">
@@ -118,23 +118,16 @@
                             x-transition:leave="transition duration-75"
                             x-transition:leave-start="opacity-100 max-h-screen"
                             x-transition:leave-end="opacity-0 max-h-0" class="overflow-hidden px-4 py-3 text-gray-700">
-                            {{-- <div class="flex w-full"> --}}
-                                <flux:field class="w-full">
-                                    <label class="text-sm">Señale otras en su caso:</label>
-                                    <flux:textarea class="h-64" wire:model='additionalConsiderations' />
-                                </flux:field>
-                                {{--
-                            </div> --}}
+
+                            <flux:field class="w-full">
+                                <label class="text-sm">Señale otras en su caso:</label>
+                                <flux:textarea class="h-64" wire:model='additionalConsiderations' />
+                            </flux:field>
+
                         </div>
                     </div>
                     {{-- TERMINA ACORDEÓN --}}
                 </div>
-
-
-
-
-
-
 
 
                 <div>
@@ -208,9 +201,6 @@
                 </div>
 
 
-
-
-
                 <div>
                     {{-- INICIA ACORDEÓN --}}
                     <div x-data="{ open: false }" class="border border-gray-200 rounded-lg mb-4">
@@ -278,10 +268,6 @@
                 </div>
 
 
-
-
-
-
                 <div>
                     {{-- INICIA ACORDEÓN --}}
                     <div x-data="{ open: false }" class="border border-gray-200 rounded-lg mb-4">
@@ -315,229 +301,219 @@
                     {{-- TERMINA ACORDEÓN --}}
                 </div>
 
+            </div> {{-- CIERRA CONTENT DEL PRIMER CONTENEDOR --}}
+        </div> {{-- CIERRA EL PRIMER CONTENEDOR --}}
 
 
 
+
+
+
+        {{-- ========================================== --}}
+        {{-- CONTENEDOR 2: ENFOQUES HOMOLOGACIÓN --}}
+        {{-- ========================================== --}}
+
+        <div class="form-container">
+            <div class="form-container__header">
+                Enfoques a consideras para la homologación
             </div>
+            <div class="form-container__content">
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <div class="form-container">
-                <div class="form-container__header">
-                    Enfoques a consideras para la homologación
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <div class="label-variation">
+                        <flux:label>Cálculo de terrenos<span class="sup-required">*</span></flux:label>
+                    </div>
+                    <div class="radio-input">
+                        <flux:field>
+                            <div class="radio-group-horizontal">
+                                <flux:select wire:model.live="ach_landCalculation"
+                                    class=" text-gray-800 [&_option]:text-gray-900">
+                                    <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                                    <flux:select.option value="Si se apllica, usando terrenos directos o residual">
+                                        Si se apllica, usando terrenos directos o residual</flux:select.option>
+                                    <flux:select.option value="No se aplica, no existen comparables debido a...">No
+                                        se aplica, no existen comparables debido a...</flux:select.option>
+                                    <flux:select.option
+                                        value="No se aplica, no existe muestra suficiente en el mercado">No se
+                                        aplica, no existe muestra suficiente en el mercado</flux:select.option>
+                                    <flux:select.option
+                                        value="No se aplica, no existen comparables ya que el inmueble se encuentra en construccion">
+                                        No se aplica, no existen comparables ya que el inmueble se encuentra en
+                                        construccion</flux:select.option>
+                                </flux:select>
+                            </div>
+                            <div>
+                                <flux:error name="ach_landCalculation" />
+                            </div>
+                        </flux:field>
+                    </div>
                 </div>
-                <div class="form-container__content">
 
 
-
-                    <div class="form-grid form-grid--3 form-grid-3-variation">
-                        <div class="label-variation">
-                            <flux:label>Cálculo de terrenos<span class="sup-required">*</span></flux:label>
-                        </div>
-                        <div class="radio-input">
-                            <flux:field>
-                                <div class="radio-group-horizontal">
-                                    <flux:select wire:model.live="ach_landCalculation"
-                                        class=" text-gray-800 [&_option]:text-gray-900">
-                                        <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                                        <flux:select.option value="Si se apllica, usando terrenos directos o residual">
-                                            Si se apllica, usando terrenos directos o residual</flux:select.option>
-                                        <flux:select.option value="No se aplica, no existen comparables debido a...">No
-                                            se aplica, no existen comparables debido a...</flux:select.option>
-                                        <flux:select.option
-                                            value="No se aplica, no existe muestra suficiente en el mercado">No se
-                                            aplica, no existe muestra suficiente en el mercado</flux:select.option>
-                                        <flux:select.option
-                                            value="No se aplica, no existen comparables ya que el inmueble se encuentra en construccion">
-                                            No se aplica, no existen comparables ya que el inmueble se encuentra en
-                                            construccion</flux:select.option>
-                                    </flux:select>
-                                </div>
-                                <div>
-                                    <flux:error name="ach_landCalculation" />
-                                </div>
-                            </flux:field>
-                        </div>
+                @if($ach_landCalculation == 'Si se apllica, usando terrenos directos o residual')
+                {{-- Solo si está seleccionado: Si se apllica, usando terrenos directos o residual --}}
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <div class="label-variation">
+                        <flux:label>Enfoque comparativo
+                            <br> de terrenos
+                        </flux:label>
                     </div>
-
-
-                    @if($ach_landCalculation == 'Si se apllica, usando terrenos directos o residual')
-                    {{-- Solo si está seleccionado: Si se apllica, usando terrenos directos o residual --}}
-                    <div class="form-grid form-grid--3 form-grid-3-variation">
-                        <div class="label-variation">
-                            <flux:label>Enfoque comparativo
-                                <br> de terrenos
-                            </flux:label>
-                        </div>
-                        <div class="radio-input">
-                            <flux:field>
-                                <div class="radio-group-horizontal">
-                                    <flux:checkbox wire:model="ach_comparativeApproachLand" />
-                                </div>
-                                <div>
-                                    <flux:error name="ach_comparativeApproachLand" />
-                                </div>
-                            </flux:field>
-                        </div>
+                    <div class="radio-input">
+                        <flux:field>
+                            <div class="radio-group-horizontal">
+                                <flux:checkbox wire:model="ach_comparativeApproachLand" />
+                            </div>
+                            <div>
+                                <flux:error name="ach_comparativeApproachLand" />
+                            </div>
+                        </flux:field>
                     </div>
-
-                    <div class="form-grid form-grid--3 form-grid-3-variation">
-                        <div class="label-variation">
-                            <flux:label>Enfoque comparativo
-                                <br> de ventas
-                            </flux:label>
-                        </div>
-                        <div class="radio-input">
-                            <flux:field>
-                                <div class="radio-group-horizontal">
-                                    <flux:checkbox wire:model="ach_comparativeSalesApproach" />
-                                </div>
-                                <div>
-                                    <flux:error name="ach_comparativeSalesApproach" />
-                                </div>
-                            </flux:field>
-                        </div>
-                    </div>
-                    @endif
-
-
-
-                    @if ($ach_landCalculation == 'No se aplica, no existen comparables debido a...')
-                    {{-- Solo se aplica si está seleccionado: No se aplica, no existen comparables debido a... --}}
-                    <div class="form-grid form-grid--3 form-grid-3-variation">
-                        <div class="label-variation">
-                            <flux:label>Debido a <span class="sup-required">*</span></flux:label>
-                        </div>
-                        <div class="radio-input">
-                            <flux:field>
-                                <div class="radio-group-horizontal">
-                                    <flux:input type='text' wire:model="ach_dueTo1" />
-                                </div>
-                                <div>
-                                    <flux:error name="ach_dueTo1" />
-                                </div>
-                            </flux:field>
-                        </div>
-                    </div>
-                    @endif
-
-
-
-
-
-                    {{-- ESTOS VALORES SON PARA TODOS LOS INPUT SELECT --}}
-                    <div class="form-grid form-grid--3 form-grid-3-variation">
-                        <div class="label-variation">
-                            <flux:label>Enfoque de costos<span class="sup-required">*</span></flux:label>
-                        </div>
-                        <div class="radio-input">
-                            <flux:field>
-                                <div class="radio-group-horizontal">
-                                    <flux:select wire:model="ahc_costApproach"
-                                        class=" text-gray-800 [&_option]:text-gray-900">
-                                        <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                                        <flux:select.option value="Si se aplica">Si se aplica</flux:select.option>
-                                        <flux:select.option value="No se aplica">No se aplica</flux:select.option>
-                                    </flux:select>
-                                </div>
-                                <div>
-                                    <flux:error name="ahc_costApproach" />
-                                </div>
-                            </flux:field>
-                        </div>
-                    </div>
-
-                    <div class="form-grid form-grid--3 form-grid-3-variation">
-                        <div class="label-variation">
-                            <flux:label>Enfoque de ingresos<span class="sup-required">*</span></flux:label>
-                        </div>
-                        <div class="radio-input">
-                            <flux:field>
-                                <div class="radio-group-horizontal">
-                                    <flux:select wire:model.live="ach_incomeApproach"
-                                        class=" text-gray-800 [&_option]:text-gray-900">
-                                        <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                                        <flux:select.option value="Si se apllica, usando terrenos directos o residual">
-                                            Si se apllica, usando
-                                            terrenos directos o residual</flux:select.option>
-                                        <flux:select.option value="No se aplica, no existen comparables debido a...">No
-                                            se aplica, no
-                                            existen comparables debido a...</flux:select.option>
-                                        <flux:select.option
-                                            value="No se aplica, no existe muestra suficiente en el mercado">No se
-                                            aplica,
-                                            no existe muestra suficiente en el mercado</flux:select.option>
-                                        <flux:select.option
-                                            value="No se aplica, no existen comparables ya que el inmueble se encuentra en construccion">
-                                            No
-                                            se aplica, no existen comparables ya que el inmueble se encuentra en
-                                            construccion
-                                        </flux:select.option>
-                                        <flux:select.option
-                                            value="No se aplica, no existen comparables ya que el inmueble se encuentra en construccion">
-                                            No
-                                            se aplica, no se requiere la ejecucion
-                                        </flux:select.option>
-                                    </flux:select>
-                                </div>
-                                <div>
-                                    <flux:error name="ach_incomeApproach" />
-                                </div>
-                            </flux:field>
-                        </div>
-                    </div>
-
-                    @if ($ach_incomeApproach == 'No se aplica, no existen comparables debido a...')
-                    {{-- Solo se aplica si está seleccionado: No se aplica, no existen comparables debido a... --}}
-                    <div class="form-grid form-grid--3 form-grid-3-variation">
-                        <div class="label-variation">
-                            <flux:label>Debido a <span class="sup-required">*</span></flux:label>
-                        </div>
-                        <div class="radio-input">
-                            <flux:field>
-                                <div class="radio-group-horizontal">
-                                    <flux:input type='text' wire:model="ach_dueTo2" />
-                                </div>
-                                <div>
-                                    <flux:error name="ach_dueTo2" />
-                                </div>
-                            </flux:field>
-                        </div>
-                    </div>
-                    @endif
-
-                    <div class="form-grid form-grid--3 form-grid-3-variation">
-                        <div class="label-variation">
-                            <flux:label>Aplicar FIC</flux:label>
-                        </div>
-                        <div class="radio-input">
-                            <flux:field>
-                                <div class="radio-group-horizontal">
-                                    <flux:checkbox wire:model="applyFIC" />
-                                </div>
-                                <div>
-                                    <flux:error name="applyFIC" />
-                                </div>
-                            </flux:field>
-                        </div>
-                    </div>
-
-
                 </div>
-            </div>
-            <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos
-            </flux:button>
+
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <div class="label-variation">
+                        <flux:label>Enfoque comparativo
+                            <br> de ventas
+                        </flux:label>
+                    </div>
+                    <div class="radio-input">
+                        <flux:field>
+                            <div class="radio-group-horizontal">
+                                <flux:checkbox wire:model="ach_comparativeSalesApproach" />
+                            </div>
+                            <div>
+                                <flux:error name="ach_comparativeSalesApproach" />
+                            </div>
+                        </flux:field>
+                    </div>
+                </div>
+                @endif
+
+
+
+                @if ($ach_landCalculation == 'No se aplica, no existen comparables debido a...')
+                {{-- Solo se aplica si está seleccionado: No se aplica, no existen comparables debido a... --}}
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <div class="label-variation">
+                        <flux:label>Debido a <span class="sup-required">*</span></flux:label>
+                    </div>
+                    <div class="radio-input">
+                        <flux:field>
+                            <div class="radio-group-horizontal">
+                                <flux:input type='text' wire:model="ach_dueTo1" />
+                            </div>
+                            <div>
+                                <flux:error name="ach_dueTo1" />
+                            </div>
+                        </flux:field>
+                    </div>
+                </div>
+                @endif
+
+
+                {{-- ESTOS VALORES SON PARA TODOS LOS INPUT SELECT --}}
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <div class="label-variation">
+                        <flux:label>Enfoque de costos<span class="sup-required">*</span></flux:label>
+                    </div>
+                    <div class="radio-input">
+                        <flux:field>
+                            <div class="radio-group-horizontal">
+                                <flux:select wire:model="ahc_costApproach"
+                                    class=" text-gray-800 [&_option]:text-gray-900">
+                                    <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                                    <flux:select.option value="Si se aplica">Si se aplica</flux:select.option>
+                                    <flux:select.option value="No se aplica">No se aplica</flux:select.option>
+                                </flux:select>
+                            </div>
+                            <div>
+                                <flux:error name="ahc_costApproach" />
+                            </div>
+                        </flux:field>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <div class="label-variation">
+                        <flux:label>Enfoque de ingresos<span class="sup-required">*</span></flux:label>
+                    </div>
+                    <div class="radio-input">
+                        <flux:field>
+                            <div class="radio-group-horizontal">
+                                <flux:select wire:model.live="ach_incomeApproach"
+                                    class=" text-gray-800 [&_option]:text-gray-900">
+                                    <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
+                                    <flux:select.option value="Si se apllica, usando terrenos directos o residual">
+                                        Si se apllica, usando
+                                        terrenos directos o residual</flux:select.option>
+                                    <flux:select.option value="No se aplica, no existen comparables debido a...">No
+                                        se aplica, no
+                                        existen comparables debido a...</flux:select.option>
+                                    <flux:select.option
+                                        value="No se aplica, no existe muestra suficiente en el mercado">No se
+                                        aplica,
+                                        no existe muestra suficiente en el mercado</flux:select.option>
+                                    <flux:select.option
+                                        value="No se aplica, no existen comparables ya que el inmueble se encuentra en construccion">
+                                        No
+                                        se aplica, no existen comparables ya que el inmueble se encuentra en
+                                        construccion
+                                    </flux:select.option>
+                                    <flux:select.option
+                                        value="No se aplica, no existen comparables ya que el inmueble se encuentra en construccion">
+                                        No
+                                        se aplica, no se requiere la ejecucion
+                                    </flux:select.option>
+                                </flux:select>
+                            </div>
+                            <div>
+                                <flux:error name="ach_incomeApproach" />
+                            </div>
+                        </flux:field>
+                    </div>
+                </div>
+
+                @if ($ach_incomeApproach == 'No se aplica, no existen comparables debido a...')
+                {{-- Solo se aplica si está seleccionado: No se aplica, no existen comparables debido a... --}}
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <div class="label-variation">
+                        <flux:label>Debido a <span class="sup-required">*</span></flux:label>
+                    </div>
+                    <div class="radio-input">
+                        <flux:field>
+                            <div class="radio-group-horizontal">
+                                <flux:input type='text' wire:model="ach_dueTo2" />
+                            </div>
+                            <div>
+                                <flux:error name="ach_dueTo2" />
+                            </div>
+                        </flux:field>
+                    </div>
+                </div>
+                @endif
+
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <div class="label-variation">
+                        <flux:label>Aplicar FIC</flux:label>
+                    </div>
+                    <div class="radio-input">
+                        <flux:field>
+                            <div class="radio-group-horizontal">
+                                <flux:checkbox wire:model="applyFIC" />
+                            </div>
+                            <div>
+                                <flux:error name="applyFIC" />
+                            </div>
+                        </flux:field>
+                    </div>
+                </div>
+
+
+            </div> {{-- CIERRA CONTENT DEL SEGUNDO CONTENEDOR --}}
+        </div> {{-- CIERRA EL SEGUNDO CONTENEDOR (ESTE ES EL QUE FALTABA) --}}
+
+        <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">
+            Guardar datos
+        </flux:button>
     </form>
 </div>

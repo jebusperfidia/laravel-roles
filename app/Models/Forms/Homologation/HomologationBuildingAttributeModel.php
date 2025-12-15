@@ -16,6 +16,9 @@ class HomologationBuildingAttributeModel extends Model
         'valuation_id',
         'unit_value_mode_lot',
         'conclusion_type_rounding',
+
+        'average_arithmetic',  // <--- NUEVO
+        'average_homologated', // <--- NUEVO
     ];
 
     public function valuation()

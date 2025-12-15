@@ -68,16 +68,22 @@ class ApplicableSurfaces extends Component
         //Obtenemos el tipo de propiedad del avaluo para la asignación de campos condicionales
         // NOTA: Agregué un safety check rápido aquí también por si acaso
         $val = Valuation::find(session('valuation_id'));
+
+        //dd($val);
         $this->propertyType = $val ? $val->property_type : '';
 
         //Obtenemos el valor del landDetail para las sugerencias
-        $this->landDetail = LandDetailsModel::find(session('valuation_id'));
+        $this->landDetail = LandDetailsModel::where('valuation_id', $val->id)->first();
+
+        //dd($this->landDetail);
 
         // --- CORRECCIÓN INICIO: Validamos si landDetail existe ---
         if ($this->landDetail) {
             $this->landSurfacesTotal = $this->landDetail->landSurfaces()->sum('surface');
             //Asignamos el valor del checkbox de cálculo de terreno excedente
             $this->useExcessCalculation = (bool) $this->landDetail->use_excess_calculation;
+
+           // dd($this->useExcessCalculation);
         } else {
             $this->landSurfacesTotal = 0;
             $this->useExcessCalculation = false;
@@ -178,32 +184,33 @@ class ApplicableSurfaces extends Component
 
     public function save()
     {
+        // 1. Reglas UNIVERSALES (Aplican para Casa Habitación Y Condominio)
+        // Solo Superficie Construida y Total del Terreno
         $rules = [
-            //'saleableArea' => 'required|numeric',
-            //'calculationBuiltArea' => 'required|numeric|gt:0',
             'builtArea' => 'required|numeric|min:0',
-
             'surfaceArea' => 'required|numeric|min:0',
             'sourceSurfaceArea' => 'required',
-
-
-            'applicableUndivided' => 'required|numeric|between:0,100',
-            'sourceApplicableUndivided' => 'required',
-
-            'proporcionalLand' => 'required|numeric|min:0',
-            'sourceProporcionalLand' => 'required',
-
         ];
 
+        // 2. Reglas EXCLUSIVAS para CONDOMINIO
+        // Usamos la misma lógica que en tu Blade para determinar si aplican
+        if (stripos($this->propertyType, 'condominio') !== false) {
+            $rules = array_merge($rules, [
+                'applicableUndivided' => 'required|numeric|between:0,100',
+                'sourceApplicableUndivided' => 'required',
+                'proporcionalLand' => 'required|numeric|min:0',
+                'sourceProporcionalLand' => 'required',
+            ]);
+        }
 
+        // 3. Reglas para CÁLCULO DE EXCEDENTE
+        // (Esta parte ya la tenías bien, la dejamos igual)
         if ($this->useExcessCalculation) {
             $rules = array_merge($rules, [
                 'privateLot' => 'required|numeric|min:0',
                 'sourcePrivateLot' => 'required',
-
                 'privateLotType' => 'required|numeric|min:0',
                 'sourcePrivateLotType' => 'required',
-
                 'surplusLandArea' => 'required|numeric|min:0'
             ]);
         }
@@ -215,8 +222,13 @@ class ApplicableSurfaces extends Component
             $this->validationAttributes()
         );
 
+        //dd($validator->errors()->all());
+
         //Comprobamos si se obtuvieron errores de validación
         if ($validator->fails()) {
+
+
+
             //Enviamos un mensaje en pantalla indicando que existen errores de validación
             Toaster::error('Existen errores de validación');
 

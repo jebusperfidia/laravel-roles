@@ -229,8 +229,8 @@ class SpecialInstallations extends Component
 
             // Campos de tipo numérico (flotante) que deben ser mayores a 0
             'quantity' => 'nullable|numeric|gt:0',
-            'age' => 'required|numeric|gt:0',
-            'usefulLife' => 'required|numeric|gt:0',
+            'age' => 'required|numeric|min:0',
+            'usefulLife' => 'required|numeric|min:0',
             'newRepUnitCost' => 'required|numeric|gt:0',
             //'ageFactor' => 'required|numeric|gt:0',
             'conservationFactor' => 'required|numeric|gt:0',
@@ -315,18 +315,18 @@ class SpecialInstallations extends Component
         $this->key = $selectedClave;
 
         /* if ($selectedClave) { */
-            // Busca el elemento completo en el array de configuración usando la clave seleccionada.
-            // Ejemplo: Busca 'IE01' en $this->select_SI y devuelve el array completo.
-           /*  $item = collect($configArray)->firstWhere('clave', $selectedClave); */
+        // Busca el elemento completo en el array de configuración usando la clave seleccionada.
+        // Ejemplo: Busca 'IE01' en $this->select_SI y devuelve el array completo.
+        /*  $item = collect($configArray)->firstWhere('clave', $selectedClave); */
 
-            //  1. Asignamos la CLAVE (IE01) a la propiedad 'key' del modelo.
-     /*        $this->key = $selectedClave; */
+        //  1. Asignamos la CLAVE (IE01) a la propiedad 'key' del modelo.
+        /*        $this->key = $selectedClave; */
 
 
 
-            //  2. Asignamos la DESCRIPCIÓN LARGA (Elevadores) a la variable que se va a persistir.
-            // Si no encuentra la descripción, usa la clave como fallback (seguridad).
-      /*       $selectedDescriptionName = $item['descripcion'] ?? $selectedClave;
+        //  2. Asignamos la DESCRIPCIÓN LARGA (Elevadores) a la variable que se va a persistir.
+        // Si no encuentra la descripción, usa la clave como fallback (seguridad).
+        /*       $selectedDescriptionName = $item['descripcion'] ?? $selectedClave;
         }
  */
 
@@ -335,7 +335,17 @@ class SpecialInstallations extends Component
         //Hacemos algunos cálculos para asignar valores a campos que no se ingresan directamente
 
         //Factor de edad
-        $this->ageFactor = 1 - ((($this->age * 100) / $this->usefulLife) * 0.01);
+        //$this->ageFactor = 1 - ((($this->age * 100) / $this->usefulLife) * 0.01);
+
+        if ($this->usefulLife > 0) {
+            // Si hay vida útil, calculamos el factor normal
+            $this->ageFactor = 1 - ((($this->age * 100) / $this->usefulLife) * 0.01);
+        } else {
+            // Si la vida útil es 0, definimos un factor por defecto.
+            // Usualmente si la vida útil es 0, el factor es 0 (ya no vale nada),
+            // pero si prefieres que valga 1 (como si fuera nuevo/sin depreciación), cambia el 0 por 1.
+            $this->ageFactor = 1;
+        }
 
         //Costo unitario de neto reposición
         $this->netRepUnitCost = $this->newRepUnitCost * $this->ageFactor;
@@ -474,7 +484,13 @@ class SpecialInstallations extends Component
         );
 
         //Factor de edad
-        $this->ageFactor = 1 - ((($this->age * 100) / $this->usefulLife) * 0.01);
+        //$this->ageFactor = 1 - ((($this->age * 100) / $this->usefulLife) * 0.01);
+
+        if ($this->usefulLife > 0) {
+            $this->ageFactor = 1 - ((($this->age * 100) / $this->usefulLife) * 0.01);
+        } else {
+            $this->ageFactor = 1; // O el valor de fallback que decidas
+        }
 
         //Costo unitario de neto reposición
         $this->netRepUnitCost = $this->newRepUnitCost * $this->ageFactor;

@@ -98,6 +98,12 @@ select:focus[data-flux-control] {
     @apply text-black;
 } */
 
+
+#toaster {
+    z-index: 99999 !important; /* Tomen eso, modales */
+}
+
+
 /*ESTILOS PARA LOS BOTONES PRINCIPALES DEL SISTEMA*/
 
 .btn-primary {

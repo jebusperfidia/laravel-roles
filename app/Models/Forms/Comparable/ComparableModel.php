@@ -135,7 +135,7 @@ class ComparableModel extends Model
      * Lista de atributos virtuales (accessors) que se añadirán
      * automáticamente al modelo (ej. para Livewire).
      */
-    protected $appends = ['is_expired', 'vigencia_hasta'];
+    protected $appends = ['is_expired', 'vigencia_hasta', 'dias_para_vencer'];
 
 
 
@@ -213,5 +213,20 @@ class ComparableModel extends Model
     {
         // Devuelve la fecha de creación + 6 meses, formateada.
         return $this->created_at->addMonths(6)->format('d/m/Y');
+    }
+
+    public function getDiasParaVencerAttribute()
+    {
+        // Tu lógica exacta:
+        $fechaBase = $this->comparable_date
+            ? \Carbon\Carbon::parse($this->comparable_date)
+            : $this->created_at;
+
+        if (!$fechaBase) return 0;
+
+        $diasTranscurridos = (int) $fechaBase->diffInDays(now());
+
+        // Retorna positivo si falta tiempo, negativo si ya se pasó
+        return 180 - $diasTranscurridos;
     }
 }

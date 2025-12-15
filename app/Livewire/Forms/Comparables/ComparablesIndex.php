@@ -110,7 +110,7 @@ class ComparablesIndex extends Component
         $comparableFront, $comparableFrontType, $comparableDescriptionForm, $comparableTopography,
         $comparableAllowedLevels;
 
-    public float $comparableFreeAreaRequired, $comparableSlope;
+    public float $comparableFreeAreaRequired = 0, $comparableSlope = 0;
 
 
     // --- CAMPOS ESPECÍFICOS DE BUILDING (Construcción) ---
@@ -121,7 +121,7 @@ class ComparablesIndex extends Component
 
     public bool $comparableElevator = false, $comparableStore = false, $comparableRoofGarden = false; // <--- Inicializados
 
-    public float $comparableSeleableArea;
+    public float $comparableSeleableArea = 0;
 
 
     //Variable para guardar los comparables asignados al avaluo
@@ -418,8 +418,10 @@ class ComparablesIndex extends Component
                 'comparable_services_infraestructure' => $this->comparableServicesInfraestructure,
                 'comparable_shape' => $this->comparableShape,
                 'comparable_density' => $this->comparableDensity,
-                'comparable_front' => $this->comparableFront,
-                'comparable_front_type' => $this->comparableFrontType,
+                //'comparable_front' => $this->comparableFront,
+                //'comparable_front_type' => $this->comparableFrontType,
+                'comparable_front' => ($this->comparableFront === '' || $this->comparableFront === null) ? null : $this->comparableFront,
+                'comparable_front_type' => ($this->comparableFrontType === '' || $this->comparableFrontType === null) ? null : $this->comparableFrontType,
                 'comparable_description_form' => $this->comparableDescriptionForm,
                 'comparable_topography' => $this->comparableTopography,
                 'comparable_allowed_levels' => $this->comparableAllowedLevels,
@@ -861,8 +863,8 @@ class ComparablesIndex extends Component
                 'comparable_services_infraestructure' => $this->comparableServicesInfraestructure,
                 'comparable_shape' => $this->comparableShape,
                 'comparable_density' => $this->comparableDensity,
-                'comparable_front' => $this->comparableFront,
-                'comparable_front_type' => $this->comparableFrontType,
+                'comparable_front' => ($this->comparableFront === '' || $this->comparableFront === null) ? null : $this->comparableFront,
+                'comparable_front_type' => ($this->comparableFrontType === '' || $this->comparableFrontType === null) ? null : $this->comparableFrontType,
                 'comparable_description_form' => $this->comparableDescriptionForm,
                 'comparable_topography' => $this->comparableTopography,
                 'comparable_allowed_levels' => $this->comparableAllowedLevels,
@@ -1581,7 +1583,7 @@ class ComparablesIndex extends Component
 
         // --- 1. REGLAS COMUNES (Siempre se validan) ---
         $commonRules = [
-            // 'comparableKey' => 'nullable', // readonly
+            // 'comparableKey' => 'nullable', // readonlya
             'comparableFolio' => 'required',
             'comparableDischargedBy' => 'required',
             'comparableProperty' => 'required',
@@ -1592,8 +1594,8 @@ class ComparablesIndex extends Component
             'comparableStreet' => 'required',
             'comparableAbroadNumber' => 'required',
             'comparableInsideNumber' => 'nullable', // Sin *
-            'comparableBetweenStreet' => 'required',
-            'comparableAndStreet' => 'required',
+            'comparableBetweenStreet' => 'nullable',
+            'comparableAndStreet' => 'nullable',
             'comparableName' => 'required',
             'comparableLastName' => 'required',
             'comparablePhone' => 'required',
@@ -1621,9 +1623,9 @@ class ComparablesIndex extends Component
             'comparableServicesInfraestructure' => 'required', // <--- CAMBIO: Tiene *
             'comparableDescServicesInfraestructure' => 'required',
             'comparableShape' => 'required',
-            'comparableSlope' => 'required|numeric|between:0,100',
-            'comparableDensity' => 'required',
-            'comparableFront' => 'required',
+            'comparableSlope' => 'nullable|numeric|between:0,100',
+            'comparableDensity' => 'nullable',
+            'comparableFront' => 'nullable|numeric|min:0',
             'comparableFrontType' => 'nullable', // Sin *
             'comparableDescriptionForm' => 'nullable', // Sin *
             'comparableTopography' => 'required',

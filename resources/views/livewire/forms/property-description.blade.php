@@ -110,7 +110,28 @@
                     </div>
                 </div>
 
+
                 @if (stripos($propertyType, 'condominio') !== false)
+
+                <div class="form-grid form-grid--3 form-grid-3-variation">
+                    <div class="label-variation">
+                        <flux:label>Nivel de edicificio <br>(condominio)<span class="sup-required">*</span></flux:label>
+                    </div>
+                    <div class="radio-input">
+                        <flux:field>
+                            <div class="radio-group-horizontal">
+                                <flux:input type="text" wire:model.lazy='levelBuilding' />
+                            </div>
+                            <div>
+                                <flux:error name="levelBuilding" />
+                            </div>
+                        </flux:field>
+                        <small>Nivel en el que se encuentra el departamento dentro del edificio</small>
+                    </div>
+                </div>
+
+                @endif
+
                 <div class="form-grid form-grid--3 form-grid-3-variation">
                     <div class="label-variation">
                         <flux:label>Espacio de uso múltiple<span class="sup-required">*</span></flux:label>
@@ -135,22 +156,6 @@
 
                 <div class="form-grid form-grid--3 form-grid-3-variation">
                     <div class="label-variation">
-                        <flux:label>Nivel de edicificio <br>(condominio)<span class="sup-required">*</span></flux:label>
-                    </div>
-                    <div class="radio-input">
-                        <flux:field>
-                            <div class="radio-group-horizontal">
-                                <flux:input type="text" wire:model.lazy='levelBuilding' />
-                            </div>
-                            <div>
-                                <flux:error name="levelBuilding"/>
-                            </div>
-                        </flux:field>
-                        <small>Nivel en el que se encuentra el departamento dentro del edificio</small>
-                    </div>
-                </div>
-                <div class="form-grid form-grid--3 form-grid-3-variation">
-                    <div class="label-variation">
                         <flux:label>Calidad del proyecto<span class="sup-required">*</span></flux:label>
                     </div>
                     <div class="radio-input">
@@ -164,12 +169,13 @@
                                 </flux:select>
                             </div>
                             <div>
-                                <flux:error name="projectQuality"/>
+                                <flux:error name="projectQuality" />
                             </div>
                         </flux:field>
                     </div>
                 </div>
-                @endif
+
+
             </div>
         </div>
         <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos</flux:button>

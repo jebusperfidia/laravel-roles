@@ -13,13 +13,17 @@ class HomologationLandAttributeModel extends Model
 
     protected $fillable = [
         'valuation_id',
-        'surface_applicable_id',
-        'surface_applicable_area',
+        'subject_surface_option_id',
+        'subject_surface_value',
+        //'surface_applicable_area',
+
         'cus',
         'cos',
         'mode_lot',
         'unit_value_mode_lot',
         'conclusion_type_rounding',
+        'average_arithmetic',  // <--- NUEVO
+        'average_homologated', // <--- NUEVO
     ];
 
 

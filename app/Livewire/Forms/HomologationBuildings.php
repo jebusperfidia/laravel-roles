@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Collection;
 use Flux\Flux;
 use Masmerise\Toaster\Toaster;
+
 use App\Models\Valuations\Valuation;
 
 // Modelos
@@ -15,14 +16,17 @@ use App\Models\Forms\Homologation\HomologationValuationFactorModel;
 use App\Models\Forms\Homologation\HomologationComparableFactorModel;
 use App\Models\Forms\Homologation\HomologationValuationEquipmentModel;
 use App\Models\Forms\Homologation\HomologationComparableEquipmentModel;
-// [NUEVO] Modelo de Selecciones
 use App\Models\Forms\Homologation\HomologationComparableSelectionModel;
 use App\Models\Forms\Building\BuildingModel;
 use App\Models\Forms\ApplicableSurface\ApplicableSurfaceModel;
 use App\Models\Forms\Homologation\HomologationBuildingAttributeModel;
+use App\Models\Forms\Homologation\HomologationLandAttributeModel;
+use App\Models\Forms\PropertyDescription\PropertyDescriptionModel;
+
 
 class HomologationBuildings extends Component
 {
+
     // --- PROPIEDADES INICIALES ---
     public $idValuation;
     public $valuation;
@@ -105,19 +109,271 @@ class HomologationBuildings extends Component
     public $subject_rel_tc = 0;
     public $subject_progress_work = 0;
 
-    public const EQUIPMENT_MAP = [
-        'Baño completo' => ['unit' => 'PZA', 'value' => 16768.00],
-        'Medio baño' => ['unit' => 'PZA', 'value' => 9396.00],
-        'Cocina integral' => ['unit' => 'PZA', 'value' => 38000.00],
-        'Estacionamiento cubierto para dpto.' => ['unit' => 'Cajón', 'value' => 80000.00],
-        'Estacionamiento desubierto para dpto.' => ['unit' => 'Cajón', 'value' => 40000.00],
-        'Terraza' => ['unit' => 'M2', 'value' => 3375.00],
-        'Balcon' => ['unit' => 'M2', 'value' => 1687.00],
-        'Acabados' => ['unit' => 'M2', 'value' => 1360.00],
-        'Elevador' => ['unit' => '%', 'value' => 0.01],
-        'Roof garden' => ['unit' => 'M2', 'value' => 4121.00],
-        'Otro' => ['unit' => 'PZA', 'value' => 0.00],
+    // En tus propiedades públicas (al inicio de la clase)
+    public $subject_vus = 0; // Valor Unitario de Suelo (VUS)
+
+    //Propiedad para obtener la descripción/caracteristicas del inmueble
+    public $property_description;
+
+    // Reemplaza la antigua const EQUIPMENT_MAP por esto:
+    protected const EQUIPMENT_VALUES_BY_CLASS = [
+        'Minima' => [
+            'Baño completo' => ['unit' => 'PZA', 'value' => 10000.00],
+            'Medio baño' => ['unit' => 'PZA', 'value' => 0.00],
+            'Cocina integral' => ['unit' => 'PZA', 'value' => 0.00],
+            'Estacionamiento cubierto para dpto.' => ['unit' => 'Cajón', 'value' => 0.00],
+            'Estacionamiento desubierto para dpto.' => ['unit' => 'Cajón', 'value' => 0.00],
+            'Terraza' => ['unit' => 'M2', 'value' => 0.00],
+            'Balcon' => ['unit' => 'M2', 'value' => 0.00],
+            'Acabados' => ['unit' => 'M2', 'value' => 0.00],
+            'Elevador' => ['unit' => '%', 'value' => 0.00],
+            'Roof garden' => ['unit' => 'M2', 'value' => 1980.00],
+            'Otro' => ['unit' => 'PZA', 'value' => 0.00],
+        ],
+        'Economica' => [
+            'Baño completo' => ['unit' => 'PZA', 'value' => 12528.00],
+            'Medio baño' => ['unit' => 'PZA', 'value' => 7000.00],
+            'Cocina integral' => ['unit' => 'PZA', 'value' => 17700.00],
+            'Estacionamiento cubierto para dpto.' => ['unit' => 'Cajón', 'value' => 45000.00],
+            'Estacionamiento desubierto para dpto.' => ['unit' => 'Cajón', 'value' => 22500.00],
+            'Terraza' => ['unit' => 'M2', 'value' => 1980.00],
+            'Balcon' => ['unit' => 'M2', 'value' => 990.00],
+            'Acabados' => ['unit' => 'M2', 'value' => 301.00],
+            'Elevador' => ['unit' => '%', 'value' => 0.01],
+            'Roof garden' => ['unit' => 'M2', 'value' => 3375.00],
+            'Otro' => ['unit' => 'PZA', 'value' => 0.00],
+        ],
+        'Interes social' => [ // Igual a Económica
+            'Baño completo' => ['unit' => 'PZA', 'value' => 12528.00],
+            'Medio baño' => ['unit' => 'PZA', 'value' => 7000.00],
+            'Cocina integral' => ['unit' => 'PZA', 'value' => 17700.00],
+            'Estacionamiento cubierto para dpto.' => ['unit' => 'Cajón', 'value' => 45000.00],
+            'Estacionamiento desubierto para dpto.' => ['unit' => 'Cajón', 'value' => 22500.00],
+            'Terraza' => ['unit' => 'M2', 'value' => 1980.00],
+            'Balcon' => ['unit' => 'M2', 'value' => 990.00],
+            'Acabados' => ['unit' => 'M2', 'value' => 301.00],
+            'Elevador' => ['unit' => '%', 'value' => 0.01],
+            'Roof garden' => ['unit' => 'M2', 'value' => 3375.00],
+            'Otro' => ['unit' => 'PZA', 'value' => 0.00],
+        ],
+        'Media' => [
+            'Baño completo' => ['unit' => 'PZA', 'value' => 16768.00],
+            'Medio baño' => ['unit' => 'PZA', 'value' => 9396.00],
+            'Cocina integral' => ['unit' => 'PZA', 'value' => 38000.00],
+            'Estacionamiento cubierto para dpto.' => ['unit' => 'Cajón', 'value' => 80000.00],
+            'Estacionamiento desubierto para dpto.' => ['unit' => 'Cajón', 'value' => 40000.00],
+            'Terraza' => ['unit' => 'M2', 'value' => 3375.00],
+            'Balcon' => ['unit' => 'M2', 'value' => 1687.00],
+            'Acabados' => ['unit' => 'M2', 'value' => 1360.00],
+            'Elevador' => ['unit' => '%', 'value' => 0.01],
+            'Roof garden' => ['unit' => 'M2', 'value' => 4121.00],
+            'Otro' => ['unit' => 'PZA', 'value' => 0.00],
+        ],
+        'Semilujo' => [
+            'Baño completo' => ['unit' => 'PZA', 'value' => 31446.00],
+            'Medio baño' => ['unit' => 'PZA', 'value' => 20421.00],
+            'Cocina integral' => ['unit' => 'PZA', 'value' => 141663.00],
+            'Estacionamiento cubierto para dpto.' => ['unit' => 'Cajón', 'value' => 120000.00],
+            'Estacionamiento desubierto para dpto.' => ['unit' => 'Cajón', 'value' => 60000.00],
+            'Terraza' => ['unit' => 'M2', 'value' => 4121.00],
+            'Balcon' => ['unit' => 'M2', 'value' => 2060.00],
+            'Acabados' => ['unit' => 'M2', 'value' => 2150.00],
+            'Elevador' => ['unit' => '%', 'value' => 0.01],
+            'Roof garden' => ['unit' => 'M2', 'value' => 6000.00],
+            'Otro' => ['unit' => 'PZA', 'value' => 0.00],
+        ],
+        'Residencial' => [
+            'Baño completo' => ['unit' => 'PZA', 'value' => 38587.00],
+            'Medio baño' => ['unit' => 'PZA', 'value' => 31446.00],
+            'Cocina integral' => ['unit' => 'PZA', 'value' => 350000.00],
+            'Estacionamiento cubierto para dpto.' => ['unit' => 'Cajón', 'value' => 150000.00],
+            'Estacionamiento desubierto para dpto.' => ['unit' => 'Cajón', 'value' => 75000.00],
+            'Terraza' => ['unit' => 'M2', 'value' => 6000.00],
+            'Balcon' => ['unit' => 'M2', 'value' => 3000.00],
+            'Acabados' => ['unit' => 'M2', 'value' => 2351.00],
+            'Elevador' => ['unit' => '%', 'value' => 0.00], // Ojo: en tu lista decía 0.00
+            'Roof garden' => ['unit' => 'M2', 'value' => 6000.00],
+            'Otro' => ['unit' => 'PZA', 'value' => 0.00],
+        ],
+        'Residencial plus' => [ // Igual a Residencial
+            'Baño completo' => ['unit' => 'PZA', 'value' => 38587.00],
+            'Medio baño' => ['unit' => 'PZA', 'value' => 31446.00],
+            'Cocina integral' => ['unit' => 'PZA', 'value' => 350000.00],
+            'Estacionamiento cubierto para dpto.' => ['unit' => 'Cajón', 'value' => 150000.00],
+            'Estacionamiento desubierto para dpto.' => ['unit' => 'Cajón', 'value' => 75000.00],
+            'Terraza' => ['unit' => 'M2', 'value' => 6000.00],
+            'Balcon' => ['unit' => 'M2', 'value' => 3000.00],
+            'Acabados' => ['unit' => 'M2', 'value' => 2351.00],
+            'Elevador' => ['unit' => '%', 'value' => 0.00],
+            'Roof garden' => ['unit' => 'M2', 'value' => 6000.00],
+            'Otro' => ['unit' => 'PZA', 'value' => 0.00],
+        ],
+        'Residencial plus +' => [ // Igual a Residencial
+            'Baño completo' => ['unit' => 'PZA', 'value' => 38587.00],
+            'Medio baño' => ['unit' => 'PZA', 'value' => 31446.00],
+            'Cocina integral' => ['unit' => 'PZA', 'value' => 350000.00],
+            'Estacionamiento cubierto para dpto.' => ['unit' => 'Cajón', 'value' => 150000.00],
+            'Estacionamiento desubierto para dpto.' => ['unit' => 'Cajón', 'value' => 75000.00],
+            'Terraza' => ['unit' => 'M2', 'value' => 6000.00],
+            'Balcon' => ['unit' => 'M2', 'value' => 3000.00],
+            'Acabados' => ['unit' => 'M2', 'value' => 2351.00],
+            'Elevador' => ['unit' => '%', 'value' => 0.00],
+            'Roof garden' => ['unit' => 'M2', 'value' => 6000.00],
+            'Otro' => ['unit' => 'PZA', 'value' => 0.00],
+        ],
+        'Unica' => [ // Todos ceros
+            'Baño completo' => ['unit' => 'PZA', 'value' => 0.00],
+            'Medio baño' => ['unit' => 'PZA', 'value' => 0.00],
+            'Cocina integral' => ['unit' => 'PZA', 'value' => 0.00],
+            'Estacionamiento cubierto para dpto.' => ['unit' => 'Cajón', 'value' => 0.00],
+            'Estacionamiento desubierto para dpto.' => ['unit' => 'Cajón', 'value' => 0.00],
+            'Terraza' => ['unit' => 'M2', 'value' => 0.00],
+            'Balcon' => ['unit' => 'M2', 'value' => 0.00],
+            'Acabados' => ['unit' => 'M2', 'value' => 0.00],
+            'Elevador' => ['unit' => '%', 'value' => 0.00],
+            'Roof garden' => ['unit' => 'M2', 'value' => 0.00],
+            'Otro' => ['unit' => 'PZA', 'value' => 0.00],
+        ],
+        'Default' => [ // FALLBACK: Todos ceros si no hay building
+            'Baño completo' => ['unit' => 'PZA', 'value' => 0.00],
+            'Medio baño' => ['unit' => 'PZA', 'value' => 0.00],
+            'Cocina integral' => ['unit' => 'PZA', 'value' => 0.00],
+            'Estacionamiento cubierto para dpto.' => ['unit' => 'Cajón', 'value' => 0.00],
+            'Estacionamiento desubierto para dpto.' => ['unit' => 'Cajón', 'value' => 0.00],
+            'Terraza' => ['unit' => 'M2', 'value' => 0.00],
+            'Balcon' => ['unit' => 'M2', 'value' => 0.00],
+            'Acabados' => ['unit' => 'M2', 'value' => 0.00],
+            'Elevador' => ['unit' => '%', 'value' => 0.00],
+            'Roof garden' => ['unit' => 'M2', 'value' => 0.00],
+            'Otro' => ['unit' => 'PZA', 'value' => 0.00],
+        ]
     ];
+
+
+    /*
+    Detalle de categorías
+
+    mínima
+    'Baño completo' => 10000.00
+    'Medio baño' => 0.00
+    'Cocina integral' => 0.00
+     'Estacionamiento cubierto para dpto.' => 0.00
+    'Estacionamiento desubierto para dpto.' => 0.00
+    'Terraza' => 0.00
+    'Balcon' => 0.00
+    'Acabados' => 0.00
+    'Elevador' => 0.00
+    'Roof garden' => 1980.00
+    'Otro' => 0.00
+
+    económica
+    'Baño completo' => 12528.00
+    'Medio baño' => 7000.00
+    'Cocina integral' => 17700.00
+     'Estacionamiento cubierto para dpto.' => 45000.00
+    'Estacionamiento desubierto para dpto.' => 22500.00
+    'Terraza' => 1980.00
+    'Balcon' => 990.00
+    'Acabados' => 301.00
+    'Elevador' => 0.01
+    'Roof garden' => 3375.00
+    'Otro' => 0.00
+
+     interés social
+    'Baño completo' => 12528.00
+    'Medio baño' => 7000.00
+    'Cocina integral' => 17700.00
+     'Estacionamiento cubierto para dpto.' => 45000.00
+    'Estacionamiento desubierto para dpto.' => 22500.00
+    'Terraza' => 1980.00
+    'Balcon' => 990.00
+    'Acabados' => 301.00
+    'Elevador' => 0.01
+    'Roof garden' => 3375.00
+    'Otro' => 0.00
+
+    media
+    ''Baño completo' =>  16768.00,
+    'Medio baño' =>  9396.00,
+    'Cocina integral' =>  => 38000.00,
+    'Estacionamiento cubierto para dpto.' => 80000.00,
+    'Estacionamiento desubierto para dpto.' =>  40000.00,
+    'Terraza' =>  3375.00,
+    'Balcon' =>  1687.00,
+    'Acabados' =>  1360.00,
+    'Elevador' =>  0.01,
+    'Roof garden' =>  4121.00,
+    'Otro' =>  0.00,
+
+    semilujo
+    'Baño completo' => 31446.00
+    'Medio baño' => 20421.00
+    'Cocina integral' => 141663.00
+    'Estacionamiento cubierto para dpto.' => 120000.00
+    'Estacionamiento desubierto para dpto.' => 60000.00
+    'Terraza' => 4121.00
+    'Balcon' => 2060.00
+    'Acabados' => 2150.00
+    'Elevador' => 0.01
+    'Roof garden' => 6000.00
+    'Otro' => 0.00
+
+    residencial
+    'Baño completo' => 38587.00
+    'Medio baño' => 31446.00
+    'Cocina integral' => 350000.00
+     'Estacionamiento cubierto para dpto.' => 150000.00
+    'Estacionamiento desubierto para dpto.' => 75000.00
+    'Terraza' => 6000.00
+    'Balcon' => 3000.00
+    'Acabados' => 2351.00
+    'Elevador' => 0.00
+    'Roof garden' => 6000.00
+    'Otro' => 0.00
+
+    residencial plus
+    'Baño completo' => 38587.00
+    'Medio baño' => 31446.00
+    'Cocina integral' => 350000.00
+     'Estacionamiento cubierto para dpto.' => 150000.00
+    'Estacionamiento desubierto para dpto.' => 75000.00
+    'Terraza' => 6000.00
+    'Balcon' => 3000.00
+    'Acabados' => 2351.00
+    'Elevador' => 0.00
+    'Roof garden' => 6000.00
+    'Otro' => 0.00
+
+    residencial plus +
+    'Baño completo' => 38587.00
+    'Medio baño' => 31446.00
+    'Cocina integral' => 350000.00
+     'Estacionamiento cubierto para dpto.' => 150000.00
+    'Estacionamiento desubierto para dpto.' => 75000.00
+    'Terraza' => 6000.00
+    'Balcon' => 3000.00
+    'Acabados' => 2351.00
+    'Elevador' => 0.00
+    'Roof garden' => 6000.00
+    'Otro' => 0.00
+
+     única
+    'Baño completo' => 0.00
+    'Medio baño' => 0.00
+    'Cocina integral' => 0.00
+     'Estacionamiento cubierto para dpto.' => 0.00
+    'Estacionamiento desubierto para dpto.' => 0.00
+    'Terraza' => 0.00
+    'Balcon' => 0.00
+    'Acabados' => 0.00
+    'Elevador' => 0.00
+    'Roof garden' => 0.00
+    'Otro' => 0.00
+
+
+
+
+    */
 
     // [NUEVO] Mapa de valores para Conservación
     const CONSERVACION_MAP = [
@@ -129,6 +385,22 @@ class HomologationBuildings extends Component
         'Recientemente remodelado' => 1.10,
         'Ruidoso' => 0.00
     ];
+
+
+    #[Computed]
+    public function equipmentOptions(): array
+    {
+        // Devuelve solo los nombres (Baño, Cocina, etc) para el Select
+        return array_keys(self::EQUIPMENT_VALUES_BY_CLASS['Media']);
+    }
+
+    #[Computed]
+    public function selectedEquipmentUnitPrice(): float
+    {
+        // Calcula el precio unitario según la Clase del edificio y la opción seleccionada
+        $map = $this->getCurrentPriceMap();
+        return $map[$this->new_eq_description]['value'] ?? 0.00;
+    }
 
     #[Computed]
     public function orderedComparableFactorsForView(): array
@@ -156,6 +428,13 @@ class HomologationBuildings extends Component
             return;
         }
 
+        //Obtenemos la descripción del inmueble
+        $property_description = PropertyDescriptionModel::where('valuation_id', $this->idValuation)->first();
+
+        if ($property_description) {
+            $this->property_description = $property_description->actual_use;
+        }
+
         $attributes = HomologationBuildingAttributeModel::where('valuation_id', $this->idValuation)->first();
 
         if ($attributes) {
@@ -171,6 +450,7 @@ class HomologationBuildings extends Component
 
         $this->building = BuildingModel::where('valuation_id', $this->idValuation)->first();
         $this->calculateSubjectValues();
+        $this->refreshSubjectEquipmentValues();
         $this->comparablesCount = $this->comparables->count();
         $this->prepareSubjectFactorsForView();
 
@@ -188,6 +468,104 @@ class HomologationBuildings extends Component
         $this->recalculateConclusions();
     }
 
+    // Detecta la clase del primer edificio y devuelve el mapa de precios correspondiente
+    private function getCurrentPriceMap(): array
+    {
+        $claseSujeto = 'Default'; // Si no hay building, usamos Default (ceros)
+
+        if ($this->building) {
+            $firstConstruction = $this->building->privates()->first();
+            if ($firstConstruction && !empty($firstConstruction->clasification)) {
+                $claseSujeto = $firstConstruction->clasification;
+            }
+        }
+
+        // Si la clase que viene de la BD no está en nuestro mapa, usamos Default o Media?
+        // Según tu instrucción, si no encuentra, usa Default (ceros).
+        return self::EQUIPMENT_VALUES_BY_CLASS[$claseSujeto]
+            ?? self::EQUIPMENT_VALUES_BY_CLASS['Default'];
+    }
+
+
+
+    public function refreshSubjectEquipmentValues()
+    {
+        $priceMap = $this->getCurrentPriceMap();
+
+        // 1. Obtener equipos guardados
+        $equipments = HomologationValuationEquipmentModel::where('valuation_id', $this->idValuation)->get();
+
+        if ($equipments->isEmpty()) return;
+
+        $hasChanges = false;
+        $pivotIds = $this->valuation->buildingComparablePivots()->pluck('id');
+
+        foreach ($equipments as $eq) {
+            // Ignoramos 'Otro' o los que tengan descripción personalizada ya que esos tienen valor manual
+            if (!empty($eq->custom_description) || $eq->description === 'Otro') {
+                continue;
+            }
+
+            // Verificamos si existe en el mapa actual
+            if (isset($priceMap[$eq->description])) {
+                $newUnitValue = (float)$priceMap[$eq->description]['value'];
+                $currentTotal = (float)$eq->total_value;
+                $quantity = (float)$eq->quantity;
+
+                // Calculamos el nuevo total esperado
+                $newTotal = $quantity * $newUnitValue;
+
+                // Si hay diferencia (tolerancia de centavos), actualizamos
+                if (abs($currentTotal - $newTotal) > 0.01) {
+                    // Actualizar Sujeto
+                    $eq->update(['total_value' => $newTotal]);
+                    $hasChanges = true;
+
+                    // --- REPERCUSIÓN EN COMPARABLES ---
+                    // Como cambió el valor unitario del sujeto, cambia la diferencia en dinero
+                    // $unitPrice = $newTotal / $quantity (que es $newUnitValue)
+
+                    if ($quantity > 0) {
+                        $unitPrice = $newUnitValue;
+
+                        // Buscamos los registros hijos en los comparables
+                        $compEquipments = HomologationComparableEquipmentModel::where('valuation_equipment_id', $eq->id)->get();
+
+                        foreach ($compEquipments as $compEq) {
+                            $pivot = $this->valuation->buildingComparablePivots->firstWhere('id', $compEq->valuation_building_comparable_id);
+                            if (!$pivot) continue;
+
+                            $comparable = $this->comparables->firstWhere('id', $pivot->comparable_id);
+                            $valorOferta = (float)($comparable->comparable_offers ?? 0);
+
+                            $qtyComparable = (float)$compEq->quantity; // La cantidad del comparable se respeta
+                            $diffQty = $quantity - $qtyComparable; // (Sujeto - Comparable)
+
+                            $newDifferenceMoney = $diffQty * $unitPrice;
+                            $newPct = ($valorOferta > 0) ? ($newDifferenceMoney / $valorOferta) * 100 : 0;
+
+                            $compEq->update([
+                                'difference' => $newDifferenceMoney,
+                                'percentage' => $newPct
+                            ]);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Si hubo cambios, recalculamos los factores FEQ de todos los comparables
+        if ($hasChanges) {
+            foreach ($pivotIds as $pid) {
+                $this->calculateEquipmentFactor($pid);
+            }
+            // Recargamos la data en memoria para la vista
+            $this->loadEquipmentData();
+        }
+    }
+
+
+
     public function calculateSubjectValues()
     {
         // 1. Obtener Avance de Obra
@@ -199,8 +577,16 @@ class HomologationBuildings extends Component
         $applicableSurface = ApplicableSurfaceModel::where('valuation_id', $this->idValuation)->first();
 
         if ($applicableSurface) {
-            $this->subject_surface_land = $applicableSurface->surface_area ?? 0;
+            //$this->subject_surface_land = $applicableSurface->surface_area ?? 0;
             $this->subject_surface_construction = $applicableSurface->built_area ?? 0;
+        }
+
+        $landAttributes = HomologationLandAttributeModel::where('valuation_id', $this->idValuation)->first();
+
+       // dd($landAttributes);
+        if ($landAttributes) {
+            // Asumo que la columna es 'surface', si se llama 'surface_area' cámbialo aquí
+            $this->subject_surface_land = $landAttributes->subject_surface_value ?? 0;
         }
 
         // 3. Relación T/C
@@ -238,6 +624,9 @@ class HomologationBuildings extends Component
                 $this->subject_vur_weighted = max($this->subject_vut_weighted - $this->subject_age_weighted, 0);
             }
         }
+        // [NUEVO] -> AQUÍ AGREGAS ESTA LÍNEA:
+        // Calcular, Machetear (Truncar) y Guardar FEDAD automáticamente
+        $this->calculateSubjectFedad();
     }
 
     private function prepareSubjectFactorsForView(): void
@@ -300,7 +689,8 @@ class HomologationBuildings extends Component
             fn($i) =>
             $i->is_editable &&
                 !$i->is_custom &&
-                !$i->is_feq
+                !$i->is_feq &&
+            !in_array($i->id, $processedIds)
         );
 
         if ($editableSystem) {
@@ -540,7 +930,7 @@ class HomologationBuildings extends Component
             $this->recalculateSingleComparable($comparableId);
             $this->recalculateConclusions();
 
-            Toaster::success(ucfirst($variable) . ' actualizado correctamente.');
+            Toaster::success(ucfirst($variable) . ' actualizado correctamente');
         }
     }
 
@@ -601,7 +991,7 @@ class HomologationBuildings extends Component
 
         $this->recalculateSingleComparable($comparableId);
         $this->recalculateConclusions();
-        Toaster::success('Factor guardado.');
+        Toaster::success('Factor editado correctamente');
     }
 
     private function revertToOldValue($comparableId, $acronym, $property, $pivotId)
@@ -723,13 +1113,82 @@ class HomologationBuildings extends Component
         $this->cancelEdit();
 
         // El Toaster limpio de Flux
-        Flux::toast('Factor actualizado correctamente.', variant: 'success');
+        Toaster::success('Cantidad actualizada');
     }
 
     public function cancelEdit()
     {
         $this->editing_factor_index = null;
     }
+
+
+
+
+
+
+    // [NUEVO] Calcular FACTOR EDAD (FEDAD) del Sujeto
+    // Regla: Primer registro de construcciones privativas + Truncado a 2 decimales
+    public function calculateSubjectFedad()
+    {
+        // 1. Valor por defecto = 1.0 (Neutro)
+        $factorTruncado = 1.0;
+
+        if ($this->building) {
+            // Buscamos la PRIMERA construcción privativa (Regla de negocio)
+            $firstConstruction = $this->building->privates()->first();
+
+            if ($firstConstruction) {
+                // Datos para la fórmula
+                $clasification = $firstConstruction->clasification;
+                $use = $firstConstruction->use;
+                $age = $firstConstruction->age;
+
+                // Configuración de Vida Útil (Misma config que usas en el ponderado)
+                $lifeValuesConfig = config('properties_inputs.construction_life_values', []);
+                $claveCombinacion = $clasification . '_' . $use;
+                $vidaUtilTotal = $lifeValuesConfig[$claveCombinacion] ?? 0;
+
+                // Aplicar Fórmula Ross-Heidecke Ponderada
+                if ($vidaUtilTotal > 0) {
+                    // (10% de VUT + 90% de Vida Remanente) / VUT
+                    $factorCalculado = (0.100 * $vidaUtilTotal + 0.900 * ($vidaUtilTotal - $age)) / $vidaUtilTotal;
+
+                    // EL MACHETAZO: Cortar a 2 decimales sin redondear
+                    // Ejemplo: 0.9775 -> 97.75 -> floor(97.0) -> 0.97
+                    $factorTruncado = floor($factorCalculado * 100) / 100;
+                }
+            }
+        }
+
+        // 2. GUARDAR EN BD (Rating)
+        // Esto asegura que al renderizar la tabla de homologación, el dato ya esté persistido
+        HomologationValuationFactorModel::updateOrCreate(
+            [
+                'valuation_id' => $this->idValuation,
+                'acronym' => 'FEDAD', // Buscamos específicamente el factor de EDAD
+                'homologation_type' => 'building'
+            ],
+            [
+                'rating' => $factorTruncado,       // Guardamos 0.9700
+                'factor_name' => 'Factor Edad',    // Aseguramos nombre
+                'is_editable' => false,             // Permitir edición manual si se requiere
+                'is_custom' => false
+            ]
+        );
+
+        // 3. ACTUALIZAR EN MEMORIA (Para que se vea el cambio sin F5)
+        // Buscamos el factor en tu array $subject_factors_ordered y actualizamos el rating visual
+        foreach ($this->subject_factors_ordered as $key => $factor) {
+            if (($factor['acronym'] ?? '') === 'FEDAD') {
+                $this->subject_factors_ordered[$key]['rating'] = number_format($factorTruncado, 4, '.', '');
+                break;
+            }
+        }
+    }
+
+
+
+
 
     // ==========================================================
     // == LÓGICA DE CÁLCULO
@@ -827,8 +1286,8 @@ class HomologationBuildings extends Component
                 $rating_to_save = $feqFactorAplicable;
             } elseif ($sigla === $currentFsuAcronym) {
                 // FSU: Superficie
-                $subjectLand = (float)$this->subject_surface_land;
-                $compLand = (float)($comparableModel->comparable_land_area ?? 0);
+                $subjectLand = (float)$this->subject_surface_construction ?? 0;
+                $compLand = (float)($comparableModel->comparable_built_area  ?? 0);
                 if ($subjectLand > 0 && $compLand > 0) {
                     $coeficiente = $compLand / $subjectLand;
                     $compRating = pow($coeficiente, (1 / 12));
@@ -837,12 +1296,59 @@ class HomologationBuildings extends Component
                 $aplicable = 1.0 + $diferencia_math;
                 $rating_to_save = $compRating;
             } elseif ($sigla === 'FIC') {
-                // FIC: Select Clase
-                $compRating = $clase_factor;
-                $diferencia_math = $sujetoRating - $compRating;
+                // =========================================================
+                // FIC: CÁLCULO RAW + TRUNCADO ESTRICTO (Sin redondear)
+                // =========================================================
+
+                // 1. VUS Fijo (Temporal)
+                $VUS = 5440.00;
+
+                // 2. DATOS SUJETO
+                $SCiv = (float)$this->subject_surface_construction;
+                $STiv = (float)$this->subject_surface_land;
+                $sujetoRating = 1.00;
+
+                // 3. DATOS COMPARABLE
+                $Pp  = (float)$comparableModel->comparable_offers;
+                $SCc = (float)($comparableModel->comparable_built_area ?? 0);
+                $STc = (float)($comparableModel->comparable_land_area ?? 0);
+
+                // 4. CÁLCULO RAW (Con todos los decimales habidos y por haber)
+                if ($SCiv > 0 && $STiv > 0 && $SCc > 0 && $Pp > 0) {
+                    $intensidadSujeto = $SCiv / $STiv;
+
+                    $terrenoTeorico = $SCc / $intensidadSujeto;
+                    $diferenciaTerreno = $terrenoTeorico - $STc;
+                    $ajustePesos = $diferenciaTerreno * $VUS;
+
+                    $VUa = ($Pp + $ajustePesos) / $SCc;
+                    $VU = $Pp / $SCc;
+
+                    $FIC_Raw = $VUa / $VU;
+                } else {
+                    $FIC_Raw = 1.0;
+                }
+
+                // 5. CÁLCULO DE DIFERENCIA RAW (Usamos el FIC completo)
+                if ($FIC_Raw != 0) {
+                    $diferencia_raw = 1.0 - ($sujetoRating / $FIC_Raw);
+                } else {
+                    $diferencia_raw = 0.0;
+                }
+
+                // 6. APLICAR LA GUILLOTINA (Truncar a 4 decimales) 🪓
+                // Multiplicamos por 10000, quitamos decimales con floor, y dividimos.
+                // Ejemplo: 0.0518999 -> 518.999 -> 518 -> 0.0518
+                $diferencia_math = floor($diferencia_raw * 10000) / 10000;
+
+                // 7. APLICABLE (1 + Diferencia truncada)
                 $aplicable = 1.0 + $diferencia_math;
+
+                // 8. ASIGNACIÓN DEL RATING (También truncado)
+                // El FIC que se guarda en BD también lo cortamos a 4 decimales
+                $compRating = floor($FIC_Raw * 10000) / 10000;
                 $rating_to_save = $compRating;
-            } elseif ($isEditable || $isCustom || $isAVANC) { // <--- ¡CAMBIO AQUÍ! AÑADIR $isAVANC
+            }elseif ($isEditable || $isCustom || $isAVANC) { // <--- ¡CAMBIO AQUÍ! AÑADIR $isAVANC
                 // FLOC, CUSTOMS y AVANC: Leemos el input manual.
                 $userInput = (float)($factorData['calificacion'] ?? 1.0);
                 $compRating = $userInput ?: 1.0;
@@ -964,7 +1470,9 @@ class HomologationBuildings extends Component
                 'unit_value_mode_lot' => $valorRedondeado,
 
                 // Guardamos la configuración del select
-                'conclusion_type_rounding' => $this->conclusion_tipo_redondeo
+                'conclusion_type_rounding' => $this->conclusion_tipo_redondeo,
+                'average_arithmetic' => $avgOferta ?? 0,
+                'average_homologated' => $avgHomologado ?? 0
             ]
         );
 
@@ -1140,7 +1648,7 @@ class HomologationBuildings extends Component
         $this->loadAllComparableFactors();
         $this->loadComparableSelections();
         $this->recalculateConclusions();
-        Toaster::success('Factor agregado correctamente.');
+        Toaster::success('Factor agregado correctamente');
     }
     public function deleteCustomFactor($factorId)
     {
@@ -1154,7 +1662,7 @@ class HomologationBuildings extends Component
         $this->loadAllComparableFactors();
         $this->loadComparableSelections();
         $this->recalculateConclusions();
-        Toaster::success('Factor eliminado.');
+        Toaster::success('Factor eliminado correctamente');
     }
     public function gotoPage($page)
     {
@@ -1225,11 +1733,17 @@ class HomologationBuildings extends Component
         $finalDescription = $isOther ? $this->new_eq_other_description : $sourceKey;
         $existing = HomologationValuationEquipmentModel::where('valuation_id', $this->idValuation)->where('description', $finalDescription)->first();
         if ($existing) {
-            Toaster::error('Ya existe este equipamiento.');
+            Toaster::success('Ya existe este equipamiento');
+            //$this->emit('dummy');
+            //$this->success('Ya existe este equipamiento');
+            //dd('Ya existe este equipamiento');
             return;
         }
 
-        $equipmentData = self::EQUIPMENT_MAP[$sourceKey] ?? ['unit' => 'PZA', 'value' => 0.00];
+        //$equipmentData = self::EQUIPMENT_MAP[$sourceKey] ?? ['unit' => 'PZA', 'value' => 0.00];
+
+        $currentMap = $this->getCurrentPriceMap();
+        $equipmentData = $currentMap[$sourceKey] ?? ['unit' => 'PZA', 'value' => 0.00];
 
         $qtySujeto = (float)$this->new_eq_quantity;
         $totalVal = $isOther ? (float)$this->new_eq_total_value : ($qtySujeto * $equipmentData['value']);
@@ -1288,9 +1802,11 @@ class HomologationBuildings extends Component
         $this->reset(['editing_eq_id', 'edit_eq_quantity', 'edit_eq_total_value', 'edit_eq_other_description']);
         $this->loadEquipmentData();
     }
+
     public function saveEditedEquipment()
     {
         $eq = HomologationValuationEquipmentModel::find($this->editing_eq_id);
+
         if (!$eq) {
             $this->cancelEditEquipment();
             return;
@@ -1301,10 +1817,31 @@ class HomologationBuildings extends Component
             'edit_eq_total_value' => 'nullable|numeric|min:0',
         ]);
 
-        $isOther = !empty($eq->custom_description);
-        $totalVal = $isOther ? $this->edit_eq_total_value : ($this->edit_eq_quantity * (self::EQUIPMENT_MAP[$eq->description]['value'] ?? 0));
+        // 1. Determinar si es Custom o Estándar
+        // Agregamos chequeo de 'Otro' por seguridad
+        $isOther = !empty($eq->custom_description) || $eq->description === 'Otro';
+
+        // 2. Obtener el Mapa de Precios Dinámico (El cambio clave)
+        $currentMap = $this->getCurrentPriceMap();
+
+        // Precio unitario base (si es estándar)
+        $refValue = $currentMap[$eq->description]['value'] ?? 0;
+
+        // 3. Calcular Total
+        if ($isOther) {
+            // Si es custom, respetamos el valor total manual
+            $totalVal = (float)$this->edit_eq_total_value;
+            // Calculamos el precio unitario implícito para usarlo en las diferencias
+            $unitPriceCalc = ($this->edit_eq_quantity > 0) ? ($totalVal / $this->edit_eq_quantity) : 0;
+        } else {
+            // Si es estándar, multiplicamos cantidad nueva * precio de la clase actual
+            $totalVal = $this->edit_eq_quantity * $refValue;
+            $unitPriceCalc = $refValue;
+        }
+
         $newDescription = $isOther ? $this->edit_eq_other_description : $eq->description;
 
+        // 4. Actualizar Sujeto
         $eq->update([
             'quantity' => $this->edit_eq_quantity,
             'total_value' => $totalVal,
@@ -1312,12 +1849,48 @@ class HomologationBuildings extends Component
             'description' => $newDescription
         ]);
 
-        HomologationComparableEquipmentModel::where('valuation_equipment_id', $eq->id)->update(['description' => $newDescription]);
+        // 5. Actualizar Nombres en Comparables
+        HomologationComparableEquipmentModel::where('valuation_equipment_id', $eq->id)
+            ->update(['description' => $newDescription]);
+
+        // 6.  CRÍTICO: Recalcular Matemáticas de los Comparables
+        // Al cambiar la cantidad del sujeto, cambia la "Diferencia" ($) y el "Porcentaje" en los comparables
+        $compEquipments = HomologationComparableEquipmentModel::where('valuation_equipment_id', $eq->id)->get();
+
+        foreach ($compEquipments as $compEq) {
+            $pivot = $this->valuation->buildingComparablePivots->firstWhere('id', $compEq->valuation_building_comparable_id);
+            if (!$pivot) continue;
+
+            $comparable = $this->comparables->firstWhere('id', $pivot->comparable_id);
+            if (!$comparable) continue;
+
+            $valorOferta = (float)($comparable->comparable_offers ?? 0);
+
+            // Diferencia de Cantidades (Sujeto - Comparable)
+            $qtyComparable = (float)$compEq->quantity;
+            $diffQty = $this->edit_eq_quantity - $qtyComparable;
+
+            // Diferencia en Dinero (Diferencia Cantidad * Precio Unitario)
+            $newDifferenceMoney = $diffQty * $unitPriceCalc;
+
+            // Nuevo Porcentaje de Ajuste
+            $newPct = ($valorOferta > 0) ? ($newDifferenceMoney / $valorOferta) * 100 : 0;
+
+            $compEq->update([
+                'difference' => $newDifferenceMoney,
+                'percentage' => $newPct
+            ]);
+
+            // Recalculamos el Factor FEQ de este comparable específico
+            $this->calculateEquipmentFactor($pivot->id);
+        }
+
         $this->loadEquipmentData();
         $this->cancelEditEquipment();
         $this->recalculateConclusions();
-        Toaster::success('Editado correctamente.');
+        Toaster::success('Editado correctamente');
     }
+
     public function deleteEquipment($subjectEqId)
     {
         $eq = HomologationValuationEquipmentModel::find($subjectEqId);
@@ -1326,7 +1899,7 @@ class HomologationBuildings extends Component
             $eq->delete();
             $this->loadEquipmentData();
             $this->recalculateConclusions();
-            Toaster::success('Eliminado.');
+            Toaster::error('Eliminado.');
         }
     }
 
@@ -1364,6 +1937,8 @@ class HomologationBuildings extends Component
         $this->calculateEquipmentFactor($pivot->id);
         $this->loadEquipmentData();
         $this->recalculateConclusions();
+
+        Toaster::success('Cantidad actualizada');
     }
 
     public function calculateEquipmentFactor($pivotId)

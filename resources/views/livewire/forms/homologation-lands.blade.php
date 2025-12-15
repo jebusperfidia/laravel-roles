@@ -48,7 +48,7 @@
                 <div class="space-y-4 md:w-1/3 w-full">
                     {{-- DROPDOWN DE SUPERFICIE APLICABLE --}}
                     <flux:field>
-                        <flux:label>SUPERFICIE APLICABLE</flux:label>
+                        <flux:label>Superficie aplicable</flux:label>
                         <div class="relative w-full">
                             <flux:dropdown inline position="bottom" align="start" class="w-full">
                                 <button @click.stop.prevent
@@ -289,23 +289,28 @@
                                     <dd class="text-gray-900 font-bold">${{
                                         number_format($selectedComparable->comparable_unit_value, 2) }}</dd>
 
-                                    @php
-                                    $fechaBase = $selectedComparable->comparable_date ??
-                                    $selectedComparable->created_at;
-                                    $carbonDate = $fechaBase ? \Carbon\Carbon::parse($fechaBase) : null;
-                                    $diasVigencia = $carbonDate ? (int) $carbonDate->diffInDays(now()) : 0;
-                                    $isVencida = $selectedComparable->is_expired ?? ($diasVigencia > 180);
-                                    $claseVigencia = $isVencida ? 'text-red-600 font-bold' : 'text-gray-600';
-                                    @endphp
-                                    <dt class="font-semibold text-gray-800 mt-2">Vigencia/Fecha:</dt>
-                                    <dd class="{{ $claseVigencia }}">
-                                        @if ($selectedComparable->is_expired ?? false)
-                                        Vencida ({{ $selectedComparable->vigencia_hasta ?? 'N/A' }})
+
+                                   <dt class="font-semibold text-gray-800 mt-2">
+                                        Vigencia/Fecha:
+                                    </dt>
+                                   {{-- 1. Definimos la clase CSS directo en el elemento usando una condicional simple --}}
+                                <dd class="{{ $selectedComparable->dias_para_vencer < 0 ? 'text-red-600 font-bold' : 'text-teal-700 font-bold' }}">
+
+                                    @if ($selectedComparable->dias_para_vencer < 0) {{-- CASO VENCIDO: Usamos abs() para convertir -5 días a "5 días"
+                                        --}} Vencida (Hace {{ abs($selectedComparable->dias_para_vencer) }} días)
+
                                         @else
-                                        {{ $diasVigencia }} Días ({{ $carbonDate ? $carbonDate->format('d/m/Y') : '-'
-                                        }})
+                                        {{-- CASO VIGENTE: Mostramos días restantes y formateamos la fecha ahí mismo --}}
+                                        @php
+                                        // Solo para mostrar la fecha bonita entre paréntesis (sin recalcular días)
+                                        $fechaMostrar = $selectedComparable->comparable_date
+                                        ? \Carbon\Carbon::parse($selectedComparable->comparable_date)
+                                        : $selectedComparable->created_at;
+                                        @endphp
+
+                                        Quedan {{ $selectedComparable->dias_para_vencer }} Días ({{ $fechaMostrar->format('d/m/Y') }})
                                         @endif
-                                    </dd>
+                                </dd>
                                 </div>
 
                                 <div>

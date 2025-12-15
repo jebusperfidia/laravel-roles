@@ -11,6 +11,8 @@ use App\Models\Valuations\Valuation; // Asegúrate que la ruta a tu modelo Valua
 use App\Models\Forms\Comparable\ValuationLandComparableModel; // Importar pivot Land
 use App\Models\Forms\Comparable\ValuationBuildingComparableModel; // Importar pivot Building
 use App\Models\Forms\ApplicableSurface\ApplicableSurfaceModel;
+use App\Models\Forms\Homologation\HomologationLandAttributeModel;
+use App\Models\Forms\Homologation\HomologationBuildingAttributeModel;
 
 class MarketFocus extends Component
 {
@@ -47,6 +49,11 @@ class MarketFocus extends Component
     public $saleableBuiltArea;
 
 
+    // --- CÁLCULOS EXTRAS (Lote Privativo / Tipo / Excedente) ---
+    public $valLotePrivativo = 0.00;      // Total terreno * Valor Mercado
+    public $valLoteTipo = 0.00;           // Lote Tipo * Valor Mercado
+    public $valDiferenciaExcedente = 0.00; // La resta de los dos anteriores
+
 
     /**
      * Se ejecuta al cargar el componente.
@@ -76,21 +83,97 @@ class MarketFocus extends Component
      */
     public function loadData()
     {
-
         if (!$this->valuationId) {
-            // Si no hay avalúo en sesión, dejamos los contadores en 0
-            $this->landCount = 0;
-            $this->buildingCount = 0;
+            $this->resetValues();
             return;
         }
 
-        // Usamos los modelos PIVOT para contar eficientemente
+        // 1. Conteos
         $this->landCount = ValuationLandComparableModel::where('valuation_id', $this->valuationId)->count();
         $this->buildingCount = ValuationBuildingComparableModel::where('valuation_id', $this->valuationId)->count();
-        //$this->getComparableCounts();
-       // $this->calculateMarketValues(); // Llama a tu lógica de cálculos
+
+        // 2. Obtener Atributos de TERRENO (HomologationLandAttributeModel)
+        // Aquí viene el "Valor Probable" (unit_value_mode_lot) y la "Superficie Seleccionada" (subject_surface_value)
+        $landAttributes = HomologationLandAttributeModel::where('valuation_id', $this->valuationId)->first();
+
+        if ($landAttributes) {
+            $this->landAvgUnitValue = $landAttributes->average_arithmetic ?? 0;
+            $this->landHomologatedValue = $landAttributes->average_homologated ?? 0;
+            $this->landProbableValue = $landAttributes->unit_value_mode_lot ?? 0;
+
+            // SUPERFICIE SELECCIONADA EN EL INPUT (La que guardamos en el select)
+            $this->terrainSurface = $landAttributes->subject_surface_value ?? 0;
+        } else {
+            $this->landAvgUnitValue = 0;
+            $this->landHomologatedValue = 0;
+            $this->landProbableValue = 0;
+            $this->terrainSurface = 0;
+        }
+
+        // 3. Obtener Atributos de CONSTRUCCIÓN
+        $buildingAttributes = HomologationBuildingAttributeModel::where('valuation_id', $this->valuationId)->first();
+
+        if ($buildingAttributes) {
+            $this->buildingAvgUnitValue = $buildingAttributes->average_arithmetic ?? 0;
+            $this->buildingHomologatedValue = $buildingAttributes->average_homologated ?? 0;
+            $this->buildingProbableValue = $buildingAttributes->unit_value_mode_lot ?? 0;
+        } else {
+            // ... ceros ...
+        }
+
+        // 4. Calcular Totales
+        $this->calculateTotals();
     }
 
+    public function calculateTotals()
+    {
+        // ==========================================
+        // === TABLA 2: VALOR DEL TERRENO ===
+        // ==========================================
+
+        // 1. Valor Unitario del Mercado = El resultado de la homologación de tierras
+        $this->marketUnitValue = $this->landProbableValue;
+
+        // 2. Importe Total del Terreno = Superficie Seleccionada * Valor Mercado
+        $this->totalTerrainAmount = $this->terrainSurface * $this->marketUnitValue;
+
+        // 3. Indiviso (Hardcodeado a 100% por ahora)
+        $this->applicableUndividedPercent = 100;
+
+        // 4. Valor del Terreno Propiedad (Igual al total porque indiviso es 100%)
+        $this->terrainValue = $this->totalTerrainAmount * ($this->applicableUndividedPercent / 100);
+
+
+        // ==========================================
+        // === CÁLCULOS EXTRAS (Privativo vs Tipo) ===
+        // ==========================================
+
+        // Necesitamos los valores crudos de ApplicableSurface para estas multiplicaciones específicas
+        // (No la seleccionada, sino los campos específicos de la BD)
+        if ($this->applicableSurface) {
+            $rawTotalArea = $this->applicableSurface->surface_area ?? 0;     // Total del terreno
+            $rawPrivateType = $this->applicableSurface->private_lot_type ?? 0; // Lote privativo tipo
+
+            // A. Valor Lote Privativo = Total Terreno (BD) * Valor Mercado
+            $this->valLotePrivativo = $rawTotalArea * $this->marketUnitValue;
+
+            // B. Valor Lote Tipo = Lote Tipo (BD) * Valor Mercado
+            $this->valLoteTipo = $rawPrivateType * $this->marketUnitValue;
+
+            // C. Diferencia Excedente
+            $this->valDiferenciaExcedente = $this->valLotePrivativo - $this->valLoteTipo;
+        }
+
+
+        // ==========================================
+        // === TABLA 3: VALOR CONSTRUCCIONES ===
+        // ==========================================
+        $this->constructionMarketUnitValue = $this->buildingProbableValue;
+
+        // Valor Mercado = Sup. Vendible * Valor Unit. Construcción
+        // (saleableBuiltArea ya se cargó en el mount)
+        $this->marketValue = $this->saleableBuiltArea * $this->constructionMarketUnitValue;
+    }
     /**
      * Cuenta los comparables asignados de cada tipo para el avalúo actual.
      */

@@ -20,6 +20,9 @@ return new class extends Migration
             // Campo solicitado (Tipo de redondeo)
             $table->string('conclusion_type_rounding', 50)->nullable()->default('Unidades');
 
+            $table->decimal('average_arithmetic', 16, 10)->nullable()->default(0); // Promedio Oferta
+            $table->decimal('average_homologated', 16, 10)->nullable()->default(0); // Promedio Homologado
+
             $table->timestamps();
         });
     }

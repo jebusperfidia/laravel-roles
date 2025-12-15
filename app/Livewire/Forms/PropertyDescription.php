@@ -44,12 +44,13 @@ class PropertyDescription extends Component
         if($propertyDescription){
             $this->urbanProximity = $propertyDescription->urban_proximity;
             $this->actualUse = $propertyDescription->actual_use;
+            $this->multipleUseSpace = $propertyDescription->multiple_use_space;
+            $this->projectQuality = $propertyDescription->project_quality;
 
         if (stripos($this->propertyType, 'condominio') !== false) {
 
-            $this->multipleUseSpace = $propertyDescription->multiple_use_space;
             $this->levelBuilding = $propertyDescription->level_building;
-            $this->projectQuality = $propertyDescription->project_quality;
+
             }
         }
 
@@ -62,15 +63,15 @@ class PropertyDescription extends Component
 
         $rules = [
             "urbanProximity" => 'required',
-            "actualUse" => 'required'
+            "actualUse" => 'required',
+            "multipleUseSpace" => 'required',
+            "projectQuality" => 'required',
         ];
 
         //Validaciones si la colonia no está listada
         if (stripos($this->propertyType, 'condominio') !== false) {
             $rules = array_merge($rules, [
-                "multipleUseSpace" => 'required',
                 "levelBuilding" => 'required|integer|min:0',
-                "projectQuality" => 'required'
             ]);
         }
 
@@ -97,18 +98,18 @@ class PropertyDescription extends Component
         $data = [
             'urban_proximity' => $this->urbanProximity,
             'actual_use' => $this->actualUse,
-            /* 'multiple_use_space' => $this->multipleUseSpace,
-            'level_building' => $this->levelBuilding,
-            'project_quality' => $this->projectQuality, */
+            'multiple_use_space' => $this->multipleUseSpace,
+            'project_quality' => $this->projectQuality,
+         /*    'level_building' => $this->levelBuilding, */
         ];
 
 
         //Validaciones si la colonia no está listada
         if (stripos($this->propertyType, 'condominio') !== false) {
             $data = array_merge($data, [
-            'multiple_use_space' => $this->multipleUseSpace,
+           /*  'multiple_use_space' => $this->multipleUseSpace,
+            'project_quality' => $this->projectQuality, */
             'level_building' => $this->levelBuilding,
-            'project_quality' => $this->projectQuality,
             ]);
         }
 
