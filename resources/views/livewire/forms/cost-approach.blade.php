@@ -536,7 +536,7 @@
     </div>
 
     {{-- Botón Continuar --}}
-    <flux:button class="mt-4 cursor-pointer btn-primary" variant="primary" type="submit">
+    <flux:button class="mt-4 cursor-pointer btn-primary" variant="primary" type="button" wire:click="nextComponent">
         Continuar
     </flux:button>
 </div>

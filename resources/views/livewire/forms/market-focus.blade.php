@@ -1,5 +1,5 @@
-<!-- wire:poll.10s refresca los datos (conteos y cálculos) cada 10 segundos -->
-<div wire:poll.10s="loadData">
+{{-- <div wire:poll.10s="loadData"> --}}
+<div>
     <div class="form-container">
         <div class="form-container__header">
             Enfoque de mercado
@@ -20,15 +20,14 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td class="px-2 py-2 text-xs text-center">Terrenos</td>
-                                <!-- Valores dinámicos con formato -->
-                                <td class="px-2 py-2 text-xs text-center">$ {{ number_format($landAvgUnitValue, 2) }}
+                                <td class="px-2 py-2 text-sm text-center">Terrenos</td>
+                                <td class="px-2 py-2 text-sm text-center">$ {{ number_format($landAvgUnitValue, 2) }}
                                 </td>
-                                <td class="px-2 py-2 text-xs text-center">$ {{ number_format($landHomologatedValue, 2)
+                                <td class="px-2 py-2 text-sm text-center">$ {{ number_format($landHomologatedValue, 2)
                                     }}</td>
-                                <td class="px-2 py-2 text-xs text-center">$ {{ number_format($landProbableValue, 2) }}
+                                <td class="px-2 py-2 text-sm text-center">$ {{ number_format($landProbableValue, 2) }}
                                 </td>
-                                <td class="px-2 py-2 text-xs text-center">
+                                <td class="px-2 py-2 text-sm text-center">
                                     <flux:button type="button"
                                         class="btn-primary btn-table cursor-pointer w-36 justify-center"
                                         variant="primary" wire:click='openComparablesLand'>
@@ -36,21 +35,21 @@
                                     </flux:button>
                                 </td>
 
-                                <td class="px-2 py-2 text-xs text-center">
-                                   <flux:button class="btn-primary btn-table cursor-pointer w-30 justify-center" wire:click="toHomologationLand" :disabled="$landCount < 4">
-                                    Homologar
-                                </flux:button>
+                                <td class="px-2 py-2 text-sm text-center">
+                                    <flux:button class="btn-primary btn-table cursor-pointer w-30 justify-center"
+                                        wire:click="toHomologationLand" :disabled="$landCount < 4">
+                                        Homologar
+                                    </flux:button>
                             </tr>
                             <tr>
-                                <td class="px-2 py-2 text-xs text-center">Construcción en venta</td>
-                                <!-- Valores dinámicos con formato -->
-                                <td class="px-2 py-2 text-xs text-center">$ {{ number_format($buildingAvgUnitValue, 2)
+                                <td class="px-2 py-2 text-sm text-center">Construcción en venta</td>
+                                <td class="px-2 py-2 text-sm text-center">$ {{ number_format($buildingAvgUnitValue, 2)
                                     }}</td>
-                                <td class="px-2 py-2 text-xs text-center">$ {{ number_format($buildingHomologatedValue,
+                                <td class="px-2 py-2 text-sm text-center">$ {{ number_format($buildingHomologatedValue,
                                     2) }}</td>
-                                <td class="px-2 py-2 text-xs text-center">$ {{ number_format($buildingProbableValue, 2)
+                                <td class="px-2 py-2 text-sm text-center">$ {{ number_format($buildingProbableValue, 2)
                                     }}</td>
-                                <td class="px-2 py-2 text-xs text-center">
+                                <td class="px-2 py-2 text-sm text-center">
                                     <flux:button type="button"
                                         class="btn-primary btn-table cursor-pointer w-36 justify-center"
                                         variant="primary" wire:click='openComparablesBuilding'>
@@ -58,11 +57,12 @@
                                     </flux:button>
                                 </td>
 
-                                <td class="px-2 py-2 text-xs text-center">
-                                     <flux:button class="btn-primary btn-table cursor-pointer w-30 justify-center" wire:click="toHomologationBuilding" :disabled="$buildingCount < 4">
+                                <td class="px-2 py-2 text-sm text-center">
+                                    <flux:button class="btn-primary btn-table cursor-pointer w-30 justify-center"
+                                        wire:click="toHomologationBuilding" :disabled="$buildingCount < 4">
                                         Homologar
                                     </flux:button>
-                                    </td>
+                                </td>
                             </tr>
 
                         </tbody>
@@ -82,30 +82,71 @@
                     <table class="min-w-[550px] table-fixed w-full border-2 ">
                         <tbody>
                             <tr>
-                                <td class="px-2 py-4 text-xs text-center">Superficie del terreno</td>
-                                <!-- Valores dinámicos con formato -->
-                                <td class="px-2 py-4 text-xs text-center">{{ number_format($terrainSurface, 2) }} m²
+                                <td class="px-2 py-4 text-sm text-center">Superficie del terreno</td>
+                                <td class="px-2 py-4 text-sm text-center">{{ number_format($terrainSurface, 2) }} m²
                                 </td>
                             </tr>
                             <tr>
-                                <td class="px-2 py-4 text-xs text-center">Valor unitario del mercado</td>
-                                <td class="px-2 py-4 text-xs text-center">$ {{ number_format($marketUnitValue, 2) }}
+                                <td class="px-2 py-4 text-sm text-center">Valor unitario del mercado</td>
+                                <td class="px-2 py-4 text-sm text-center">$ {{ number_format($marketUnitValue, 2) }}
                                 </td>
                             </tr>
                             <tr>
-                                <td class="px-2 py-4 text-xs text-center">Importe total del terreno</td>
-                                <td class="px-2 py-4 text-xs text-center">$ {{ number_format($totalTerrainAmount, 2) }}
+                                <td class="px-2 py-4 text-sm text-center">Importe total del terreno</td>
+                                <td class="px-2 py-4 text-sm text-center">$ {{ number_format($totalTerrainAmount, 2) }}
                                 </td>
                             </tr>
                             <tr>
-                                <td class="px-2 py-4 text-xs text-center">Indiviso aplicable en %</td>
-                                <td class="px-2 py-4 text-xs text-center">{{ number_format($applicableUndividedPercent,
+                                <td class="px-2 py-4 text-sm text-center">Indiviso aplicable en %</td>
+                                <td class="px-2 py-4 text-sm text-center">{{ number_format($applicableUndividedPercent,
                                     0) }} %</td>
                             </tr>
                             <tr>
-                                <td class="px-2 py-4 text-xs text-center">Valor del terreno</td>
-                                <td class="px-2 py-4 text-xs text-center">$ {{ number_format($terrainValue, 2) }}</td>
+                                <td class="px-2 py-4 text-sm text-center">Valor del terreno Prop</td>
+                                <td class="px-2 py-4 text-sm text-center">$ {{ number_format($terrainValue, 2) }}</td>
                             </tr>
+
+                            {{-- SECCIÓN DE EXCEDENTES (SOLO SI APLICA) --}}
+                            @if($showExcessSection)
+                            <tr>
+                                <td class="px-2 py-4 text-sm text-center">Valor Lote Privativo</td>
+                                <td class="px-2 py-4 text-sm text-center">$ {{ number_format($valLotePrivativo, 2) }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-2 py-4 text-sm text-center">Valor Lote Privativo Tipo</td>
+                                <td class="px-2 py-4 text-sm text-center">$ {{ number_format($valLoteTipo, 2) }}</td>
+                            </tr>
+                            <tr>
+                                <td class="px-2 py-4 text-sm text-center">Diferencia Excedente de Terreno</td>
+                                <td class="px-2 py-4 text-sm text-center">$ {{ number_format($valDiferenciaExcedente,
+                                    2)
+                                    }}</td>
+                            </tr>
+                            <tr>
+                                <td class="px-2 py-4 text-sm text-center">% del valor de terreno excedente a aplicar
+                                </td>
+                                <td class="px-2 py-4 text-sm text-center">
+                                    {{-- Contenedor para centrar --}}
+                                    <div class="flex justify-center w-full">
+                                        {{-- Contenedor de ancho fijo para hacerlo "chiquito" --}}
+                                        <div class="w-28">
+                                            <flux:select wire:model.live="surplusPercentage">
+                                                @foreach($percentageOptions as $opt)
+                                                <flux:select.option value="{{ $opt }}">{{ $opt }} %</flux:select.option>
+                                                @endforeach
+                                            </flux:select>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-2 py-4 text-sm text-center">Valor Terreno Excedente</td>
+                                <td class="px-2 py-4 text-sm text-center">$ {{ number_format($valTerrenoExcedente, 2)
+                                    }}
+                                </td>
+                            </tr>
+                            @endif
 
                         </tbody>
                     </table>
@@ -124,18 +165,29 @@
                     <table class="min-w-[550px] table-fixed w-full border-2 ">
                         <tbody>
                             <tr>
-                                <td class="px-2 py-4 text-xs text-center">Superficie construida vendible</td>
-                                <td class="px-2 py-4 text-xs text-center">{{ number_format($saleableBuiltArea, 2) }} m²
+                                <td class="px-2 py-4 text-sm text-center">Superficie construida vendible</td>
+                                <td class="px-2 py-4 text-sm text-center">{{ number_format($saleableBuiltArea, 2) }} m²
                                 </td>
                             </tr>
                             <tr>
-                                <td class="px-2 py-4 text-xs text-center">Valor unitario del mercado</td>
-                                <td class="px-2 py-4 text-xs text-center">$ {{
+                                <td class="px-2 py-4 text-sm text-center">Valor unitario de mercado</td>
+                                <td class="px-2 py-4 text-sm text-center">$ {{
                                     number_format($constructionMarketUnitValue, 2) }}</td>
                             </tr>
+
+                            {{-- AGREGAMOS EL EXCEDENTE AQUÍ TAMBIÉN PARA SUMAR AL TOTAL --}}
+                            @if($showExcessSection)
                             <tr>
-                                <td class="px-2 py-4 text-xs text-center">Valor de mercado</td>
-                                <td class="px-2 py-4 text-xs text-center">$ {{ number_format($marketValue, 2) }}</td>
+                                <td class="px-2 py-4 text-sm text-center">Valor Terreno Excedente</td>
+                                <td class="px-2 py-4 text-sm text-center">$ {{ number_format($valTerrenoExcedente, 2)
+                                    }}
+                                </td>
+                            </tr>
+                            @endif
+
+                            <tr>
+                                <td class="px-2 py-4 text-sm text-center">Valor de mercado</td>
+                                <td class="px-2 py-4 text-sm text-center">$ {{ number_format($marketValue, 2) }}</td>
                             </tr>
                         </tbody>
                     </table>

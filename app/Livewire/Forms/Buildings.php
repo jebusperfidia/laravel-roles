@@ -220,32 +220,43 @@ class Buildings extends Component
         $this->totalSurfaceCommon = collect($this->buildingConstructionsCommon)->sum('surface');
     }
 
-    //FUNCION PARA ACTUALIZAR VALORES DE INPUT A PARTIR DE PRIVATE CONSTRUCTIONS
+
+    // FUNCION PARA ACTUALIZAR VALORES DE INPUT A PARTIR DE PRIVATE CONSTRUCTIONS
     public function assignInputPrivateValues()
     {
-
         $constructions = collect($this->buildingConstructionsPrivate);
 
         // 1. Verificar si la colección está vacía
         if ($constructions->isEmpty()) {
             $this->isClassificationAssigned = false;
-            // --- CASO A: COLECCIÓN VACÍA (Asignar Valores por Defecto) ---
+            // Valores por defecto
             $this->progressGeneralWorks = 100.0;
-            $this->yearCompletedWork = date('Y'); // Año actual
+            $this->yearCompletedWork = date('Y');
         } else {
             $this->isClassificationAssigned = true;
-            // --- CASO B: COLECCIÓN CON REGISTROS (Tomar el Primero y Calcular) ---
-            $totalProgressWork = $constructions->sum('progress_work');
 
-            // 2. OBTENER LA CANTIDAD DE REGISTROS
-            $numberOfConstructions = $constructions->count();
+            // --- NUEVA LÓGICA: PROMEDIO PONDERADO POR SUPERFICIE ---
 
-            $this->progressGeneralWorks = $totalProgressWork / $numberOfConstructions;
+            // 1. Obtenemos la superficie total primero
+            $totalSurface = $constructions->sum('surface');
 
-            // 2. Tomar el primer registro
+            // 2. Calculamos el avance ponderado
+            if ($totalSurface > 0) {
+                // Sumatoria de (Superficie * Avance)
+                $weightedSum = $constructions->reduce(function ($carry, $item) {
+                    return $carry + ($item->surface * $item->progress_work);
+                }, 0);
+
+                // Dividimos entre la superficie total
+                $this->progressGeneralWorks = $weightedSum / $totalSurface;
+            } else {
+                // Si la superficie es 0 (caso raro pero posible), evitamos división por cero
+                $this->progressGeneralWorks = 0;
+            }
+            // -------------------------------------------------------
+
+            // Asignar otros valores (Edad, Clase) basados en el primer registro
             $firstConstruction = $constructions->first();
-
-            // 3. Asignar/Calcular valores a los inputs
             $this->yearCompletedWork = date('Y') - $firstConstruction->age;
             $this->generalClassProperty = $firstConstruction->clasification;
         }

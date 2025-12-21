@@ -1431,8 +1431,8 @@
                             mapObj.marker = marker;
                         };
 
-                        setupMap(this.$refs.mapMacro, this.maps.macro, 7);
-                        setupMap(this.$refs.mapMicro, this.maps.micro, 12);
+                        setupMap(this.$refs.mapMacro, this.maps.macro, 15);
+                        setupMap(this.$refs.mapMicro, this.maps.micro, 17);
                     },
 
                     init() {

@@ -126,7 +126,7 @@
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm md:w-2/3 w-full">
                     <h4
                         class="font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2 flex justify-between items-center">
-                        <span>Factores del Sujeto</span>
+                        <span>Factores del sujeto</span>
                         {{-- <span
                             class="text-xs font-normal text-gray-500 bg-gray-200 px-2 py-1 rounded">Building</span> --}}
                     </h4>
@@ -347,8 +347,8 @@
                     {{-- TABLA DE FACTORES DE AJUSTE --}}
                     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm md:w-2/3 w-full"
                         wire:key="factores-{{ $selectedComparableId }}">
-                        <h4 class="font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">Factores de Ajuste
-                            Aplicados</h4>
+                        <h4 class="font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">Factores de ajuste
+                            aplicados</h4>
                         <div class="overflow-x-auto border border-gray-300 rounded-md">
                             <table class="w-full text-md table-fixed">
                                 <thead>

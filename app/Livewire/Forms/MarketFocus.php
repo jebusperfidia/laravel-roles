@@ -13,6 +13,8 @@ use App\Models\Forms\Comparable\ValuationBuildingComparableModel; // Importar pi
 use App\Models\Forms\ApplicableSurface\ApplicableSurfaceModel;
 use App\Models\Forms\Homologation\HomologationLandAttributeModel;
 use App\Models\Forms\Homologation\HomologationBuildingAttributeModel;
+use App\Models\Forms\MarketFocus\MarketFocusModel;
+use App\Models\Forms\LandDetails\LandDetailsModel;
 
 class MarketFocus extends Component
 {
@@ -49,11 +51,19 @@ class MarketFocus extends Component
     public $saleableBuiltArea;
 
 
-    // --- CÁLCULOS EXTRAS (Lote Privativo / Tipo / Excedente) ---
-    public $valLotePrivativo = 0.00;      // Total terreno * Valor Mercado
-    public $valLoteTipo = 0.00;           // Lote Tipo * Valor Mercado
-    public $valDiferenciaExcedente = 0.00; // La resta de los dos anteriores
 
+    // --- NUEVAS PROPIEDADES PARA EXCEDENTES ---
+    public $surplusPercentage = 100; // Valor por defecto
+    public $showExcessSection = false; // Controla si mostramos la sección
+
+    // Valores calculados
+    public $valLotePrivativo = 0.00;
+    public $valLoteTipo = 0.00;
+    public $valDiferenciaExcedente = 0.00;
+    public $valTerrenoExcedente = 0.00; // El valor final tras aplicar porcentaje
+
+    // Opciones del Select (Fixed Array)
+    public $percentageOptions = [0, 10, 20, 30, 40, 50, 75, 100, 105, 110, 115, 120, 125];
 
     /**
      * Se ejecuta al cargar el componente.
@@ -77,6 +87,28 @@ class MarketFocus extends Component
         // Cargamos todos los datos iniciales
         $this->loadData();
     }
+
+
+
+
+    public function updatedSurplusPercentage($value)
+    {
+        // Guardar o Actualizar en BD
+        MarketFocusModel::updateOrCreate(
+            ['valuation_id' => $this->valuationId],
+            ['surplus_percentage' => $value]
+        );
+
+        // Notificación Toast
+        Toaster::success("Porcentaje de excedente actualizado al {$value}%");
+
+        // Recalcular montos
+        $this->calculateTotals();
+    }
+
+
+
+
 
     /**
      * Función principal para cargar y refrescar todos los datos.
@@ -110,6 +142,16 @@ class MarketFocus extends Component
             $this->terrainSurface = 0;
         }
 
+        // 1. CARGAR CONFIGURACIÓN DE PORCENTAJE (Tabla market_focus)
+        $marketFocus = MarketFocusModel::where('valuation_id', $this->valuationId)->first();
+
+        if ($marketFocus) {
+            $this->surplusPercentage = (float)$marketFocus->surplus_percentage;
+        } else {
+            // Si no existe, dejamos el 100 por defecto (pero no guardamos aún para no llenar basura)
+            $this->surplusPercentage = 100;
+        }
+
         // 3. Obtener Atributos de CONSTRUCCIÓN
         $buildingAttributes = HomologationBuildingAttributeModel::where('valuation_id', $this->valuationId)->first();
 
@@ -140,28 +182,49 @@ class MarketFocus extends Component
         // 3. Indiviso (Hardcodeado a 100% por ahora)
         $this->applicableUndividedPercent = 100;
 
-        // 4. Valor del Terreno Propiedad (Igual al total porque indiviso es 100%)
-        $this->terrainValue = $this->totalTerrainAmount * ($this->applicableUndividedPercent / 100);
+        // 4. Valor del Terreno Propiedad
+        $this->terrainValue = $this->totalTerrainAmount;
 
 
         // ==========================================
-        // === CÁLCULOS EXTRAS (Privativo vs Tipo) ===
+        // === CÁLCULO DE EXCEDENTES (SWITCH MAESTRO) ===
         // ==========================================
 
-        // Necesitamos los valores crudos de ApplicableSurface para estas multiplicaciones específicas
-        // (No la seleccionada, sino los campos específicos de la BD)
-        if ($this->applicableSurface) {
-            $rawTotalArea = $this->applicableSurface->surface_area ?? 0;     // Total del terreno
-            $rawPrivateType = $this->applicableSurface->private_lot_type ?? 0; // Lote privativo tipo
+        // A. Consultar el "Switch" desde LandDetails para ver si el usuario activó el cálculo
+        $landDetail = LandDetailsModel::where('valuation_id', $this->valuationId)->first();
+        $useExcessCalculation = $landDetail ? (bool)$landDetail->use_excess_calculation : false;
 
-            // A. Valor Lote Privativo = Total Terreno (BD) * Valor Mercado
-            $this->valLotePrivativo = $rawTotalArea * $this->marketUnitValue;
+        // B. Condición:
+        // 1. El usuario activó el checkbox en LandDetails ($useExcessCalculation)
+        // 2. Existe superficie privativa capturada en ApplicableSurface (> 0)
+        if ($useExcessCalculation && $this->applicableSurface && $this->applicableSurface->private_lot > 0) {
 
-            // B. Valor Lote Tipo = Lote Tipo (BD) * Valor Mercado
-            $this->valLoteTipo = $rawPrivateType * $this->marketUnitValue;
+            $this->showExcessSection = true;
 
-            // C. Diferencia Excedente
+            $privateLot = (float)$this->applicableSurface->private_lot; // Superficie real
+            $privateLotType = (float)$this->applicableSurface->private_lot_type; // Superficie tipo
+
+            // C.1 Valor Lote Privativo (Sup. Privativa * Valor Mercado)
+            $this->valLotePrivativo = $privateLot * $this->marketUnitValue;
+
+            // C.2 Valor Lote Tipo (Sup. Tipo * Valor Mercado)
+            $this->valLoteTipo = $privateLotType * $this->marketUnitValue;
+
+            // C.3 Diferencia (Privativo - Tipo)
             $this->valDiferenciaExcedente = $this->valLotePrivativo - $this->valLoteTipo;
+
+            // C.4 Valor Terreno Excedente (Diferencia * % Seleccionado)
+            $factor = $this->surplusPercentage / 100;
+            $this->valTerrenoExcedente = $this->valDiferenciaExcedente * $factor;
+        } else {
+            // Si el checkbox está desmarcado O no hay datos, ocultamos y reseteamos a cero
+            $this->showExcessSection = false;
+            $this->valTerrenoExcedente = 0.00;
+
+            // Opcional: Resetear variables visuales para limpieza
+            $this->valLotePrivativo = 0.00;
+            $this->valLoteTipo = 0.00;
+            $this->valDiferenciaExcedente = 0.00;
         }
 
 
@@ -170,9 +233,12 @@ class MarketFocus extends Component
         // ==========================================
         $this->constructionMarketUnitValue = $this->buildingProbableValue;
 
-        // Valor Mercado = Sup. Vendible * Valor Unit. Construcción
-        // (saleableBuiltArea ya se cargó en el mount)
-        $this->marketValue = $this->saleableBuiltArea * $this->constructionMarketUnitValue;
+        // 1. Cálculo base de construcción (Sup. Vendible * Valor Unitario)
+        $baseConstructionValue = $this->saleableBuiltArea * $this->constructionMarketUnitValue;
+
+        // 2. SUMAMOS EL EXCEDENTE AL FINAL
+        // (Si el switch estaba apagado, valTerrenoExcedente será 0, así que no afecta)
+        $this->marketValue = $baseConstructionValue + $this->valTerrenoExcedente;
     }
     /**
      * Cuenta los comparables asignados de cada tipo para el avalúo actual.

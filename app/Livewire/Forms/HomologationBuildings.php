@@ -91,7 +91,7 @@ class HomologationBuildings extends Component
 
     // Variables Equipamiento CRUD
     public $new_eq_description = '';
-    public $new_eq_quantity = 1.00;
+    public $new_eq_quantity = 0.00;
     public $new_eq_total_value = 0.00;
     public $new_eq_other_description = '';
     public $editing_eq_id = null;
@@ -585,8 +585,11 @@ class HomologationBuildings extends Component
 
        // dd($landAttributes);
         if ($landAttributes) {
-            // Asumo que la columna es 'surface', si se llama 'surface_area' cámbialo aquí
+            // Asignamos la superficie de terreno desde la BD
             $this->subject_surface_land = $landAttributes->subject_surface_value ?? 0;
+
+            // Asignamos el VUS real desde la BD
+            $this->subject_vus = $landAttributes->unit_value_mode_lot ?? 0;
         }
 
         // 3. Relación T/C
@@ -949,12 +952,43 @@ class HomologationBuildings extends Component
         $valid = true;
         $errorMessage = '';
 
-        if ($property === 'calificacion') {
+        // Detectamos si es AVANC
+        $isAvanc = ($acronym === 'AVANC');
+
+        /*         if ($property === 'calificacion') {
             if ($numericValue < 0.01 || $numericValue > 2.0) {
                 $valid = false;
                 $errorMessage = 'La calificación debe estar entre 0.0100 y 2.0000.';
             }
         } elseif ($property === 'aplicable' && $acronym === 'FNEG') {
+            if ($numericValue < 0.8 || $numericValue > 1.0) {
+                $valid = false;
+                $errorMessage = 'El factor de negociación (FNEG) debe estar entre 0.8000 y 1.0000.';
+            }
+        }
+
+        if (!$valid) {
+            Toaster::error($errorMessage);
+            $this->revertToOldValue($comparableId, $acronym, $property, $pivotId);
+            return;
+        } */
+
+        if ($property === 'calificacion') {
+            if ($isAvanc) {
+                // AHORA SÍ: Permitimos de 0 a 100
+                if ($numericValue < 0 || $numericValue > 100) {
+                    $valid = false;
+                    $errorMessage = 'El avance debe ser un valor entre 0 y 100.';
+                }
+            } else {
+                // RESTO (FLOC, FSU, etc): Siguen siendo factores pequeños (0.01 a 2.0)
+                if ($numericValue < 0.01 || $numericValue > 2.0) {
+                    $valid = false;
+                    $errorMessage = 'La calificación debe estar entre 0.0100 y 2.0000.';
+                }
+            }
+        } elseif ($property === 'aplicable' && $acronym === 'FNEG') {
+            // ... (Validación FNEG igual) ...
             if ($numericValue < 0.8 || $numericValue > 1.0) {
                 $valid = false;
                 $errorMessage = 'El factor de negociación (FNEG) debe estar entre 0.8000 y 1.0000.';
@@ -1195,11 +1229,9 @@ class HomologationBuildings extends Component
     // ==========================================================
     public function recalculateSingleComparable($comparableId)
     {
-        // 1. MAPA MAESTRO DEL SUJETO (De aquí sacamos flags y ratings reales)
-        // Usamos la colección original que viene de la BD
+        // 1. MAPA MAESTRO DEL SUJETO
         $subjectMasterMap = collect($this->subject_factors_ordered)->keyBy('acronym');
 
-        // FNEG siempre existe virtualmente en el sujeto con valor 1.0
         if (!$subjectMasterMap->has('FNEG')) {
             $subjectMasterMap->put('FNEG', ['rating' => 1.0, 'is_editable' => false, 'is_feq' => false]);
         }
@@ -1215,6 +1247,51 @@ class HomologationBuildings extends Component
         $pivotId = $this->valuation->buildingComparablePivots()->where('comparable_id', $comparableId)->value('id');
         $comparableModel = $this->comparables->find($comparableId);
 
+        if (!$comparableModel) return;
+
+        // =========================================================================
+        // [PASO A] CÁLCULO DINÁMICO DE VUT Y VUR (El VUT ya no es fijo)
+        // =========================================================================
+
+        // 1. Obtener la Clase del Comparable (Prioridad: Dropdown > BD > Default)
+        $claseComparable = $this->comparableFactors[$comparableId]['clase']
+            ?? $comparableModel->comparable_clasification
+            ?? 'Media';
+
+        // 2. Obtener el Uso del SUJETO (El truco: Asumimos homogeneidad)
+        // Si el sujeto es "Comercial", buscamos el VUT "Comercial" para el comparable.
+        $usoSujeto = 'Habitacional'; // Default
+        if ($this->building) {
+            $firstConstruction = $this->building->privates()->first();
+            if ($firstConstruction && !empty($firstConstruction->use)) {
+                $usoSujeto = $firstConstruction->use;
+            }
+        }
+
+        // 3. Buscar VUT en Configuración
+        // Genera llave tipo: "Media_Habitacional" o "Economica_Comercial"
+        $configVida = config('properties_inputs.construction_life_values', []);
+        $keyConfig = $claseComparable . '_' . $usoSujeto;
+
+        // Si no encuentra la llave, usamos 60 años por seguridad (fallback)
+        $VUT_Real = isset($configVida[$keyConfig]) ? (int)$configVida[$keyConfig] : 60;
+
+        // 4. Calcular VUR (Vida Útil Remanente)
+        $edadComparable = (int)$comparableModel->comparable_age;
+        $VUR_Real = max($VUT_Real - $edadComparable, 0);
+
+        // 5. ACTUALIZAR MODELO (Persistencia para que la ficha se vea bonita)
+        if ((int)$comparableModel->comparable_vut !== $VUT_Real) {
+            $comparableModel->comparable_vut = $VUT_Real;
+            $comparableModel->save();
+            // Actualizar memoria
+            if ($this->selectedComparable && $this->selectedComparable->id == $comparableId) {
+                $this->selectedComparable->comparable_vut = $VUT_Real;
+            }
+        }
+        // =========================================================================
+
+
         // 4. Calcular Selects (FIC, Conservación)
         $conservacionTxt = $this->comparableFactors[$comparableId]['conservacion'] ?? '';
         $conservacion_factor = self::CONSERVACION_MAP[$conservacionTxt] ?? 1.0000;
@@ -1223,12 +1300,11 @@ class HomologationBuildings extends Component
         $clase_factor = $this->mapSelectValue($this->comparableFactors[$comparableId]['clase'] ?? 'Clase B', 'clase');
         $localizacion_factor = $this->mapSelectValue($this->comparableFactors[$comparableId]['localizacion'] ?? 'Lote intermedio', 'localizacion');
 
-        // Guardamos visuales
         $this->comparableFactors[$comparableId]['clase_factor'] = number_format($clase_factor, 4);
         $this->comparableFactors[$comparableId]['localizacion_factor'] = number_format($localizacion_factor, 4);
 
-        // 5. OBTENER VALOR REAL DE FEQ (Desde BD del Modal)
-        $feqFactorAplicable = 1.0; // Valor por defecto si no hay nada
+        // 5. OBTENER VALOR REAL DE FEQ
+        $feqFactorAplicable = 1.0;
         if ($pivotId) {
             $dbFeq = HomologationComparableFactorModel::where('valuation_building_comparable_id', $pivotId)
                 ->where('acronym', $currentFeqAcronym)
@@ -1247,45 +1323,57 @@ class HomologationBuildings extends Component
         foreach ($allFactorsView as $factorView) {
             $sigla = $factorView['acronym'];
 
-            // --- LIMPIEZA DE VARIABLES (Anti-Mezcla) ---
             $compRating = 1.0;
             $aplicable = 1.0;
             $diferencia_math = 0.0;
             $rating_to_save = 1.0;
 
-            // Recuperamos definición MAESTRA para leer flags correctos
             $masterDef = $subjectMasterMap->get($sigla);
-
-            // Rating del sujeto para este factor
             $sujetoRating = isset($masterDef['rating']) ? (float)$masterDef['rating'] : 1.0;
 
-            // Flags Reales
             $isFeq = $masterDef['is_feq'] ?? false;
             $isCustom = $masterDef['is_custom'] ?? false;
             $isEditable = $masterDef['is_editable'] ?? false;
-
-            //  Identificar AVANC para forzar lectura manual
             $isAVANC = ($sigla === 'AVANC');
 
-            // Data actual del comparable (inputs)
             $factorData = $this->comparableFactors[$comparableId][$sigla] ?? [];
 
             // --- LÓGICA DE NEGOCIO ---
 
             if ($sigla === 'FNEG') {
-                // FNEG: Solo importa el aplicable manual
                 $aplicable = (float)($factorData['aplicable'] ?? 1.0);
                 $diferencia_math = $aplicable - 1.0;
                 $compRating = 1.0;
                 $rating_to_save = 1.0;
+            } elseif ($sigla === 'FEDAD') {
+                // =========================================================
+                // [PASO B] FEDAD: LÓGICA ROSS-HEIDECKE (Sujeto vs Comparable)
+                // =========================================================
+
+                // 1. Sujeto (Ya calculado en calculateSubjectFedad y guardado en $sujetoRating)
+                // Usualmente viene como 0.95, 0.88, etc.
+
+                // 2. Comparable (Calculamos al vuelo con VUT_Real)
+                if ($VUT_Real > 0) {
+                    // Fórmula: ((0.1 * VUT) + 0.9 * (VUT - Edad)) / VUT
+                    $rawCompRating = (0.10 * $VUT_Real + 0.90 * ($VUT_Real - $edadComparable)) / $VUT_Real;
+
+                    // Truncamos a 4 decimales para consistencia
+                    $compRating = floor($rawCompRating * 10000) / 10000;
+                } else {
+                    $compRating = 1.0; // Evitar div by zero
+                }
+
+                // 3. Diferencia y Aplicable
+                $diferencia_math = $sujetoRating - $compRating;
+                $aplicable = 1.0 + $diferencia_math;
+                $rating_to_save = $compRating;
             } elseif ($isFeq) {
-                // FEQ: Toma el valor calculado en paso 5
                 $aplicable = $feqFactorAplicable;
-                $compRating = $feqFactorAplicable; // La calificación ES el factor
+                $compRating = $feqFactorAplicable;
                 $diferencia_math = $aplicable - 1.0;
                 $rating_to_save = $feqFactorAplicable;
             } elseif ($sigla === $currentFsuAcronym) {
-                // FSU: Superficie
                 $subjectLand = (float)$this->subject_surface_construction ?? 0;
                 $compLand = (float)($comparableModel->comparable_built_area  ?? 0);
                 if ($subjectLand > 0 && $compLand > 0) {
@@ -1296,68 +1384,53 @@ class HomologationBuildings extends Component
                 $aplicable = 1.0 + $diferencia_math;
                 $rating_to_save = $compRating;
             } elseif ($sigla === 'FIC') {
-                // =========================================================
-                // FIC: CÁLCULO RAW + TRUNCADO ESTRICTO (Sin redondear)
-                // =========================================================
-
-                // 1. VUS Fijo (Temporal)
-                $VUS = 5440.00;
-
-                // 2. DATOS SUJETO
+                // ... (Tu lógica FIC original se mantiene intacta) ...
+                $VUS = (float)$this->subject_vus;
                 $SCiv = (float)$this->subject_surface_construction;
                 $STiv = (float)$this->subject_surface_land;
                 $sujetoRating = 1.00;
-
-                // 3. DATOS COMPARABLE
                 $Pp  = (float)$comparableModel->comparable_offers;
                 $SCc = (float)($comparableModel->comparable_built_area ?? 0);
                 $STc = (float)($comparableModel->comparable_land_area ?? 0);
 
-                // 4. CÁLCULO RAW (Con todos los decimales habidos y por haber)
                 if ($SCiv > 0 && $STiv > 0 && $SCc > 0 && $Pp > 0) {
                     $intensidadSujeto = $SCiv / $STiv;
-
                     $terrenoTeorico = $SCc / $intensidadSujeto;
                     $diferenciaTerreno = $terrenoTeorico - $STc;
                     $ajustePesos = $diferenciaTerreno * $VUS;
-
                     $VUa = ($Pp + $ajustePesos) / $SCc;
                     $VU = $Pp / $SCc;
-
                     $FIC_Raw = $VUa / $VU;
                 } else {
                     $FIC_Raw = 1.0;
                 }
 
-                // 5. CÁLCULO DE DIFERENCIA RAW (Usamos el FIC completo)
                 if ($FIC_Raw != 0) {
                     $diferencia_raw = 1.0 - ($sujetoRating / $FIC_Raw);
                 } else {
                     $diferencia_raw = 0.0;
                 }
 
-                // 6. APLICAR LA GUILLOTINA (Truncar a 4 decimales) 🪓
-                // Multiplicamos por 10000, quitamos decimales con floor, y dividimos.
-                // Ejemplo: 0.0518999 -> 518.999 -> 518 -> 0.0518
                 $diferencia_math = floor($diferencia_raw * 10000) / 10000;
-
-                // 7. APLICABLE (1 + Diferencia truncada)
                 $aplicable = 1.0 + $diferencia_math;
-
-                // 8. ASIGNACIÓN DEL RATING (También truncado)
-                // El FIC que se guarda en BD también lo cortamos a 4 decimales
                 $compRating = floor($FIC_Raw * 10000) / 10000;
                 $rating_to_save = $compRating;
-            }elseif ($isEditable || $isCustom || $isAVANC) { // <--- ¡CAMBIO AQUÍ! AÑADIR $isAVANC
-                // FLOC, CUSTOMS y AVANC: Leemos el input manual.
+            } elseif ($isEditable || $isCustom || $isAVANC) {
                 $userInput = (float)($factorData['calificacion'] ?? 1.0);
-                $compRating = $userInput ?: 1.0;
 
-                $diferencia_math = $sujetoRating - $compRating;
+                if ($isAVANC) {
+                    $compRating = $userInput;
+                    $factorComparable = $userInput / 100;
+                    $diferencia_math = $sujetoRating - $factorComparable;
+                    $rating_to_save = $userInput;
+                } else {
+                    $compRating = $userInput ?: 1.0;
+                    $diferencia_math = $sujetoRating - $compRating;
+                    $rating_to_save = $compRating;
+                }
                 $aplicable = 1.0 + $diferencia_math;
-                $rating_to_save = $compRating;
             } else {
-                // Default (Otros factores fijos no contemplados)
+                // Default
                 $diferencia_math = $sujetoRating - $compRating;
                 $aplicable = 1.0 + $diferencia_math;
                 $rating_to_save = $compRating;
@@ -1394,7 +1467,6 @@ class HomologationBuildings extends Component
         $this->comparableFactors[$comparableId]['FRE']['valor_homologado'] = $unitValue * $factorResultante;
         $this->comparableFactors[$comparableId]['FRE']['valor_unitario_vendible'] = number_format($unitValue * $factorResultante, 2, '.', '');
     }
-
     public function recalculateConclusions()
     {
         if (!$this->comparables || $this->comparables->isEmpty()) {

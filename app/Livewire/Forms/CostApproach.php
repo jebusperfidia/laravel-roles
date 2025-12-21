@@ -175,6 +175,16 @@ class CostApproach extends Component
         });
     }
 
+
+
+    public function nextComponent()
+    {
+        /* Toaster::success('Formulario guardado con éxito'); */
+        return redirect()->route('form.index', ['section' => 'photo-report']);
+    }
+
+
+
     public function render()
     {
         return view('livewire.forms.cost-approach');

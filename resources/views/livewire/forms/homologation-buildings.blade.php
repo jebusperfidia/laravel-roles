@@ -1,6 +1,6 @@
 <div>
     {{-- Mínimo 2 para pruebas, mensaje de 6 para producción --}}
-    @if($comparablesCount >= 2)
+    @if($comparablesCount >= 6)
 
     <div class="form-container" wire:init="recalculateConclusions">
         <div class="form-container__header">
@@ -100,6 +100,10 @@
                 </div>
 
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm md:w-2/3 w-full">
+                    <h4 class="font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2 flex justify-between items-center">
+                        <span>Factores del sujeto</span>
+                        {{-- <span class="text-xs font-normal text-gray-500 bg-gray-200 px-2 py-1 rounded">Building</span> --}}
+                    </h4>
                     <div class="overflow-x-auto border border-gray-300 rounded-md">
                         <table class="w-full text-md table-fixed">
                             <thead>
@@ -285,8 +289,19 @@
                                         number_format($selectedComparable->comparable_unit_value ?? 2500.00, 2) }}</dd>
 
                                     <dt class="font-semibold text-gray-800 mt-2">Relación T/C:</dt>
-                                    <dd class="text-gray-600">{{ $selectedComparable->comparable_tc_ratio_placeholder ??
-                                        '1.2500' }}</dd>
+                                    <dd class="text-gray-600">
+                                        @php
+                                        // Obtenemos los valores del modelo del comparable seleccionado
+                                        $areaTerreno = (float)($selectedComparable->comparable_land_area ?? 0);
+                                        $areaConstruccion = (float)($selectedComparable->comparable_built_area ?? 0);
+
+                                        // Evitamos división por cero
+                                        $relacionTC_Comp = ($areaConstruccion > 0)
+                                        ? ($areaTerreno / $areaConstruccion)
+                                        : 0;
+                                        @endphp
+                                        {{ number_format($relacionTC_Comp, 4) }}
+                                    </dd>
 
                                     <dt class="font-semibold text-gray-800 mt-2">Fecha:</dt>
                                     <dd class="text-gray-600">{{ $selectedComparable->created_at ?
@@ -298,16 +313,32 @@
                                     <dd class="text-gray-600">{{ $selectedComparable->comparable_levels ?? '1' }}</dd>
 
                                     <dt class="font-semibold text-gray-800 mt-2">Edad:</dt>
-                                    <dd class="text-gray-600">{{ $selectedComparable->comparable->age ?? '0' }} años
+                                    <dd class="text-gray-600">{{ $selectedComparable->comparable_age ?? '0' }} año(s)
                                     </dd>
 
+                                    {{-- <dt class="font-semibold text-gray-800 mt-2">VUT:</dt>
+                                    <dd class="text-gray-600">{{ $selectedComparable->comparable_vut ?? '0' }}</dd> --}}
+
                                     <dt class="font-semibold text-gray-800 mt-2">VUT:</dt>
-                                    <dd class="text-gray-600">{{ $selectedComparable->comparable_vut ?? '0' }}</dd>
+                                    <dd class="text-gray-600">
+                                        {{ $selectedComparable->comparable_vut ?? '0' }} años
+                                    </dd>
 
 
-                                    <dt class="font-semibold text-gray-800 mt-2">VUR:</dt>
+                                    {{-- <dt class="font-semibold text-gray-800 mt-2">VUR:</dt>
                                     <dd class="text-gray-600">{{ ($selectedComparable->comparable_vut -
-                                        $selectedComparable->comparable_age) ?? '0.0000' }}</dd>
+                                        $selectedComparable->comparable_age) ?? '0.0000' }}</dd> --}}
+
+                                    {{-- VUR (Vida Útil Remanente) --}}
+                                    <dt class="font-semibold text-gray-800 mt-2">VUR:</dt>
+                                    <dd class="text-gray-600">
+                                        @php
+                                        $vut = (int)($selectedComparable->comparable_vut ?? 0);
+                                        $age = (int)($selectedComparable->comparable_age ?? 0);
+                                        $vur = max($vut - $age, 0);
+                                        @endphp
+                                        {{ $vur }} años
+                                    </dd>
 
                                     <dt class="font-semibold text-gray-800 mt-2">Clasificación:</dt>
                                     <dd class="text-gray-600">{{ $selectedComparable->comparable_clasification ?? '' }}
@@ -433,8 +464,8 @@
                     {{-- TABLA FACTORES --}}
                     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm md:w-2/3 w-full"
                         wire:key="factores-{{ $selectedComparableId }}">
-                        <h4 class="font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">Factores de Ajuste
-                            Aplicados</h4>
+                        <h4 class="font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">Factores de ajuste
+                            aplicados</h4>
                         @if (session()->has('info_comparable'))
                         <div class="mb-2 text-sm text-blue-600 font-medium">{{ session('info_comparable') }}</div>
                         @endif
@@ -816,7 +847,7 @@
                                 <tr class="align-middle bg-gray-50">
                                     <td class="py-3 px-2">
                                         {{-- CORRECCIÓN 1: Usamos la computada equipmentOptions --}}
-                                        <flux:select wire:model.live="new_eq_description" placeholder="Seleccionar" allow-custom>
+                                        <flux:select wire:model.live="new_eq_description" placeholder="Seleccionar" allow-custom class="text-gray-800 [&_option]:text-gray-900">
                                             @foreach($this->equipmentOptions as $key)
                                             <flux:select.option value="{{ $key }}">{{ $key }}</flux:select.option>
                                             @endforeach
