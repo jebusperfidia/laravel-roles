@@ -3,6 +3,9 @@
 // 1. bootstrap.js PRIMERO. Es crucial porque inicializa Alpine.
 //import "./bootstrap";
 
+import Sortable from "sortablejs";
+window.Sortable = Sortable;
+
 // 2. Ahora importa el resto de paquetes de vendor y CSS.
 // PowerGrid
 import "./../../vendor/power-components/livewire-powergrid/dist/powergrid";

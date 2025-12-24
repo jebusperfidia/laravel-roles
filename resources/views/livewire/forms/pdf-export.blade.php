@@ -1,17 +1,58 @@
-<div class="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+<div>
 
     {{-- ============================================================== --}}
-    {{-- ÁREA FUNCIONAL (LO QUE SÍ SE VE AHORITA) --}}
+    {{-- ÁREA FUNCIONAL (EL BOTÓN QUE DA LA ORDEN) --}}
     {{-- ============================================================== --}}
 
-    <div class="flex flex-col items-center justify-center space-y-4">
-        <h3 class="text-lg font-bold text-gray-700">Exportar Documento</h3>
-        <p class="text-sm text-gray-500">Generar el PDF con la configuración actual.</p>
+    <div class="form-container" x-data="{
+        async captureChartAndDownload() {
+            console.log('🔍 Buscando la gráfica en la pantalla...');
 
-        {{-- Botón que sí dispara la acción --}}
-        <flux:button wire:click="generatePdf" variant="primary" icon="printer" class="w-full sm:w-auto">
-            GENERAR PDF
-        </flux:button>
+            // 1. Buscamos el canvas.
+            // NOTA: Busca el primer <canvas> que encuentre en toda la página.
+            // Si tienes varios, capturará el primero.
+            const canvas = document.querySelector('canvas');
+
+            if (canvas) {
+                console.log('✅ Canvas encontrado. Tomando foto...');
+
+                // Convertimos la gráfica a texto (Base64)
+                const chartBase64 = canvas.toDataURL('image/png');
+
+                // 2. Se lo pasamos a Livewire ($wire es el puente mágico de Alpine)
+                await $wire.set('chartImageBase64', chartBase64);
+
+                console.log('📤 Imagen enviada al backend. Generando PDF...');
+
+                // 3. Ordenamos generar el PDF
+                $wire.generatePdf();
+
+            } else {
+                console.error('❌ NO SE ENCONTRÓ NINGÚN CANVAS');
+                alert('No encuentro la gráfica en la pantalla. Se generará el PDF sin ella.');
+
+                // Generamos el PDF aunque no haya gráfica
+                $wire.generatePdf();
+            }
+        }
+    }">
+        <div class="form-container__header">
+            Impresión PDF
+        </div>
+        <div class="form-container__content">
+
+            <div class="flex flex-col items-center justify-center space-y-4">
+                <h3 class="text-lg font-bold text-gray-700">Exportar Documento</h3>
+                <p class="text-sm text-gray-500">Generar el PDF con la configuración actual.</p>
+
+                {{-- El botón dispara la función de arriba --}}
+                <flux:button @click="captureChartAndDownload" variant="primary" icon="printer"
+                    class="btn-primary cursor-pointer">
+                    GENERAR PDF
+                </flux:button>
+            </div>
+        </div>
+
     </div>
 
     {{-- ============================================================== --}}

@@ -11,6 +11,7 @@ use App\Models\Forms\Comparable\ComparableModel;
 use App\Models\Forms\Comparable\ValuationLandComparableModel;
 use App\Models\Forms\Comparable\ValuationBuildingComparableModel;
 use App\Models\Forms\Homologation\HomologationValuationFactorModel;
+use App\Models\Forms\Homologation\HomologationLandAttributeModel;
 
 class Valuation extends Model
 {
@@ -258,6 +259,12 @@ class Valuation extends Model
     public function buildingComparablePivots()
     {
         return $this->hasMany(ValuationBuildingComparableModel::class, 'valuation_id');
+    }
+
+
+    public function homologationLandAttributes()
+    {
+        return $this->hasOne(HomologationLandAttributeModel::class, 'valuation_id');
     }
 
 

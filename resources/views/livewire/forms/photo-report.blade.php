@@ -1,6 +1,6 @@
 <div>
     {{-- Script de SortableJS --}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+{{--     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script> --}}
 
     <div class="flex justify-end font-semibold text-sm text-red-600 pt-2 -mb-3">
         <span>* Campos obligatorios</span>
@@ -88,18 +88,30 @@
                             </tr>
                         </thead>
 
-                        <tbody x-data x-init="
-                        Sortable.create($el, {
-                            handle: '.drag-handle',
-                            animation: 150,
-                            ghostClass: 'bg-teal-100',
-                            onEnd: function (evt) {
-                                let orderedIds = Array.from(evt.to.children).map(el => el.dataset.id);
-                                orderedIds = orderedIds.filter(id => id !== undefined);
-                                $wire.reorder(orderedIds);
-                            }
-                        })
-                    ">
+                    <tbody x-data x-init="
+                            const initSortable = () => {
+                                if (typeof Sortable !== 'undefined') {
+                                    new Sortable($el, {
+                                        handle: '.drag-handle',
+                                        animation: 150,
+                                        ghostClass: 'bg-teal-100',
+                                        onEnd: function (evt) {
+                                            let orderedIds = Array.from(evt.to.children)
+                                                .map(el => el.dataset.id)
+                                                .filter(id => id !== undefined);
+                                            $wire.reorder(orderedIds);
+                                        }
+                                    });
+                                }
+                            };
+
+                            {{-- Lo ejecutamos al cargar --}}
+                            initSortable();
+
+                            {{-- Y lo relanzamos si Livewire refresca el componente --}}
+                            document.addEventListener('livewire:navigated', () => initSortable());
+                            $wire.on('photos-updated', () => initSortable());
+                        ">
                             @if ($photos->isEmpty())
                             <tr>
                                 <td colspan="6" class="px-2 py-8 text-center text-gray-500 text-sm italic border border-gray-300">
@@ -118,7 +130,7 @@
                                 {{-- 1. No. + Ícono Drag --}}
                                 <td class="px-2 py-1 border border-gray-300 text-center">
                                     <div class="drag-handle flex flex-col items-center justify-center h-full cursor-grab active:cursor-grabbing p-2 hover:bg-gray-100 rounded transition-colors"
-                                        title="Arrastra para ordenar">
+                                        >
                                         <flux:icon name="bars-3" class="w-6 h-6 text-gray-500 mb-1" />
                                         <span class="text-xs font-bold text-gray-700">{{ $photo->sort_order }}</span>
                                     </div>
@@ -195,7 +207,8 @@
                                     @if(!$isPdf)
                                     {{-- Botón Girar (Visible) --}}
                                     <flux:button wire:click="rotatePhoto({{ $photo->id }})" icon="arrow-path" size="sm"
-                                        class="cursor-pointer !bg-blue-600 hover:!bg-blue-700 !text-white !border-0" title="Girar" />
+                                        class="cursor-pointer btn-intermediary" />
+                                        {{-- class="cursor-pointer !bg-blue-600 hover:!bg-blue-700 !text-white !border-0" title="Girar" /> --}}
                                     @else
                                     {{-- EL TRUCO: Elemento invisible del mismo tamaño (Ghost) --}}
                                     {{-- Esto ocupa el espacio pero no se ve, manteniendo la alineación --}}
@@ -203,15 +216,16 @@
                                     @endif
 
                                     {{-- Botón Ver --}}
-                                    <a href="{{ asset('storage/' . $photo->file_path) }}" target="_blank" title="Ver">
+                                    <a href="{{ asset('storage/' . $photo->file_path) }}" target="_blank">
                                         <flux:button icon="eye" size="sm"
-                                            class="cursor-pointer !bg-blue-600 hover:!bg-blue-700 !text-white !border-0" />
+                                            class="cursor-pointer btn-intermediary" />
                                     </a>
 
                                     {{-- Botón Eliminar --}}
                                     <flux:button onclick="confirm('¿Eliminar archivo?') || event.stopImmediatePropagation()"
                                         wire:click="deletePhoto({{ $photo->id }})" icon="trash" size="sm"
-                                        class="cursor-pointer !bg-red-500 hover:!bg-red-600 !text-white !border-0" />
+                                        class="cursor-pointer btn-deleted" />
+                                       {{--  class="cursor-pointer !bg-red-500 hover:!bg-red-600 !text-white !border-0" /> --}}
 
                                 </div>
                             </td>

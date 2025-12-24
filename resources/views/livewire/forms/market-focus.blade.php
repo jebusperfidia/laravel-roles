@@ -69,6 +69,30 @@
                     </table>
                 </div>
             </div>
+
+            {{-- Alerta de Comparables Vencidos --}}
+            @if($landExpiredCount > 0 || $buildingExpiredCount > 0)
+            <div class="mt-4 flex flex-col gap-2">
+                @if($landExpiredCount > 0)
+                <div class="flex items-center gap-2 text-red-600 bg-amber-50 border border-amber-200 p-2 rounded-lg text-xs">
+                    <flux:icon.exclamation-triangle variant="mini" />
+                    <span>
+                        Hay <b>{{ $landExpiredCount }}</b> comparables de <b>terreno</b> que han superado los 180 días de vigencia.
+                    </span>
+                </div>
+                @endif
+
+                @if($buildingExpiredCount > 0)
+                <div class="flex items-center gap-2 text-red-600 bg-amber-50 border border-amber-200 p-2 rounded-lg text-xs">
+                    <flux:icon.exclamation-triangle variant="mini" />
+                    <span>
+                        Hay <b>{{ $buildingExpiredCount }}</b> comparables de <b>construcción</b> que han superado los 180 días de
+                        vigencia.
+                    </span>
+                </div>
+                @endif
+            </div>
+            @endif
         </div>
     </div>
 

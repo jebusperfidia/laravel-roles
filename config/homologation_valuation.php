@@ -96,6 +96,12 @@ return [
             'is_editable' => false,
             'homologation_type' => 'building',
         ],
+        [
+            'factor_name' => 'Conservación',
+            'acronym' => 'FCON',
+            'is_editable' => false, // No se edita a mano, se lee de la construcción
+            'homologation_type' => 'building',
+        ],
     ],
 
 ];

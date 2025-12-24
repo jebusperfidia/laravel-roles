@@ -65,6 +65,10 @@ class MarketFocus extends Component
     // Opciones del Select (Fixed Array)
     public $percentageOptions = [0, 10, 20, 30, 40, 50, 75, 100, 105, 110, 115, 120, 125];
 
+
+    public $landExpiredCount = 0;
+    public $buildingExpiredCount = 0;
+
     /**
      * Se ejecuta al cargar el componente.
      */
@@ -123,6 +127,21 @@ class MarketFocus extends Component
         // 1. Conteos
         $this->landCount = ValuationLandComparableModel::where('valuation_id', $this->valuationId)->count();
         $this->buildingCount = ValuationBuildingComparableModel::where('valuation_id', $this->valuationId)->count();
+
+
+        // Usamos whereHas para "asomarnos" a la tabla comparables y revisar el accessor indirectly
+        // Nota: is_expired en tu modelo depende de la fecha, así que filtramos por la lógica de 6 meses
+        $sixMonthsAgo = now()->subMonths(6);
+
+        $this->landExpiredCount = ValuationLandComparableModel::where('valuation_id', $this->valuationId)
+            ->whereHas('comparable', function ($query) use ($sixMonthsAgo) {
+                $query->where('created_at', '<', $sixMonthsAgo);
+            })->count();
+
+        $this->buildingExpiredCount = ValuationBuildingComparableModel::where('valuation_id', $this->valuationId)
+            ->whereHas('comparable', function ($query) use ($sixMonthsAgo) {
+                $query->where('created_at', '<', $sixMonthsAgo);
+            })->count();
 
         // 2. Obtener Atributos de TERRENO (HomologationLandAttributeModel)
         // Aquí viene el "Valor Probable" (unit_value_mode_lot) y la "Superficie Seleccionada" (subject_surface_value)

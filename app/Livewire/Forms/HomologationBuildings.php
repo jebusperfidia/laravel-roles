@@ -115,6 +115,13 @@ class HomologationBuildings extends Component
     //Propiedad para obtener la descripción/caracteristicas del inmueble
     public $property_description;
 
+    // Nueva propiedad para avance de obra en porcentaje
+    public $subject_progress_porcent = 0;
+
+
+    // Nueva propiedad para estado de conservación
+    public $subject_conservation_description = '';
+
     // Reemplaza la antigua const EQUIPMENT_MAP por esto:
     protected const EQUIPMENT_VALUES_BY_CLASS = [
         'Minima' => [
@@ -247,6 +254,28 @@ class HomologationBuildings extends Component
             'Roof garden' => ['unit' => 'M2', 'value' => 0.00],
             'Otro' => ['unit' => 'PZA', 'value' => 0.00],
         ]
+    ];
+
+
+    protected const VUT_MAP = [
+        'Superior a moda'    => 60, // Mínima
+        'Economica'          => 60,
+        'Interes social'     => 60,
+        'Media'              => 70,
+        'Semilujo'           => 80,
+        'Residencial'        => 90,
+        'Residencial plus'   => 90,
+        'Residencial plus +' => 90,
+        'Unica'              => 90,
+    ];
+
+
+    // En HomologationBuildings.php
+    protected const CONSERVACION_VALORES = [
+        '0.8' => 0.80, // Malo
+        '1'   => 1.00, // Bueno, Normal, Nuevo
+        '1.1' => 1.10, // Muy bueno, Recientemente remodelado
+        '0'   => 0.00, // Ruidoso
     ];
 
 
@@ -405,10 +434,14 @@ class HomologationBuildings extends Component
     #[Computed]
     public function orderedComparableFactorsForView(): array
     {
+        // 1. Ya trae FSU, FIC, FEDAD... ¡y ahora también FCON!
         $ordered = $this->subject_factors_ordered;
+
+        // 2. Solo agregamos el FNEG al principio como siempre
         if ($this->fneg_factor_meta) {
             array_unshift($ordered, $this->fneg_factor_meta);
         }
+
         return $ordered;
     }
 
@@ -568,27 +601,51 @@ class HomologationBuildings extends Component
 
     public function calculateSubjectValues()
     {
-        // 1. Obtener Avance de Obra
+        // 1. Obtener Avance de Obra y Conservación
         if ($this->building) {
-            $this->subject_progress_work = $this->building->progress_general_works ?? 0;
+            // --- AVANCE DE OBRA ---
+            $rawProgress = $this->building->progress_general_works ?? 0;
+            $this->subject_progress_porcent = $rawProgress;
+            $this->subject_progress_work = round($rawProgress / 100, 4);
+
+            // Persistencia de AVANC
+            HomologationValuationFactorModel::updateOrCreate(
+                ['valuation_id' => $this->idValuation, 'acronym' => 'AVANC', 'homologation_type' => 'building'],
+                ['rating' => $this->subject_progress_work, 'factor_name' => 'Avance de Obra', 'is_editable' => false, 'is_custom' => false]
+            );
+
+            // --- CONSERVACIÓN DEL SUJETO (NUEVO) ---
+            $firstConstruction = $this->building->privates()->first();
+            if ($firstConstruction) {
+                // Guardamos el texto (ej: "0.8 Malo" o "1. Bueno")
+                $rawState = $firstConstruction->conservation_state;
+                $this->subject_conservation_description = $rawState;
+
+                // Extraemos el valor numérico alv con floatval()
+                $ratingSujeto = floatval($rawState);
+
+                // Persistencia de FCON (Calificación del Sujeto)
+                HomologationValuationFactorModel::updateOrCreate(
+                    ['valuation_id' => $this->idValuation, 'acronym' => 'FCON', 'homologation_type' => 'building'],
+                    [
+                        'rating' => $ratingSujeto,
+                        'factor_name' => 'Conservación',
+                        'is_editable' => false,
+                        'is_custom' => false
+                    ]
+                );
+            }
         }
 
         // 2. Obtener Superficies
         $applicableSurface = ApplicableSurfaceModel::where('valuation_id', $this->idValuation)->first();
-
         if ($applicableSurface) {
-            //$this->subject_surface_land = $applicableSurface->surface_area ?? 0;
             $this->subject_surface_construction = $applicableSurface->built_area ?? 0;
         }
 
         $landAttributes = HomologationLandAttributeModel::where('valuation_id', $this->idValuation)->first();
-
-       // dd($landAttributes);
         if ($landAttributes) {
-            // Asignamos la superficie de terreno desde la BD
             $this->subject_surface_land = $landAttributes->subject_surface_value ?? 0;
-
-            // Asignamos el VUS real desde la BD
             $this->subject_vus = $landAttributes->unit_value_mode_lot ?? 0;
         }
 
@@ -599,16 +656,14 @@ class HomologationBuildings extends Component
             $this->subject_rel_tc = 0;
         }
 
-        // 4. Calcular Ponderados
+        // 4. Calcular Ponderados (Ross-Heidecke y VUT)
         if (!$this->building) return;
-
         $constructions = $this->building->privates()->get();
 
         if ($constructions->isNotEmpty()) {
             $totalSurfaceForWeighting = 0;
             $weightedAgeAccumulator = 0;
             $weightedVUTAccumulator = 0;
-
             $lifeValuesConfig = config('properties_inputs.construction_life_values', []);
 
             foreach ($constructions as $item) {
@@ -627,11 +682,10 @@ class HomologationBuildings extends Component
                 $this->subject_vur_weighted = max($this->subject_vut_weighted - $this->subject_age_weighted, 0);
             }
         }
-        // [NUEVO] -> AQUÍ AGREGAS ESTA LÍNEA:
-        // Calcular, Machetear (Truncar) y Guardar FEDAD automáticamente
+
+        // 5. Calcular FEDAD (Factor Edad)
         $this->calculateSubjectFedad();
     }
-
     private function prepareSubjectFactorsForView(): void
     {
         // 1. Traemos todo de la BD
@@ -685,7 +739,8 @@ class HomologationBuildings extends Component
             $processedIds[] = $fedad->id;
         }
 
-        // 5. EL FACTOR EDITABLE DE SISTEMA (Antes FLOC) - 🔥 POR BANDERAS 🔥
+
+        // 5. EL FACTOR EDITABLE DE SISTEMA (Antes FLOC)
         // Aquí está la magia: Buscamos al factor que sea editable, NO sea custom y NO sea equipo.
         // Se llame "FLOC", "UBIC", "ZONA" o "PATITO", siempre caerá aquí.
         $editableSystem = $allFactors->first(
@@ -708,14 +763,29 @@ class HomologationBuildings extends Component
             $processedIds[] = $avanc->id;
         }
 
+
+
         // =========================================================
         // RESTO DE FACTORES (Customs o Nuevos)
         // =========================================================
         foreach ($allFactors as $factor) {
             if (!in_array($factor->id, $processedIds)) {
-                $orderedList[] = $this->formatFactorForView($factor);
+                // NO lo saltes si es FCON. Solo agrégalo a la lista.
+                $formatted = $this->formatFactorForView($factor);
+
+                // Le ponemos una marca para ocultarlo en la tabla de arriba si quieres
+                $formatted['hide_in_subject'] = ($factor->acronym === 'FCON');
+
+                $orderedList[] = $formatted;
             }
         }
+
+      /*   $fcon = $allFactors->firstWhere('acronym', 'FCON');
+        if ($fcon) {
+            $orderedList[] = $this->formatFactorForView($fcon);
+            //$processedIds[] = $fcon->id;
+        }
+ */
 
         $this->subject_factors_ordered = $orderedList;
     }
@@ -800,30 +870,28 @@ class HomologationBuildings extends Component
 
             if (!$comparableModel) continue;
 
-            // 1. Obtener registros existentes de la BD
             $selections = HomologationComparableSelectionModel::where('valuation_building_comparable_id', $pivot->id)->get();
 
-            // --- LÓGICA DE CLASE (SINCRONIZACIÓN) ---
+            // 1. LÓGICA DE CLASE
             $dbClase = $selections->where('variable', 'clase')->first();
             $realClass = $comparableModel->comparable_clasification ?? '';
+            $vutAnios = self::VUT_MAP[$realClass] ?? 60; // Traducción inmediata
 
             if (!$dbClase) {
                 HomologationComparableSelectionModel::create([
                     'valuation_building_comparable_id' => $pivot->id,
                     'variable' => 'clase',
                     'value' => $realClass,
-                    'factor' => null
                 ]);
-                $this->comparableFactors[$comparableId]['clase'] = $realClass;
             } elseif ($dbClase->value !== $realClass) {
-                // Sincronización: Si cambió en el comparable original, actualizamos
                 $dbClase->update(['value' => $realClass]);
-                $this->comparableFactors[$comparableId]['clase'] = $realClass;
-            } else {
-                $this->comparableFactors[$comparableId]['clase'] = $dbClase->value;
             }
 
-            // --- LÓGICA CONSERVACIÓN ---
+            // ASIGNACIÓN SIEMPRE (Para que la vista lo vea)
+            $this->comparableFactors[$comparableId]['clase'] = $realClass;
+            $this->comparableFactors[$comparableId]['vut_tabla'] = $vutAnios;
+
+            // 2. LÓGICA CONSERVACIÓN
             $dbConserv = $selections->where('variable', 'conservacion')->first();
             if ($dbConserv) {
                 $this->comparableFactors[$comparableId]['conservacion'] = $dbConserv->value;
@@ -832,12 +900,11 @@ class HomologationBuildings extends Component
                     'valuation_building_comparable_id' => $pivot->id,
                     'variable' => 'conservacion',
                     'value' => null,
-                    'factor' => null
                 ]);
                 $this->comparableFactors[$comparableId]['conservacion'] = null;
             }
 
-            // --- LÓGICA LOCALIZACIÓN ---
+            // 3. LÓGICA LOCALIZACIÓN
             $dbLocal = $selections->where('variable', 'localizacion')->first();
             if ($dbLocal) {
                 $this->comparableFactors[$comparableId]['localizacion'] = $dbLocal->value;
@@ -846,12 +913,10 @@ class HomologationBuildings extends Component
                     'valuation_building_comparable_id' => $pivot->id,
                     'variable' => 'localizacion',
                     'value' => null,
-                    'factor' => null
                 ]);
                 $this->comparableFactors[$comparableId]['localizacion'] = null;
             }
 
-            // URL (Se mantiene en memoria)
             $this->comparableFactors[$comparableId]['url'] = $comparableModel->comparable_source ?? '';
         }
     }
@@ -925,6 +990,11 @@ class HomologationBuildings extends Component
             }
 
             $selection->update($dataToUpdate);
+
+            if ($variable === 'clase') {
+                $vutAnios = self::VUT_MAP[$value] ?? 60;
+                $this->comparableFactors[$comparableId]['vut_tabla'] = $vutAnios;
+            }
 
             // Actualizar memoria
             $this->comparableFactors[$comparableId][$variable] = $value;
@@ -1165,10 +1235,10 @@ class HomologationBuildings extends Component
     public function calculateSubjectFedad()
     {
         // 1. Valor por defecto = 1.0 (Neutro)
-        $factorTruncado = 1.0;
+        $factorFinal = 1.0;
 
         if ($this->building) {
-            // Buscamos la PRIMERA construcción privativa (Regla de negocio)
+            // Buscamos la PRIMERA construcción privativa
             $firstConstruction = $this->building->privates()->first();
 
             if ($firstConstruction) {
@@ -1177,49 +1247,46 @@ class HomologationBuildings extends Component
                 $use = $firstConstruction->use;
                 $age = $firstConstruction->age;
 
-                // Configuración de Vida Útil (Misma config que usas en el ponderado)
+                // Configuración de Vida Útil
                 $lifeValuesConfig = config('properties_inputs.construction_life_values', []);
                 $claveCombinacion = $clasification . '_' . $use;
                 $vidaUtilTotal = $lifeValuesConfig[$claveCombinacion] ?? 0;
 
                 // Aplicar Fórmula Ross-Heidecke Ponderada
                 if ($vidaUtilTotal > 0) {
-                    // (10% de VUT + 90% de Vida Remanente) / VUT
+                    // Cálculo puro
                     $factorCalculado = (0.100 * $vidaUtilTotal + 0.900 * ($vidaUtilTotal - $age)) / $vidaUtilTotal;
 
-                    // EL MACHETAZO: Cortar a 2 decimales sin redondear
-                    // Ejemplo: 0.9775 -> 97.75 -> floor(97.0) -> 0.97
-                    $factorTruncado = floor($factorCalculado * 100) / 100;
+                    // CORRECCIÓN: Quitamos el "floor" (machetazo) de 2 decimales.
+                    // Usamos round a 4 decimales para mantener precisión estándar de factores.
+                    $factorFinal = round($factorCalculado, 4);
                 }
             }
         }
 
         // 2. GUARDAR EN BD (Rating)
-        // Esto asegura que al renderizar la tabla de homologación, el dato ya esté persistido
         HomologationValuationFactorModel::updateOrCreate(
             [
                 'valuation_id' => $this->idValuation,
-                'acronym' => 'FEDAD', // Buscamos específicamente el factor de EDAD
+                'acronym' => 'FEDAD',
                 'homologation_type' => 'building'
             ],
             [
-                'rating' => $factorTruncado,       // Guardamos 0.9700
-                'factor_name' => 'Factor Edad',    // Aseguramos nombre
-                'is_editable' => false,             // Permitir edición manual si se requiere
+                'rating' => $factorFinal,       // Guardamos el valor completo (0.9754 en lugar de 0.97)
+                'factor_name' => 'Factor Edad',
+                'is_editable' => false,
                 'is_custom' => false
             ]
         );
 
         // 3. ACTUALIZAR EN MEMORIA (Para que se vea el cambio sin F5)
-        // Buscamos el factor en tu array $subject_factors_ordered y actualizamos el rating visual
         foreach ($this->subject_factors_ordered as $key => $factor) {
             if (($factor['acronym'] ?? '') === 'FEDAD') {
-                $this->subject_factors_ordered[$key]['rating'] = number_format($factorTruncado, 4, '.', '');
+                $this->subject_factors_ordered[$key]['rating'] = number_format($factorFinal, 4, '.', '');
                 break;
             }
         }
     }
-
 
 
 
@@ -1338,6 +1405,8 @@ class HomologationBuildings extends Component
 
             $factorData = $this->comparableFactors[$comparableId][$sigla] ?? [];
 
+            $masterDef = $subjectMasterMap->get($sigla);
+
             // --- LÓGICA DE NEGOCIO ---
 
             if ($sigla === 'FNEG') {
@@ -1415,12 +1484,23 @@ class HomologationBuildings extends Component
                 $aplicable = 1.0 + $diferencia_math;
                 $compRating = floor($FIC_Raw * 10000) / 10000;
                 $rating_to_save = $compRating;
-            } elseif ($isEditable || $isCustom || $isAVANC) {
+            }
+
+
+
+
+
+
+
+            elseif ($isEditable || $isCustom || $isAVANC) {
                 $userInput = (float)($factorData['calificacion'] ?? 1.0);
 
                 if ($isAVANC) {
-                    $compRating = $userInput;
-                    $factorComparable = $userInput / 100;
+                    // El Sujeto ya es 0.8273 (gracias al paso 1)
+                    // El Comparable lo dividimos entre 100 para que sean peras con peras
+                    $compRating = $userInput; // Guardamos el "80" para que el usuario lo vea
+                    $factorComparable = $userInput / 100; // Usamos "0.8000" para la matemática
+
                     $diferencia_math = $sujetoRating - $factorComparable;
                     $rating_to_save = $userInput;
                 } else {
@@ -1429,7 +1509,31 @@ class HomologationBuildings extends Component
                     $rating_to_save = $compRating;
                 }
                 $aplicable = 1.0 + $diferencia_math;
-            } else {
+            } elseif ($sigla === 'FCON') {
+                // 1. Sujeto: Como lo ocultamos de la lista principal, lo traemos directo de la BD
+                // para que no pinte 1.0000 por error.
+                $sujetoFconModel = HomologationValuationFactorModel::where('valuation_id', $this->idValuation)
+                    ->where('acronym', 'FCON')
+                    ->first();
+
+                // Aquí es donde recuperamos el 1.1 real del sujeto
+                $sujetoRating = $sujetoFconModel ? (float)$sujetoFconModel->rating : 1.0;
+
+                // 2. Comparable: Usamos el valor del Select (el que eliges en el dropdown)
+                $compRating = (float)($this->comparableFactors[$comparableId]['conservacion_factor'] ?? 1.0);
+
+                // 3. Diferencia: Sujeto - Comparable (Ej: 1.1 - 1.0 = 0.1)
+                $diferencia_math = $sujetoRating - $compRating;
+
+                // 4. Aplicable: 1 + Diferencia (Ej: 1 + 0.1 = 1.1)
+                $aplicable = 1.0 + $diferencia_math;
+
+                // El rating que guardamos es el del comparable para la base de datos
+                $rating_to_save = $compRating;
+            }
+
+
+            else {
                 // Default
                 $diferencia_math = $sujetoRating - $compRating;
                 $aplicable = 1.0 + $diferencia_math;
@@ -1460,7 +1564,7 @@ class HomologationBuildings extends Component
         }
 
         // Finales
-        $factorResultante *= $conservacion_factor;
+        //$factorResultante *= $conservacion_factor;
         $unitValue = (float)($comparableModel->comparable_unit_value ?? 0);
 
         $this->comparableFactors[$comparableId]['FRE']['factor_ajuste'] = number_format($factorResultante, 4, '.', '');

@@ -84,6 +84,8 @@ class Buildings extends Component
         //Obtenemos el valor del building
         $this->building = BuildingModel::where('valuation_id', $this->valuation->id)->first();
 
+        $this->loadPrivateConstructions();
+
         //Hacemos la asignación a los valores
         // Variables tercer contenedor
         $this->sourceReplacementObtained = $this->building->source_replacement_obtained;
@@ -260,6 +262,17 @@ class Buildings extends Component
             $this->yearCompletedWork = date('Y') - $firstConstruction->age;
             $this->generalClassProperty = $firstConstruction->clasification;
         }
+
+
+        if ($this->building) {
+            $this->building->update([
+                'progress_general_works' => $this->progressGeneralWorks,
+                'year_completed_work'    => $this->yearCompletedWork,
+                'general_class_property' => $this->generalClassProperty,
+            ]);
+        }
+
+
     }
 
     //FUNCIONES PARA ELEMENTOS DE TABLAS
