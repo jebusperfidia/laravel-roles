@@ -18,13 +18,14 @@ window.Chart = Chart;
 // Leaflet
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-
+import domtoimage from "dom-to-image-more";
 
 
 
 // 3. Haz que las librerías importantes sean globales (si es necesario).
 //    bootstrap.js ya hace "window.Alpine = Alpine".
 window.L = L;
+window.domtoimage = domtoimage;
 
 // 4. Registra los plugins de Alpine DESPUÉS de que Alpine exista.
 //    Asegúrate de que la variable 'Toaster' esté disponible (la importación de masmerise debería encargarse de ello).

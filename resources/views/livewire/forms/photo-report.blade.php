@@ -61,6 +61,15 @@
 
                 {{-- BOTONES DE DESCARGA --}}
                 <div class="flex justify-end items-center mb-4 gap-2">
+
+                    @if(count($photosData) > 0)
+                    <flux:button type="button"
+                        onclick="confirm('¿Estás seguro?\n\nSe eliminarán TODOS los archivos de forma permanente.\n\nEsta acción no se puede deshacer.') || event.stopImmediatePropagation()"
+                        wire:click="deleteAllPhotos" icon="trash" size="sm"
+                        class="cursor-pointer btn-deleted btn-table">
+                        Eliminar todo
+                    </flux:button>
+                    @endif
                     <flux:button type="button" wire:click="downloadSelected" icon="document-arrow-down" size="sm"
                         class="cursor-pointer btn-primary btn-table">
                         Descargar seleccionados
@@ -137,23 +146,33 @@
                                 </td>
 
                                 {{-- 2. Vista Previa --}}
-                                <td class="px-2 py-1 border border-gray-300">
-                                    <div class="flex items-center justify-center">
-                                        <div
-                                            class="w-16 h-16 bg-gray-50 border border-gray-200 rounded flex items-center justify-center overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
-                                            @if($isPdf)
-                                            <div class="flex flex-col items-center text-red-600">
-                                                <flux:icon name="document-text" class="w-8 h-8" />
-                                                <span class="text-[9px] font-bold mt-1 text-gray-600">PDF</span>
-                                            </div>
-                                            @else
-                                            <img src="{{ asset('storage/' . $photo->file_path) }}"
-                                                class="object-contain w-full h-full"
-                                                style="transform: rotate({{ $photo->rotation_angle }}deg);">
-                                            @endif
-                                        </div>
+                          <td class="px-2 py-1 border border-gray-300">
+                            <div class="flex items-center justify-center py-2">
+                                {{--
+                                CAMBIO: Quitamos el botón absoluto invisible.
+                                Ahora el div contenedor tiene el wire:click directo.
+                                Esto elimina el "ruido" del cursor.
+                                --}}
+                                <div @if(!$isPdf) wire:click="openPreview({{ $photo->id }})"
+                                    class="w-32 h-32 bg-gray-50 border border-gray-200 rounded flex items-center justify-center overflow-hidden shadow-sm hover:scale-105 hover:shadow-md transition-all cursor-pointer"
+                                    @else
+                                    class="w-32 h-32 bg-gray-50 border border-gray-200 rounded flex items-center justify-center overflow-hidden shadow-sm"
+                                    @endif>
+
+                                    @if($isPdf)
+                                    <div class="flex flex-col items-center text-red-600">
+                                        <flux:icon name="document-text" class="w-12 h-12" />
+                                        <span class="text-[10px] font-bold mt-1 text-gray-600">PDF</span>
                                     </div>
-                                </td>
+                                    @else
+                                    {{-- Eliminamos el button invisible intermedio --}}
+                                    <img src="{{ asset('storage/' . $photo->file_path) }}"
+                                        class="object-contain w-full h-full pointer-events-none"
+                                        style="transform: rotate({{ $photo->rotation_angle }}deg);">
+                                    @endif
+                                </div>
+                            </div>
+                        </td>
 
                                 {{-- 3. Categoría (AHORA MÁS ANCHA) --}}
                                 <td class="px-2 py-1 border border-gray-300">
@@ -245,6 +264,31 @@
                 Continuar
             </flux:button>
         </div>
+{{-- <div x-data="{ openPdfModal: false }">
 
+    <flux:button @click="openPdfModal = true">IMPRIMIR AVALÚO</flux:button>
+
+    <div x-show="openPdfModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+        <div class="fixed inset-0 bg-black opacity-50" @click="openPdfModal = false"></div>
+
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+            <livewire:forms.pdf-export />
+        </div>
+    </div>
+</div>
+ --}}
+
+{{-- MODAL VISTA PREVIA: Simple, Fondo Blanco, GIGANTE --}}
+<flux:modal name="preview-modal" {{-- !max-w-[90vw] permite que crezca a lo ancho. w-auto se ajusta a la foto. --}}
+    class="bg-white p-2 rounded-xl shadow-2xl !max-w-[90vw] !w-auto h-auto outline-none">
+
+    <div class="relative flex items-center justify-center outline-none">
+        @if($previewPhoto)
+        <img src="{{ asset('storage/' . $previewPhoto->file_path) }}" {{-- max-h-[90vh] es la clave: fuerza la altura al
+            90% de tu pantalla --}} class="max-h-[90vh] object-contain rounded"
+            style="transform: rotate({{ $previewPhoto->rotation_angle }}deg);">
+        @endif
+    </div>
+</flux:modal>
     {{-- </form> --}}
 </div>

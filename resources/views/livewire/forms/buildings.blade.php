@@ -267,7 +267,7 @@
 
                                     // 5. Factor de conservación
                                     $factorConservacion = match ($item->conservation_state) {
-                                    '0. Ruidoso' => 0.0,
+                                    '0. Ruinoso' => 0.0,
                                     '0.8 Malo' => 0.8,
                                     '1. Normal', '1. Bueno' => 1.0,
                                     '1.1 Muy bueno', '1.1 Recientemente remodelado' => 1.1,
@@ -333,17 +333,25 @@
                                     @endif
 
                                 </tbody>
-                                <tfoot>
-                                    <tr class="font-bold">
-                                        <td colspan="11" class="px-2 py-1"></td>
+                               <tfoot>
+                                <tr class="font-bold">
+                                    {{-- 4 columnas vacías (Desc, Edad, Vida, Vida Remanente) --}}
+                                    <td colspan="4" class="px-2 py-1"></td>
 
-                                        <td class="px-2 py-1 text-xs text-center">
+                                    {{-- Columna 5: Suma de Superficie --}}
+                                    <td class="px-2 py-1 text-xs text-center">
+                                        {{ rtrim(rtrim(number_format($totalSurfacePrivate, 6, '.', ''), '0'), '.') }}
+                                    </td>
 
-                                            ${{ number_format($sumValuesTotalsPriv, 4)
-                                            }}
-                                        </td>
-                                    </tr>
-                                </tfoot>
+                                    {{-- 6 columnas vacías (C.Unit, F.Edad, F.Cons, Avance, F.Res, C.U.Neto) --}}
+                                    <td colspan="6" class="px-2 py-1"></td>
+
+                                    {{-- Columna 12: Suma de Valor Total --}}
+                                    <td class="px-2 py-1 text-xs text-center">
+                                        ${{ number_format($sumValuesTotalsPriv, 4) }}
+                                    </td>
+                                </tr>
+                            </tfoot>
                             </table>
                         </div>
                     </div>
@@ -558,7 +566,7 @@
 
                                     // 5. Factor de conservación
                                     $factorConservacion = match ($item->conservation_state) {
-                                    '0. Ruidoso' => 0.0,
+                                    '0. Ruinoso' => 0.0,
                                     '0.8 Malo' => 0.8,
                                     '1. Normal', '1. Bueno' => 1.0,
                                     '1.1 Muy bueno', '1.1 Recientemente remodelado' => 1.1,
@@ -626,12 +634,20 @@
                                 </tbody>
                                 <tfoot>
                                     <tr class="font-bold">
-                                        <td colspan="11" class="px-2 py-1"></td>
+                                        {{-- 4 columnas vacías --}}
+                                        <td colspan="4" class="px-2 py-1"></td>
 
+                                        {{-- Columna 5: Suma de Superficie Común --}}
                                         <td class="px-2 py-1 text-xs text-center">
+                                            {{ rtrim(rtrim(number_format($totalSurfaceCommon, 6, '.', ''), '0'), '.') }}
+                                        </td>
 
-                                            ${{ number_format($sumValuesTotalsCom, 4)
-                                            }}
+                                        {{-- 6 columnas vacías --}}
+                                        <td colspan="6" class="px-2 py-1"></td>
+
+                                        {{-- Columna 12: Suma de Valor Total Común --}}
+                                        <td class="px-2 py-1 text-xs text-center">
+                                            ${{ number_format($sumValuesTotalsCom, 4) }}
                                         </td>
                                     </tr>
                                 </tfoot>
@@ -801,7 +817,7 @@
                     <div class="radio-group-horizontal">
                         <flux:select wire:model="conservationStatus" class=" text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                            <flux:select.option value="Ruidoso">Ruidoso</flux:select.option>
+                            <flux:select.option value="Ruinoso">Ruinoso</flux:select.option>
                             <flux:select.option value="Malo">Malo</flux:select.option>
                             <flux:select.option value="Normal">Normal</flux:select.option>
                             <flux:select.option value="Bueno">Bueno</flux:select.option>

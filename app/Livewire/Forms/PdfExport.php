@@ -11,22 +11,21 @@ use App\Models\Forms\PhotoReport\PhotoReportModel;
 use App\Models\Forms\Homologation\HomologationValuationFactorModel;
 use App\Models\Forms\Homologation\HomologationComparableFactorModel;
 
-
-
 class PdfExport extends Component
 {
     public $headerType = 'ESTUDIO ÁLAMO: ARQUITECTURA + VALUACIÓN';
     public $sections = ['cover' => true, 'photos' => true, 'comparables' => true, 'map' => false, 'annexes' => false];
     public $valuationId;
 
-    // 1. PROPIEDAD PARA RECIBIR LA CAPTURA DE LA GRÁFICA
-    public $chartImageBase64;
+    // Ya no necesitamos la propiedad pública $chartImageBase64 persistente,
+    // la calculamos al vuelo dentro de generatePdf.
 
     public function mount()
     {
         $this->valuationId = Session::get('valuation_id');
     }
 
+    // 1. YA NO RECIBE PARÁMETROS. EL PDF BUSCA SUS PROPIOS RECURSOS.
     public function generatePdf()
     {
         if (!$this->valuationId) {
@@ -34,12 +33,28 @@ class PdfExport extends Component
             return;
         }
 
-        // 1. CARGA BASE
+        // --- LÓGICA DE LA GRÁFICA (ESTRATEGIA BOMBERO) ---
+        $chartImageBase64 = null;
+
+        // Construimos la ruta donde el JS debió haber guardado la imagen "mixed" (barras + líneas)
+        // Ruta: storage/app/public/homologation/lands/chart_{ID}_land_mixed.jpg
+        $chartPath = storage_path("app/public/homologation/lands/chart_{$this->valuationId}_land_mixed.jpg");
+
+        if (file_exists($chartPath)) {
+            // Leemos el archivo físico y lo convertimos a Base64 para DomPDF
+            // Esto es más seguro que pasarle la ruta 'http://...'
+            $type = pathinfo($chartPath, PATHINFO_EXTENSION);
+            $data = file_get_contents($chartPath);
+            $chartImageBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        }
+        // -------------------------------------------------
+
+        // 2. CARGA BASE
         $valuation = Valuation::with([
             'homologationLandAttributes',
         ])->find($this->valuationId);
 
-        // 2. CARGA DE COMPARABLES Y FACTORES
+        // 3. CARGA DE COMPARABLES Y FACTORES
         $landPivots = $valuation->landComparablePivots()->with('comparable')->get();
 
         $pivotIds = $landPivots->pluck('id');
@@ -51,7 +66,7 @@ class PdfExport extends Component
             $pivot->setRelation('factors', $allFactors->where('valuation_land_comparable_id', $pivot->id));
         }
 
-        // 3. OBTENER FACTORES DEL SUJETO
+        // 4. OBTENER FACTORES DEL SUJETO
         $rawSubjectFactors = HomologationValuationFactorModel::where('valuation_id', $this->valuationId)
             ->where('homologation_type', 'land')->get();
 
@@ -70,7 +85,7 @@ class PdfExport extends Component
 
         foreach ($bottom as $acr) if ($f = $rawSubjectFactors->firstWhere('acronym', $acr)) $orderedHeaders->push($f);
 
-        // 4. CÁLCULO DE ESTADÍSTICAS
+        // 5. CÁLCULO DE ESTADÍSTICAS
         $homologatedValues = collect();
         foreach ($landPivots as $pivot) {
             $fre = 1.0;
@@ -96,7 +111,7 @@ class PdfExport extends Component
             $stats['coef_var'] = ($stats['std_dev'] / $stats['avg']) * 100;
         }
 
-        // 5. REPORTE FOTOGRÁFICO
+        // 6. REPORTE FOTOGRÁFICO
         $photos = PhotoReportModel::where('valuation_id', $this->valuationId)
             ->where('is_printable', true)
             ->orderBy('sort_order', 'asc')
@@ -104,21 +119,22 @@ class PdfExport extends Component
 
         $config = ['header' => $this->headerType, 'sections' => $this->sections];
 
-        // 6. RENDERIZADO (PASANDO LA GRÁFICA)
-        // Agregamos 'chartImageBase64' al compact
+        // 7. RENDERIZADO
+        // Inyectamos $chartImageBase64 que leímos del disco
         $pdf = Pdf::loadView('pdf.master-report', compact(
             'valuation',
             'photos',
             'config',
             'orderedHeaders',
             'landPivots',
-            'stats'
-        ) + ['chartImageBase64' => $this->chartImageBase64])
+            'stats',
+            'chartImageBase64' // <--- AQUÍ VA LA VARIABLE CALCULADA
+        ))
             ->setPaper('letter', 'portrait')
             ->setOption('isHtml5ParserEnabled', true)
             ->setOption('isRemoteEnabled', true);
 
-        // 7. DESCARGA
+        // 8. DESCARGA
         $fileName = 'Avaluo_' . ($valuation->folio ?? 'Borrador') . '.pdf';
 
         return response()->streamDownload(function () use ($pdf) {

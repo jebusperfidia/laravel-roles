@@ -6,8 +6,10 @@ use Livewire\Component;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Flux\Flux;
 use Masmerise\Toaster\Toaster;
+use Illuminate\Support\Facades\Storage;
 
 use App\Models\Valuations\Valuation;
 
@@ -275,7 +277,7 @@ class HomologationBuildings extends Component
         '0.8' => 0.80, // Malo
         '1'   => 1.00, // Bueno, Normal, Nuevo
         '1.1' => 1.10, // Muy bueno, Recientemente remodelado
-        '0'   => 0.00, // Ruidoso
+        '0'   => 0.00, // Ruinoso
     ];
 
 
@@ -410,9 +412,10 @@ class HomologationBuildings extends Component
         'Normal' => 1.00,
         'Nuevo' => 1.00,
         'Malo' => 0.80,
+        'Malo' => 0.80,
         'Muy bueno' => 1.10,
         'Recientemente remodelado' => 1.10,
-        'Ruidoso' => 0.00
+        'Ruinoso' => 0.00
     ];
 
 
@@ -1445,9 +1448,11 @@ class HomologationBuildings extends Component
             } elseif ($sigla === $currentFsuAcronym) {
                 $subjectLand = (float)$this->subject_surface_construction ?? 0;
                 $compLand = (float)($comparableModel->comparable_built_area  ?? 0);
+
                 if ($subjectLand > 0 && $compLand > 0) {
                     $coeficiente = $compLand / $subjectLand;
                     $compRating = pow($coeficiente, (1 / 12));
+                    //dd($subjectLand,$compLand, $coeficiente, $compRating);
                 }
                 $diferencia_math = $sujetoRating - $compRating;
                 $aplicable = 1.0 + $diferencia_math;
@@ -2144,6 +2149,37 @@ class HomologationBuildings extends Component
         $this->comparableFactors[$comparableId]['FEQ']['diferencia'] = number_format($decimalSum, 4, '.', '');
 
         $this->recalculateSingleComparable($comparableId);
+    }
+
+    // --- GUARDADO DE GRÁFICAS (Igual que en Lands) ---
+    public function saveChartImage($base64Image, $chartName)
+    {
+        try {
+            // 1. Limpiar la cadena base64
+            // Viene como "data:image/jpeg;base64,/9j/4AAQSw..."
+            if (strpos($base64Image, ',') !== false) {
+                $image_parts = explode(";base64,", $base64Image);
+                $image_base64 = base64_decode($image_parts[1]);
+            } else {
+                $image_base64 = base64_decode($base64Image);
+            }
+
+            // 2. Definir nombre y ruta
+            // Guardamos en: storage/app/public/homologation/buildings/
+            // Nombre: chart_{valuation_id}_{chartName}.jpg
+            $fileName = "chart_{$this->idValuation}_{$chartName}.jpg";
+            $path = "homologation/buildings/{$fileName}";
+
+            // 3. Guardar en disco público
+            Storage::disk('public')->put($path, $image_base64);
+
+            // Opcional: Log para verificar (quítalo después)
+            // \Log::info("Imagen guardada: $path");
+
+        } catch (\Exception $e) {
+            // Si falla, no rompemos el flujo, solo lo registramos
+            Log::error("Error guardando gráfica building: " . $e->getMessage());
+        }
     }
 
     public function render()

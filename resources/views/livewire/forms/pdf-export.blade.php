@@ -17,10 +17,11 @@
                 console.log('✅ Canvas encontrado. Tomando foto...');
 
                 // Convertimos la gráfica a texto (Base64)
-                const chartBase64 = canvas.toDataURL('image/png');
+                const chartBase64 = canvas.toDataURL('image/jpeg', 0.6);
 
                 // 2. Se lo pasamos a Livewire ($wire es el puente mágico de Alpine)
-                await $wire.set('chartImageBase64', chartBase64);
+
+                $wire.generatePdf(chartBase64);
 
                 console.log('📤 Imagen enviada al backend. Generando PDF...');
 

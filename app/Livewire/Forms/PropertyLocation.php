@@ -6,6 +6,8 @@ use Livewire\Component;
 use Masmerise\Toaster\Toaster;
 use App\Models\Forms\PropertyLocation\PropertyLocationModel;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class PropertyLocation extends Component
 {
@@ -101,6 +103,47 @@ public function locate()
 
     // Tu función sanitizeDecimal es buena, pero la validación 'numeric' de Laravel
     // ya maneja la mayoría de los casos, por lo que se puede simplificar el código.
+
+
+    public function saveMapImages($macroBase64, $microBase64)
+    {
+        // Validación simple para no procesar si llegan vacíos
+        if (empty($macroBase64) && empty($microBase64)) {
+            return;
+        }
+
+        $valuationId = session('valuation_id');
+
+        // Función anónima para procesar el guardado y evitar repetir código
+        $processImage = function ($base64Data, $suffix) use ($valuationId) {
+            if (!$base64Data) return;
+
+            // 1. Limpiar el encabezado del string Base64 (data:image/png;base64,...)
+            if (strpos($base64Data, ',') !== false) {
+                $base64Data = explode(',', $base64Data)[1];
+            }
+
+            // 2. Decodificar
+            $imageContent = base64_decode($base64Data);
+
+            if ($imageContent === false) {
+                Log::error("Error al decodificar la imagen $suffix para valuación $valuationId");
+                return;
+            }
+
+            // 3. Definir nombre y ruta
+            // Guardamos en: storage/app/public/location_maps/
+            $filename = "map_{$valuationId}_{$suffix}.png";
+            $path = "location_maps/{$filename}";
+
+            // 4. Guardar en disco 'public'
+            Storage::disk('public')->put($path, $imageContent);
+        };
+
+        // Procesar ambas imágenes
+        $processImage($macroBase64, 'macro');
+        $processImage($microBase64, 'micro');
+    }
 
     public function render()
     {

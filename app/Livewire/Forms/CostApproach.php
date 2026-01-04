@@ -150,7 +150,8 @@ class CostApproach extends Component
             }
 
             $factorConservacion = match ($item->conservation_state) {
-                '0. Ruidoso' => 0.0,
+                '0. Ruinoso' => 0.0,
+                '0. Ruinoso' => 0.0,
                 '0.8 Malo' => 0.8,
                 '1. Normal', '1. Bueno', '1. Nuevo' => 1.0,
                 '1.1 Muy bueno', '1.1 Recientemente remodelado' => 1.1,

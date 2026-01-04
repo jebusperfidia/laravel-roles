@@ -1,9 +1,8 @@
 <style>
-
-
-
+    /* 1. AJUSTE DE MÁRGENES DE LA HOJA */
+    /* Dejamos más espacio arriba (3.5cm) y abajo (2.5cm) para que quepan Header y Footer sin tapar texto */
     @page {
-        margin: 0.5cm 1cm 1.5cm 1cm;
+       margin: 3.2cm 0.4cm 0.5cm 0.4cm;
     }
 
     body {
@@ -13,16 +12,94 @@
         color: #333;
     }
 
-    .page-number:before {
-    content: counter(page);
+    /* 2. DEFINICIÓN DEL HEADER FIJO */
+    header {
+       position: fixed;
+    top: -3cm;
+    left: 0cm;
+    right: 0cm;
+    height: 3cm;
+
     }
 
-    /* --- COLORES --- */
+    /* 3. DEFINICIÓN DEL FOOTER FIJO */
+  footer {
+position: fixed;
+/* Lo bajamos casi hasta el corte de hoja */
+bottom: -0.5cm;
+left: 0cm;
+right: 0cm;
+/* Altura suficiente para el logo, pero sin empujar el contenido hacia arriba */
+height: 3cm;
+}
+
+    /* --- ESTILOS DEL HEADER (EXTRAÍDOS DE TU FRONT PAGE) --- */
+    .header-logo-text {
+        font-size: 18px;
+        /* Ajustado un poco */
+        font-weight: bold;
+        color: #000;
+        letter-spacing: -1px;
+    }
+
+    .info-table {
+        width: 100%;
+        font-size: 8px;
+        border-collapse: separate;
+        border-spacing: 2px;
+    }
+
+    .info-label {
+        font-weight: bold;
+        text-align: right;
+        padding-right: 5px;
+        vertical-align: middle;
+        width: 40%;
+        background-color: #E0E0E0;
+        /* El gris para las etiquetas */
+        padding: 2px;
+    }
+
+    .info-value {
+        background-color: #F5F5F5;
+        /* Un gris más claro para los valores */
+        padding: 2px 5px;
+        text-align: left;
+        /* Cambiado a left para que se lea mejor */
+        vertical-align: middle;
+        font-weight: bold;
+    }
+
+    /* --- ESTILOS DEL FOOTER --- */
+    .footer-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: fill; /* Forzamos a que llene el contenedor */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    }
+
+    .footer-text-table {
+        width: 100%;
+        position: relative;
+        /* Juega con este top para "aterrizar" el texto sobre la barra verde */
+        top: 25px;
+        color: #555;
+        /* O blanco #FFF si tu barra es muy oscura */
+        font-size: 9px;
+    }
+
+    /* --- UTILIDADES GENERALES QUE YA TENÍAS --- */
+    .page-number:before {
+        content: counter(page);
+    }
+
     .text-brand {
         color: #25998b;
     }
 
-    /* Títulos en NEGRO como pediste */
     .section-header {
         color: #000;
         font-size: 11px;
@@ -33,7 +110,6 @@
         text-transform: uppercase;
     }
 
-    /* TABLAS Y GENERALES */
     table {
         width: 100%;
         border-collapse: collapse;
@@ -61,66 +137,11 @@
         text-transform: uppercase;
     }
 
-    /* --- FOOTER ORIGINAL (EL QUE TE GUSTABA) --- */
-    footer {
-        position: fixed;
-        bottom: -40px;
-        left: 0px;
-        right: 0px;
-        height: 30px;
-        border-top: 2px solid #25998b;
-        padding-top: 5px;
-        color: #555;
-    }
-
-  /*   .page-number:after {
-        content: counter(page);
-    } */
-
-    /* --- CLASES NUEVAS PARA EL HEADER (SOLO ESTO ES NUEVO) --- */
-    .header-logo-text {
-        font-size: 24px;
-        font-weight: bold;
-        color: #000;
-        letter-spacing: -1px;
-    }
-
-    .header-subtitle {
-        font-size: 10px;
-        color: #25998b;
-        letter-spacing: 3px;
-        font-weight: bold;
-        margin-top: -2px;
-    }
-
-    /* El cuadro de la derecha con gris */
-    .info-table {
-        width: 100%;
-        font-size: 8px;
-    }
-
-    .info-label {
-        font-weight: bold;
-        text-align: right;
-        padding-right: 5px;
-        vertical-align: middle;
-        width: 40%;
-    }
-
-    .info-value {
-        background-color: #d1d5db;
-        padding: 2px 5px;
-        text-align: right;
-        vertical-align: middle;
-        margin-bottom: 2px;
-    }
-
-    /* Ajuste foto portada */
+    /* Estilos específicos de secciones (Portada, Fotos, etc.) se mantienen igual... */
     .cover-photo-container {
         width: 100%;
         height: 350px;
         margin: 20px 0;
-        /* Sin bordes de color, limpio */
         text-align: center;
         overflow: hidden;
         background-color: #f9f9f9;
@@ -133,7 +154,6 @@
         object-position: center;
     }
 
-    /* Caja de valor */
     .value-box {
         margin-top: 30px;
         border: 2px solid #25998b;
@@ -142,7 +162,6 @@
         background-color: #f0fdfc;
     }
 
-    /* Fotos */
     .photo-cell {
         width: 50%;
         padding: 5px 10px;
@@ -167,5 +186,10 @@
         font-weight: bold;
         font-size: 9px;
         margin-top: 2px;
+    }
+
+    /* Salto de página forzado */
+    .page-break {
+        page-break-after: always;
     }
 </style>

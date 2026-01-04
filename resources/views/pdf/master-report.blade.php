@@ -9,23 +9,29 @@
 
 <body>
 
+    {{-- HEADER GLOBAL (Se repite en todas las páginas gracias a position: fixed) --}}
+    @include('pdf.partials.header')
+
     {{-- FOOTER GLOBAL --}}
     @include('pdf.partials.footer')
 
-    {{-- 1. PORTADA --}}
-    @include('pdf.sections.front-page')
+    {{-- CONTENIDO PRINCIPAL --}}
+    <main>
+        {{-- 1. PORTADA (Nota: Ya le quitamos el header interno) --}}
+        @include('pdf.sections.front-page')
 
-    {{-- 2. HOMOLOGACIÓN TERRENOS (Ahora va después de portada) --}}
-    @if(($config['sections']['comparables'] ?? false) && isset($landPivots) && $landPivots->count() >= 4)
-    <div style="page-break-before: always;"></div>
-    @include('pdf.sections.homologation-lands')
-    @endif
+        {{-- 2. HOMOLOGACIÓN TERRENOS --}}
+        @if(($config['sections']['comparables'] ?? false) && isset($landPivots) && $landPivots->count() >= 4)
+        <div class="page-break"></div>
+        @include('pdf.sections.homologation-lands')
+        @endif
 
-    {{-- 3. FOTOS (Ahora va al final) --}}
-    @if($photos->count() > 0)
-    <div style="page-break-before: always;"></div>
-    @include('pdf.sections.photos')
-    @endif
+        {{-- 3. FOTOS --}}
+        @if($photos->count() > 0)
+        <div class="page-break"></div>
+        @include('pdf.sections.photos')
+        @endif
+    </main>
 
 </body>
 

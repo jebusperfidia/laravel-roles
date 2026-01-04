@@ -7,6 +7,8 @@ use Livewire\Attributes\Computed;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Flux\Flux;
 use Masmerise\Toaster\Toaster;
 use App\Models\Valuations\Valuation;
@@ -1147,6 +1149,26 @@ class HomologationLands extends Component
         Session::put('comparables-active-session', true);
         Session::put('comparable-type', 'land');
         return redirect()->route('form.comparables.index');
+    }
+
+    public function saveChartImage($base64Image, $chartName)
+    {
+        if (!$base64Image || !$this->idValuation) return;
+
+        try {
+            // Limpiamos el prefijo del Base64
+            $image = str_replace('data:image/jpeg;base64,', '', $base64Image);
+            $image = str_replace(' ', '+', $image);
+
+            $folder = 'homologation/lands';
+            $name = "chart_{$this->idValuation}_{$chartName}.jpg";
+            $filePath = "{$folder}/{$name}";
+
+            // Guardamos en el disco public (storage/app/public/homologation/lands)
+         Storage::disk('public')->put($filePath, base64_decode($image));
+        } catch (\Exception $e) {
+            Log::error("Error al guardar captura de gráfica {$chartName}: " . $e->getMessage());
+        }
     }
 
 

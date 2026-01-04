@@ -245,7 +245,8 @@
                 </div>
 
                 {{-- Contenido Principal --}}
-                <div class="flex flex-col md:flex-row gap-x-6 gap-y-8" wire:loading.class="opacity-50">
+                <div class="flex flex-col md:flex-row gap-x-6 gap-y-8" wire:loading.class="opacity-50"
+                    wire:target="gotoPage, selectSurfaceOption, openComparablesLand">
 
                     {{-- FICHA DEL COMPARABLE --}}
                     <div class="md:w-1/3 w-full space-y-3" wire:key="ficha-{{ $selectedComparableId }}">
@@ -290,27 +291,32 @@
                                         number_format($selectedComparable->comparable_unit_value, 2) }}</dd>
 
 
-                                   <dt class="font-semibold text-gray-800 mt-2">
+                                    <dt class="font-semibold text-gray-800 mt-2">
                                         Vigencia/Fecha:
                                     </dt>
-                                   {{-- 1. Definimos la clase CSS directo en el elemento usando una condicional simple --}}
-                                <dd class="{{ $selectedComparable->dias_para_vencer < 0 ? 'text-red-600 font-bold' : 'text-teal-700 font-bold' }}">
+                                    {{-- 1. Definimos la clase CSS directo en el elemento usando una condicional simple
+                                    --}}
+                                    <dd
+                                        class="{{ $selectedComparable->dias_para_vencer < 0 ? 'text-red-600 font-bold' : 'text-teal-700 font-bold' }}">
 
-                                    @if ($selectedComparable->dias_para_vencer < 0) {{-- CASO VENCIDO: Usamos abs() para convertir -5 días a "5 días"
-                                        --}} Vencida (Hace {{ abs($selectedComparable->dias_para_vencer) }} días)
+                                        @if ($selectedComparable->dias_para_vencer < 0) {{-- CASO VENCIDO: Usamos abs()
+                                            para convertir -5 días a "5 días" --}} Vencida (Hace {{
+                                            abs($selectedComparable->dias_para_vencer) }} días)
 
-                                        @else
-                                        {{-- CASO VIGENTE: Mostramos días restantes y formateamos la fecha ahí mismo --}}
-                                        @php
-                                        // Solo para mostrar la fecha bonita entre paréntesis (sin recalcular días)
-                                        $fechaMostrar = $selectedComparable->comparable_date
-                                        ? \Carbon\Carbon::parse($selectedComparable->comparable_date)
-                                        : $selectedComparable->created_at;
-                                        @endphp
+                                            @else
+                                            {{-- CASO VIGENTE: Mostramos días restantes y formateamos la fecha ahí mismo
+                                            --}}
+                                            @php
+                                            // Solo para mostrar la fecha bonita entre paréntesis (sin recalcular días)
+                                            $fechaMostrar = $selectedComparable->comparable_date
+                                            ? \Carbon\Carbon::parse($selectedComparable->comparable_date)
+                                            : $selectedComparable->created_at;
+                                            @endphp
 
-                                        Quedan {{ $selectedComparable->dias_para_vencer }} Días ({{ $fechaMostrar->format('d/m/Y') }})
-                                        @endif
-                                </dd>
+                                            Quedan {{ $selectedComparable->dias_para_vencer }} Días ({{
+                                            $fechaMostrar->format('d/m/Y') }})
+                                            @endif
+                                    </dd>
                                 </div>
 
                                 <div>
@@ -345,15 +351,18 @@
                     </div>
 
                     {{-- TABLA DE FACTORES DE AJUSTE --}}
+                    {{-- TABLA DE FACTORES DE AJUSTE (VERSIÓN BLINDADA) --}}
                     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm md:w-2/3 w-full"
-                        wire:key="factores-{{ $selectedComparableId }}">
-                        <h4 class="font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">Factores de ajuste
-                            aplicados</h4>
+                        wire:key="container-factores-{{ $selectedComparableId }}">
+
+                        <h4 class="font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">
+                            Factores de ajuste aplicados
+                        </h4>
+
                         <div class="overflow-x-auto border border-gray-300 rounded-md">
                             <table class="w-full text-md table-fixed">
                                 <thead>
-                                    <tr
-                                        class="bg-gray-100 text-md font-semibold text-gray-500 border-b border-gray-300">
+                                    <tr class="bg-gray-100 text-md font-semibold text-gray-500 border-b border-gray-300">
                                         <th class="text-left py-2 px-3 w-20">Factor</th>
                                         <th class="text-left py-2 px-2 w-24">Cal. Sujeto</th>
                                         <th class="text-left py-2 px-2 w-24">Cal. Comp.</th>
@@ -361,10 +370,10 @@
                                         <th class="text-left py-2 px-3 w-24">Aplicable</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-200 bg-white">
+                                {{-- AÑADIMOS KEY AL TBODY PARA DAR ESTABILIDAD AL BLOQUE ENTERO --}}
+                                <tbody class="divide-y divide-gray-200 bg-white" wire:key="tbody-{{ $selectedComparableId }}">
                                     @foreach ($this->orderedComparableFactorsForView as $index => $factor)
                                     @php
-                                    // Declaración limpia de variables
                                     $sigla = $factor['acronym'];
                                     $sujetoRating = $factor['rating'];
 
@@ -373,13 +382,10 @@
                                     $diferencia = $factorData['diferencia'] ?? '0.0000';
                                     $aplicableCalc = $factorData['aplicable'] ?? '1.0000';
 
-                                    // Definimos qué es editable: Todo menos FNEG (tiene su propio input), FSU y FCUS
-                                  /*   (son calculados) */
                                     $isEditable = !in_array($sigla, ['FNEG', 'FSU', 'FCUS']);
                                     @endphp
 
-                                    <tr class="hover:bg-gray-50"
-                                        wire:key="comp-factor-{{ $selectedComparableId }}-{{ $sigla }}">
+                                    <tr class="hover:bg-gray-50" wire:key="row-{{ $selectedComparableId }}-{{ $sigla }}">
                                         {{-- 1. FACTOR --}}
                                         <td class="py-1.5 px-3 align-middle">
                                             <flux:label class="!py-0 !px-0 !m-0 font-medium text-gray-700 block">
@@ -394,18 +400,17 @@
                                             </flux:label>
                                         </td>
 
-                                        {{-- 3. CALIFICACIÓN COMPARABLE (Aquí cambiamos todo a Input) --}}
+                                        {{-- 3. CALIFICACIÓN COMPARABLE --}}
                                         <td class="py-1.5 px-2 text-left align-middle">
                                             @if($isEditable)
-                                            {{-- Input numérico editable (Lazy para no molestar) --}}
+                                            {{-- AQUÍ ESTÁ EL CAMBIO IMPORTANTE: .blur y wire:key ÚNICO --}}
                                             <flux:input type="number" step="0.0001"
-                                                wire:model.lazy="comparableFactors.{{ $selectedComparableId }}.{{ $sigla }}.calificacion"
-                                                placeholder="1.0000" class="text-left h-9 text-sm w-full" />
+                                                wire:model.blur="comparableFactors.{{ $selectedComparableId }}.{{ $sigla }}.calificacion"
+                                                wire:key="input-cal-{{ $selectedComparableId }}-{{ $sigla }}" placeholder="1.0000"
+                                                class="text-left h-9 text-sm w-full" />
                                             @elseif($sigla === 'FNEG')
-                                            {{-- FNEG no lleva calificación en esta columna --}}
                                             <flux:label class="text-gray-700 h-9 flex items-center px-1">-</flux:label>
                                             @else
-                                            {{-- Factores de solo lectura (FSU, FCUS) --}}
                                             <flux:label class="text-gray-700 h-9 flex items-center px-1">
                                                 {{ $compCalificacion }}
                                             </flux:label>
@@ -422,12 +427,12 @@
                                         {{-- 5. APLICABLE --}}
                                         <td class="py-1.5 px-3 text-left align-middle">
                                             @if($sigla === 'FNEG')
-                                            {{-- FNEG es editable aquí --}}
+                                            {{-- AQUÍ TAMBIÉN: .blur y wire:key ÚNICO --}}
                                             <flux:input type="number" step="0.0001"
-                                                wire:model.lazy="comparableFactors.{{ $selectedComparableId }}.{{ $sigla }}.aplicable"
-                                                placeholder="0.9000" class="text-left h-9 text-sm w-full" />
+                                                wire:model.blur="comparableFactors.{{ $selectedComparableId }}.{{ $sigla }}.aplicable"
+                                                wire:key="input-app-{{ $selectedComparableId }}-{{ $sigla }}" placeholder="0.9000"
+                                                class="text-left h-9 text-sm w-full" />
                                             @else
-                                            {{-- Los demás son calculados --}}
                                             <flux:label class="text-gray-900 font-bold">
                                                 {{ $aplicableCalc }}
                                             </flux:label>
@@ -439,15 +444,16 @@
                                 <tfoot class="bg-gray-100 border-t-2 border-gray-300">
                                     <tr class="font-extrabold text-md">
                                         <td colspan="4" class="py-2 px-3 text-right">FACTOR RESULTANTE (FRE):</td>
-                                        <td class="py-2 px-3 text-left text-gray-900">{{
-                                            $comparableFactors[$selectedComparableId]['FRE']['factor_ajuste'] ??
-                                            '1.0000' }}</td>
+                                        <td class="py-2 px-3 text-left text-gray-900">
+                                            {{ $comparableFactors[$selectedComparableId]['FRE']['factor_ajuste'] ?? '1.0000' }}
+                                        </td>
                                     </tr>
                                     <tr class="font-extrabold text-md">
                                         <td colspan="4" class="py-2 px-3 text-right">Valor Unitario Homologado:</td>
-                                        <td class="py-2 px-3 text-left text-gray-900">${{
-                                            number_format($comparableFactors[$selectedComparableId]['FRE']['valor_homologado']
-                                            ?? 0, 2) }}</td>
+                                        <td class="py-2 px-3 text-left text-gray-900">
+                                            ${{ number_format($comparableFactors[$selectedComparableId]['FRE']['valor_homologado'] ?? 0, 2)
+                                            }}
+                                        </td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -500,7 +506,7 @@
                                 @endphp
                                 <tr class="hover:bg-gray-50 ">
                                     <td class="py-1.5 px-3 align-middle text-sm">
-                                        <input type="checkbox" wire:model.live='selectedForStats'
+                                        <input type="checkbox" wire:model.blur='selectedForStats'
                                             value="{{ $comparable->id }}"
                                             class="rounded text-blue-600 focus:ring-blue-500 mr-2">
                                         {{ $comparable->id }}
@@ -547,11 +553,10 @@
                     {{-- <h4 class="text-sm font-semibold text-gray-500 mb-2 text-center">Comportamiento Oferta vs
                         Homologado
                     </h4> --}}
-                    <div x-data="chartHomologationLands()" x-init="init()" wire:ignore
-                        class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm w-full relative"
-                        style="height: 300px; min-height: 300px;">
-                        <canvas x-ref="chart1"></canvas>
-                    </div>
+                   <div x-data="chartHomologationLands()" wire:ignore
+                    class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm w-full relative h-[300px]">
+                    <canvas x-ref="chart1"></canvas>
+                </div>
                 </div>
             </div>
 
@@ -615,9 +620,8 @@
                     {{-- <h4 class="text-sm font-semibold text-gray-500 mb-2 text-center">Dispersión de Valores
                         Homologados
                     </h4> --}}
-                    <div x-data="chartHomologationStats()" x-init="init()" wire:ignore
-                        class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm w-full relative"
-                        style="height: 300px; min-height: 300px;">
+                    <div x-data="chartHomologationStats()" wire:ignore
+                        class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm w-full relative h-[300px] mt-4">
                         <canvas x-ref="chart2"></canvas>
                     </div>
                 </div>
@@ -637,7 +641,7 @@
                             class="block text-sm font-medium text-gray-700 whitespace-nowrap mb-1 md:mb-0">
                             TIPO DE REDONDEO SOBRE EL VALOR UNITARIO LOTE TIPO:
                         </label>
-                        <flux:select wire:model.live="conclusion_tipo_redondeo" id="tipo_redondeo"
+                        <flux:select wire:model.blur="conclusion_tipo_redondeo" id="tipo_redondeo"
                             class="w-full md:w-40 text-sm mt-1 md:mt-0">
                             <flux:select.option value="Unidades">Unidades</flux:select.option>
                             <flux:select.option value="Decenas">Decenas</flux:select.option>
@@ -666,58 +670,76 @@
 
     {{-- ======================================================================== --}}
     {{-- SCRIPT: LÓGICA DE GRÁFICAS - VERSIÓN "EVENTO NATIVO" --}}
- <script>
-    // 1. La Fábrica Global (Igualita que en Building)
-    // Usamos window para que no importe si navegas o recargas
+<script>
     if (typeof window.createChartManager === 'undefined') {
         window.createChartManager = function(chartType, eventName, refName) {
-            let chartInstance = null;
-
             return {
                 init() {
-                    // Si el elemento no existe (porque cambiaste de tab), adiós
-                    if (!this.$refs[refName]) return;
+                    this.destroyChart();
 
-                    this.drawChart({ labels: [], datasets: [] });
+                    this.$nextTick(() => {
+                        this.drawChart({ labels: [], datasets: [] });
+                    });
 
-                    // Escuchamos el evento
                     window.addEventListener(eventName, (event) => {
-                        // Doble validación por si la navegación mató el componente
-                        if (!this.$refs[refName]) return;
-
-                        let payload = event.detail;
+                        const payload = event.detail;
                         const dataToUse = (payload && payload.data) ? payload.data : payload;
 
                         if (dataToUse) {
-                            this.drawChart(dataToUse);
+                            this.$nextTick(() => {
+                                this.drawChart(dataToUse);
+                            });
                         }
                     });
                 },
 
+                destroyChart() {
+                    if (this.$el._chartInstance) {
+                        this.$el._chartInstance.destroy();
+                        this.$el._chartInstance = null;
+                    }
+                },
+
                 drawChart(data) {
                     try {
-                        const ctx = this.$refs[refName];
+                        const canvas = this.$refs[refName];
+                        if (!canvas) return;
+
+                        const ctx = canvas.getContext('2d');
                         if (!ctx) return;
 
-                        if (chartInstance) {
-                            chartInstance.destroy();
-                            chartInstance = null;
-                        }
+                        this.destroyChart();
 
-                        chartInstance = new Chart(ctx, {
+                        this.$el._chartInstance = new Chart(ctx, {
                             type: chartType,
                             data: data,
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                animation: { duration: 500 },
+                                animation: {
+                                    duration: 500, // Regresamos a tus 500ms originales
+                                    onComplete: () => {
+                                        const instance = this.$el._chartInstance;
+                                        if (instance && instance.canvas) {
+                                            const base64 = instance.canvas.toDataURL('image/jpeg', 0.8);
+                                            this.$wire.saveChartImage(base64, refName);
+                                        }
+                                    }
+                                },
                                 plugins: {
                                     legend: { display: false },
-                                    tooltip: { mode: 'index', intersect: false }
+                                    tooltip: { mode: 'index', intersect: false } // Regresamos tus tooltips originales
                                 },
                                 scales: {
-                                    y: { display: false, beginAtZero: true, grid: { display: false } },
-                                    x: { grid: { display: false }, ticks: { display: true, font: { size: 10 } } }
+                                    y: {
+                                        display: false,
+                                        beginAtZero: true,
+                                        grid: { display: false } // Regresamos configuración original
+                                    },
+                                    x: {
+                                        grid: { display: false },
+                                        ticks: { display: true, font: { size: 10 } } // Regresamos tus ticks originales
+                                    }
                                 }
                             }
                         });
@@ -729,17 +751,11 @@
         }
     }
 
-    // 2. Funciones Específicas para LANDS
-    // Aquí es donde ajustamos los nombres para que coincidan con tu HTML y tu PHP
-
     function chartHomologationLands() {
-        // Escucha 'updateLandChart1' y busca la ref 'chart1'
         return window.createChartManager('bar', 'updateLandChart1', 'chart1');
     }
 
     function chartHomologationStats() {
-        // Escucha 'updateLandChart2' y busca la ref 'chart2'
-        // NOTA: En tu error log vi que llamabas a esta función 'chartHomologationStats'
         return window.createChartManager('bar', 'updateLandChart2', 'chart2');
     }
 </script>

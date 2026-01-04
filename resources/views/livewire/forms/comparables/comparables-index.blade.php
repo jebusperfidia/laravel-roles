@@ -797,7 +797,7 @@
                     <flux:input.group>
                         <flux:select wire:model.live="comparableConservation" class="text-gray-800 [&_option]:text-gray-900">
                             <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                            <flux:select.option value="Ruidoso">Ruidoso</flux:select.option>
+                            <flux:select.option value="Ruinoso">Ruinoso</flux:select.option>
                             <flux:select.option value="Normal">Normal</flux:select.option>
                             <flux:select.option value="Bueno">Bueno</flux:select.option>
                             <flux:select.option value="Muy bueno">Muy bueno</flux:select.option>

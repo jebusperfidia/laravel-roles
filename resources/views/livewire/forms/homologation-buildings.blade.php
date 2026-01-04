@@ -433,7 +433,7 @@
                                                 <flux:select.option value="Nuevo">Nuevo</flux:select.option>
                                                 <flux:select.option value="Recientemente remodelado">Recientemente
                                                     remodelado</flux:select.option>
-                                                <flux:select.option value="Ruidoso">Ruidoso</flux:select.option>
+                                                <flux:select.option value="Ruinoso">Ruinoso</flux:select.option>
                                             </flux:select>
                                         </td>
                                         <td class="py-1.5 pl-3 align-middle text-gray-700 font-semibold">{{
@@ -457,10 +457,10 @@
                                                 </flux:select.option>
                                                 <flux:select.option value="Lote interior">Lote interior
                                                 </flux:select.option>
+                                                <flux:select.option value="Lote intermedio">Lote intemerdio
+                                                </flux:select.option>
                                                 <flux:select.option value="Manzana completa">Manzana completa
                                                 </flux:select.option>
-                                                <flux:select.option value="Recientemente remodelado">Recientemente
-                                                    remodelado</flux:select.option>
                                             </flux:select>
                                         </td>
                                         <td class="py-1.5 pl-3 align-middle text-gray-700 font-semibold">
@@ -1006,24 +1006,20 @@
 
 
 
-    <script>
-        // 1. La Fábrica (Global)
-    // La definimos en window para asegurar que esté disponible siempre
+<script>
+    // 1. La Fábrica (Global)
     window.createChartManager = function(chartType, eventName, refName) {
         let chartInstance = null;
 
         return {
             init() {
-                // BLINDAJE: Si el elemento no existe, abortar misión
                 if (!this.$refs[refName]) return;
 
+                // Dibujar inicial vacío o con datos si ya existen
                 this.drawChart({ labels: [], datasets: [] });
 
-                // Escucha de eventos
                 window.addEventListener(eventName, (event) => {
-                    // Doble chequeo por si el usuario cambió de página rápido
                     if (!this.$refs[refName]) return;
-
                     let payload = event.detail;
                     const dataToUse = (payload && payload.data) ? payload.data : payload;
 
@@ -1043,13 +1039,32 @@
                         chartInstance = null;
                     }
 
+                    // Referencia a 'this' para usar dentro del callback de Chart.js
+                    const self = this;
+
                     chartInstance = new Chart(ctx, {
                         type: chartType,
                         data: data,
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
-                            animation: { duration: 500 },
+                            animation: {
+                                duration: 500,
+                                // 🔥 AQUÍ ESTÁ LA MAGIA 🔥
+                                onComplete: () => {
+                                    // Solo guardamos si el canvas tiene contenido y dimensiones
+                                    if (chartInstance && chartInstance.canvas.width > 0) {
+                                        // Generar Base64 (JPG calidad 0.8 para no pesar tanto)
+                                        const base64 = chartInstance.canvas.toDataURL('image/jpeg', 0.8);
+
+                                        // Llamar a Livewire (PHP)
+                                        // Usamos self.$wire porque dentro de Chart 'this' es otra cosa
+                                        if(self.$wire && typeof self.$wire.saveChartImage === 'function'){
+                                            self.$wire.saveChartImage(base64, refName);
+                                        }
+                                    }
+                                }
+                            },
                             plugins: {
                                 legend: { display: false },
                                 tooltip: { mode: 'index', intersect: false }
@@ -1067,8 +1082,7 @@
         };
     }
 
-    // 2. Funciones Específicas (Globales)
-    // Al ser funciones normales, Alpine las encuentra siempre, sin importar la navegación.
+    // 2. Funciones Específicas
     function chartHomologationBuildings() {
         return createChartManager('bar', 'updateBuildingChart1', 'chart1');
     }
@@ -1076,5 +1090,5 @@
     function chartHomologationBuildingStats() {
         return createChartManager('bar', 'updateBuildingChart2', 'chart2');
     }
-    </script>
+</script>
 </div>

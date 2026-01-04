@@ -9,6 +9,7 @@
         "axios": "^1.7.4",
         "chart.js": "^4.5.1",
         "concurrently": "^9.0.1",
+        "dom-to-image-more": "^3.7.2",
         "laravel-vite-plugin": "^2.0",
         "leaflet": "^1.9.4",
         "sortablejs": "^1.15.6",

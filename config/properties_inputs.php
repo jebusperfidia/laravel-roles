@@ -160,7 +160,7 @@ return [
     ],
 
     'construction_conservation_state' => [
-        '0' => '0. Ruidoso',
+        '0' => '0. Ruinoso',
         '1' => '0.8 Malo',
         '2' => '1. Normal',
         '3' => '1. Bueno',
@@ -411,12 +411,12 @@ return [
         '5' => 'Lote',
     ],
     'special_installations_conservationFactor' => [
-        ['clave' => '1', 'nombre' => 'Ruidoso','factor' => '0'],
+        ['clave' => '1', 'nombre' => 'Ruinoso','factor' => '0.0'],
         ['clave' => '2', 'nombre' => 'Malo','factor' => '0.8'],
-        ['clave' => '3', 'nombre' => 'Normal','factor' => '1'],
-        ['clave' => '4', 'nombre' => 'Bueno','factor' => '1'],
+        ['clave' => '3', 'nombre' => 'Normal','factor' => '1.0'],
+        ['clave' => '4', 'nombre' => 'Bueno','factor' => '1.0'],
         ['clave' => '5', 'nombre' => 'Muy bueno','factor' => '1.1'],
-        ['clave' => '6', 'nombre' => 'Nuevo','factor' => '1'],
+        ['clave' => '6', 'nombre' => 'Nuevo','factor' => '1.0'],
         ['clave' => '7', 'nombre' => 'Recientemente remodelado','factor' => '1.1'],
     ],
 ];

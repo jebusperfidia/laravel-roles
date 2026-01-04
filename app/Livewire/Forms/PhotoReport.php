@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Masmerise\Toaster\Toaster;
 use ZipArchive;
+use Flux\Flux;
 
 class PhotoReport extends Component
 {
@@ -41,6 +42,8 @@ class PhotoReport extends Component
         'Proyecto arquitectónico / croquis',
         'Documento anexo / evidencia',
     ];
+
+    public $previewPhoto = null;
 
     public function mount($valuation)
     {
@@ -75,18 +78,16 @@ class PhotoReport extends Component
 
     public function updatedNewPhotos()
     {
-        // 1. Verificamos si realmente hay archivos
         if (empty($this->newPhotos)) return;
 
         $filesToProcess = is_array($this->newPhotos) ? $this->newPhotos : [$this->newPhotos];
         $validFiles = [];
-        $errorsCount = 0;
 
+        // Validaciones (Igual que antes)
         foreach ($filesToProcess as $file) {
-            // 2. Validar archivo individualmente
             $validator = Validator::make(
                 ['file' => $file],
-                ['file' => 'mimes:jpg,jpeg,png,pdf|max:5120'], // 5MB
+                ['file' => 'mimes:jpg,jpeg,png,pdf|max:5120'],
                 [
                     'file.mimes' => "El archivo '{$file->getClientOriginalName()}' no es un formato válido.",
                     'file.max' => "El archivo '{$file->getClientOriginalName()}' supera los 5MB."
@@ -94,16 +95,12 @@ class PhotoReport extends Component
             );
 
             if ($validator->fails()) {
-                // Si falla, avisamos con Toaster y pasamos al siguiente
                 Toaster::error($validator->errors()->first());
-                $errorsCount++;
                 continue;
             }
-
             $validFiles[] = $file;
         }
 
-        // 3. Procesar solo los archivos que pasaron la prueba
         if (empty($validFiles)) {
             $this->newPhotos = [];
             return;
@@ -121,27 +118,13 @@ class PhotoReport extends Component
             }
         }
 
-        // --- Lógica de inserción en DB (Misma que ya tenías) ---
-        $currentPhotos = PhotoReportModel::where('valuation_id', $this->valuation->id)
-            ->orderBy('sort_order', 'asc')
-            ->get();
+        // --- LÓGICA DE ORDENAMIENTO CAMBIADA ---
+        // Objetivo: "Sin clasificar" (Imágenes nuevas) deben quedar ABAJO de los PDFs.
 
-        // Insertar IMÁGENES
-        $startingIndex = -count($imagesToUpload);
-        foreach ($imagesToUpload as $index => $photo) {
-            $path = $photo->store('valuation-photos', 'public');
-            PhotoReportModel::create([
-                'valuation_id' => $this->valuation->id,
-                'file_path' => $path,
-                'file_name' => $photo->getClientOriginalName(),
-                'rotation_angle' => 0,
-                'sort_order' => $startingIndex + $index,
-                'is_printable' => true,
-            ]);
-        }
+        // 1. Obtenemos el orden máximo actual para empezar a agregar al final
+        $maxOrder = PhotoReportModel::where('valuation_id', $this->valuation->id)->max('sort_order') ?? 0;
 
-        // Insertar PDFs
-        $maxOrder = $currentPhotos->max('sort_order') ?? 0;
+        // 2. Primero insertamos los PDFs (quedarán arriba de las nuevas imágenes)
         foreach ($pdfsToUpload as $pdf) {
             $path = $pdf->store('valuation-photos', 'public');
             $maxOrder++;
@@ -152,18 +135,41 @@ class PhotoReport extends Component
                 'rotation_angle' => 0,
                 'sort_order' => $maxOrder,
                 'is_printable' => true,
+
             ]);
         }
 
-        $this->reindexPhotos();
-        $this->newPhotos = []; // Limpiamos el input
+        // 3. Al final insertamos las IMÁGENES (quedarán al fondo como "Sin clasificar")
+        foreach ($imagesToUpload as $photo) {
+            $path = $photo->store('valuation-photos', 'public');
+            $maxOrder++;
+            PhotoReportModel::create([
+                'valuation_id' => $this->valuation->id,
+                'file_path' => $path,
+                'file_name' => $photo->getClientOriginalName(),
+                'rotation_angle' => 0,
+                'sort_order' => $maxOrder,
+                'is_printable' => true,
+                'category' => 'Sin clasificar'
+            ]);
+        }
+
+        $this->organizePhotos();
+        $this->newPhotos = [];
         $this->refreshPhotosData();
 
-        // Mensaje final de éxito
         $successCount = count($validFiles);
-        Toaster::success("Se cargaron $successCount archivo(s) correctamente.");
+        Toaster::success("Se cargaron $successCount archivo(s).");
     }
-    protected function reindexPhotos()
+
+    public function openPreview($id)
+    {
+        $this->previewPhoto = PhotoReportModel::find($id);
+
+        Flux::modal('preview-modal')->show();
+    }
+
+    /* protected function reindexPhotos()
     {
         $allPhotos = PhotoReportModel::where('valuation_id', $this->valuation->id)
             ->orderBy('sort_order', 'asc')
@@ -171,6 +177,57 @@ class PhotoReport extends Component
 
         foreach ($allPhotos as $index => $photo) {
             $photo->update(['sort_order' => $index + 1]);
+        }
+    } */
+
+    public function organizePhotos()
+    {
+        $photos = PhotoReportModel::where('valuation_id', $this->valuation->id)->get();
+
+        $sortedPhotos = $photos->sort(function ($a, $b) {
+
+            // Función para calcular en qué GRUPO va la foto
+            $getGroupWeight = function ($item) {
+                $isPdf = Str::endsWith(Str::lower($item->file_path), '.pdf');
+                $cat = $item->category ?? 'Sin clasificar';
+
+                // REGLA 3: AL FONDO (PESO 30)
+                // Es imagen Y dice "Sin clasificar"
+                if (!$isPdf && ($cat === 'Sin clasificar' || empty($cat))) {
+                    return 30;
+                }
+
+                // REGLA 2: EN MEDIO (PESO 20)
+                // Es PDF -O- es una imagen categorizada como "Documento anexo..."
+                if ($isPdf || $cat === 'Documento anexo / evidencia') {
+                    return 20;
+                }
+
+                // REGLA 1: ARRIBA (PESO 10)
+                // Cualquier otra imagen clasificada (Fachada, Recámara, etc.)
+                // Aquí ya no importa si es Fachada o Cocina, todas valen 10.
+                return 10;
+            };
+
+            $weightA = $getGroupWeight($a);
+            $weightB = $getGroupWeight($b);
+
+            // Si están en grupos diferentes, gana el grupo más ligero (10 antes que 20)
+            if ($weightA !== $weightB) {
+                return $weightA <=> $weightB;
+            }
+
+            // --- AQUÍ ESTÁ EL FIX ---
+            // Si están en el MISMO grupo (ej: cambiaste de Cocina a Recámara, ambas son Peso 10),
+            // usamos su 'sort_order' actual para NO moverlas de lugar.
+            return $a->sort_order <=> $b->sort_order;
+        });
+
+        // Guardamos el nuevo orden en la BD
+        foreach ($sortedPhotos->values() as $index => $photo) {
+            if ($photo->sort_order !== ($index + 1)) {
+                $photo->update(['sort_order' => $index + 1]);
+            }
         }
     }
 
@@ -187,6 +244,24 @@ class PhotoReport extends Component
         $photo->update([
             $dbColumn => $this->photosData[$id][$field]
         ]);
+
+        // 2. DETECTAR CAMBIO DE CATEGORÍA
+        // Si el usuario cambia la categoría, reordenamos todo para mover la foto a su lugar correcto.
+        if ($field === 'category') {
+            // Actualizamos el objeto en memoria para que el sort lo detecte bien
+            $photo->category = $this->photosData[$id][$field];
+
+            // Disparamos el reordenamiento
+            $this->organizePhotos();
+
+            $this->refreshPhotosData(); // Refrescamos la vista
+            $this->dispatch('photos-updated'); // Avisamos al frontend
+
+            // Opcional: Si quieres ser muy agresivo, no muestres toaster aquí,
+            // porque visualmente la fila "salta" de lugar y eso ya es feedback suficiente.
+            Toaster::success('Lista reordenada automáticamente');
+            return;
+        }
 
         $msg = match ($field) {
             'category' => 'Categoría actualizada',
@@ -284,6 +359,37 @@ class PhotoReport extends Component
         /* Toaster::success('Formulario guardado con éxito'); */
         return redirect()->route('form.index', ['section' => 'pre-appraisal-considerations']);
     }
+
+
+    public function deleteAllPhotos()
+    {
+        // 1. Obtenemos todas las fotos de este avalúo
+        $photos = PhotoReportModel::where('valuation_id', $this->valuation->id)->get();
+
+        if ($photos->isEmpty()) {
+            Toaster::error('No hay archivos para eliminar');
+            return;
+        }
+
+        // 2. Borramos los archivos físicos del disco
+        foreach ($photos as $photo) {
+            if (Storage::disk('public')->exists($photo->file_path)) {
+                Storage::disk('public')->delete($photo->file_path);
+            }
+        }
+
+        // 3. Borramos los registros de la base de datos de un jalón
+        PhotoReportModel::where('valuation_id', $this->valuation->id)->delete();
+
+        // 4. Limpiamos las variables locales y re-indexamos (aunque quede vacío)
+        $this->photosData = [];
+        $this->refreshPhotosData();
+
+        Toaster::error('Archivos eliminados con éxito');
+    }
+
+
+
 
     public function render()
     {

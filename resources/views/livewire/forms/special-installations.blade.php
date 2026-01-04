@@ -142,7 +142,12 @@
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        @php
+                                        $factorObj = collect($select_conservation_factor)->firstWhere('clave', $item->conservation_factor);
+                                        @endphp
+                                        {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' : $item->conservation_factor }}
+                                    </td>
                                     <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">N/A</td>
                                     <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
@@ -224,7 +229,12 @@
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
                                 <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
+                               <td class="px-2 py-1 border text-sm text-center">
+                                    @php
+                                    $factorObj = collect($select_conservation_factor)->firstWhere('clave', $item->conservation_factor);
+                                    @endphp
+                                    {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' : $item->conservation_factor }}
+                                </td>
                                 <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
                                 <td class="px-2 py-1 border text-sm text-center">N/A</td>
                                 <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
@@ -309,7 +319,12 @@
                             <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
                             <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
                             <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
-                            <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
+                            <td class="px-2 py-1 border text-sm text-center">
+                                @php
+                                $factorObj = collect($select_conservation_factor)->firstWhere('clave', $item->conservation_factor);
+                                @endphp
+                                {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' : $item->conservation_factor }}
+                            </td>
                             <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
                             <td class="px-2 py-1 border text-sm text-center">N/A</td>
                             <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
@@ -398,7 +413,12 @@
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
                                 <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">
+                                    @php
+                                    $factorObj = collect($select_conservation_factor)->firstWhere('clave', $item->conservation_factor);
+                                    @endphp
+                                    {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' : $item->conservation_factor }}
+                                </td>
                                 <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}} %</td>
                                 <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
@@ -481,7 +501,12 @@
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
                                 <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
+                                <td class="px-2 py-1 border text-sm text-center">
+                                    @php
+                                    $factorObj = collect($select_conservation_factor)->firstWhere('clave', $item->conservation_factor);
+                                    @endphp
+                                    {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' : $item->conservation_factor }}
+                                </td>
                                 <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
                                 <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}} %</td>
                                 <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
@@ -562,7 +587,12 @@
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{$item->conservation_factor}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        @php
+                                        $factorObj = collect($select_conservation_factor)->firstWhere('clave', $item->conservation_factor);
+                                        @endphp
+                                        {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' : $item->conservation_factor }}
+                                    </td>
                                     <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}} %</td>
                                     <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
@@ -1007,27 +1037,33 @@
             <flux:dropdown inline position="bottom" align="start" class="w-full">
 
                 {{-- BOTÓN --}}
-                <button @click.stop.prevent
-                    @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=>
-                    !$errors->has('conservationFactor'),
-                    'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
-                    $errors->has('conservationFactor'),
-                    ])>
-                    <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
-                    <span class="flex-1 text-left text-gray-700 truncate">
-                        @if($conservationFactor)
-                        {{ $conservationFactor}} –
-                        {{ collect($select_conservation_factor)->firstWhere('clave', $conservationFactor)['nombre'] }}
-                        @else
-                        -- Selecciona una opción --
-                        @endif
-                    </span>
-                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
+              {{-- BOTÓN CON LÓGICA SEGURA --}}
+            <button @click.stop.prevent
+                @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
+                , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('conservationFactor'),
+                'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
+                $errors->has('conservationFactor'),
+                ])>
+
+                <span class="flex-1 text-left text-gray-700 truncate">
+                    @php
+                    // Buscamos el elemento completo basado en la clave guardada
+                    $seleccionado = collect($select_conservation_factor)->firstWhere('clave', $conservationFactor);
+                    @endphp
+
+                    @if($seleccionado)
+                    {{-- AQUÍ DECIDES QUÉ MOSTRAR: Nombre y Factor --}}
+                    {{ $seleccionado['nombre'] }} - {{ $seleccionado['factor'] }}
+                    @else
+                    -- Selecciona una opción --
+                    @endif
+                </span>
+
+                <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
 
                 {{-- MENÚ --}}
                 <!-- CAMBIO 2: Se cambió w-3/5 por w-full para que el menú ocupe todo el ancho por defecto -->
@@ -1453,24 +1489,30 @@
             <flux:dropdown inline position="bottom" align="start" class="w-full">
 
                 {{-- BOTÓN --}}
+                {{-- BOTÓN CON LÓGICA SEGURA --}}
                 <button @click.stop.prevent
                     @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=>
-                    !$errors->has('conservationFactor'),
+                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('conservationFactor'),
                     'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
                     $errors->has('conservationFactor'),
                     ])>
-                    <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
+
                     <span class="flex-1 text-left text-gray-700 truncate">
-                        @if($conservationFactor)
-                        {{ $conservationFactor}} –
-                        {{ collect($select_conservation_factor)->firstWhere('clave', $conservationFactor)['nombre'] }}
+                        @php
+                        // Buscamos el elemento completo basado en la clave guardada
+                        $seleccionado = collect($select_conservation_factor)->firstWhere('clave', $conservationFactor);
+                        @endphp
+
+                        @if($seleccionado)
+                        {{-- AQUÍ DECIDES QUÉ MOSTRAR: Nombre y Factor --}}
+                        {{ $seleccionado['nombre'] }} - {{ $seleccionado['factor'] }}
                         @else
                         -- Selecciona una opción --
                         @endif
                     </span>
-                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
+
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
