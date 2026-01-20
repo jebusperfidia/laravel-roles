@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Forms;
 
+use App\Services\DipomexService;
+
 use Livewire\Component;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Session;
@@ -10,49 +12,79 @@ use App\Models\Valuations\Valuation;
 use App\Models\Forms\PhotoReport\PhotoReportModel;
 use App\Models\Forms\Homologation\HomologationValuationFactorModel;
 use App\Models\Forms\Homologation\HomologationComparableFactorModel;
+use App\Models\Forms\DeclarationWarning\DeclarationsWarningsModel;
+
 
 class PdfExport extends Component
 {
     public $headerType = 'ESTUDIO ÁLAMO: ARQUITECTURA + VALUACIÓN';
     public $sections = ['cover' => true, 'photos' => true, 'comparables' => true, 'map' => false, 'annexes' => false];
     public $valuationId;
+    public $valuation;
+    //public $addiontalLimits;
 
-    // Ya no necesitamos la propiedad pública $chartImageBase64 persistente,
-    // la calculamos al vuelo dentro de generatePdf.
 
     public function mount()
     {
         $this->valuationId = Session::get('valuation_id');
     }
 
-    // 1. YA NO RECIBE PARÁMETROS. EL PDF BUSCA SUS PROPIOS RECURSOS.
-    public function generatePdf()
+
+    public function generatePdf(DipomexService $dipomexService)
     {
         if (!$this->valuationId) {
             Toaster::error('No hay avalúo seleccionado.');
             return;
         }
 
-        // --- LÓGICA DE LA GRÁFICA (ESTRATEGIA BOMBERO) ---
-        $chartImageBase64 = null;
+        $valuation = Valuation::find($this->valuationId);
 
-        // Construimos la ruta donde el JS debió haber guardado la imagen "mixed" (barras + líneas)
-        // Ruta: storage/app/public/homologation/lands/chart_{ID}_land_mixed.jpg
-        $chartPath = storage_path("app/public/homologation/lands/chart_{$this->valuationId}_land_mixed.jpg");
+        $this->valuation = $valuation;
 
-        if (file_exists($chartPath)) {
-            // Leemos el archivo físico y lo convertimos a Base64 para DomPDF
-            // Esto es más seguro que pasarle la ruta 'http://...'
-            $type = pathinfo($chartPath, PATHINFO_EXTENSION);
-            $data = file_get_contents($chartPath);
-            $chartImageBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
-        }
-        // -------------------------------------------------
+        //dd($valuation);
+
+        // 1. Obtener el nombre del Estado
+        // Consultamos todos y buscamos el que coincida con el ID guardado
+        $estados = $dipomexService->getEstados();
+        $getNombreMunicipio = function ($estadoId, $municipioId) use ($dipomexService) {
+            if (!$estadoId || !$municipioId) return 'N/A';
+
+            // Obtenemos la lista de municipios para ese estado
+            $municipios = $dipomexService->getRawMunicipiosPorEstado($estadoId);
+
+            // Buscamos el ID específico
+            foreach ($municipios as $mun) {
+                if ($mun['MUNICIPIO_ID'] == $municipioId) {
+                    return $mun['MUNICIPIO'];
+                }
+            }
+            return 'N/A';
+        };
+
+        // A) DATOS DE UBICACIÓN DEL INMUEBLE
+        $estadoInmueble    = $estados[$valuation->property_entity] ?? 'N/A';
+        $municipioInmueble = $getNombreMunicipio($valuation->property_entity, $valuation->property_locality);
+
+        // B) DATOS DEL SOLICITANTE
+        $estadoSolicitante    = $estados[$valuation->applic_entity] ?? 'N/A';
+        $municipioSolicitante = $getNombreMunicipio($valuation->applic_entity, $valuation->applic_locality);
+
+        // C) DATOS DEL PROPIETARIO
+        $estadoPropietario    = $estados[$valuation->owner_entity] ?? 'N/A';
+        $municipioPropietario = $getNombreMunicipio($valuation->owner_entity, $valuation->owner_locality);
 
         // 2. CARGA BASE
         $valuation = Valuation::with([
             'homologationLandAttributes',
         ])->find($this->valuationId);
+
+        $declarationsWarnings = DeclarationsWarningsModel::where('valuation_id', $this->valuationId)->first();
+
+        //dd($declarationsWarnings);
+
+        $addiontalLimits = $declarationsWarnings->additional_limits;
+
+        //dd($this->addiontalLimits);
 
         // 3. CARGA DE COMPARABLES Y FACTORES
         $landPivots = $valuation->landComparablePivots()->with('comparable')->get();
@@ -119,6 +151,23 @@ class PdfExport extends Component
 
         $config = ['header' => $this->headerType, 'sections' => $this->sections];
 
+
+
+        $chartFilename = "chart_$this->valuationId"."_chart1.jpg";
+        $chartPath = storage_path("app\public\homologation\lands\\".$chartFilename);
+
+        //dd($chartPath);
+
+        $chartImageBase64 = null;
+
+        // Convertimos a Base64 para que DomPDF no llore con permisos o rutas
+        if (file_exists($chartPath)) {
+            // Leemos el archivo y lo convertimos
+            $chartData = file_get_contents($chartPath);
+            $chartImageBase64 = 'data:image/jpeg;base64,' . base64_encode($chartData);
+        }
+
+
         // 7. RENDERIZADO
         // Inyectamos $chartImageBase64 que leímos del disco
         $pdf = Pdf::loadView('pdf.master-report', compact(
@@ -128,7 +177,14 @@ class PdfExport extends Component
             'orderedHeaders',
             'landPivots',
             'stats',
-            'chartImageBase64' // <--- AQUÍ VA LA VARIABLE CALCULADA
+            'chartImageBase64',
+            'estadoInmueble',
+            'municipioInmueble',
+            'estadoSolicitante',
+            'municipioSolicitante',
+            'estadoPropietario',
+            'municipioPropietario',
+            'addiontalLimits'
         ))
             ->setPaper('letter', 'portrait')
             ->setOption('isHtml5ParserEnabled', true)

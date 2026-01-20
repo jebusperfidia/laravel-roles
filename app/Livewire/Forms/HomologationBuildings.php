@@ -1454,8 +1454,8 @@ class HomologationBuildings extends Component
                     $compRating = pow($coeficiente, (1 / 12));
                     //dd($subjectLand,$compLand, $coeficiente, $compRating);
                 }
-                $diferencia_math = $sujetoRating - $compRating;
-                $aplicable = 1.0 + $diferencia_math;
+                $diferencia_math = 0.0000;
+                $aplicable = $compRating;
                 $rating_to_save = $compRating;
             } elseif ($sigla === 'FIC') {
                 // ... (Tu lógica FIC original se mantiene intacta) ...

@@ -169,7 +169,7 @@ class PhotoReport extends Component
         Flux::modal('preview-modal')->show();
     }
 
-    /* protected function reindexPhotos()
+    protected function reindexPhotos()
     {
         $allPhotos = PhotoReportModel::where('valuation_id', $this->valuation->id)
             ->orderBy('sort_order', 'asc')
@@ -178,7 +178,7 @@ class PhotoReport extends Component
         foreach ($allPhotos as $index => $photo) {
             $photo->update(['sort_order' => $index + 1]);
         }
-    } */
+    }
 
     public function organizePhotos()
     {

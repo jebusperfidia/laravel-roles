@@ -19,18 +19,42 @@
     <main>
         {{-- 1. PORTADA (Nota: Ya le quitamos el header interno) --}}
         @include('pdf.sections.front-page')
+        <div class="page-break"></div>
 
-        {{-- 2. HOMOLOGACIÓN TERRENOS --}}
+        {{-- 2. ASPECTOS GENERALES --}}
+        @include('pdf.sections.general-aspects-1')
+        <div class="page-break"></div>
+
+        @include('pdf.sections.general-aspects-2')
+        <div class="page-break"></div>
+
+        {{-- 3. CARACTERÍSTICAS PARTICULARES --}}
+        @include('pdf.sections.particular-characteristics-1')
+         <div class="page-break"></div>
+
+
+
+
+        @include('pdf.sections.particular-characteristics-2')
+        <div class="page-break"></div>
+
+        {{-- 4. ENFOQUE COMPARATIVO DEL MERCADO --}}
         @if(($config['sections']['comparables'] ?? false) && isset($landPivots) && $landPivots->count() >= 4)
         <div class="page-break"></div>
         @include('pdf.sections.homologation-lands')
         @endif
 
-        {{-- 3. FOTOS --}}
+
+        {{-- 5. CONCLUSIONES --}}
+       {{--  @include('pdf.sections.conclusions')
+        <div class="page-break"></div> --}}
+
+        {{-- 6. FOTOS --}}
         @if($photos->count() > 0)
         <div class="page-break"></div>
         @include('pdf.sections.photos')
         @endif
+
     </main>
 
 </body>

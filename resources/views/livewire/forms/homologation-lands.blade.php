@@ -717,28 +717,45 @@
                                 responsive: true,
                                 maintainAspectRatio: false,
                                 animation: {
-                                    duration: 500, // Regresamos a tus 500ms originales
+                                    duration: 500,
+                                    // AQUÍ ESTÁ LA MAGIA (SIN PLUGINS)
                                     onComplete: () => {
-                                        const instance = this.$el._chartInstance;
-                                        if (instance && instance.canvas) {
-                                            const base64 = instance.canvas.toDataURL('image/jpeg', 0.8);
+                                        const chart = this.$el._chartInstance;
+                                        if (chart && chart.canvas) {
+                                            const ctx = chart.ctx;
+
+                                            // 1. Guardamos el estado actual
+                                            ctx.save();
+
+                                            // 2. Le decimos: "Pinta DETRÁS de lo que ya existe"
+                                            ctx.globalCompositeOperation = 'destination-over';
+
+                                            // 3. Pintamos TODO el rectángulo de blanco
+                                            ctx.fillStyle = '#ffffff';
+                                            ctx.fillRect(0, 0, chart.width, chart.height);
+
+                                            // 4. Restauramos para no afectar futuros renders
+                                            ctx.restore();
+
+                                            // 5. AHORA SÍ, FOTO EN JPEG
+                                            const base64 = chart.canvas.toDataURL('image/jpeg', 0.9);
                                             this.$wire.saveChartImage(base64, refName);
                                         }
                                     }
                                 },
                                 plugins: {
                                     legend: { display: false },
-                                    tooltip: { mode: 'index', intersect: false } // Regresamos tus tooltips originales
+                                    tooltip: { mode: 'index', intersect: false }
                                 },
                                 scales: {
                                     y: {
                                         display: false,
                                         beginAtZero: true,
-                                        grid: { display: false } // Regresamos configuración original
+                                        grid: { display: false }
                                     },
                                     x: {
                                         grid: { display: false },
-                                        ticks: { display: true, font: { size: 10 } } // Regresamos tus ticks originales
+                                        ticks: { display: true, font: { size: 10 } }
                                     }
                                 }
                             }
@@ -759,5 +776,4 @@
         return window.createChartManager('bar', 'updateLandChart2', 'chart2');
     }
 </script>
-
 </div>

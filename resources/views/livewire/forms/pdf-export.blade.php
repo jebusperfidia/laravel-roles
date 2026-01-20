@@ -4,39 +4,7 @@
     {{-- ÁREA FUNCIONAL (EL BOTÓN QUE DA LA ORDEN) --}}
     {{-- ============================================================== --}}
 
-    <div class="form-container" x-data="{
-        async captureChartAndDownload() {
-            console.log('🔍 Buscando la gráfica en la pantalla...');
-
-            // 1. Buscamos el canvas.
-            // NOTA: Busca el primer <canvas> que encuentre en toda la página.
-            // Si tienes varios, capturará el primero.
-            const canvas = document.querySelector('canvas');
-
-            if (canvas) {
-                console.log('✅ Canvas encontrado. Tomando foto...');
-
-                // Convertimos la gráfica a texto (Base64)
-                const chartBase64 = canvas.toDataURL('image/jpeg', 0.6);
-
-                // 2. Se lo pasamos a Livewire ($wire es el puente mágico de Alpine)
-
-                $wire.generatePdf(chartBase64);
-
-                console.log('📤 Imagen enviada al backend. Generando PDF...');
-
-                // 3. Ordenamos generar el PDF
-                $wire.generatePdf();
-
-            } else {
-                console.error('❌ NO SE ENCONTRÓ NINGÚN CANVAS');
-                alert('No encuentro la gráfica en la pantalla. Se generará el PDF sin ella.');
-
-                // Generamos el PDF aunque no haya gráfica
-                $wire.generatePdf();
-            }
-        }
-    }">
+    <div class="form-container">
         <div class="form-container__header">
             Impresión PDF
         </div>
@@ -47,7 +15,7 @@
                 <p class="text-sm text-gray-500">Generar el PDF con la configuración actual.</p>
 
                 {{-- El botón dispara la función de arriba --}}
-                <flux:button @click="captureChartAndDownload" variant="primary" icon="printer"
+                <flux:button wire:click="generatePdf" variant="primary" icon="printer"
                     class="btn-primary cursor-pointer">
                     GENERAR PDF
                 </flux:button>

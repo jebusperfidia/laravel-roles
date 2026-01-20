@@ -1031,16 +1031,23 @@
 
             drawChart(data) {
                 try {
-                    const ctx = this.$refs[refName];
-                    if (!ctx) return;
+                    const canvas = this.$refs[refName];
+                    if (!canvas) return;
 
+                    // Referencia a 'this' de Alpine para usar dentro del callback
+                    const self = this;
+
+                    // Destruir instancia previa si existe
                     if (chartInstance) {
                         chartInstance.destroy();
                         chartInstance = null;
                     }
+                    // También revisar si quedó pegada al elemento DOM (por si acaso)
+                    if (this.$el._chartInstance) {
+                        this.$el._chartInstance.destroy();
+                    }
 
-                    // Referencia a 'this' para usar dentro del callback de Chart.js
-                    const self = this;
+                    const ctx = canvas.getContext('2d');
 
                     chartInstance = new Chart(ctx, {
                         type: chartType,
@@ -1050,15 +1057,28 @@
                             maintainAspectRatio: false,
                             animation: {
                                 duration: 500,
-                                // 🔥 AQUÍ ESTÁ LA MAGIA 🔥
+                                // 🔥 AQUÍ ESTÁ EL FIX DEL FONDO BLANCO 🔥
                                 onComplete: () => {
-                                    // Solo guardamos si el canvas tiene contenido y dimensiones
-                                    if (chartInstance && chartInstance.canvas.width > 0) {
-                                        // Generar Base64 (JPG calidad 0.8 para no pesar tanto)
-                                        const base64 = chartInstance.canvas.toDataURL('image/jpeg', 0.8);
+                                    if (chartInstance && chartInstance.canvas) {
+                                        const ctx = chartInstance.ctx;
 
-                                        // Llamar a Livewire (PHP)
-                                        // Usamos self.$wire porque dentro de Chart 'this' es otra cosa
+                                        // 1. Guardamos estado
+                                        ctx.save();
+
+                                        // 2. Pintamos DETRÁS de la gráfica
+                                        ctx.globalCompositeOperation = 'destination-over';
+
+                                        // 3. Relleno blanco puro
+                                        ctx.fillStyle = '#ffffff';
+                                        ctx.fillRect(0, 0, chartInstance.width, chartInstance.height);
+
+                                        // 4. Restauramos
+                                        ctx.restore();
+
+                                        // 5. Generamos la imagen
+                                        const base64 = chartInstance.canvas.toDataURL('image/jpeg', 0.9);
+
+                                        // 6. Enviamos a Livewire
                                         if(self.$wire && typeof self.$wire.saveChartImage === 'function'){
                                             self.$wire.saveChartImage(base64, refName);
                                         }
@@ -1075,8 +1095,12 @@
                             }
                         }
                     });
+
+                    // Guardamos referencia en el elemento DOM por seguridad
+                    this.$el._chartInstance = chartInstance;
+
                 } catch (error) {
-                    console.error("Error chart:", error);
+                    console.error("Error chart buildings:", error);
                 }
             }
         };
@@ -1084,11 +1108,11 @@
 
     // 2. Funciones Específicas
     function chartHomologationBuildings() {
-        return createChartManager('bar', 'updateBuildingChart1', 'chart1');
+        return window.createChartManager('bar', 'updateBuildingChart1', 'chart1');
     }
 
     function chartHomologationBuildingStats() {
-        return createChartManager('bar', 'updateBuildingChart2', 'chart2');
+        return window.createChartManager('bar', 'updateBuildingChart2', 'chart2');
     }
 </script>
 </div>

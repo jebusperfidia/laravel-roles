@@ -36,9 +36,9 @@
         ['key' => 'homologation-buildings', 'icon' => 'presentation-chart-line', 'label' => __('Ventas')],
         ['key' => 'cost-approach', 'icon' => 'document-currency-dollar', 'label' => __('Enfoque de costos')],
        /*  ['key' => 'market-focus', 'icon' => 'bars-arrow-up', 'label' => __('Enfoque de mercado')], */
+       ['key' => 'pre-conclusion-considerations', 'icon' => 'camera', 'label' => __('Cons. previas conclusión')],
         ['key' => 'photo-report', 'icon' => 'camera', 'label' => __('Reporte fotográfico')],
-        ['key' => 'pre-conclusion-considerations', 'icon' => 'camera', 'label' => __('Cons. previas conclusión')],
-      /*   ['key' => 'conclusion', 'icon' => 'document-check', 'label' => __('Conclusión')], */
+        ['key' => 'conclusion', 'icon' => 'document-check', 'label' => __('Conclusión')],
         ['key' => 'finish-capture', 'icon' => 'check-badge', 'label' => __('Finalizar captura')],
       /*   ['key' => 'valuation-report', 'icon' => 'document-text', 'label' => __('Reporte de avalúo')], */
         ['key' => 'pdf-export', 'icon' => 'printer', 'label' => __('Impresión PDF')],

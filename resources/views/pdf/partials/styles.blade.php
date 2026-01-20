@@ -1,8 +1,7 @@
 <style>
-    /* 1. AJUSTE DE MÁRGENES DE LA HOJA */
-    /* Dejamos más espacio arriba (3.5cm) y abajo (2.5cm) para que quepan Header y Footer sin tapar texto */
+    /* 1. MÁRGENES DE LA HOJA (ESTÁNDAR SEGURO) */
     @page {
-       margin: 3.2cm 0.4cm 0.5cm 0.4cm;
+        margin: 2.5cm 0.4cm 2.2cm 0.4cm;
     }
 
     body {
@@ -12,102 +11,114 @@
         color: #333;
     }
 
-    /* 2. DEFINICIÓN DEL HEADER FIJO */
+    /* 2. HEADER */
     header {
-       position: fixed;
-    top: -3cm;
-    left: 0cm;
-    right: 0cm;
-    height: 3cm;
-
+        position: fixed;
+        top: -2.2cm;
+        left: 0cm;
+        right: 0cm;
+        height: 2.0cm;
     }
 
-    /* 3. DEFINICIÓN DEL FOOTER FIJO */
-  footer {
-position: fixed;
-/* Lo bajamos casi hasta el corte de hoja */
-bottom: -0.5cm;
-left: 0cm;
-right: 0cm;
-/* Altura suficiente para el logo, pero sin empujar el contenido hacia arriba */
-height: 3cm;
-}
-
-    /* --- ESTILOS DEL HEADER (EXTRAÍDOS DE TU FRONT PAGE) --- */
-    .header-logo-text {
-        font-size: 18px;
-        /* Ajustado un poco */
-        font-weight: bold;
-        color: #000;
-        letter-spacing: -1px;
+    /* 3. FOOTER */
+    footer {
+        position: fixed;
+        bottom: -2.0cm;
+        left: 0cm;
+        right: 0cm;
+        height: 3cm;
     }
 
-    .info-table {
+    /* 4. TABLAS GENERALES */
+    .form-table {
         width: 100%;
-        font-size: 8px;
         border-collapse: separate;
-        border-spacing: 2px;
+        border-spacing: 0 3px;
     }
 
-    .info-label {
+    /* --- ESTILOS DE 3 COLUMNAS (AQUÍ ESTABA EL ERROR DE TAMAÑO) --- */
+    /* Ajustado para que el gris sea MUY GRANDE (75%) */
+    .label-top {
+        width: 25%;
+        background-color: transparent;
+        color: #000;
         font-weight: bold;
+        font-size: 8px;
+        /* Un pelín más chica para que quepa "Centro Comunitario" */
         text-align: right;
-        padding-right: 5px;
         vertical-align: middle;
-        width: 40%;
-        background-color: #E0E0E0;
-        /* El gris para las etiquetas */
-        padding: 2px;
+        padding-right: 4px;
+        padding-top: 3.5px;
+        padding-bottom: 3.5px;
     }
 
-    .info-value {
-        background-color: #F5F5F5;
-        /* Un gris más claro para los valores */
-        padding: 2px 5px;
-        text-align: left;
-        /* Cambiado a left para que se lea mejor */
-        vertical-align: middle;
-        font-weight: bold;
-    }
-
-    /* --- ESTILOS DEL FOOTER --- */
-    .footer-bg {
-    width: 100%;
-    height: 100%;
-    object-fit: fill; /* Forzamos a que llene el contenedor */
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    z-index: -1;
-    }
-
-    .footer-text-table {
-        width: 100%;
-        position: relative;
-        /* Juega con este top para "aterrizar" el texto sobre la barra verde */
-        top: 25px;
-        color: #555;
-        /* O blanco #FFF si tu barra es muy oscura */
+    .value-top {
+        width: 75%;
+        /* CAJA GRIS AMPLIA */
+        background-color: #eee;
+        color: #000;
         font-size: 9px;
+        text-transform: uppercase;
+        text-align: left;
+        vertical-align: middle;
+        padding: 3.5px 6px;
+        /* Evita que el texto se corte feo */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    /* --- UTILIDADES GENERALES QUE YA TENÍAS --- */
-    .page-number:before {
-        content: counter(page);
+    /* --- ESTILOS DE 2 COLUMNAS (ESTÁNDAR) --- */
+    .label-cell {
+        width: 20%;
+        background-color: transparent;
+        color: #000;
+        font-weight: bold;
+        font-size: 9px;
+        text-align: right;
+        padding-right: 6px;
+        vertical-align: middle;
+        padding-top: 3.5px;
+        padding-bottom: 3.5px;
     }
 
-    .text-brand {
-        color: #25998b;
+    .value-cell {
+        background-color: #eee;
+        color: #000;
+        font-size: 9px;
+        text-transform: uppercase;
+        text-align: left;
+        vertical-align: middle;
+        padding: 3.5px 6px;
     }
 
+    .value-full {
+        width: 80%;
+    }
+
+    .value-half {
+        width: 30%;
+    }
+
+    /* UTILERÍA Y TEXTOS */
     .section-header {
         color: #000;
         font-size: 11px;
         font-weight: bold;
         border-bottom: 1px solid #ccc;
-        margin-top: 15px;
+        margin-top: 12px;
         margin-bottom: 5px;
         text-transform: uppercase;
+    }
+
+    /* Subtítulos centrados (Parques, Escuelas...) */
+    .sub-header {
+        text-align: center;
+        font-weight: bold;
+        font-size: 9px;
+        margin: 4px 0;
+        border-bottom: 1px solid #000;
+        padding-bottom: 1px;
     }
 
     table {
@@ -118,30 +129,51 @@ height: 3cm;
 
     td {
         vertical-align: top;
-        padding: 3px;
+        padding: 2px;
     }
 
-    .font-bold {
+    .header-logo-text {
+        font-size: 18px;
         font-weight: bold;
+        color: #000;
+        letter-spacing: -1px;
     }
 
-    .text-center {
-        text-align: center;
+    .footer-bg {
+        width: 100%;
+        height: 100%;
+        object-fit: fill;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        z-index: -1;
     }
 
-    .text-right {
-        text-align: right;
+    .footer-text-table {
+        width: 100%;
+        position: relative;
+        top: 25px;
+        color: #555;
+        font-size: 9px;
     }
 
-    .uppercase {
-        text-transform: uppercase;
+    .page-number:before {
+        content: counter(page);
     }
 
-    /* Estilos específicos de secciones (Portada, Fotos, etc.) se mantienen igual... */
+    .text-brand {
+        color: #25998b;
+    }
+
+    .page-break {
+        page-break-after: always;
+    }
+
+    /* CLASES DE FOTOS (NO OLVIDADAS) */
     .cover-photo-container {
         width: 100%;
         height: 350px;
-        margin: 20px 0;
+        margin: 15px 0;
         text-align: center;
         overflow: hidden;
         background-color: #f9f9f9;
@@ -186,10 +218,5 @@ height: 3cm;
         font-weight: bold;
         font-size: 9px;
         margin-top: 2px;
-    }
-
-    /* Salto de página forzado */
-    .page-break {
-        page-break-after: always;
     }
 </style>

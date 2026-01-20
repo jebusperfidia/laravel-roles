@@ -38,7 +38,7 @@ class FormIndex extends Component
         'cost-approach',
         'pre-conclusion-considerations',
         'special-installations',
-        'd-t-c-infonavit',
+     /*    'd-t-c-infonavit', */
         'conclusion'
     ];
 

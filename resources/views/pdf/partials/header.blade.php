@@ -1,38 +1,55 @@
 <header>
-    {{-- Quitamos el padding-bottom extra para pegarlo más a la línea verde si es necesario --}}
-    <table style="width: 100%; border-bottom: 2px solid #25998b;">
+    {{-- Reducimos el margin-bottom de 10px a 2px para eliminar el aire --}}
+    <table style="width: 100%;  border-collapse: collapse; margin-bottom: 2px;">
         <tr>
-            {{-- COLUMNA IZQUIERDA: LOGO COMPLETO --}}
-            {{-- Le damos más espacio (70%) y alineamos al centro vertical --}}
-            <td style="width: 65%; vertical-align: middle;">
-                {{-- USAMOS LA IMAGEN COMPLETA (Logo + Texto) --}}
-                {{-- Aumentamos el width a 220px (ajusta si lo quieres más grande o chico) --}}
+            {{-- COLUMNA IZQUIERDA: LOGO --}}
+            <td style="width: 60%; vertical-align: bottom; padding-bottom: 3px;">
                 <img src="{{ public_path('assets/img/pdf/logo_header.png') }}"
-                    style="width: 420px; height: auto; display: block;">
+                    style="width: 260px; height: auto; display: block;">
             </td>
 
             {{-- COLUMNA DERECHA: DATOS TÉCNICOS --}}
-            {{-- Reducimos un poco el ancho (30%) para que el logo tenga protagonismo --}}
-            <td style="width: 35%; vertical-align: middle;">
-                <table class="info-table">
+            <td style="width: 40%; vertical-align: bottom; padding-bottom: 3px;">
+                <table style="width: 100%; border-collapse: collapse; font-family: sans-serif;">
                     <tr>
-                        {{-- Ajustamos porcentajes internos para que se vea balanceado --}}
-                        <td class="info-label" style="width: 50%;">Número Interno:</td>
-                        <td class="info-value" style="width: 50%;">{{ $valuation->folio ?? 'S/N' }}</td>
+                        <td
+                            style="text-align: right; font-size: 8px; font-weight: bold; color: #333; padding: 1px 5px; width: 55%;">
+                            Número Interno:</td>
+                        <td
+                            style="background-color: #eee; text-align: center; font-size: 8px; color: #000; padding: 1px 5px; width: 45%;">
+                            {{ $valuation->folio ?? 'S/N' }}</td>
                     </tr>
-                    <br>
+                    {{-- Espacio mínimo entre filas --}}
                     <tr>
-                        <td class="info-label">Fecha del Avalúo:</td>
-                        {{-- Formateamos la fecha si existe, si no, usa la de hoy --}}
-                        <td class="info-value">{{ isset($valuation->valuation_date) ? date('d/m/Y',
-                            strtotime($valuation->valuation_date)) : date('d/m/Y') }}</td>
+                        <td style="height: 1px;"></td>
                     </tr>
-                    <br>
                     <tr>
-                        <td class="info-label">Fecha de caducidad:</td>
-                        {{-- Formateamos la fecha si existe, si no, usa la de hoy --}}
-                        <td class="info-value">{{ isset($valuation->valuation_date) ? date('d/m/Y',
-                            strtotime($valuation->valuation_date)) : date('d/m/Y') }}</td>
+                        <td
+                            style="text-align: right; font-size: 8px; font-weight: bold; color: #333; padding: 1px 5px;">
+                            Fecha del Avalúo:</td>
+                        <td
+                            style="background-color: #eee; text-align: center; font-size: 8px; color: #000; padding: 1px 5px;">
+                            {{-- Cambié $valuation->date por la variable que suele usar Laravel: valuation_date o
+                            created_at --}}
+                            {{ isset($valuation->valuation_date) ? date('d/m/Y', strtotime($valuation->valuation_date))
+                            : date('d/m/Y') }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="height: 1px;"></td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="text-align: right; font-size: 8px; font-weight: bold; color: #333; padding: 1px 5px;">
+                            Fecha de caducidad:</td>
+                        <td
+                            style="background-color: #eee; text-align: center; font-size: 8px; color: #000; padding: 1px 5px;">
+                            @php
+                            $fechaBase = $valuation->valuation_date ?? date('Y-m-d');
+                            $fechaCaducidad = date('d/m/Y', strtotime($fechaBase . ' + 6 months'));
+                            @endphp
+                            {{ $fechaCaducidad }}
+                        </td>
                     </tr>
                 </table>
             </td>

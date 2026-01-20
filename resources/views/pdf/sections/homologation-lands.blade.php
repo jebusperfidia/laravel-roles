@@ -238,12 +238,16 @@
             </td>
 
             {{-- GRÁFICA --}}
+            {{-- GRÁFICA --}}
             <td style="width: 55%; text-align: center; padding-left: 10px;">
+                {{-- Si el controlador encontró la imagen, la pone --}}
                 @if(isset($chartImageBase64) && $chartImageBase64)
                 <img src="{{ $chartImageBase64 }}" style="width: 100%; height: auto; border: 1px solid #eee;">
                 @else
+                {{-- Si no existe el archivo chart_12_chart1.jpg, muestra esto --}}
                 <div style="height: 120px; border: 1px dashed #ccc; color: #999; line-height: 120px; font-size: 7px;">
-                    Gráfica de Mercado</div>
+                    Gráfica no disponible
+                </div>
                 @endif
             </td>
         </tr>

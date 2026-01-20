@@ -268,7 +268,7 @@
                     console.log('🚀 Enviando al servidor...');
                     await @this.saveMapImages(base64Macro, base64Micro);
 
-                    console.log('✅ Finalizando...');
+                    console.log(' Finalizando...');
                     @this.save();
 
                     // Nota: Si la página no recarga, descomenta esto para quitar el spinner:

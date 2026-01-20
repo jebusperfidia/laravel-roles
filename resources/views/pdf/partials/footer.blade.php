@@ -12,7 +12,7 @@
         </div>
 
         {{-- Teléfonos --}}
-        <div style="font-size: 14px; color: #555;">
+        <div style="font-size: 10px; color: #555;">
             <span
                 style="background-color: #25998b; color: white; border-radius: 3px; padding: 1px 4px; font-weight: bold; font-size: 8px; margin-right: 3px;">
                 TEL
@@ -26,7 +26,7 @@
     {{-- 3. BLOQUE CENTRAL (Paginación) --}}
     {{-- TAMBIÉN SUBIMOS A 30px para que quede alineado con los teléfonos --}}
     <div style="position: absolute; bottom: 30px; left: 0; width: 100%; text-align: center; pointer-events: none;">
-        <div style="font-size: 14px; font-weight: bold; color: #666;">
+        <div style="font-size: 10px; font-weight: bold; color: #666;">
             Página <span class="page-number"></span>
         </div>
     </div>
