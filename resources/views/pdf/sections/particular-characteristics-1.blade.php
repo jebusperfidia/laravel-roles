@@ -20,17 +20,30 @@
                 Macrolocalización</td>
         </tr>
         <tr>
-            @php $id = session('valuation_id'); @endphp
-            <td style="width: 50%; padding: 2px; text-align: center;">
-                {{-- CAMBIO: Barras normales / --}}
-                <img src="{{ storage_path('app/public/location_maps/map_' . $id . '_micro.png') }}"
-                    style="width: 98%; height: 160px; object-fit: cover; border: 1px solid #ccc;">
-            </td>
-            <td style="width: 50%; padding: 2px; text-align: center;">
-                {{-- CAMBIO: Barras normales / --}}
-                <img src="{{ storage_path('app/public/location_maps/map_' . $id . '_macro.png') }}"
-                    style="width: 98%; height: 160px; object-fit: cover; border: 1px solid #ccc;">
-            </td>
+           {{--  @php $id = session('valuation_id'); @endphp --}}
+           <td style="width: 50%; padding: 2px; text-align: center;">
+            {{-- Micro Localización --}}
+            @if($mapMicroBase64)
+            <img src="{{ $mapMicroBase64 }}" style="width: 98%; height: 160px; object-fit: cover; border: 1px solid #ccc;">
+            @else
+            <div
+                style="width: 98%; height: 160px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; color: #999;">
+                Sin Mapa Micro
+            </div>
+            @endif
+        </td>
+
+        <td style="width: 50%; padding: 2px; text-align: center;">
+            {{-- Macro Localización --}}
+            @if($mapMacroBase64)
+            <img src="{{ $mapMacroBase64 }}" style="width: 98%; height: 160px; object-fit: cover; border: 1px solid #ccc;">
+            @else
+            <div
+                style="width: 98%; height: 160px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; color: #999;">
+                Sin Mapa Macro
+            </div>
+            @endif
+        </td>
         </tr>
     </table>
 
@@ -144,7 +157,7 @@
 
 {{-- BLOQUE 3: MEDIDAS Y COLINDANCIAS (AREA PRIVATIVA) --}}
 <div style="margin-bottom: 10px;">
-    <div style="font-weight: bold; font-size: 11px; border-bottom: 1px solid #adadad; margin-bottom: 2px;">Medidas y colindancias (Area privativa):</div>
+    <div style="font-weight: bold; font-size: 11px; border-bottom: 1px solid #adadad; margin-bottom: 2px; margin-bottom: 4px;">Medidas y colindancias (Area privativa):</div>
 
     {{-- Tabla con bordes y encabezados --}}
     <table style="width:100%; border-collapse:collapse; border:1px solid #ccc;">

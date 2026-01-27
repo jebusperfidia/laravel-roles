@@ -46,6 +46,7 @@ final class CapturedTable extends PowerGridComponent
             ->join('valuations', 'assignments.valuation_id', '=', 'valuations.id')
             ->join('users as appraiserU', 'assignments.appraiser_id', '=', 'appraiserU.id')
             ->join('users as operatorU',  'assignments.operator_id',  '=', 'operatorU.id')
+            ->where('valuations.status', 1)
             ->select([
                 'valuations.id',
                 'valuations.date        as valuation_date',
@@ -150,20 +151,23 @@ final class CapturedTable extends PowerGridComponent
     public function actions(Assignment $row): array
     {
         return [
+            // 1. CAPTURAR
             Button::add('edit')
                 ->slot('Capturar')
                 ->id()
                 ->class('cursor-pointer btn-primary btn-table pr-3')
                 ->dispatch('openForms', ['id' => $row->id]),
-                /* ->route('form.index', ['id' => $row->id]), */
 
+            // 2. CAMBIAR ESTATUS (Corregido)
             Button::add()
                 ->slot('Cambiar estatus')
                 ->id()
                 ->class('cursor-pointer btn-change btn-table')
-                ->dispatch('openStatusModal', ['Id' => $row->id])
+                // AQUÍ EL CAMBIO: Enviamos valuationId y currentStatus = 1
+                ->dispatch('openStatusModal', ['valuationId' => $row->id, 'currentStatus' => 1])
                 ->can($this->user->type === 'Administrador'),
 
+            // 3. ELIMINAR
             Button::add()
                 ->confirm('¿Estás seguro de eliminar el avalúo?')
                 ->slot('Eliminar')

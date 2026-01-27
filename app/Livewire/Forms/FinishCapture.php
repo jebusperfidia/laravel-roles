@@ -6,6 +6,9 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Session;
 use Masmerise\Toaster\Toaster;
 
+// Importamos el Modelo del Avalúo
+use App\Models\Valuations\Valuation;
+
 // Importamos los modelos necesarios para los conteos
 use App\Models\Forms\Comparable\ValuationLandComparableModel;
 use App\Models\Forms\Comparable\ValuationBuildingComparableModel;
@@ -46,13 +49,30 @@ class FinishCapture extends Component
 
     public function finalizeValuation()
     {
-        // AQUÍ IRÁ TU LÓGICA PARA CAMBIAR EL ESTATUS DEL AVALÚO
-        // Por ejemplo: Valuation::find($this->valuationId)->update(['status' => 'revision']);
+        // 1. Validamos que tengamos ID
+        if (!$this->valuationId) {
+            Toaster::error('Error: No se ha identificado el avalúo.');
+            return;
+        }
 
-        Toaster::success('El avalúo ha sido finalizado y enviado a revisión correctamente.');
+        // 2. Buscamos el avalúo
+        $valuation = Valuation::find($this->valuationId);
 
-        // Opcional: Redirigir al dashboard
-        // return redirect()->route('dashboard');
+        if ($valuation) {
+            // 3. CAMBIAMOS EL ESTATUS A 2 (REVISIÓN)
+            $valuation->update(['status' => 2]);
+
+            // 4. Limpiamos la sesión para "cerrar" el flujo de edición
+            Session::forget('valuation_id');
+
+            Toaster::success('El avalúo ha sido finalizado y enviado a revisión correctamente.');
+
+            // 5. Redirigimos al Dashboard
+            // Truco Pro: Lo mandamos directo a la pestaña de "En Revisión" para que vea que ya cayó ahí
+            return redirect()->route('dashboard', ['currentView' => 'reviewing']);
+        } else {
+            Toaster::error('Error: El avalúo no existe en la base de datos.');
+        }
     }
 
     public function render()

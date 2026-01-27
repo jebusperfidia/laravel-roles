@@ -14,7 +14,7 @@ use App\Livewire\Valuations\ValuationDuplicate;
 use App\Livewire\Valuations\ValuationsIndex;
 use App\Livewire\Forms\FormIndex;
 use App\Livewire\Forms\Comparables\ComparablesIndex;
-
+use App\Http\Controllers\ValuationPdfController;
 // ========================================
 // RUTA RAÍZ - Redirige a login directamente
 // ========================================
@@ -27,6 +27,7 @@ Route::get('/', function () {
 // RUTAS PROTEGIDAS POR AUTENTICACIÓN + comparablesActive
 // ========================================
 Route::middleware(['auth', 'comparablesActive'])->group(function () {
+
 
     // -----------------------------------------
     // CONFIGURACIÓN DE USUARIO

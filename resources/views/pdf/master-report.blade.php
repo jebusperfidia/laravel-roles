@@ -33,27 +33,40 @@
          <div class="page-break"></div>
 
 
-
-
         @include('pdf.sections.particular-characteristics-2')
+        <div class="page-break"></div>
+
+        @include('pdf.sections.particular-characteristics-3')
         <div class="page-break"></div>
 
         {{-- 4. ENFOQUE COMPARATIVO DEL MERCADO --}}
         @if(($config['sections']['comparables'] ?? false) && isset($landPivots) && $landPivots->count() >= 4)
-        <div class="page-break"></div>
         @include('pdf.sections.homologation-lands')
         @endif
 
 
+        {{-- 4. ENFOQUE COMPARATIVO DEL MERCADO --}}
+        @if(($config['sections']['comparables'] ?? false) && isset($landPivots) && $landPivots->count() >= 4)
+        @include('pdf.sections.homologation-buildings')
+        @endif
+
+
+
+        @include('pdf.sections.coast-approach')
+        <div class="page-break"></div>
+
+
+
         {{-- 5. CONCLUSIONES --}}
-       {{--  @include('pdf.sections.conclusions')
-        <div class="page-break"></div> --}}
+        @include('pdf.sections.conclusions')
+        <div class="page-break"></div>
 
         {{-- 6. FOTOS --}}
         @if($photos->count() > 0)
-        <div class="page-break"></div>
         @include('pdf.sections.photos')
         @endif
+
+        @include('pdf.sections.documents')
 
     </main>
 

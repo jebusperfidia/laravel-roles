@@ -4,6 +4,7 @@ namespace App\Livewire\Valuations;
 
 use Livewire\Component;
 use App\Models\Valuations\Valuation;
+use App\Models\Users\Assignment;
 use Livewire\Attributes\On;
 
 class ValuationsIndex extends Component
@@ -47,11 +48,27 @@ class ValuationsIndex extends Component
 
     public function render()
     {
+        // 0. UNASSIGNED: Este se queda igual (contamos Avalúos sueltos)
+        // Usamos count() directo sin get() para optimizar
+        $this->unassigned = Valuation::where('status', 0)->count();
 
-        $this->unassigned = Valuation::where('status', 0)->get()->count();
-        $this->capturing = Valuation::where('status', 1)->get()->count();
-        $this->reviewing = Valuation::where('status', 2)->get()->count();
-        $this->completed = Valuation::where('status', 3)->get()->count();
+        // 1. CAPTURING (En Proceso)
+        // Contamos Asignaciones donde el avalúo tenga status 1
+        $this->capturing = Assignment::join('valuations', 'assignments.valuation_id', '=', 'valuations.id')
+            ->where('valuations.status', 1)
+            ->count();
+
+        // 2. REVIEWING (Revisión)
+        // Contamos Asignaciones donde el avalúo tenga status 2
+        $this->reviewing = Assignment::join('valuations', 'assignments.valuation_id', '=', 'valuations.id')
+            ->where('valuations.status', 2)
+            ->count();
+
+        // 3. COMPLETED (Completados)
+        // Contamos Asignaciones donde el avalúo tenga status 3
+        $this->completed = Assignment::join('valuations', 'assignments.valuation_id', '=', 'valuations.id')
+            ->where('valuations.status', 3)
+            ->count();
 
         return view('livewire.valuations.valuations-index');
     }

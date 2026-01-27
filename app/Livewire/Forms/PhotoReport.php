@@ -25,7 +25,7 @@ class PhotoReport extends Component
         'Sin clasificar',
         'Fachada',
         'Fachada posterior',
-        'Proyecto arquitectónico / croquis',
+        'Proyecto arquitectonico / croquis',
         'Estancia comedor',
         'Cocina',
         'Baño',

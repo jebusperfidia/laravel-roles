@@ -326,12 +326,12 @@
             </div>
             <div class="form-container__content">
 
-                @if (!$landDetail)
-                {{-- <small>Debes guardar los datos principales para poder usar esta opción</small> --}}
+              {{--   @if (!$landDetail)
+
                 <div class="font-semibold text-sm text-red-600 mb-2"><span>Debes guardar los datos principales para
                         poder usar esta opción</span></div>
-                {{-- <br><br> --}}
-                @endif
+
+                @endif --}}
                 <div class="form-grid form-grid--3 form-grid-3-variation">
 
                     {{-- Primer elemento hijo: el label --}}
@@ -464,11 +464,11 @@
                 </div>
 
 
-                @if (!$landDetail)
+              {{--   @if (!$landDetail)
                 <div class="font-semibold text-sm text-red-600"><span>Debes guardar los datos principales para poder
                         usar esta
                         opción</span></div>
-                @endif
+                @endif --}}
                 <div class="flex justify-between text-lg border-b-2 border-gray-300 mt-8">
                     <h2>Grupos de colindancias</h2>
                     {{-- <flux:modal.trigger name="add-group" class="flex justify-end mb-2"> --}}
@@ -1015,12 +1015,12 @@
                 Superficie del terreno
             </div>
             <div class="form-container__content">
-                @if (!$landDetail)
+            {{--     @if (!$landDetail)
                 <div class="font-semibold text-sm text-red-600"><span>Debes guardar los datos principales para poder
                         usar esta
                         opción</span></div>
                 <br><br>
-                @endif
+                @endif --}}
                 <div class="flex justify-start text-md">
                     {{-- <flux:modal.trigger name="add-item" class="flex justify-end"> --}}
                         <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
