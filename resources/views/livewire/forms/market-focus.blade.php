@@ -1,6 +1,13 @@
 {{-- <div wire:poll.10s="loadData"> --}}
 <div>
+    @if($isReadOnly)
+    <div class="border-l-4 border-red-600 text-red-600 p-4 mb-4 rounded shadow-sm">
+        <p class="font-bold">Modo Lectura</p>
+        <p>El avalúo está en revisión. No puedes realizar modificaciones.</p>
+    </div>
+    @endif
     <div class="form-container">
+        <fieldset @disabled($isReadOnly)>
         <div class="form-container__header">
             Enfoque de mercado
         </div>
@@ -219,4 +226,5 @@
             </div>
         </div>
     </div>
+</fielset>
 </div>

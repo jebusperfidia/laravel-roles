@@ -21,9 +21,12 @@ use App\Models\Forms\Homologation\HomologationComparableFactorModel;
 use App\Models\Forms\Homologation\HomologationValuationFactorModel;
 use App\Models\Forms\Homologation\HomologationLandAttributeModel;
 use Masmerise\Toaster\Toast;
+use App\Traits\ValuationLockTrait;
 
 class HomologationLands extends Component
 {
+    use ValuationLockTrait;
+
     // --- PROPIEDADES ---
     public $idValuation;
     public $valuation;
@@ -200,6 +203,8 @@ class HomologationLands extends Component
             return;
         }
 
+        $this->checkReadOnlyStatus($this->valuation);
+
         $this->propertyType = $this->valuation->property_type;
 
         // 1. Carga de datos base (LandDetails y ApplicableSurface)
@@ -314,6 +319,7 @@ class HomologationLands extends Component
 
     public function selectSurfaceOption(string $key)
     {
+        $this->ensureNotReadOnly();
         $options = $this->surfaceOptions();
         $selectedOption = $options[$key] ?? null;
 
@@ -506,6 +512,7 @@ class HomologationLands extends Component
 
     public function updatedSubjectLoteModa($value)
     {
+        $this->ensureNotReadOnly();
         if ($value === '' || $value === null || !is_numeric($value) || (float)$value <= 0) {
             Toaster::error('El Lote Moda debe ser mayor a cero.');
             $old = HomologationLandAttributeModel::where('valuation_id', $this->idValuation)->value('mode_lot');
@@ -537,6 +544,7 @@ class HomologationLands extends Component
 
     public function updatedConclusionTipoRedondeo($value)
     {
+        $this->ensureNotReadOnly();
         HomologationLandAttributeModel::updateOrCreate(
             ['valuation_id' => $this->idValuation],
             ['conclusion_type_rounding' => $value]
@@ -567,6 +575,7 @@ class HomologationLands extends Component
 
     public function updatedSubjectFactorsOrdered($value, $key)
     {
+        $this->ensureNotReadOnly();
         list($index, $property) = explode('.', $key, 2);
         $factorData = $this->subject_factors_ordered[$index] ?? null;
         if (!$factorData || !isset($factorData['id'])) return;
@@ -625,6 +634,7 @@ class HomologationLands extends Component
 
     public function updatedComparableFactors($value, $key)
     {
+        $this->ensureNotReadOnly();
         $parts = explode('.', $key);
         if (count($parts) < 3) return;
 
@@ -1146,6 +1156,7 @@ class HomologationLands extends Component
 
     public function openComparablesLand()
     {
+        $this->ensureNotReadOnly();
         Session::put('comparables-active-session', true);
         Session::put('comparable-type', 'land');
         return redirect()->route('form.comparables.index');

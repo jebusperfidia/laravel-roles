@@ -2,17 +2,26 @@
     {{-- Script de SortableJS --}}
     {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script> --}}
 
+    @if($isReadOnly)
+    <div class="border-l-4 border-red-600 text-red-600 p-4 mb-4 rounded shadow-sm">
+        <p class="font-bold">Modo Lectura</p>
+        <p>El avalúo está en revisión. No puedes realizar modificaciones.</p>
+    </div>
+    @endif
+    @if(!$isReadOnly)
     <div class="flex justify-end font-semibold text-sm text-red-600 pt-2 -mb-3">
         <span>* Campos obligatorios</span>
     </div>
+    @endif
 
+    <fieldset @disabled($isReadOnly)>
     <div class="form-container">
         <div class="form-container__header">
             Reporte fotográfico
         </div>
 
         <div class="form-container__content">
-
+            @if(!$isReadOnly)
             {{-- AREA DE CARGA (DROPZONE) --}}
             <div x-data="{ isDropping: false }"
                 class="relative w-full border-2 border-dashed rounded-lg h-32 text-center transition-all duration-200 ease-in-out bg-gray-50 hover:bg-gray-100 mb-6 group"
@@ -52,6 +61,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             {{-- BOTONES DE DESCARGA --}}
             <div class="flex justify-end items-center mb-4 gap-2">
@@ -90,6 +100,8 @@
 
                         <tbody x-data x-init="
                                     const initSortable = () => {
+
+                                    if(@js($isReadOnly)) return;
                                         if (typeof Sortable !== 'undefined') {
                                             new Sortable($el, {
                                                 handle: '.drag-handle',
@@ -238,13 +250,14 @@
             </div>
         </div>
     </div>
-
+    </fieldset>
+    @if(!$isReadOnly)
     <div class="flex justify-start mt-4">
         <flux:button class="btn-primary cursor-pointer" type="button" variant="primary" wire:click='nextComponent'>
             Continuar
         </flux:button>
     </div>
-
+    @endif
     {{-- MODAL VISTA PREVIA (VERSIÓN LIMPIA SIN LOADERS) --}}
     <flux:modal name="preview-modal"
         class="!p-0 bg-white rounded-xl shadow-2xl !max-w-[95vw] !w-auto overflow-hidden outline-none">

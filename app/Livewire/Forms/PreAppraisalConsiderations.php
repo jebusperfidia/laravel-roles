@@ -5,12 +5,17 @@ namespace App\Livewire\Forms;
 use Livewire\Component;
 use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
+use App\Models\Valuations\Valuation;
+use App\Traits\ValuationLockTrait;
 
 use App\Models\Forms\AppraisalConsideration\AppraisalConsiderationModel;
 
 
 class PreAppraisalConsiderations extends Component
 {
+
+    use ValuationLockTrait;
+
     public $valuationId;
 
     //Generamos una variable para obtener los datos del modelo
@@ -34,6 +39,15 @@ class PreAppraisalConsiderations extends Component
     {
 
         $this->valuationId = session('valuation_id');
+
+        $valuation = Valuation::find($this->valuationId);
+
+        if (!$valuation) return;
+
+        $this->checkReadOnlyStatus($valuation);
+
+
+
         $this->appConElement = AppraisalConsiderationModel::where('valuation_id', $this->valuationId)->first();
         //dd($this->valuationId);
 
@@ -64,7 +78,7 @@ class PreAppraisalConsiderations extends Component
 
     public function save()
     {
-
+        $this->ensureNotReadOnly();
         //Ejecutar función con todas las reglas de validación y validaciones condicionales, guardando todo en una variable
         $validator = $this->validateAllContainers();
 

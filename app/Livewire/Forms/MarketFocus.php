@@ -15,9 +15,13 @@ use App\Models\Forms\Homologation\HomologationLandAttributeModel;
 use App\Models\Forms\Homologation\HomologationBuildingAttributeModel;
 use App\Models\Forms\MarketFocus\MarketFocusModel;
 use App\Models\Forms\LandDetails\LandDetailsModel;
+use App\Traits\ValuationLockTrait;
+
 
 class MarketFocus extends Component
 {
+    use ValuationLockTrait;
+
     // --- PROPIEDADES PARA CONTEOS Y CÁLCULOS ---
     public $valuationId;
     public $landCount = 0;
@@ -76,6 +80,14 @@ class MarketFocus extends Component
     {
         // Obtenemos el ID del avalúo activo desde la sesión
         $this->valuationId = Session::get('valuation_id');
+
+        $valuation = Valuation::find($this->valuationId);
+
+        if (!$valuation) return;
+
+        $this->checkReadOnlyStatus($valuation);
+
+
 
         //Obtenemos el valor de superficie construida
         $this->applicableSurface = ApplicableSurfaceModel::where('valuation_id', session('valuation_id'))->first();

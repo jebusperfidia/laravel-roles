@@ -8,9 +8,14 @@ use App\Models\Forms\PropertyLocation\PropertyLocationModel;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use App\Traits\ValuationLockTrait;
+use App\Models\Valuations\Valuation;
+
 
 class PropertyLocation extends Component
 {
+    use ValuationLockTrait;
+
     public $latitude;
     public $longitude;
     public $altitude;
@@ -21,6 +26,13 @@ class PropertyLocation extends Component
     public function mount()
     {
         $valuationId = session('valuation_id');
+
+        $valuation = Valuation::find($valuationId);
+
+        if (!$valuation) return;
+
+        $this->checkReadOnlyStatus($valuation);
+
         $propertyLocation = PropertyLocationModel::where('valuation_id', $valuationId)->first();
 
         if ($propertyLocation) {
@@ -42,6 +54,8 @@ class PropertyLocation extends Component
      */
 public function locate()
 {
+    $this->ensureNotReadOnly();
+
     $this->validateLocation();
 
     // Enviar lat, lon y alt al frontend
@@ -58,6 +72,8 @@ public function locate()
      */
     public function save()
     {
+        $this->ensureNotReadOnly();
+
         $this->validateLocation();
         $valuationId = session('valuation_id');
 

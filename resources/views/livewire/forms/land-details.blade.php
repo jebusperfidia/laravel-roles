@@ -10,9 +10,18 @@
         }
 
         </style>
-
+    @if($isReadOnly)
+    <div class="border-l-4 border-red-600 text-red-600 p-4 mb-4 rounded shadow-sm">
+        <p class="font-bold">Modo Lectura</p>
+        <p>El avalúo está en revisión. No puedes realizar modificaciones.</p>
+    </div>
+    @endif
+    @if(!$isReadOnly)
     <div class="flex justify-end font-semibold text-sm text-red-600 pt-2 -mb-3"><span>* Campos obligatorios</span></div>
+    @endif
+
     <form wire:submit="save">
+        <fieldset @disabled($isReadOnly)>
         {{-- CONTENEDOR 1 --}}
         <div class="form-container">
             <div class="form-container__header">
@@ -379,11 +388,13 @@
                         @enderror
 
                         {{-- El botón de carga va debajo de todo --}}
+                        @if(!$isReadOnly)
                         <div class="mt-4">
                             <flux:button wire:click="uploadFiles" class="btn-primary btn-files cursor-pointer">Cargar
                                 archivos
                             </flux:button>
                         </div>
+                        @endif
 
                         {{-- Muestra un mensaje de éxito cuando la carga es correcta --}}
                         {{-- @if (session()->has('message'))
@@ -451,11 +462,13 @@
                             @endif
 
                             {{-- Botón eliminar --}}
+                            @if(!$isReadOnly)
                             <button type="button" wire:click="deleteFile({{ $file->id }})"
                                 class="absolute top-1 right-1 text-white bg-red-600 rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700 cursor-pointer"
                                 onclick="confirm('¿Seguro que deseas eliminar este archivo?') || event.stopImmediatePropagation()">
                                 ×
                             </button>
+                            @endif
                         </div>
                         @empty
                         <p class="text-sm col-span-3 text-gray-500">No hay archivos cargados aún.</p>
@@ -471,29 +484,32 @@
                 @endif --}}
                 <div class="flex justify-between text-lg border-b-2 border-gray-300 mt-8">
                     <h2>Grupos de colindancias</h2>
-                    {{-- <flux:modal.trigger name="add-group" class="flex justify-end mb-2"> --}}
-                        <flux:button class="btn-primary btn-table cursor-pointer mb-2" wire:click='openAddGroup'>Agregar
-                            grupo</flux:button>
-                        {{--
-                    </flux:modal.trigger> --}}
+                    @if(!$isReadOnly)
+                    <flux:button class="btn-primary btn-table cursor-pointer mb-2" wire:click='openAddGroup'>Agregar
+                        grupo</flux:button>
+                    @endif
                 </div>
                 <br>
                 @forelse ($groupsWithNeighbors as $index => $group)
                 <div class="border-2 p-4 mt-4">
                     <div class="flex justify-between text-md mt-2">
                         <h3>Grupo {{ $group->name }}</h3>
+                        @if(!$isReadOnly)
                         <flux:button
                             onclick="confirm('¿Estás seguro de que deseas eliminar este grupo?') || event.stopImmediatePropagation()"
                             wire:click="deleteGroup({{ $group->id }})" type="button"
                             class="btn-deleted btn-files cursor-pointer mr-2">
                             Eliminar grupo
                         </flux:button>
+                        @endif
                     </div>
 
                     <div class="flex justify-between text-md mb-2">
+                        @if(!$isReadOnly)
                         <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
                             wire:click='openAddElement({{ $group->id }})'>
                         </flux:button>
+                        @endif
                     </div>
 
                     <div class="mt-2">
@@ -515,6 +531,7 @@
                                         <td class="px-2 py-1 border text-sm text-center">{{ $neighbor->extent }}</td>
                                         <td class="px-2 py-1 border text-sm text-center">{{ $neighbor->adjacent }}</td>
                                         <td class="my-2 flex justify-evenly">
+                                            @if(!$isReadOnly)
                                             <flux:button type="button" icon-leading="pencil"
                                                 class="cursor-pointer btn-intermediary btn-buildins"
                                                 wire:click='openEditElement({{ $neighbor->id }})' />
@@ -522,6 +539,7 @@
                                                 onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
                                                 wire:click="deleteElement({{ $neighbor->id }})" type="button"
                                                 icon-leading="trash" class="cursor-pointer btn-deleted btn-buildings" />
+                                            @endif
                                         </td>
                                     </tr>
                                     @empty
@@ -1022,12 +1040,11 @@
                 <br><br>
                 @endif --}}
                 <div class="flex justify-start text-md">
-                    {{-- <flux:modal.trigger name="add-item" class="flex justify-end"> --}}
-                        <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
-                            wire:click='openAddLandSurface'>
-                        </flux:button>
-                        {{--
-                    </flux:modal.trigger> --}}
+                    @if(!$isReadOnly)
+                    <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
+                        wire:click='openAddLandSurface'>
+                    </flux:button>
+                    @endif
                 </div>
                 <div class="form-grid form-grid--2 pt-4">
                     <div class="overflow-x-auto max-w-full">
@@ -1048,6 +1065,7 @@
                                         number_format($surface->value_area, 2)
                                         }}</td> --}}
                                     <td class="my-2 flex justify-evenly">
+                                        @if(!$isReadOnly)
                                         <flux:button type="button" icon-leading="pencil"
                                             class="cursor-pointer btn-intermediary btn-buildins"
                                             wire:click="openEditLandSurface({{ $surface->id }})" />
@@ -1055,6 +1073,7 @@
                                             onclick="confirm('¿Estás seguro de que deseas eliminar esto?') || event.stopImmediatePropagation()"
                                             wire:click="deleteLandSurface({{ $surface->id }})" type="button"
                                             icon-leading="trash" class="cursor-pointer btn-deleted btn-buildings" />
+                                        @endif
                                     </td>
                                 </tr>
                                 @empty
@@ -1189,210 +1208,173 @@
 
             </div>
         </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        </fieldset>
 
         {{-- MODALES --}}
 
-
-
         {{-- Agregar grupo --}}
         <flux:modal name="add-group" class="md:w-96">
-            <div class="space-y-6">
-                <div>
-                    <flux:heading size="lg">Crear grupo</flux:heading>
-                </div>
-                <flux:field class="flux-field">
-                    <flux:label>Nombre del grupo</flux:label>
-                    <flux:input type="text" wire:model='group' />
-                    <div class="error-container">
-                        <flux:error name="group" />
+            <fieldset @disabled($isReadOnly)>
+                <div class="space-y-6">
+                    <div>
+                        <flux:heading size="lg">Crear grupo</flux:heading>
                     </div>
-                </flux:field>
-                <div class="flex">
-                    <flux:spacer />
-                    <flux:button type="button" wire:click='addGroup' class="btn-primary cursor-pointer">Crear grupo
-                    </flux:button>
+                    <flux:field class="flux-field">
+                        <flux:label>Nombre del grupo</flux:label>
+                        <flux:input type="text" wire:model='group' />
+                        <div class="error-container">
+                            <flux:error name="group" />
+                        </div>
+                    </flux:field>
+                    @if(!$isReadOnly)
+                    <div class="flex">
+                        <flux:spacer />
+                        <flux:button type="button" wire:click='addGroup' class="btn-primary cursor-pointer">Crear grupo
+                        </flux:button>
+                    </div>
+                    @endif
                 </div>
-            </div>
+            </fieldset>
         </flux:modal>
 
-
-
         {{-- Agregar elemento --}}
-
         <flux:modal name="add-element" class="md:w-96">
-            <div class="space-y-6">
-                <div>
-                    <flux:heading size="lg">Crear elemento</flux:heading>
-                    {{-- <flux:text class="mt-2"></flux:text> --}}
+            <fieldset @disabled($isReadOnly)>
+                <div class="space-y-6">
+                    <div>
+                        <flux:heading size="lg">Crear elemento</flux:heading>
+                    </div>
+                    <flux:field class="flux-field">
+                        <flux:label>Orientación<span class="sup-required">*</span></flux:label>
+                        <flux:input type="text" wire:model='orientation' />
+                        <div class="error-container">
+                            <flux:error name="orientation" />
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux-field">
+                        <flux:label>Medida<span class="sup-required">*</span></flux:label>
+                        <flux:input type="number" wire:model='extent' />
+                        <div class="error-container">
+                            <flux:error name="extent" />
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux-field">
+                        <flux:label>Colindancia<span class="sup-required">*</span></flux:label>
+                        <flux:input type="text" wire:model='adjacent' />
+                        <div class="error-container">
+                            <flux:error name="adjacent" />
+                        </div>
+                    </flux:field>
+                    @if(!$isReadOnly)
+                    <div class="flex">
+                        <flux:spacer />
+                        <flux:button type="button" wire:click='addElement' class="btn-primary cursor-pointer">Crear elemento
+                        </flux:button>
+                    </div>
+                    @endif
                 </div>
-                <flux:field class="flux-field">
-                    <flux:label>Orientación<span class="sup-required">*</span></flux:label>
-                    <flux:input type="text" wire:model='orientation' />
-                    <div class="error-container">
-                        <flux:error name="orientation" />
-                    </div>
-                </flux:field>
-                <flux:field class="flux-field">
-                    <flux:label>Medida<span class="sup-required">*</span></flux:label>
-                    <flux:input type="number" wire:model='extent' />
-                    <div class="error-container">
-                        <flux:error name="extent" />
-                    </div>
-                </flux:field>
-                <flux:field class="flux-field">
-                    <flux:label>Colindancia<span class="sup-required">*</span></flux:label>
-                    <flux:input type="text" wire:model='adjacent' />
-                    <div class="error-container">
-                        <flux:error name="adjacent" />
-                    </div>
-                </flux:field>
-                <div class="flex">
-                    <flux:spacer />
-                    <flux:button type="button" wire:click='addElement' class="btn-primary cursor-pointer">Crear elemento
-                    </flux:button>
-                </div>
-            </div>
+            </fieldset>
         </flux:modal>
-
-
 
         {{-- Editar elemento --}}
-
         <flux:modal name="edit-element" class="md:w-96">
-            <div class="space-y-6">
-                <div>
-                    <flux:heading size="lg">Editar elemento</flux:heading>
-                    {{-- <flux:text class="mt-2"></flux:text> --}}
+            <fieldset @disabled($isReadOnly)>
+                <div class="space-y-6">
+                    <div>
+                        <flux:heading size="lg">Editar elemento</flux:heading>
+                    </div>
+                    <flux:field class="flux-field">
+                        <flux:label>Orientación<span class="sup-required">*</span></flux:label>
+                        <flux:input type="text" wire:model='orientation' />
+                        <div class="error-container">
+                            <flux:error name="orientation" />
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux-field">
+                        <flux:label>Medida<span class="sup-required">*</span></flux:label>
+                        <flux:input type="number" wire:model='extent' />
+                        <div class="error-container">
+                            <flux:error name="extent" />
+                        </div>
+                    </flux:field>
+                    <flux:field class="flux-field">
+                        <flux:label>Colindancia<span class="sup-required">*</span></flux:label>
+                        <flux:input type="text" wire:model='adjacent' />
+                        <div class="error-container">
+                            <flux:error name="adjacent" />
+                        </div>
+                    </flux:field>
+                    @if(!$isReadOnly)
+                    <div class="flex">
+                        <flux:spacer />
+                        <flux:button type="button" wire:click='editElement' class="btn-primary cursor-pointer">Editar
+                            elemento
+                        </flux:button>
+                    </div>
+                    @endif
                 </div>
-                <flux:field class="flux-field">
-                    <flux:label>Orientación<span class="sup-required">*</span></flux:label>
-                    <flux:input type="text" wire:model='orientation' />
-                    <div class="error-container">
-                        <flux:error name="orientation" />
-                    </div>
-                </flux:field>
-                <flux:field class="flux-field">
-                    <flux:label>Medida<span class="sup-required">*</span></flux:label>
-                    <flux:input type="number" wire:model='extent' />
-                    <div class="error-container">
-                        <flux:error name="extent" />
-                    </div>
-                </flux:field>
-                <flux:field class="flux-field">
-                    <flux:label>Colindancia<span class="sup-required">*</span></flux:label>
-                    <flux:input type="text" wire:model='adjacent' />
-                    <div class="error-container">
-                        <flux:error name="adjacent" />
-                    </div>
-                </flux:field>
-                <div class="flex">
-                    <flux:spacer />
-                    <flux:button type="button" wire:click='editElement' class="btn-primary cursor-pointer">Editar
-                        elemento
-                    </flux:button>
-                </div>
-            </div>
+            </fieldset>
         </flux:modal>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         {{-- Agregar elemento --}}
-
         <flux:modal name="add-LandSurface" class="md:w-96">
-            <div class="space-y-6">
-                <div>
-                    <flux:heading size="lg">Crear elemento</flux:heading>
-                    {{-- <flux:text class="mt-2"></flux:text> --}}
-                </div>
-                <flux:field class="flux-field">
-                    <flux:label>Superficie en M²<span class="sup-required">*</span></flux:label>
-                    <flux:input type="number" wire:model='modalSurface' />
-                    <div class="error-container">
-                        <flux:error name="modalSurface" />
+            <fieldset @disabled($isReadOnly)>
+                <div class="space-y-6">
+                    <div>
+                        <flux:heading size="lg">Crear elemento</flux:heading>
                     </div>
-                </flux:field>
-                <div class="flex">
-                    <flux:spacer />
-                    <flux:button type="button" wire:click='addLandSurface' class="btn-primary cursor-pointer">Crear
-                        elemento
-                    </flux:button>
+                    <flux:field class="flux-field">
+                        <flux:label>Superficie en M²<span class="sup-required">*</span></flux:label>
+                        <flux:input type="number" wire:model='modalSurface' />
+                        <div class="error-container">
+                            <flux:error name="modalSurface" />
+                        </div>
+                    </flux:field>
+                    @if(!$isReadOnly)
+                    <div class="flex">
+                        <flux:spacer />
+                        <flux:button type="button" wire:click='addLandSurface' class="btn-primary cursor-pointer">Crear
+                            elemento
+                        </flux:button>
+                    </div>
+                    @endif
                 </div>
-            </div>
+            </fieldset>
         </flux:modal>
-
 
         {{-- Editar elemento --}}
-
         <flux:modal name="edit-LandSurface" class="md:w-96">
-            <div class="space-y-6">
-                <div>
-                    <flux:heading size="lg">Editar elemento</flux:heading>
-                    {{-- <flux:text class="mt-2"></flux:text> --}}
-                </div>
-                <flux:field class="flux-field">
-                    <flux:label>Superficie en M²<span class="sup-required">*</span></flux:label>
-                    <flux:input type="number" wire:model='modalSurface' />
-                    <div class="error-container">
-                        <flux:error name="modalSurface" />
+            <fieldset @disabled($isReadOnly)>
+                <div class="space-y-6">
+                    <div>
+                        <flux:heading size="lg">Editar elemento</flux:heading>
                     </div>
-                </flux:field>
-                <div class="flex">
-                    <flux:spacer />
-                    <flux:button type="button" wire:click="editLandSurface" class="btn-primary cursor-pointer">Editar
-                        elemento
-                    </flux:button>
+                    <flux:field class="flux-field">
+                        <flux:label>Superficie en M²<span class="sup-required">*</span></flux:label>
+                        <flux:input type="number" wire:model='modalSurface' />
+                        <div class="error-container">
+                            <flux:error name="modalSurface" />
+                        </div>
+                    </flux:field>
+                    @if(!$isReadOnly)
+                    <div class="flex">
+                        <flux:spacer />
+                        <flux:button type="button" wire:click="editLandSurface" class="btn-primary cursor-pointer">Editar
+                            elemento
+                        </flux:button>
+                    </div>
+                    @endif
                 </div>
-            </div>
+            </fieldset>
         </flux:modal>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos</flux:button>
+        @if(!$isReadOnly)
+        <div class="form-container__footer">
+            <flux:button class="btn-primary" type="submit">
+                Guardar datos
+            </flux:button>
+        </div>
+        @endif
     </form>
 <script>
         function mapViewer() {

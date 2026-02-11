@@ -6,11 +6,16 @@ use Livewire\Component;
 use Masmerise\Toaster\Toaster;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Forms\DeclarationWarning\DeclarationsWarningsModel;
+use App\Traits\ValuationLockTrait;
+use App\Models\Valuations\Valuation;
 
 class DeclarationsWarnings extends Component
 {
+    use ValuationLockTrait;
+
 
     public $valuation_id;
+
 
     // Variables primer contenedor
     public $dec_idDoc, $dec_areaDoc, $dec_constState, $dec_occupancy, $dec_urbanPlan,
@@ -33,6 +38,10 @@ class DeclarationsWarnings extends Component
 
         // Guardar el valuationId en una propiedad pública
         $this->valuation_id = $valuationId;
+
+        $valuation = Valuation::find($valuationId);
+
+        $this->checkReadOnlyStatus($valuation);
 
         // Asignar el modelo solo si valuationId existe para evitar errores
         $declarationWarning = DeclarationsWarningsModel::where('valuation_id', $valuationId)->first();
@@ -87,6 +96,9 @@ class DeclarationsWarnings extends Component
 
     public function save()
     {
+
+        $this->ensureNotReadOnly();
+
         $rules = [
             "cyb_conclusionValue" => 'required',
             "cyb_inmediateTypology" => 'required',

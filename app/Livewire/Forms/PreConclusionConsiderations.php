@@ -5,15 +5,24 @@ namespace App\Livewire\Forms;
 use Livewire\Component;
 use App\Models\Forms\PreConclusionConsideration\PreConclusionConsiderationModel;
 use Masmerise\Toaster\Toaster;
+use App\Traits\ValuationLockTrait;
+
 
 class PreConclusionConsiderations extends Component
 {
+    use ValuationLockTrait;
+
     public $valuation; // Objeto completo del avalúo
     public $additionalConsiderations = '';
 
     public function mount($valuation)
     {
         $this->valuation = $valuation;
+
+        if (!$valuation) return;
+
+        $this->checkReadOnlyStatus($valuation);
+
 
         // Validamos que el objeto exista y tenga ID para evitar errores
         if ($this->valuation && $this->valuation->id) {
@@ -30,6 +39,7 @@ class PreConclusionConsiderations extends Component
 
     public function save()
     {
+        $this->ensureNotReadOnly();
         // Validación defensiva
       /*   if (!$this->valuation || !$this->valuation->id) {
              Toaster::error('Error: No se identificó el avalúo.');

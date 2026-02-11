@@ -1,4 +1,10 @@
 <div>
+    @if($isReadOnly)
+    <div class="border-l-4 border-red-600 text-red-600 p-4 mb-4 rounded shadow-sm">
+        <p class="font-bold">Modo Lectura</p>
+        <p>El avalúo está en revisión. No puedes realizar modificaciones.</p>
+    </div>
+    @endif
     {{-- Mínimo 2 para pruebas, mensaje de 6 para producción --}}
     @if($comparablesCount >= 6)
 
@@ -115,34 +121,34 @@
                             class="text-xs font-normal text-gray-500 bg-gray-200 px-2 py-1 rounded">Building</span> --}}
                     </h4>
                     <div class="overflow-x-auto border border-gray-300 rounded-md">
-                        <table class="w-full text-md table-fixed">
-                            <thead>
-                                <tr class="bg-gray-100 text-md font-semibold text-gray-500 border-b border-gray-300">
-                                    <th class="text-left py-2 px-3 w-5/12">Descripción</th>
-                                    <th class="text-left py-2 px-2 w-2/12">Siglas</th>
-                                    <th class="text-left py-2 px-3 w-3/12">Calificación</th>
-                                    <th class="text-left py-2 px-3 w-2/12">Acción</th>
-                                </tr>
-                            </thead>
-                           <tbody class="divide-y divide-gray-200 bg-white">
+                    <table class="w-full text-md table-fixed">
+                        <thead>
+                            <tr class="bg-gray-100 text-md font-semibold text-gray-500 border-b border-gray-300">
+                                <th class="text-left py-2 px-3 w-5/12">Descripción</th>
+                                <th class="text-left py-2 px-2 w-2/12">Siglas</th>
+                                <th class="text-left py-2 px-3 w-3/12">Calificación</th>
+                                {{-- Ocultamos el encabezado de Acción si es ReadOnly --}}
+                                @if(!$isReadOnly)
+                                <th class="text-left py-2 px-3 w-2/12">Acción</th>
+                                @endif
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 bg-white">
                             @foreach($subject_factors_ordered as $index => $factor)
                             @php
                             $acronym = $factor['acronym'];
                             $canEdit = $factor['can_edit'];
                             $isEditing = ($editing_factor_index === $index);
                             $isCustom = $factor['is_custom'];
-
-                            // Esta es la bandera que mandamos desde el Componente (PHP)
                             $hideRow = $factor['hide_in_subject'] ?? false;
                             @endphp
 
-                            {{-- INICIO DEL FILTRO: Si hideRow es true, no renderiza nada de este TR --}}
                             @if(!$hideRow)
                             <tr class="hover:bg-gray-50 transition-colors" wire:key="row-{{ $factor['id'] ?? $index }}">
-
+                                {{-- DESCRIPCIÓN --}}
                                 <td class="py-1.5 px-3 align-middle">
                                     @if($isEditing)
-                                    <flux:input type="text" wire:model.defer="edit_factor_name"
+                                    <flux:input type="text" wire:model.defer="edit_factor_name" :disabled="$isReadOnly"
                                         class="h-9 text-sm w-full bg-white font-semibold" />
                                     @else
                                     <flux:label class="!py-0 !px-0 !m-0 font-medium text-gray-700 block truncate">
@@ -151,31 +157,30 @@
                                     @endif
                                 </td>
 
+                                {{-- SIGLAS --}}
                                 <td class="py-1.5 px-2 text-left align-middle">
                                     @if($isEditing)
-                                    <flux:input type="text" wire:model.defer="edit_factor_acronym"
+                                    <flux:input type="text" wire:model.defer="edit_factor_acronym" :disabled="$isReadOnly"
                                         class="h-9 text-sm w-full font-mono uppercase bg-white" />
                                     @else
                                     <flux:label class="font-mono text-md text-gray-700">{{ $acronym }}</flux:label>
                                     @endif
                                 </td>
 
+                                {{-- CALIFICACIÓN --}}
                                 <td class="py-1.5 px-3 align-middle">
-                                    @if($canEdit)
-                                    @if($isEditing)
+                                    @if($canEdit && $isEditing)
                                     <flux:input type="number" step="0.0001" min="0.8" max="1.2" wire:model.defer="edit_factor_rating"
-                                        wire:key="edit-rating-{{ $factor['id'] ?? $index }}"
+                                        wire:key="edit-rating-{{ $factor['id'] ?? $index }}" :disabled="$isReadOnly"
                                         class="text-right h-9 text-sm w-full bg-white border-blue-500 ring-1 ring-blue-200" />
                                     @else
                                     <flux:input type="text" value="{{ $factor['rating'] }}" readonly
-                                        class="text-right h-9 text-sm w-full bg-gray-100 text-gray-600 border-gray-300 cursor-not-allowed" />
-                                    @endif
-                                    @else
-                                    <flux:input type="text" value="{{ $factor['rating'] }}" readonly
-                                        class="text-right h-9 text-sm w-full bg-transparent border-none shadow-none text-gray-500" />
+                                        class="text-right h-9 text-sm w-full {{ $canEdit ? 'bg-gray-100 text-gray-600 border-gray-300' : 'bg-transparent border-none shadow-none text-gray-500' }}" />
                                     @endif
                                 </td>
 
+                                {{-- ACCIONES (Ocultamos el TD completo si es ReadOnly) --}}
+                                @if(!$isReadOnly)
                                 <td class="py-1.5 px-3 align-middle flex items-center gap-2">
                                     @if($canEdit)
                                     @if($isEditing)
@@ -192,11 +197,13 @@
                                     @endif
                                     @endif
                                 </td>
+                                @endif
                             </tr>
-                            @endif {{-- FIN DEL FILTRO --}}
+                            @endif
                             @endforeach
 
-                            {{-- Fila para agregar nuevos factores (Esta siempre se ve) --}}
+                            {{-- FILA PARA AGREGAR NUEVO (Solo si NO es ReadOnly) --}}
+                            @if(!$isReadOnly)
                             <tr class="bg-gray-50 border-t-2 border-gray-200">
                                 <td class="py-1.5 px-3 align-middle">
                                     <flux:input type="text" wire:model="new_factor_name" placeholder="Nueva Descripción"
@@ -214,8 +221,9 @@
                                     <flux:button icon="plus" class="btn-primary justify-center cursor-pointer" wire:click="saveNewFactor" />
                                 </td>
                             </tr>
+                            @endif
                         </tbody>
-                        </table>
+                    </table>
                     </div>
                 </div>
             </div>
@@ -250,8 +258,10 @@
                     <flux:button class="btn-primary cursor-pointer" type="button"
                         wire:click="$dispatch('openSummary', { id: {{ $selectedComparableId }}, comparableType: 'building' })"
                         size="sm">Resumen</flux:button>
+                        @if(!$isReadOnly)
                     <flux:button class="btn-primary cursor-pointer" type="button" wire:click='openComparablesBuilding'
                         size="sm">Cambiar Comparables</flux:button>
+                        @endif
                 </div>
             </div>
 
@@ -394,6 +404,7 @@
                                         <td class="py-1.5 align-middle">
                                             <flux:select
                                                 wire:model.live="comparableFactors.{{ $selectedComparableId }}.clase"
+                                                :disabled="$isReadOnly"
                                                 placeholder="-" class="!text-sm !py-1" disabled>
                                                 <flux:select.option value="">-- Selecciona una opción --
                                                 </flux:select.option>
@@ -423,6 +434,7 @@
                                         <td class="py-1.5 align-middle">
                                             <flux:select
                                                 wire:model.live="comparableFactors.{{ $selectedComparableId }}.conservacion"
+                                                :disabled="$isReadOnly"
                                                 placeholder="[Seleccione]" class="!text-sm !py-1">
                                                 <flux:select.option value="">-- Selecciona una opción --
                                                 </flux:select.option>
@@ -446,6 +458,7 @@
                                         <td class="py-1.5 align-middle">
                                             <flux:select
                                                 wire:model.live="comparableFactors.{{ $selectedComparableId }}.localizacion"
+                                                :disabled="$isReadOnly"
                                                 placeholder="[Seleccione]" class="!text-sm !py-1">
                                                 <flux:select.option value="">-- Selecciona una opción --
                                                 </flux:select.option>
@@ -509,6 +522,14 @@
                                     @php
                                     $sigla = $factor['acronym'];
 
+
+                                    // El Trait te dice qué es manual y qué no
+                                    $isManual = $factor['is_manual'] ?? false;
+                                    $isFneg = ($sigla === 'FNEG');
+
+                                    // Obtenemos el rating del sujeto (masterFactor)
+                                    $masterFactorRating = collect($subject_factors_ordered)->firstWhere('acronym', $sigla)['rating'] ?? '1.0000';
+
                                     // BÚSQUEDA MAESTRA DE BANDERAS
                                     $masterFactor = collect($subject_factors_ordered)->firstWhere('acronym', $sigla);
 
@@ -544,7 +565,7 @@
                                         </td>
 
                                         {{-- 2. CALIFICACIÓN SUJETO --}}
-                                        <td class="py-1.5 px-2 text-left align-middle text-center">
+                                        <td class="py-1.5 px-2 text-left align-middle text-center" {{ $isFneg ? '-' : $masterFactorRating }}>
                                             <flux:label class="text-gray-700">
                                                 @if($isFNEG) - @else {{ $masterFactor['rating'] ?? '1.0000' }} @endif
                                             </flux:label>
@@ -556,7 +577,8 @@
                                             {{-- INPUT HABILITADO PARA FLOC, AVANC Y CUSTOMS --}}
                                             <flux:input type="number" step="0.0001" placeholder="1.0000"
                                                 wire:model.blur="comparableFactors.{{ $selectedComparableId }}.{{ $sigla }}.calificacion"
-                                                class="text-left h-9 text-sm w-full font-semibold" />
+                                                class="text-left h-9 text-sm w-full font-semibold"
+                                                :disabled="$isReadOnly" />
 
                                             @elseif($isFNEG)
                                             {{-- FNEG: Guion --}}
@@ -588,6 +610,7 @@
                                             {{-- INPUT PARA FNEG --}}
                                             <flux:input type="number" step="0.0001" placeholder="1.0000"
                                                 wire:model.blur="comparableFactors.{{ $selectedComparableId }}.{{ $sigla }}.aplicable"
+                                                :disabled="$isReadOnly"
                                                 class="text-left h-9 text-sm w-full font-bold text-blue-800 bg-blue-50 border-blue-200" />
                                             @else
                                             {{-- TEXTO PARA LOS DEMÁS --}}
@@ -668,7 +691,7 @@
                                     <td class="py-1.5 px-3 align-middle text-sm">
                                         <input type="checkbox" wire:model.live='selectedForStats'
                                             value="{{ $comparable->id }}"
-                                            class="rounded text-blue-600 focus:ring-blue-500 mr-2">
+                                            class="rounded text-blue-600 focus:ring-blue-500 mr-2" @disabled($isReadOnly) />
                                         {{ $comparable->id }}
                                     </td>
                                     <td class="py-1.5 px-3 align-middle text-sm text-center">${{
@@ -796,12 +819,14 @@
                             class="block text-sm font-medium text-gray-700 whitespace-nowrap mb-1 md:mb-0">
                             TIPO DE REDONDEO SOBRE EL VALOR UNITARIO:
                         </label>
-                        <flux:select wire:model.live="conclusion_tipo_redondeo" id="tipo_redondeo_venta"
-                            class="w-full md:w-40 text-sm mt-1 md:mt-0">
-                            <flux:select.option value="UNIDADES">UNIDADES</flux:select.option>
-                            <flux:select.option value="DECENAS">DECENAS</flux:select.option>
-                            <flux:select.option value="CENTENAS">CENTENAS</flux:select.option>
-                            <flux:select.option value="MILLARES">MILLARES</flux:select.option>
+                        <flux:select wire:model.live="redondearValor" id="tipo_redondeo"
+                         class="w-full md:w-40 text-sm mt-1 md:mt-0" :disabled="$isReadOnly">
+                            <flux:select.option value="Unidades">Unidades</flux:select.option>
+                            <flux:select.option value="Decenas">Decenas</flux:select.option>
+                            <flux:select.option value="Centenas">Centenas</flux:select.option>
+                            <flux:select.option value="Miles">Miles</flux:select.option>
+                            <flux:select.option value="Sin decimales">Sin decimales</flux:select.option>
+                            <flux:select.option value="Sin redondeo">Sin redondeo</flux:select.option>
                         </flux:select>
                     </div>
                 </div>
@@ -842,20 +867,21 @@
                                     <td class="py-2 pr-2">
                                         @if($isEditingEq && $isOther)
                                         <flux:input type="text" wire:model.defer="edit_eq_other_description"
-                                            class="!text-sm" />
+                                            class="!text-sm" :disabled="$isReadOnly" />
                                         @else <div class="font-medium text-gray-900">{{ $eq->description }}</div> @endif
                                         <div class="text-xs text-gray-500">{{ $eq->unit }}</div>
                                     </td>
                                     <td class="py-2 px-2">@if($isEditingEq)
                                         <flux:input type="number" wire:model.blur="edit_eq_quantity" class="!text-sm"
-                                            step="0.01" /> @else {{ number_format($eq->quantity, 2) }} @endif
+                                            step="0.01" :disabled="$isReadOnly" /> @else {{ number_format($eq->quantity, 2) }} @endif
                                     </td>
                                     <td class="py-2 px-2 font-mono text-gray-700">@if($isEditingEq && $isOther)
                                         <flux:input type="number" wire:model.blur="edit_eq_total_value" class="!text-sm"
-                                            step="100" /> @else ${{ number_format($eq->total_value, 2)
+                                            step="100"  :disabled="$isReadOnly"/> @else ${{ number_format($eq->total_value, 2)
                                         }} @endif
                                     </td>
                                     <td class="py-2 pl-2">
+                                        @if(!$isReadOnly)
                                         <div class="flex justify-center space-x-2">@if($isEditingEq)
                                             <flux:button icon="check" wire:click="saveEditedEquipment"
                                                 class="btn-primary btn-table cursor-pointer" />
@@ -867,12 +893,14 @@
                                                 wire:confirm="¿Seguro?" class="btn-deleted btn-table cursor-pointer" />
                                             @endif
                                         </div>
+                                        @endif
                                     </td>
                                 </tr>
                                 @empty <tr>
                                     <td colspan="4" class="py-4 text-center text-gray-400 italic">Sin equipamiento.</td>
                                 </tr> @endforelse
                             </tbody>
+                            @if(!$isReadOnly)
                             <tfoot class="border-t-2">
                                 <tr class="align-middle bg-gray-50">
                                     <td class="py-3 px-2">
@@ -911,6 +939,7 @@
                                     </td>
                                 </tr>
                             </tfoot>
+                            @endif
                             {{-- <tfoot class="border-t-2">
                                 <tr class="align-middle bg-gray-50">
                                     <td class="py-3 px-2">
@@ -967,7 +996,7 @@
                                     <td class="py-2 px-2 text-center">
                                         <flux:input type="number" value="{{ $compEq->quantity }}"
                                             wire:change="updateComparableEquipmentQty({{ $compEq->id }}, $event.target.value)"
-                                            min="0" step="0.01" class="!text-sm w-20 text-center" />
+                                            min="0" step="0.01" class="!text-sm w-20 text-center" :disabled="$isReadOnly" />
                                     </td>
                                     <td class="py-2 px-2 font-mono text-right text-gray-900">
                                         ${{ number_format($compEq->difference, 2) }}

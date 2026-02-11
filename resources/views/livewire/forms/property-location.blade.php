@@ -19,8 +19,15 @@
             display: none;
         }
     </style>
+    @if($isReadOnly)
+    <div class="border-l-4 border-red-600 text-red-600 p-4 mb-4 rounded shadow-sm">
+        <p class="font-bold">Modo Lectura</p>
+        <p>El avalúo está en revisión. No puedes realizar modificaciones.</p>
+    </div>
+    @endif
 
     <form wire:submit='save'>
+        <fieldset @disabled($isReadOnly)>
         <div class="form-container">
             <div class="form-container__header">Localización del inmueble</div>
             <div class="form-container__content">
@@ -61,14 +68,16 @@
                     <div x-ref="mapMicro" class="map-container" wire:ignore></div>
                     {{-- <div x-ref="mapPolygon" class="map-container" wire:ignore></div> --}}
                 </div>
-
+                @if(!$isReadOnly)
                 <flux:button type="button" wire:click.prevent="locate" class="mt-4 cursor-pointer btn-intermediary"
                     variant="primary">
                     Localizar inmueble en mapa
                 </flux:button>
+                @endif
             </div>
         </div>
-
+        </fieldset>
+        @if(!$isReadOnly)
         {{-- Resto de tu formulario --}}
     <div class="form-container__content">
         {{-- Botón con Loader "Overlay" --}}
@@ -76,6 +85,7 @@
             type="button" x-on:click="captureAndSave" x-bind:disabled="isCapturing">
 
             {{-- 1. EL TEXTO (Se vuelve invisible pero MANTIENE el ancho del botón) --}}
+
             <span :class="isCapturing ? 'opacity-0' : 'opacity-100'" class="transition-opacity duration-200">
                 Guardar datos
             </span>
@@ -93,6 +103,7 @@
             </div>
 
         </flux:button>
+        @endif
     </div>
     </form>
 

@@ -9,9 +9,12 @@ use App\Models\Valuations\Valuation;
 use Illuminate\Support\Facades\Session;
 use Masmerise\Toaster\Toaster;
 use Flux\Flux;
+use App\Traits\ValuationLockTrait;
 
 class Buildings extends Component
 {
+
+    use ValuationLockTrait;
     // Variable para saber si la clasificación ya fue asignada
     public bool $isClassificationAssigned;
 
@@ -81,6 +84,11 @@ class Buildings extends Component
         //Obtenemos los valores deL avalúo a partir de la variable de sesión del ID
         $this->valuation = Valuation::find(session('valuation_id'));
 
+        if (!$this->valuation) return;
+
+        $this->checkReadOnlyStatus($this->valuation);
+
+
         //Obtenemos el valor del building
         $this->building = BuildingModel::where('valuation_id', $this->valuation->id)->first();
 
@@ -116,6 +124,7 @@ class Buildings extends Component
 
     public function save()
     {
+        $this->ensureNotReadOnly();
         $rules = [
             'sourceReplacementObtained' => 'required',
             'conservationStatus' => 'required',
@@ -278,6 +287,8 @@ class Buildings extends Component
     //FUNCIONES PARA ELEMENTOS DE TABLAS
     public function openAddElement($type)
     {
+        $this->ensureNotReadOnly();
+
         $this->modalType = $type;
         $this->resetValidation();
         $this->reset([
@@ -299,6 +310,9 @@ class Buildings extends Component
 
     public function openEditElement($constructionId)
     {
+
+        $this->ensureNotReadOnly();
+
         $construction = BuildingConstructionModel::findOrFail($constructionId);
 
         $this->constructionId = $construction->id;
@@ -323,6 +337,9 @@ class Buildings extends Component
 
     public function addElement()
     {
+
+        $this->ensureNotReadOnly();
+
         $rules = [
             'description' => 'required',
             'clasification' => 'required',
@@ -394,6 +411,9 @@ class Buildings extends Component
 
     public function editElement()
     {
+
+        $this->ensureNotReadOnly();
+
         $rules = [
             'description' => 'required',
             'clasification' => 'required',
@@ -462,6 +482,8 @@ class Buildings extends Component
 
     public function deleteElement($constructionId)
     {
+
+        $this->ensureNotReadOnly();
         $construction = BuildingConstructionModel::findOrFail($constructionId);
 
         // Obtenemos el tipo antes de que se elimine el registro.

@@ -6,9 +6,15 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
 use App\Models\Forms\UrbanEquipment\UrbanEquipmentModel;
+use App\Traits\ValuationLockTrait;
+use App\Models\Valuations\Valuation;
+
+
 
 class UrbanEquipment extends Component
 {
+    use ValuationLockTrait;
+
     public $valuation_id;
 
     public int $church, $market, $superMarket, $commercialSpaces, $numberCommercialSpaces, $publicSquare, $parks, $gardens,
@@ -32,6 +38,13 @@ class UrbanEquipment extends Component
         $valuationId = session('valuation_id');
         // Guardar el valuationId en una propiedad pública
         $this->valuation_id = $valuationId;
+
+        $valuation = Valuation::find($valuationId);
+
+        if (!$valuation) return;
+
+        $this->checkReadOnlyStatus($valuation);
+
 
         // Asignar el modelo solo si valuationId existe para evitar errores
         $urbanEquipment = UrbanEquipmentModel::where('valuation_id', $valuationId)->first();
@@ -123,6 +136,8 @@ class UrbanEquipment extends Component
 
     public function save()
     {
+        $this->ensureNotReadOnly();
+
         $rules = [
             'church' => 'required',
             'market' => 'required',

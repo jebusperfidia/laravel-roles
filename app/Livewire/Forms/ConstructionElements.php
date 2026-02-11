@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
 use Flux\Flux;
 use Illuminate\Support\Facades\DB;
+use App\Traits\ValuationLockTrait;
 
 
 use App\Models\Forms\ConstructionElements\ConstructionElementModel;
@@ -15,6 +16,8 @@ use App\Models\Valuations\Valuation;
 
 class ConstructionElements extends Component
 {
+    use ValuationLockTrait;
+
 
     //Obtenemos el valor del avaluo para saber si es pre-avaluo o no
     public $preValuation;
@@ -77,8 +80,10 @@ class ConstructionElements extends Component
     //  Inicializar con el tab por defecto
     public function mount()
     {
+        $val = Valuation::find(session('valuation_id'));
+        $this->preValuation = $val->pre_valuation;
         //Obtenemos el valor del avaluo para saber si es pre-avaluo o no
-        $this->preValuation =  Valuation::find(session('valuation_id'))->pre_valuation;
+        //$this->preValuation =  Valuation::find(session('valuation_id'))->pre_valuation;
 
 
         $constructionElement = ConstructionElementModel::where('valuation_id', session('valuation_id'))->first();
@@ -229,10 +234,11 @@ class ConstructionElements extends Component
         }
 
 
-
+        $this->checkReadOnlyStatus($val);
 
         //Inicializamos el valor de la ventana que se abrirá por defecto
         $this->activeTab = 'obra_negra';
+
     }
 
     // 3. Método para cambiar de tab
@@ -290,6 +296,9 @@ class ConstructionElements extends Component
 
 
     public function save(){
+
+
+        $this->ensureNotReadOnly();
 
         if($this->preValuation){
             $this->validate([
@@ -520,6 +529,9 @@ class ConstructionElements extends Component
 
     public function addItem()
     {
+
+        $this->ensureNotReadOnly();
+
         $rules = [
             'space' => 'required',
             'amount' => 'required|numeric',
@@ -559,6 +571,7 @@ class ConstructionElements extends Component
     public function editItem()
     {
 
+        $this->ensureNotReadOnly();
 
         $rules = [
             'space' => 'required',
@@ -594,6 +607,9 @@ class ConstructionElements extends Component
 
     public function deleteItem($finishingOtherId)
     {
+
+        $this->ensureNotReadOnly();
+
         $finishingOtherElement = FinishingOtherModel::findOrFail($finishingOtherId);
 
         $finishingOtherElement->delete();

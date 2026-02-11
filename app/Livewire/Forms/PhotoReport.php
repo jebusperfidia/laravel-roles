@@ -11,10 +11,14 @@ use Illuminate\Support\Str;
 use Masmerise\Toaster\Toaster;
 use ZipArchive;
 use Flux\Flux;
+use App\Traits\ValuationLockTrait;
+use App\Models\Valuations\Valuation;
+
 
 class PhotoReport extends Component
 {
     use WithFileUploads;
+    use ValuationLockTrait;
 
     public $valuation;
     public $newPhotos = [];
@@ -48,6 +52,8 @@ class PhotoReport extends Component
     public function mount($valuation)
     {
         $this->valuation = $valuation;
+        $this->checkReadOnlyStatus($this->valuation);
+
         $this->refreshPhotosData();
     }
 
@@ -69,6 +75,7 @@ class PhotoReport extends Component
 
     public function reorder($orderedIds)
     {
+        $this->ensureNotReadOnly();
         foreach ($orderedIds as $index => $id) {
             PhotoReportModel::where('id', $id)->update(['sort_order' => $index + 1]);
         }
@@ -78,6 +85,7 @@ class PhotoReport extends Component
 
     public function updatedNewPhotos()
     {
+        $this->ensureNotReadOnly();
         if (empty($this->newPhotos)) return;
 
         $filesToProcess = is_array($this->newPhotos) ? $this->newPhotos : [$this->newPhotos];
@@ -233,6 +241,7 @@ class PhotoReport extends Component
 
     public function updatePhotoField($id, $field)
     {
+        $this->ensureNotReadOnly();
         $photo = PhotoReportModel::find($id);
         if (!$photo) return;
 
@@ -274,6 +283,7 @@ class PhotoReport extends Component
 
     public function rotatePhoto($id)
     {
+        $this->ensureNotReadOnly();
         $photo = PhotoReportModel::find($id);
         // Doble validación: no rotar PDFs
         if (!$photo || Str::endsWith(Str::lower($photo->file_path), '.pdf')) {
@@ -289,6 +299,7 @@ class PhotoReport extends Component
 
     public function deletePhoto($id)
     {
+        $this->ensureNotReadOnly();
         $photo = PhotoReportModel::find($id);
         if ($photo) {
             if (Storage::disk('public')->exists($photo->file_path)) {

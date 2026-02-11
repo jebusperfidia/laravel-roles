@@ -10,9 +10,12 @@ use App\Models\Valuations\Valuation;
 use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
 use App\Services\DipomexService;
+use App\Traits\ValuationLockTrait;
 
 class GeneralInfo extends Component
 {
+    use ValuationLockTrait;
+
     //Obtenemos información de los modelos de datos
     public $users;
 
@@ -87,6 +90,8 @@ class GeneralInfo extends Component
 
         //Obtenemos los valores deL avalúo a partir de la variable de sesión del ID
         $valuation = Valuation::find(Session::get('valuation_id'));
+
+        $this->checkReadOnlyStatus($valuation);
 
         //Obtenemos el valor de la tabla de asignaciones
         $assignament = Assignment::where('valuation_id', $valuation->id)->first();
@@ -587,6 +592,7 @@ class GeneralInfo extends Component
     //Las funciones se repiten para cáda uno, seperando la lógica y evitando que se mezclen los datos
     public function buscarCP1(DipomexService $dipomex)
     {
+        $this->ensureNotReadOnly();
         //Validamos que el campo no esté vacío y contenga 5 dígitos
         /*  $this->validate([
             'gi_ownerCp' => 'required|numeric|digits:5'
@@ -646,6 +652,7 @@ class GeneralInfo extends Component
     //Este llamará al método del servicio para poblar los municipios
     public function updatedGiOwnerEntity($estadoId, DipomexService $dipomex)
     {
+        $this->ensureNotReadOnly();
         $this->reset(['gi_ownerLocality', 'gi_ownerColony', 'municipalities', 'colonies']);
 
         if ($estadoId) {
@@ -657,6 +664,7 @@ class GeneralInfo extends Component
     //Este llamará al método del servicio para poblar las colonias
     public function updatedGiOwnerLocality($municipioId, DipomexService $dipomex)
     {
+        $this->ensureNotReadOnly();
         /* $this->reset(['gi_ownerColony', 'colonies']);
 
         if ($selectedMunicipio && $this->gi_ownerEntity) {
@@ -683,7 +691,7 @@ class GeneralInfo extends Component
     //Función para búsqueda del código postal del solicitante, usando API Dipomex
     public function buscarCP2(DipomexService $dipomex)
     {
-
+        $this->ensureNotReadOnly();
         /*  $this->validate([
             'gi_applicCp' => 'required|digits:5'
         ]); */
@@ -744,6 +752,7 @@ class GeneralInfo extends Component
     //Creamos un watcher para cuando se actualice el valor del select de estados
     public function updatedGiApplicEntity($estadoId, DipomexService $dipomex)
     {
+        $this->ensureNotReadOnly();
         $this->reset(['gi_applicLocality', 'gi_applicColony', 'municipalities2', 'colonies2']);
 
         if ($estadoId) {
@@ -754,7 +763,7 @@ class GeneralInfo extends Component
     //Creamos un watcher para cuando se actualice el valor del select de municipios
     public function updatedGiApplicLocality($municipioId, DipomexService $dipomex)
     {
-
+        $this->ensureNotReadOnly();
 
         $this->reset(['gi_applicColony', 'colonies2']);
 
@@ -768,7 +777,7 @@ class GeneralInfo extends Component
     //Función para búsqueda del código postal del inmueble, usando API Dipomex
     public function buscarCP3(DipomexService $dipomex)
     {
-
+        $this->ensureNotReadOnly();
         /*  $this->validate([
             'gi_propertyCp' => 'required|digits:5'
         ]); */
@@ -824,6 +833,7 @@ class GeneralInfo extends Component
     //Creamos un watcher para cuando se actualice el valor del select de estados
     public function updatedGiPropertyEntity($estadoId, DipomexService $dipomex)
     {
+        $this->ensureNotReadOnly();
         $this->reset(['gi_propertyLocality', 'gi_propertyColony', 'municipalities3', 'colonies3']);
 
         if ($estadoId) {
@@ -835,7 +845,7 @@ class GeneralInfo extends Component
     public function updatedGiPropertyLocality($municipioId, DipomexService $dipomex)
     {
 
-
+        $this->ensureNotReadOnly();
         $this->reset(['gi_propertyColony', 'colonies3']);
 
         if ($municipioId && $this->gi_propertyEntity) {
@@ -907,6 +917,7 @@ class GeneralInfo extends Component
 
 
     public function updatedGiCopyFromProperty2($value){
+        $this->ensureNotReadOnly();
         if($value){
 
             /* if(empty($this->gi_propertyCp)){
@@ -956,6 +967,7 @@ class GeneralInfo extends Component
 
 
     public function updatedGiCopyFromOwner($value){
+        $this->ensureNotReadOnly();
         if($value){
 
             /* if(empty($this->gi_ownerCp)){

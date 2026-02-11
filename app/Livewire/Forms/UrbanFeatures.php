@@ -6,9 +6,14 @@ use Livewire\Component;
 use Masmerise\Toaster\Toaster;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Forms\UrbanFeatures\UrbanFeaturesModel;
+use App\Traits\ValuationLockTrait;
+use App\Models\Valuations\Valuation;
+
+
 
 class UrbanFeatures extends Component
 {
+    use ValuationLockTrait;
 
     public $valuation_id;
 
@@ -42,6 +47,12 @@ class UrbanFeatures extends Component
         $valuationId = session('valuation_id');
         // Guardar el valuationId en una propiedad pública
         $this->valuation_id = $valuationId;
+
+        $valuation = Valuation::find($valuationId);
+
+        if (!$valuation) return;
+
+        $this->checkReadOnlyStatus($valuation);
 
         // Asignar el modelo solo si valuationId existe para evitar errores
         $urbanFeatures = UrbanFeaturesModel::where('valuation_id', $valuationId)->first();
@@ -145,6 +156,7 @@ class UrbanFeatures extends Component
 
     public function save()
     {
+        $this->ensureNotReadOnly();
 
         //Ejecutar función con todas las reglas de validación y validaciones condicionales, guardando todo en una variable
         $validator = $this->validateAllContainers();

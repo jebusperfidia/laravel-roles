@@ -24,11 +24,12 @@ use App\Models\Forms\ApplicableSurface\ApplicableSurfaceModel;
 use App\Models\Forms\Homologation\HomologationBuildingAttributeModel;
 use App\Models\Forms\Homologation\HomologationLandAttributeModel;
 use App\Models\Forms\PropertyDescription\PropertyDescriptionModel;
+use App\Traits\ValuationLockTrait;
 
 
 class HomologationBuildings extends Component
 {
-
+    use ValuationLockTrait;
     // --- PROPIEDADES INICIALES ---
     public $idValuation;
     public $valuation;
@@ -84,7 +85,7 @@ class HomologationBuildings extends Component
     public string $conclusion_diferencia_oferta = '0.00';
     public string $conclusion_diferencia_homologado = '0.00';
     public string $conclusion_valor_unitario_de_venta = '$0.00';
-    public string $conclusion_tipo_redondeo = 'DECENAS';
+    public string $redondearValor = 'DECENAS';
     public string $conclusion_desviacion_estandar_homologado = '0.00';
 
     // --- EQUIPAMIENTO ---
@@ -475,7 +476,7 @@ class HomologationBuildings extends Component
 
         if ($attributes) {
             // Recuperamos la preferencia de redondeo
-            $this->conclusion_tipo_redondeo = $attributes->conclusion_type_rounding ?? 'Unidades';
+            $this->redondearValor = $attributes->conclusion_type_rounding ?? 'DECENAS';
         }
 
         try {
@@ -502,6 +503,8 @@ class HomologationBuildings extends Component
 
         $this->selectedForStats = $this->comparables->pluck('id')->toArray();
         $this->recalculateConclusions();
+
+        $this->checkReadOnlyStatus($this->valuation);
     }
 
     // Detecta la clase del primer edificio y devuelve el mapa de precios correspondiente
@@ -947,9 +950,13 @@ class HomologationBuildings extends Component
         }
     }
 
+
+
+
     // [MODIFICADO] "El Agente de Tránsito"
     public function updatedComparableFactors($value, $key)
     {
+        $this->ensureNotReadOnly();
         $parts = explode('.', $key);
         // Estructura esperada Factor: ID.ACRONIMO.PROPIEDAD (3 partes)
         // Estructura esperada Selección: ID.VARIABLE (2 partes)
@@ -1120,6 +1127,7 @@ class HomologationBuildings extends Component
     // ... (MÉTODOS DE EDICIÓN DE NOMBRES DE FACTORES - IGUALES) ...
     public function toggleEditFactor($acronym, $index)
     {
+        $this->ensureNotReadOnly();
         if ($this->editing_factor_index === $index) {
             $this->saveEditedFactor($index);
         } else {
@@ -1135,6 +1143,7 @@ class HomologationBuildings extends Component
 
     public function saveEditedFactor()
     {
+        $this->ensureNotReadOnly();
         // 1. Validaciones
         $this->validate([
             'edit_factor_name' => 'required|string|max:255',
@@ -1576,6 +1585,7 @@ class HomologationBuildings extends Component
         $this->comparableFactors[$comparableId]['FRE']['valor_homologado'] = $unitValue * $factorResultante;
         $this->comparableFactors[$comparableId]['FRE']['valor_unitario_vendible'] = number_format($unitValue * $factorResultante, 2, '.', '');
     }
+
     public function recalculateConclusions()
     {
         if (!$this->comparables || $this->comparables->isEmpty()) {
@@ -1624,7 +1634,9 @@ class HomologationBuildings extends Component
         $this->conclusion_desviacion_estandar_homologado = number_format($stdDevHomologado, 2);
         $this->conclusion_coeficiente_variacion_homologado = ($avgHomologado > 0) ? number_format(($stdDevHomologado / $avgHomologado) * 100, 2) : '0.00';
 
-        $valorRedondeado = $this->redondearValor($avgHomologado, $this->conclusion_tipo_redondeo);
+        // Usamos $this->redondearValor en lugar de la variable vieja
+        $valorRedondeado = $this->redondearValor($avgHomologado, $this->redondearValor);
+
         $this->conclusion_valor_unitario_de_venta = $this->format_currency($valorRedondeado, true);
 
 
@@ -1637,7 +1649,7 @@ class HomologationBuildings extends Component
 
         // 1. Aplicar Redondeo al Promedio Homologado (Segunda columna)
         // Esto cumple tu requisito: "El total asignado sea el promedio de los valores homologados"
-        $valorRedondeado = $this->redondearValor($avgHomologado, $this->conclusion_tipo_redondeo);
+        $valorRedondeado = $this->redondearValor($avgHomologado, $this->redondearValor);
 
         // 2. Actualizar Vista
         $this->conclusion_valor_unitario_de_venta = $this->format_currency($valorRedondeado, true);
@@ -1651,7 +1663,7 @@ class HomologationBuildings extends Component
                 'unit_value_mode_lot' => $valorRedondeado,
 
                 // Guardamos la configuración del select
-                'conclusion_type_rounding' => $this->conclusion_tipo_redondeo,
+                'conclusion_type_rounding' => $this->redondearValor,
                 'average_arithmetic' => $avgOferta ?? 0,
                 'average_homologated' => $avgHomologado ?? 0
             ]
@@ -1747,15 +1759,20 @@ class HomologationBuildings extends Component
     {
         return ($s ? '$' : '') . number_format($v ?? 0, 2, '.', ',');
     }
-    private function redondearValor($v, $t)
+
+    private function redondearValor($valor, $tipo)
     {
-        return match ($t) {
-            'DECENAS' => round($v, -1),
-            'CENTENAS' => round($v, -2),
-            'MILLARES' => round($v, -3),
-            'default' => round($v, 0)
+        $valor = $valor ?? 0;
+        return match ($tipo) {
+            'Unidades', 'Sin decimales' => round($valor, 0),
+            'Decenas' => round($valor / 10) * 10,
+            'Centenas' => round($valor / 100) * 100,
+            'Miles' => round($valor / 1000) * 1000,
+            'Sin redondeo' => $valor,
+            default => round($valor / 10) * 10,
         };
     }
+
     private function resetConclusionProperties()
     {
         $this->conclusion_promedio_oferta = '0.00';
@@ -1767,6 +1784,7 @@ class HomologationBuildings extends Component
 
     public function saveNewFactor()
     {
+        $this->ensureNotReadOnly();
         // 1. Validaciones (Aseguramos que la sigla sea única para que el loop no truene)
         $this->validate([
             'new_factor_name' => 'required|string|max:100',
@@ -1831,8 +1849,11 @@ class HomologationBuildings extends Component
         $this->recalculateConclusions();
         Toaster::success('Factor agregado correctamente');
     }
+
+
     public function deleteCustomFactor($factorId)
     {
+        $this->ensureNotReadOnly();
         $factor = HomologationValuationFactorModel::find($factorId);
         if (!$factor || !$factor->is_custom) return;
         $pivotIds = $this->valuation->buildingComparablePivots()->pluck('id');
@@ -1874,11 +1895,23 @@ class HomologationBuildings extends Component
         $this->recalculateConclusions();
     }
 
-    public function updatedConclusionTipoRedondeo()
+    public function updatedRedondearValor($value)
     {
-        $this->recalculateConclusions();
-    }
+        // 1. Verificar bloqueo
+        $this->ensureNotReadOnly();
 
+        // 2. Guardar en la tabla de Atributos de Construcción (Building)
+        HomologationBuildingAttributeModel::updateOrCreate(
+            ['valuation_id' => $this->idValuation],
+            ['conclusion_type_rounding' => $value]
+        );
+
+        // 3. Recalcular todo con el nuevo criterio
+        $this->recalculateConclusions();
+
+        // 4. Avisar al usuario
+        Toaster::success('Tipo de redondeo guardado.');
+    }
     public function openComparablesBuilding()
     {
         Session::put('comparables-active-session', true);
@@ -1902,6 +1935,7 @@ class HomologationBuildings extends Component
 
     public function saveNewEquipment()
     {
+        $this->ensureNotReadOnly();
         $sourceKey = $this->new_eq_description;
         $isOther = ($sourceKey === 'Otro');
         $rules = ['new_eq_description' => 'required|string', 'new_eq_quantity' => 'required|numeric|min:0'];
@@ -1968,6 +2002,7 @@ class HomologationBuildings extends Component
 
     public function toggleEditEquipment($eqId)
     {
+        $this->ensureNotReadOnly();
         $eq = HomologationValuationEquipmentModel::find($eqId);
         if (!$eq) return;
         $this->reset(['editing_eq_id', 'edit_eq_quantity', 'edit_eq_total_value', 'edit_eq_other_description']);
@@ -1986,6 +2021,7 @@ class HomologationBuildings extends Component
 
     public function saveEditedEquipment()
     {
+        $this->ensureNotReadOnly();
         $eq = HomologationValuationEquipmentModel::find($this->editing_eq_id);
 
         if (!$eq) {
@@ -2074,6 +2110,7 @@ class HomologationBuildings extends Component
 
     public function deleteEquipment($subjectEqId)
     {
+        $this->ensureNotReadOnly();
         $eq = HomologationValuationEquipmentModel::find($subjectEqId);
         if ($eq) {
             HomologationComparableEquipmentModel::where('valuation_equipment_id', $subjectEqId)->delete();

@@ -16,10 +16,12 @@ use App\Models\Forms\LandDetails\GroupNeighborDetailsModel;
 use App\Models\Forms\LandDetails\LandSurfaceModel;
 use App\Models\Forms\LandDetails\MeasureBoundaryModel;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\ValuationLockTrait;
 
 
 class LandDetails extends Component
 {
+    use ValuationLockTrait;
 
     //Variable para obtener los valores del avaluo
     public $valuation;
@@ -235,6 +237,10 @@ class LandDetails extends Component
                 $this->ls_undividedOnlyCondominium = 0;
                 $this->ls_undividedSurfaceLand = 0;
             } */
+
+            if ($this->valuation) {
+                $this->checkReadOnlyStatus($this->valuation);
+            }
         }
 
 
@@ -244,7 +250,7 @@ class LandDetails extends Component
 
     public function save()
     {
-
+        $this->ensureNotReadOnly();
         //dd($this->ls_surfacePrivateLot);
         //Ejecutar función con todas las reglas de validación y validaciones condicionales, guardando todo en una variable
         $validator = $this->validateAllContainers();
@@ -349,6 +355,8 @@ class LandDetails extends Component
         //y a la vez enviar un toaster
         Toaster::success('Formulario guardado con éxito');
         return redirect()->route('form.index', ['section' => 'property-description']);
+
+
     }
 
 
@@ -360,6 +368,8 @@ class LandDetails extends Component
     //Abrir modal para crear grupo
     public function openAddGroup()
     {
+
+        $this->ensureNotReadOnly();
 /*
         if(!$this->landDetail){
             Toaster::error('Primero debes guardar los datos principales');
@@ -407,6 +417,7 @@ class LandDetails extends Component
     //Función para crear grupo
     public function addGroup(){
 
+        $this->ensureNotReadOnly();
 
         $rules = [
             'group' => 'required|unique:groups_neighbors,name'

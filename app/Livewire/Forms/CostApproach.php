@@ -8,9 +8,13 @@ use App\Models\Forms\ApplicableSurface\ApplicableSurfaceModel; // Nuevo
 use App\Models\Forms\Homologation\HomologationLandAttributeModel; // Nuevo
 use App\Models\Valuations\Valuation;
 use Livewire\Component;
+use App\Traits\ValuationLockTrait;
 
 class CostApproach extends Component
 {
+
+    use ValuationLockTrait;
+
     public $valuation;
     public $building;
 
@@ -49,6 +53,10 @@ class CostApproach extends Component
     {
         // 1. Cargar Valuación y Modelo de Construcción
         $this->valuation = Valuation::find(session('valuation_id'));
+
+        $this->checkReadOnlyStatus($this->valuation);
+
+
         $this->building = BuildingModel::where('valuation_id', $this->valuation->id)->first();
 
         // 2. Cargar configuraciones necesarias

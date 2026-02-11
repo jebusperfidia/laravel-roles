@@ -1,8 +1,16 @@
 <div>
+    @if($isReadOnly)
+    <div class="border-l-4 border-red-600 text-red-600 p-4 mb-4 rounded shadow-sm">
+        <p class="font-bold">Modo Lectura</p>
+        <p>El avalúo está en revisión. No puedes realizar modificaciones.</p>
+    </div>
+    @endif
+    @if(!$isReadOnly)
     <div class="flex justify-end font-semibold text-sm text-red-600 pt-2 -mb-3"><span>* Campos obligatorios</span></div>
+    @endif
 
     <form wire:submit='save'>
-
+        <fieldset @disabled($isReadOnly)>
         <div class="form-container">
             <div class="form-container__header">
                 Conclusión del Valor
@@ -184,7 +192,9 @@
                 </div>
             </div>
         </div>
-
+        @if(!$isReadOnly)
         <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Continuar</flux:button>
+        @endif
+        </fieldset>
     </form>
 </div>

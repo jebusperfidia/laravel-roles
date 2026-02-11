@@ -1,8 +1,12 @@
 <div>
-{{--     <form wire:submit=''> --}}
+    @if($isReadOnly)
+    <div class="border-l-4 border-red-600 text-red-600 p-4 mb-4 rounded shadow-sm">
+        <p class="font-bold">Modo Lectura</p>
+        <p>El avalúo está en revisión. No puedes realizar modificaciones.</p>
+    </div>
+    @endif
 
-
-        <div class="form-container">
+    <div class="form-container">
             <div class="form-container__header">
                 Instalaciones especiales
             </div>
@@ -78,7 +82,7 @@
 
 
 
-
+                <fieldset @disabled($isReadOnly)>
 
                 @if ($activeTab === 'privativas')
 
@@ -695,12 +699,13 @@
             </div>
         </div>
 </div>
+</fieldset>
 
 
-
+@if(!$isReadOnly)
 <flux:button class="mt-4 cursor-pointer btn-primary" variant="primary" wire:click='nextComponent'>Continuar
 </flux:button>
-
+@endif
 
 {{-- MODALES PARA INSTALACIONES ESPECIALES --}}
 
@@ -819,9 +824,9 @@
                 {{-- BOTÓN --}}
                 <button @click.stop.prevent
                     @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionSI'),
+                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionAE'),
                     'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
-                    $errors->has('descriptionSI'),
+                    $errors->has('descriptionAE'),
                     ])>
                     <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
                     <span class="flex-1 text-left text-gray-700 truncate">
@@ -898,9 +903,9 @@
                 {{-- BOTÓN --}}
                 <button @click.stop.prevent
                     @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionSI'),
+                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionCW'),
                     'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
-                    $errors->has('descriptionSI'),
+                    $errors->has('descriptionCW'),
                     ])>
                     <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
                     <span class="flex-1 text-left text-gray-700 truncate">
@@ -1119,7 +1124,7 @@
         </flux:field> --}}
 
         @if ($classificationType === 'common')
-        <flux:field class="flux-field">
+        <flux:field class="flux-field pt-4">
             <flux:label>%Indiviso<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model='undivided'/>
             <div class="error-container">
@@ -1267,9 +1272,9 @@
                 {{-- BOTÓN --}}
                 <button @click.stop.prevent
                     @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionSI'),
+                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionAE'),
                     'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
-                    $errors->has('descriptionAW'),
+                    $errors->has('descriptionAE'),
                     ])>
                     <!-- CAMBIO 1: Se agregó la clase 'truncate' para cortar el texto si es muy largo -->
                     <span class="flex-1 text-left text-gray-700 truncate">
@@ -1346,7 +1351,7 @@
                 {{-- BOTÓN --}}
                 <button @click.stop.prevent
                     @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionSI'),
+                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('descriptionCW'),
                     'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
                     $errors->has('descriptionCW'),
                     ])>
@@ -1573,9 +1578,9 @@
         @if ($classificationType === 'common')
         <flux:field class="flux-field pt-4">
             <flux:label>%Indiviso<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='undividedOnlyCondominium' readonly/>
+            <flux:input type="number" wire:model='undivided'/>
             <div class="error-container">
-                <flux:error name="undividedOnlyCondominium" />
+                <flux:error name="undivided" />
             </div>
         </flux:field>
         @endif

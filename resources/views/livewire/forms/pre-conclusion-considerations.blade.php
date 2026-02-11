@@ -4,7 +4,13 @@
     </div> --}}
 
     <form wire:submit="save">
-
+        @if($isReadOnly)
+        <div class="border-l-4 border-red-600 text-red-600 p-4 mb-4 rounded shadow-sm">
+            <p class="font-bold">Modo Lectura</p>
+            <p>El avalúo está en revisión. No puedes realizar modificaciones.</p>
+        </div>
+        @endif
+        <fieldset @disabled($isReadOnly)>
         <div class="form-container">
             <div class="form-container__header">
                 Consideraciones previas a la conclusión
@@ -38,11 +44,13 @@
 
             </div>
         </div>
-
+        </fieldset>
+        @if(!$isReadOnly)
         {{-- Botón limpio y solitario --}}
         <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">
             Guardar datos
         </flux:button>
+        @endif
 
     </form>
 </div>

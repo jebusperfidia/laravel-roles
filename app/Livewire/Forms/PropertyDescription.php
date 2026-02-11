@@ -7,9 +7,11 @@ use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
 use App\Models\Valuations\Valuation;
 use App\Models\Forms\PropertyDescription\PropertyDescriptionModel;
+use App\Traits\ValuationLockTrait;
 
 class PropertyDescription extends Component
 {
+    use ValuationLockTrait;
 
     public $valuationId;
 
@@ -33,6 +35,12 @@ class PropertyDescription extends Component
 
         //Recuperamos el id del avaluo desde la variable de sesión
         $this->valuationId = session('valuation_id');
+
+        $valuation = Valuation::find($this->valuationId);
+
+        if (!$valuation) return;
+
+        $this->checkReadOnlyStatus($valuation);
 
         //Obtenemos el valor del tipo de propiedad para el renderizado y guardado condicional
         $this->propertyType = Valuation::where('id', $this->valuationId)->value('property_type');
@@ -58,6 +66,7 @@ class PropertyDescription extends Component
 
     public function save()
     {
+        $this->ensureNotReadOnly();
 
         $this->resetValidation('urbanProximity');
 

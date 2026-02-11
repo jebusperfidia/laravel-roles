@@ -1,5 +1,15 @@
 <div>
-    <div class="flex justify-end font-semibold text-sm text-red-600 pt-2 -mb-3"><span>* Campos obligatorios</span></div>
+    @if($isReadOnly)
+    <div class="border-l-4 border-red-600 text-red-600 p-4 mb-4 rounded shadow-sm">
+        <p class="font-bold">Modo Lectura</p>
+        <p>El avalúo está en revisión. No puedes realizar modificaciones.</p>
+    </div>
+    @endif
+    @if(!$isReadOnly)
+    <div class="flex justify-end font-semibold text-sm text-red-600 pt-2 -mb-3">
+        <span>* Campos obligatorios</span>
+    </div>
+    @endif
     <form wire:submit='save'>
 
         <div class="form-container">
@@ -74,7 +84,7 @@
                     </ul>
                 </div>
 
-
+                <fieldset @disabled($isReadOnly)>
                 <div class="{{ $activeTab === 'privativas' ? 'block' : 'hidden' }}">
                     <div class="flex justify-end pt-4">
                         <flux:button class="btn-primary btn-table cursor-pointer mr-2" icon="plus"
@@ -1318,7 +1328,10 @@
     </div>
 </flux:modal>
 
+</fieldset>
+@if(!$isReadOnly)
 <flux:button class="mt-4 cursor-pointer btn-primary" type="submit" variant="primary">Guardar datos
 </flux:button>
+@endif
 </form>
 </div>

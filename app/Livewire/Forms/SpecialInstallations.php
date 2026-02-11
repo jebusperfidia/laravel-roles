@@ -9,19 +9,20 @@ use Livewire\Component;
 use App\Models\Valuations\Valuation;
 use Illuminate\Support\Facades\Session;
 use Masmerise\Toaster\Toaster;
+use App\Traits\ValuationLockTrait;
 use Flux\Flux;
-/* use Psy\Command\WhereamiCommand; */
 
 class SpecialInstallations extends Component
 {
+    use ValuationLockTrait;
 
     //Variable que guardará el valor del elemento a editar
     public $specialInstallationId;
 
     //Propiedades para input select tipo tabla
     public array $select_SI, $select_AE, $select_CW,
-                 $select_units,
-                 $select_conservation_factor;
+        $select_units,
+        $select_conservation_factor;
 
 
     // Estado del tab activo
@@ -61,8 +62,8 @@ class SpecialInstallations extends Component
 
     //Variables para generar elementos en tablas
     public $key, $descriptionSI, $descriptionAE, $descriptionCW, $descriptionOther,
-    $unit, $quantity, $age, $usefulLife, $newRepUnitCost, $ageFactor, $conservationFactor,
-    $netRepUnitCost, $undivided, $amount;
+        $unit, $quantity, $age, $usefulLife, $newRepUnitCost, $ageFactor, $conservationFactor,
+        $netRepUnitCost, $undivided, $amount;
 
 
     //Estas variables también son para asignar en la BD pero se asignan mediante la lógica del sistema
@@ -73,7 +74,6 @@ class SpecialInstallations extends Component
 
     //Asignamos la vida util total del inmueble, desde construcciones (modelo building)
     public $usefulLifeProperty;
-
 
     public $construction_life_values;
     public function mount()
@@ -87,6 +87,8 @@ class SpecialInstallations extends Component
         if (!$this->valuation) {
             return; // O podrías redirigir, pero esto evita que el componente explote.
         }
+
+        $this->checkReadOnlyStatus($this->valuation);
 
         // --- CORRECCIÓN PRINCIPAL (BUILDING Y DIVISIÓN POR CERO) ---
 
@@ -176,6 +178,10 @@ class SpecialInstallations extends Component
         $this->elementType = $elemType;
         $this->resetValidation();
         $this->resetModalsFields();
+        if ($this->classificationType === 'common') {
+            // Aquí pasamos el valor "fantasma" a la variable REAL que se va a guardar
+            $this->undivided = $this->undividedOnlyCondominium;
+        }
         Flux::modal('add-element')->show();
     }
 
@@ -196,7 +202,7 @@ class SpecialInstallations extends Component
         $this->ageFactor = $element->age_factor;
         $this->conservationFactor = $element->conservation_factor;
         $this->netRepUnitCost = $element->net_rep_unit_cost;
-        $this->undivided = $element->undivided;
+        $this->undivided = $element->undivided ?? $this->undividedOnlyCondominium;
         $this->amount = $element->amount;
 
         $this->classificationType = $element->classification_type;
@@ -221,6 +227,7 @@ class SpecialInstallations extends Component
 
     public function addElement()
     {
+        $this->ensureNotReadOnly();
         $rules = [
             // Campos de tipo string
             /* 'key' => 'required|string', */
@@ -293,7 +300,7 @@ class SpecialInstallations extends Component
 
             //$this->undividedOnlyCondominium = $this->undivided;
             $rules = array_merge($rules, [
-                'undividedOnlyCondominium'  => 'required|numeric|between:0,100',
+                'undivided'  => 'required|numeric|between:0,100',
             ]);
         }
 
@@ -336,17 +343,17 @@ class SpecialInstallations extends Component
 
         //Factor de edad
         //$this->ageFactor = 1 - ((($this->age * 100) / $this->usefulLife) * 0.01);
-
+        //Factor de edad
         if ($this->usefulLife > 0) {
-            // Si hay vida útil, calculamos el factor normal
-            $this->ageFactor = 1 - ((($this->age * 100) / $this->usefulLife) * 0.01);
+            // 1. Si hay vida útil, calculamos el factor normal y lo guardamos en una variable real XD
+            $factorCalculado = 1 - ((($this->age * 100) / $this->usefulLife) * 0.01);
+
+            // 2. Comparamos: si el cálculo baja de 0.60, se queda en 0.60. Si es mayor (ej. 0.85), se queda el 0.85.
+            $this->ageFactor = max(0.60, $factorCalculado);
         } else {
-            // Si la vida útil es 0, definimos un factor por defecto.
-            // Usualmente si la vida útil es 0, el factor es 0 (ya no vale nada),
-            // pero si prefieres que valga 1 (como si fuera nuevo/sin depreciación), cambia el 0 por 1.
+            // Si la vida útil es 0, definimos un factor por defecto (nuevo).
             $this->ageFactor = 1;
         }
-
         //Costo unitario de neto reposición
         $this->netRepUnitCost = $this->newRepUnitCost * $this->ageFactor;
         //dd($this->netRepUnitCost, $this->newRepUnitCost, $this->ageFactor);
@@ -379,7 +386,7 @@ class SpecialInstallations extends Component
             'age_factor' => $this->ageFactor,
             'conservation_factor' => $this->conservationFactor,
             'net_rep_unit_cost' => $this->netRepUnitCost,
-            'undivided' => $this->undividedOnlyCondominium,
+            'undivided' => $this->undivided,
             'amount' => $this->amount,
         ];
 
@@ -411,7 +418,7 @@ class SpecialInstallations extends Component
 
     public function editElement()
     {
-
+        $this->ensureNotReadOnly();
         $rules = [
             /* 'description' => 'required|string', */
             'unit' => 'required|string',
@@ -427,7 +434,7 @@ class SpecialInstallations extends Component
 
             //'undivided' => 'required|numeric|gt:0',
 
-            'amount' => 'required|numeric|gt:0',
+           /*  'amount' => 'required|numeric|gt:0', */
         ];
 
         // Variables para mapeo de clave/descripción
@@ -477,6 +484,23 @@ class SpecialInstallations extends Component
             ]);
         }
 
+
+    /*     dd([
+            '1_REGLAS_ARMADAS' => $rules,
+            '2_VALORES_DEL_FORMULARIO' => [
+                'unit' => $this->unit,
+                'quantity' => $this->quantity,
+                'age' => $this->age,
+                'usefulLife' => $this->usefulLife,
+                'newRepUnitCost' => $this->newRepUnitCost,
+                'conservationFactor' => $this->conservationFactor,
+                'undivided' => $this->undivided, // <-- Nuestro principal sospechoso
+                'descriptionSI' => $this->descriptionCW,
+                'descriptionOther' => $this->descriptionOther,
+                'classificationType' => $this->classificationType,
+            ]
+        ]);
+ */
         $this->validate(
             $rules,
             [],
@@ -486,10 +510,16 @@ class SpecialInstallations extends Component
         //Factor de edad
         //$this->ageFactor = 1 - ((($this->age * 100) / $this->usefulLife) * 0.01);
 
+        //Factor de edad
         if ($this->usefulLife > 0) {
-            $this->ageFactor = 1 - ((($this->age * 100) / $this->usefulLife) * 0.01);
+            // 1. Si hay vida útil, calculamos el factor normal y lo guardamos en una variable real XD
+            $factorCalculado = 1 - ((($this->age * 100) / $this->usefulLife) * 0.01);
+
+            // 2. Comparamos: si el cálculo baja de 0.60, se queda en 0.60. Si es mayor (ej. 0.85), se queda el 0.85.
+            $this->ageFactor = max(0.60, $factorCalculado);
         } else {
-            $this->ageFactor = 1; // O el valor de fallback que decidas
+            // Si la vida útil es 0, definimos un factor por defecto (nuevo).
+            $this->ageFactor = 1;
         }
 
         //Costo unitario de neto reposición
@@ -559,7 +589,7 @@ class SpecialInstallations extends Component
 
     public function deleteElement($classType, $elemType, $elementId)
     {
-
+        $this->ensureNotReadOnly();
         $element = SpecialInstallationModel::findOrFail($elementId);
         //dd($elemType);
         $element->delete();

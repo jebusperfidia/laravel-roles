@@ -7,7 +7,12 @@
 ============================================================
 --}}
 <div>
-
+    @if($isReadOnly)
+    <div class="border-l-4 border-red-600 text-red-600 p-4 mb-4 rounded shadow-sm mx-4 mt-4">
+        <p class="font-bold">Modo Lectura</p>
+        <p>El avalúo está en revisión. No puedes realizar modificaciones.</p>
+    </div>
+    @endif
     @if($comparablesCount >= 4)
 
     {{-- MANTENEMOS wire:init AQUÍ para que dispare el evento al cargar --}}
@@ -43,6 +48,7 @@
                 </p>
             </div>
 
+            <fieldset @disabled($isReadOnly)>
             <div class="flex flex-col md:flex-row gap-x-6 gap-y-8">
 
                 <div class="space-y-4 md:w-1/3 w-full">
@@ -194,6 +200,7 @@
                     </div>
                 </div>
             </div>
+            </fieldset>
         </div>
     </div>
 
@@ -223,10 +230,12 @@
                         size="sm">
                         Resumen
                     </flux:button>
+                    @if(!$isReadOnly)
                     <flux:button class="btn-primary cursor-pointer" type="button" wire:click='openComparablesLand'
                         size="sm">
                         Cambiar Comparables
                     </flux:button>
+                    @endif
                 </div>
             </div>
 
@@ -250,6 +259,7 @@
 
                     {{-- FICHA DEL COMPARABLE --}}
                     <div class="md:w-1/3 w-full space-y-3" wire:key="ficha-{{ $selectedComparableId }}">
+                        <fieldset @disabled($isReadOnly)>
                         <div class="p-4 bg-white border border-gray-300 rounded-lg shadow-sm">
                             <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-md">
                                 <div>
@@ -349,6 +359,7 @@
                             </div>
                         </div>
                     </div>
+                    </fieldset>
 
                     {{-- TABLA DE FACTORES DE AJUSTE --}}
                     {{-- TABLA DE FACTORES DE AJUSTE (VERSIÓN BLINDADA) --}}
@@ -506,9 +517,9 @@
                                 @endphp
                                 <tr class="hover:bg-gray-50 ">
                                     <td class="py-1.5 px-3 align-middle text-sm">
-                                        <input type="checkbox" wire:model.blur='selectedForStats'
+                                        <input type="checkbox" wire:model.live='selectedForStats'
                                             value="{{ $comparable->id }}"
-                                            class="rounded text-blue-600 focus:ring-blue-500 mr-2">
+                                            class="rounded text-blue-600 focus:ring-blue-500 mr-2" @disabled($isReadOnly)>
                                         {{ $comparable->id }}
                                     </td>
                                     <td class="py-1.5 px-3 align-middle text-sm text-center">${{
@@ -641,8 +652,8 @@
                             class="block text-sm font-medium text-gray-700 whitespace-nowrap mb-1 md:mb-0">
                             TIPO DE REDONDEO SOBRE EL VALOR UNITARIO LOTE TIPO:
                         </label>
-                        <flux:select wire:model.blur="conclusion_tipo_redondeo" id="tipo_redondeo"
-                            class="w-full md:w-40 text-sm mt-1 md:mt-0">
+                        <flux:select wire:model.live="conclusion_tipo_redondeo" id="tipo_redondeo"
+                            class="w-full md:w-40 text-sm mt-1 md:mt-0" :disabled="$isReadOnly">
                             <flux:select.option value="Unidades">Unidades</flux:select.option>
                             <flux:select.option value="Decenas">Decenas</flux:select.option>
                             <flux:select.option value="Centenas">Centenas</flux:select.option>

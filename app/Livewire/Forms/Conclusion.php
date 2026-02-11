@@ -16,9 +16,12 @@ use App\Models\Forms\MarketFocus\MarketFocusModel;
 use App\Models\Forms\LandDetails\LandDetailsModel;
 use App\Models\Forms\Building\BuildingModel;
 use App\Models\Forms\SpecialInstallation\SpecialInstallationModel;
+use App\Traits\ValuationLockTrait;
 
 class Conclusion extends Component
 {
+
+    use ValuationLockTrait;
     public $valuationId;
 
     // --- VARIABLES PÚBLICAS (TOTALES) ---
@@ -188,6 +191,8 @@ class Conclusion extends Component
         }
 
         $this->refreshMetrics();
+
+        $this->checkReadOnlyStatus($valuation);
     }
 
     /**
@@ -300,6 +305,7 @@ class Conclusion extends Component
 
     public function save()
     {
+        $this->ensureNotReadOnly();
         $cleanValue = fn($val) => (float) str_replace(',', '', (string)$val);
 
         ConclusionModel::updateOrCreate(

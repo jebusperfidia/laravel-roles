@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms;
 
+use App\Traits\ValuationLockTrait;
 use Livewire\Component;
 use App\Models\Valuations\Valuation;
 use App\Models\Forms\Building\BuildingModel;
@@ -11,8 +12,11 @@ use App\Models\Forms\ApplicableSurface\ApplicableSurfaceModel;
 use Masmerise\Toaster\Toaster;
 use Illuminate\Support\Facades\Validator;
 
+
 class ApplicableSurfaces extends Component
 {
+    use ValuationLockTrait;
+
     public $building; // Para acceder a las relaciones (debes pasarlo al componente)
     public $buildingConstructionsPrivate; // Colección de construcciones privativas
     public $buildingConstructionsCommon; // Colección de construcciones privativas
@@ -178,12 +182,23 @@ class ApplicableSurfaces extends Component
             $this->applicableUndivided = 0;
             $this->proporcionalLand = 0;
         }
+
+        if ($val) {
+            $this->checkReadOnlyStatus($val);
+        }
+
+
+        /*   if ($this->valuation) {
+            $this->checkReadOnlyStatus($this->valuation);
+        } */
+        $this->checkReadOnlyStatus($val);
     }
 
 
 
     public function save()
     {
+        $this->ensureNotReadOnly();
         // 1. Reglas UNIVERSALES (Aplican para Casa Habitación Y Condominio)
         // Solo Superficie Construida y Total del Terreno
         $rules = [
