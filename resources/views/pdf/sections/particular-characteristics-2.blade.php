@@ -1,5 +1,5 @@
 {{-- ======================================================================= --}}
-{{-- SECCIÓN: ELEMENTOS DE LA CONSTRUCCIÓN (CON ESTILOS GLOBALES) --}}
+{{-- SECCIÓN: ELEMENTOS DE LA CONSTRUCCIÓN --}}
 {{-- ======================================================================= --}}
 
 <div style="margin-top: 10px; margin-bottom: 10px;">
@@ -11,300 +11,260 @@
     </div>
 
     {{-- 1. OBRA NEGRA --}}
-   <div
-    style="font-weight: bold; font-size: 11px; border-bottom: 1px solid #adadad; margin-bottom: 2px;">
-    Obra negra</div>
+    <div style="font-weight: bold; font-size: 11px; border-bottom: 1px solid #adadad; margin-bottom: 2px;">
+        Obra negra
+    </div>
 
     <table class="form-table">
         <tr>
             <td class="label-cell">Estructura:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->construction_structure ?? 'MIXTA MARCOS RIGIDOS DE CONCRETO ARMADO...' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['structure'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Cimentación:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->construction_foundation ?? 'SE SUPONE CAJÓN DE CONCRETO ARMADO' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['foundation'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Entrepisos:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->construction_mezzanines ?? 'SE SUPONE VIGUETA Y BOVEDILLA...' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['mezzanines'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Techos:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->construction_roofs ?? 'SE SUPONE VIGUETA Y BOVEDILLA...' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['roofs'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Muros:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->construction_walls ?? 'NO PRESENTA BLOCK HUECO DE CONCRETO...' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['walls'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Trabes y Col.:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->construction_beams ?? 'DE CONCRETO ARMADO' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['beams'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Azoteas:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->construction_rooftops ?? 'IMPERMEABILIZADAS CON MATERIAL...' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['rooftops'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Bardas:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->construction_fences ?? 'DE CONCRETO ARMADO EN PLANTA BAJA' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['fences'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
     </table>
 
-    {{-- 2. REVESTIMIENTOS --}}
-
-    <div style="font-weight: bold; font-size: 11px; border-bottom: 1px solid #adadad; margin-bottom: 2px;">
-        Revestimientos y Acabados Interiores</div>
+    {{-- 2. REVESTIMIENTOS Y ACABADOS INTERIORES --}}
+    <div
+        style="font-weight: bold; font-size: 11px; border-bottom: 1px solid #adadad; margin-bottom: 2px; margin-top:5px;">
+        Revestimientos y Acabados Interiores
+    </div>
 
     <table class="form-table">
         <tr>
             <td class="label-cell">Aplanados:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->finish_plaster ?? 'SALA: APLANADO DE YESO ACABADO LISO...' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['revestimientos']['plaster'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Plafones:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->finish_ceilings ?? 'SALA: APLANADO DE YESO ACABADO LISO...' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['revestimientos']['ceilings'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Lambrines:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->finish_wainscoting ?? 'EN COCINA CON LOSETA DE MARMOL...' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['revestimientos']['wainscot'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Escaleras:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->finish_stairs ?? 'PISOS: PROPIAS DEL EDIFICIO...' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['revestimientos']['stairs'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Pisos:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->finish_floors ?? 'SALA: LOSETA DE MARMOL DE 30 X 30...' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['revestimientos']['floors'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Zoclos:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->finish_skirting ?? 'PROPIO DEL PISO DE 5 CMS.' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['revestimientos']['skirting'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Pintura:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->finish_paint ?? 'VINÍLICA EN GENERAL' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['revestimientos']['paint'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Recubrimientos:</td>
-            <td class="value-cell" colspan="3"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->finish_special ?? 'NO PRESENTA' }}
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
+                {{ $construction['revestimientos']['special'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
     </table>
 
-    {{-- 3. MATRIZ DE ACABADOS (Separación de columnas arreglada) --}}
+    {{-- 3. MATRIZ DE ACABADOS --}}
     <div style="margin-top: 15px;">
-        {{-- Forzamos border-spacing horizontal para que los punteados no se toquen --}}
         <table style="width: 100%; border-collapse: separate; border-spacing: 5px 3px;">
             <thead>
                 <tr>
                     <td style="width: 20%;"></td>
-                    <td class="sub-header" style="width: 26%;">Pisos</td>
-                    <td class="sub-header" style="width: 27%;">Muros</td>
-                    <td class="sub-header" style="width: 27%;">Plafones</td>
+                    <td class="sub-header" style="width: 26%; font-weight:bold; font-size:10px;">Pisos</td>
+                    <td class="sub-header" style="width: 27%; font-weight:bold; font-size:10px;">Muros</td>
+                    <td class="sub-header" style="width: 27%; font-weight:bold; font-size:10px;">Plafones</td>
                 </tr>
             </thead>
             <tbody>
                 {{-- Estancia Comedor --}}
                 <tr>
                     <td class="label-cell">Estancia Comedor:</td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_living_floor ?? 'LOSETA DE MARMOL...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['living']['floors'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_living_walls ?? 'APLANADO DE YESO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['living']['walls'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_living_ceiling ?? 'APLANADO DE YESO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['living']['ceilings'] ?? '-' }}
                     </td>
                 </tr>
 
                 {{-- Cocina --}}
                 <tr>
                     <td class="label-cell">Cocina:</td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_kitchen_floor ?? 'LOSETA DE MARMOL...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['kitchen']['floors'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_kitchen_walls ?? 'APLANADO DE YESO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['kitchen']['walls'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_kitchen_ceiling ?? 'APLANADO DE YESO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['kitchen']['ceilings'] ?? '-' }}
                     </td>
                 </tr>
 
                 {{-- Recámara --}}
                 <tr>
                     <td class="label-cell">
-                        Recámara:<br><span style="font-size: 8px; font-weight: normal;">(Cantidad: 2)</span>
+                        Recámara <span style="font-size: 8px;">(Cnt: {{ $construction['matrix']['bedrooms']['qty'] ?? 0
+                            }})</span>:
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_bedroom_floor ?? 'DUELA LAMINADA...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['bedrooms']['floors'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_bedroom_walls ?? 'APLANADO DE YESO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['bedrooms']['walls'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_bedroom_ceiling ?? 'APLANADO DE YESO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['bedrooms']['ceilings'] ?? '-' }}
                     </td>
                 </tr>
 
                 {{-- Baños --}}
                 <tr>
                     <td class="label-cell">
-                        Baños:<br><span style="font-size: 8px; font-weight: normal;">(Cantidad: 2)</span>
+                        Baños <span style="font-size: 8px;">(Cnt: {{ $construction['matrix']['bathrooms']['qty'] ?? 0
+                            }})</span>:
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_bath_floor ?? 'LOSETA DE MARMOL...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['bathrooms']['floors'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_bath_walls ?? 'APLANADO DE YESO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['bathrooms']['walls'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_bath_ceiling ?? 'APLANADO DE YESO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['bathrooms']['ceilings'] ?? '-' }}
                     </td>
                 </tr>
 
-                {{-- Patio Servicio --}}
+                {{-- Patio Servicio (UTYR) --}}
                 <tr>
                     <td class="label-cell">Patio Servicio:</td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_service_floor ?? 'LOSETA DE MARMOL...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['service']['floors'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_service_walls ?? 'APLANADO DE YESO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['service']['walls'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_service_ceiling ?? 'APLANADO DE YESO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['service']['ceilings'] ?? '-' }}
                     </td>
                 </tr>
 
                 {{-- Escaleras --}}
                 <tr>
                     <td class="label-cell">Escaleras:</td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_stairs_floor ?? 'PROPIAS DEL EDIFICIO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['stairs']['floors'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_stairs_walls ?? 'APLANADO ACABADO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['stairs']['walls'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_stairs_ceiling ?? 'APLANADO ACABADO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['stairs']['ceilings'] ?? '-' }}
                     </td>
                 </tr>
 
                 {{-- Estacionamiento --}}
                 <tr>
                     <td class="label-cell">
-                        Estacionamiento:<br><span style="font-size: 8px; font-weight: normal;">(Cantidad: 1)</span>
+                        Estacionamiento <span style="font-size: 8px;">(Cnt: {{
+                            $construction['matrix']['parking_cov']['qty'] ?? 0 }})</span>:
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_parking_floor ?? 'FIRME DE CONCRETO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['parking_cov']['floors'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_parking_walls ?? 'CONCRETO APARENTE...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['parking_cov']['walls'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_parking_ceiling ?? 'APLANADO ACABADO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['parking_cov']['ceilings'] ?? '-' }}
                     </td>
                 </tr>
 
                 {{-- Balcón --}}
                 <tr>
                     <td class="label-cell">BALCÓN:</td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_balcony_floor ?? 'LOSETA CERÁMICA...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['balcony']['floors'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_balcony_walls ?? 'APLANADO ACABADO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['balcony']['walls'] ?? '-' }}
                     </td>
-                    <td class="value-cell"
-                        style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                        {{ $valuation->area_balcony_ceiling ?? 'APLANADO ACABADO...' }}
+                    <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                        {{ $construction['matrix']['balcony']['ceilings'] ?? '-' }}
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    {{-- Medios Baños --}}
-    <table class="form-table">
+    {{-- MEDIOS BAÑOS (AL FINAL DE LA MATRIZ) --}}
+    <table class="form-table" style="margin-top: 5px;">
         <tr>
             <td class="label-cell">Medios Baños:</td>
-            <td class="value-cell"
-                style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->area_half_baths ?? '0' }}
+            <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                {{ $construction['matrix']['half_baths_qty'] ?? 0 }}
             </td>
         </tr>
     </table>
-
-</div>

@@ -277,22 +277,25 @@
                             <flux:select wire:model="cu_environmentalPollution"
                                 class=" text-gray-800 [&_option]:text-gray-900">
                                 <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
-                                <flux:select.option value="calculation_false">
+                                <flux:select.option value="Contaminacion del aire y ruido por vehículos automotores e industria vecina">
                                     Contaminacion del aire y ruido por vehículos automotores e industria vecina
                                 </flux:select.option>
-                                <flux:select.option value="calculation_false">
+                                <flux:select.option value="Contaminacion del aire y ruido por vehiculos automotores sobre vialidades
+                                    principales con trafico intenso">
                                     Contaminacion del aire y ruido por vehiculos automotores sobre vialidades
                                     principales con trafico intenso
                                 </flux:select.option>
-                                <flux:select.option value="calculation_false">
+                                <flux:select.option value="Contaminacion del aire, ruido, visual y fauna nociva por comercio informal de
+                                    alimentos y bebidas en la via
+                                    publica y por vehiculos automotores sobre vialidades principales con trafico intenso">
                                     Contaminacion del aire, ruido, visual y fauna nociva por comercio informal de
                                     alimentos y bebidas en la via
                                     publica y por vehiculos automotores sobre vialidades principales con trafico intenso
                                 </flux:select.option>
-                                <flux:select.option value="calculation_false">
+                                <flux:select.option value="No se aprecia contaminación ambiental aparente">
                                     No se aprecia contaminación ambiental aparente
                                 </flux:select.option>
-                                <flux:select.option value="calculation_false">
+                                <flux:select.option value="Solo se detecto la provocada por vehiculos automotores en la zona">
                                     Solo se detecto la provocada por vehiculos automotores en la zona
                                 </flux:select.option>
                             </flux:select>

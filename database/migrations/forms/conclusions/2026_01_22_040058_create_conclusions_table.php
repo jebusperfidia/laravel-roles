@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('selected_value_type')->default('physical'); // 'land', 'market', etc.
 
             // MÉTRICAS Y RESULTADO
-            $table->decimal('difference', 10, 4)->nullable();
+            $table->decimal('difference', 16, 2)->nullable();
             $table->string('range')->nullable(); // String porque traes '%'
             $table->string('rounding')->default('Sin redondeo');
             $table->decimal('concluded_value', 16, 2)->nullable();

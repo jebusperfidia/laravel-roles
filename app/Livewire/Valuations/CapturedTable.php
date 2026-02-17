@@ -38,10 +38,8 @@ final class CapturedTable extends PowerGridComponent
                 ->showRecordCount(),
         ];
     }
-
     public function datasource(): Builder
     {
-        /* return Assignment::query(); */
         return Assignment::query()
             ->join('valuations', 'assignments.valuation_id', '=', 'valuations.id')
             ->join('users as appraiserU', 'assignments.appraiser_id', '=', 'appraiserU.id')
@@ -53,11 +51,24 @@ final class CapturedTable extends PowerGridComponent
                 'valuations.type        as valuation_type',
                 'valuations.folio       as valuation_folio',
                 'valuations.property_type   as property_type',
+
+                // --- MATERIA PRIMA PARA LA DIRECCIÓN ---
+                'valuations.property_street',
+                'valuations.property_abroad_number',
+                'valuations.property_inside_number',
+                'valuations.property_block',
+                'valuations.property_lot',
+                'valuations.property_condominium',
+                'valuations.property_colony',
+                'valuations.property_cp',
+                'valuations.property_locality',
+                'valuations.property_entity',
+                // ---------------------------------------
+
                 'appraiserU.name        as appraiser_name',
                 'operatorU.name         as operator_name',
             ]);
     }
-
     public function relationSearch(): array
     {
         return [];
@@ -66,34 +77,28 @@ final class CapturedTable extends PowerGridComponent
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
-            /* ->add('id')
-            ->add('valuation_id')
-            ->add('appraiser_id')
-            ->add('operator_id')
-            ->add('created_at'); */
             ->add('id')
             ->add('valuation_date')
             ->add('valuation_type', fn(Assignment $model) => ucwords($model->valuation_type))
             ->add('valuation_folio')
             ->add('property_type', fn(Assignment $model) => ucwords(str_replace('_', ' ', $model->property_type)))
             ->add('appraiser_name')
-            ->add('operator_name');
+            ->add('operator_name')
+
+            // --- NUESTRO CAMPO VIRTUAL ---
+            ->add('full_address', function (Assignment $model) {
+                // Trucazo: Llenamos un modelo Valuation en memoria con los datos traídos por el Select
+                $val = new Valuation($model->getAttributes());
+
+                // Devolvemos la dirección o el mensaje de que falta
+                return $val->full_address
+                    ?: 'PENDIENTE DE CAPTURAR';
+            });
     }
 
     public function columns(): array
     {
         return [
-            /* Column::make('Id', 'id'),
-            Column::make('Valuation id', 'valuation_id'),
-            Column::make('Appraiser id', 'appraiser_id'),
-            Column::make('Operator id', 'operator_id'),
-            Column::make('Created at', 'created_at_formatted', 'created_at')
-                ->sortable(),
-
-            Column::make('Created at', 'created_at')
-                ->sortable()
-                ->searchable(), */
-
             Column::make('ID', 'id')
                 ->searchable()
                 ->sortable(),
@@ -111,16 +116,15 @@ final class CapturedTable extends PowerGridComponent
                 ->sortable(),
 
             Column::make('Tipo de propiedad', 'property_type')
-            ->searchable()
+                ->searchable()
                 ->sortable(),
+
+            // --- AQUÍ APARECE LA MAGIA ---
+            Column::make('Ubicación', 'full_address'),
 
             Column::make('Perito', 'appraiser_name')
                 ->searchable()
                 ->sortable(),
-
-           /*  Column::make('Operador', 'operator_name')
-                ->searchable()
-                ->sortable(), */
 
             Column::action('Acciones')
         ];

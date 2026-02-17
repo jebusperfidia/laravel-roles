@@ -1,5 +1,5 @@
 {{-- ======================================================================= --}}
-{{-- SECCIÓN: CARPINTERÍA, INSTALACIONES Y ENFOQUES (ALINEACIÓN CORREGIDA) --}}
+{{-- SECCIÓN: CARPINTERÍA, INSTALACIONES Y ENFOQUES --}}
 {{-- ======================================================================= --}}
 
 <div style="margin-top: 10px; margin-bottom: 10px;">
@@ -12,26 +12,28 @@
     <table class="form-table">
         <tr>
             <td class="label-cell">Puertas de acceso:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->woodwork_access_doors ?? 'MADERA DE TIPO TAMBOR ACABADO BARNIZ' }}
+            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+                {{ $construction['carpentry']['doors_access'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Puertas Interiores:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->woodwork_interior_doors ?? 'MADERA DE TIPO TAMBOR ACABADO BARNIZ' }}
+            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+                {{ $construction['carpentry']['doors_inside'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Muebles fijos (general):</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->woodwork_kitchen_furniture ?? 'COCINA INTEGRAL DE MDF CON CUBIERTA DE GRANITO...' }}
+            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+                {{-- Mapeado a 'furniture' en el servicio --}}
+                {{ $construction['carpentry']['furniture'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Muebles fijos (recámaras):</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->woodwork_bedroom_closets ?? 'CLOSETS DE MADERA MDF BARNIZADA...' }}
+            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+                {{-- Mapeado a 'closets' en el servicio --}}
+                {{ $construction['carpentry']['closets'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
     </table>
@@ -45,40 +47,40 @@
     <table class="form-table">
         <tr>
             <td class="label-cell">Muebles de Baño:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->installations_bath_furniture ?? 'INODOROS CERÁMICOS DE UNA PIEZA...' }}
+            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+                {{ $construction['installations']['bath_furniture'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">
                 Ramaleos Hidráulicos:<br>
-                <span style="font-size: 8px; font-weight: normal; color: #555;">(Tipo Oculta)</span>
+                <span style="font-size: 8px; font-weight: normal; color: #555;">(Tipo / Material)</span>
             </td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->installations_hydraulic_pipes ?? 'RAMALEOS A BASE DE TUBERÍA DE PPR...' }}
+            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+                {{ $construction['installations']['hydraulic'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">
                 Ramaleos Sanitarios:<br>
-                <span style="font-size: 8px; font-weight: normal; color: #555;">(Tipo Oculta)</span>
+                <span style="font-size: 8px; font-weight: normal; color: #555;">(Tipo / Material)</span>
             </td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->installations_sanitary_pipes ?? 'TUBERIA Y CONEXIONES DE P.V.C....' }}
+            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+                {{ $construction['installations']['sanitary'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">
                 Instalaciones Eléctricas:<br>
-                <span style="font-size: 8px; font-weight: normal; color: #555;">(Tipo Oculta)</span>
+                <span style="font-size: 8px; font-weight: normal; color: #555;">(Tipo / Material)</span>
             </td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->installations_electric_wiring ?? 'TUBERIA POLIFLEX PARA CABLEADO...' }}
+            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+                {{ $construction['installations']['electric'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
     </table>
 
-    {{-- 3. PUERTAS Y VENTANERÍA METÁLICA --}}
+    {{-- 3. PUERTAS Y VENTANERÍA METÁLICA (HERRERÍA) --}}
     <div
         style="font-weight: bold; font-size: 11px; border-bottom: 1px solid #adadad; margin-bottom: 2px; margin-top: 5px;">
         Puertas y Ventanería Metálica
@@ -87,20 +89,20 @@
     <table class="form-table">
         <tr>
             <td class="label-cell">Puerta Patio Servicio:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->metalwork_service_door ?? 'NO PRESENTA' }}
+            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+                {{ $construction['smithy']['service_door'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Ventanería:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->metalwork_windows ?? 'ALUMINIO DE 2 PULGADAS...' }}
+            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+                {{ $construction['smithy']['windows'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Otros (Especificar):</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->metalwork_other ?? 'NO PRESENTA' }}
+            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+                {{ $construction['smithy']['others'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
     </table>
@@ -114,69 +116,127 @@
     <table class="form-table">
         <tr>
             <td class="label-cell">Vidriería:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->other_glassware ?? 'VIDRIO CLARO DE 6 MM...' }}
+            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+                {{ $construction['others']['glass'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Cerrajería:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->other_locksmith ?? 'CHAPA DE SEGURIDAD EN ACCESO...' }}
+            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+                {{ $construction['others']['locksmith'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Fachadas:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->other_facades ?? 'MODERNA DE LÍNEAS RECTAS...' }}
+            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+                {{ $construction['others']['facades'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Cuenta con elevador:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333; ">
-                {{ $valuation->has_elevator ?? 'Existe.' }}
+            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+                {{ $construction['others']['elevator'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
     </table>
 
-    {{-- 5. INSTALACIONES ESPECIALES (TABLA) --}}
-    <div
-        style="font-weight: bold; font-size: 11px; border-bottom: 1px solid #adadad; margin-bottom: 2px; margin-top: 10px;">
-        Instalaciones especiales, obras complementarias y elementos accesorios:
-    </div>
+</div>
 
-    <div style="font-weight: bold; font-size: 10px; margin-bottom: 2px;">Privativas:</div>
+{{-- 5. INSTALACIONES ESPECIALES (TABLA DINÁMICA) --}}
+<div
+    style="font-weight: bold; font-size: 11px; border-bottom: 1px solid #adadad; margin-bottom: 2px; margin-top: 10px;">
+    Instalaciones especiales, obras complementarias y elementos accesorios:
+</div>
 
-    <table style="width: 100%; border-collapse: collapse; font-size: 8px;">
-        <thead>
-            <tr style="background-color: #777; color: #fff; text-align: center; font-weight: bold;">
-                <td style="width: 10%; border: 1px solid #fff; padding: 2px;">Clave</td>
-                <td style="width: 45%; border: 1px solid #fff; padding: 2px;">Descripción</td>
-                <td style="width: 10%; border: 1px solid #fff; padding: 2px;">Cant.</td>
-                <td style="width: 15%; border: 1px solid #fff; padding: 2px;">Unidad</td>
-                <td style="width: 10%; border: 1px solid #fff; padding: 2px;">Edad</td>
-                <td style="width: 10%; border: 1px solid #fff; padding: 2px;">V. Útil</td>
-            </tr>
-        </thead>
-        <tbody>
-            {{-- DATA DUMMY PARA EJEMPLO --}}
-            <tr style="background-color: #ddd;">
-                <td style="padding: 3px; text-align: center;">EA09</td>
-                <td style="padding: 3px;">Cocinas integrales movibles</td>
-                <td style="padding: 3px; text-align: center;">1.00</td>
-                <td style="padding: 3px; text-align: center;">PIEZA</td>
-                <td style="padding: 3px; text-align: center;">11</td>
-                <td style="padding: 3px; text-align: center;">25</td>
-            </tr>
-            <tr style="background-color: #eee;">
-                <td style="padding: 3px; text-align: center;">OC17</td>
-                <td style="padding: 3px;">Bodega privativa</td>
-                <td style="padding: 3px; text-align: center;">1.00</td>
-                <td style="padding: 3px; text-align: center;">PIEZA</td>
-                <td style="padding: 3px; text-align: center;">11</td>
-                <td style="padding: 3px; text-align: center;">70</td>
-            </tr>
-        </tbody>
-    </table>
+{{-- A) SECCIÓN PRIVATIVAS --}}
+<div style="font-weight: bold; font-size: 10px; margin-bottom: 2px;">Privativas:</div>
+
+<table style="width: 100%; border-collapse: collapse; font-size: 8px;">
+    <thead>
+        <tr style="background-color: #777; color: #fff; text-align: center; font-weight: bold;">
+            <td style="width: 10%; border: 1px solid #fff; padding: 2px;">Clave</td>
+            <td style="width: 45%; border: 1px solid #fff; padding: 2px;">Descripción</td>
+            <td style="width: 10%; border: 1px solid #fff; padding: 2px;">Cant.</td>
+            <td style="width: 15%; border: 1px solid #fff; padding: 2px;">Unidad</td>
+            <td style="width: 10%; border: 1px solid #fff; padding: 2px;">Edad</td>
+            <td style="width: 10%; border: 1px solid #fff; padding: 2px;">V. Útil</td>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse($specialElementsPrivate as $index => $item)
+        {{-- Alternar color de fondo (gris claro / gris oscuro) --}}
+        <tr style="background-color: {{ $index % 2 == 0 ? '#ddd' : '#eee' }};">
+            <td style="padding: 3px; text-align: center;">
+                {{ $item->key ?? '-' }}
+            </td>
+            <td style="padding: 3px;">
+                {{-- Lógica de descripción igual que en tu Livewire --}}
+                {{ ($item->description ?: $item->description_other) ?? 'Sin descripción' }}
+            </td>
+            <td style="padding: 3px; text-align: center;">
+                {{ number_format($item->quantity ?? 0, 2) }}
+            </td>
+            <td style="padding: 3px; text-align: center;">
+                {{ strtoupper($item->unit ?? '') }}
+            </td>
+            <td style="padding: 3px; text-align: center;">
+                {{ $item->age ?? 0 }}
+            </td>
+            <td style="padding: 3px; text-align: center;">
+                {{ $item->useful_life ?? 0 }}
+            </td>
+        </tr>
+        @empty
+        <tr style="background-color: #eee;">
+            <td colspan="6" style="padding: 3px; text-align: center; font-style: italic;">
+                NO PRESENTA INSTALACIONES PRIVATIVAS
+            </td>
+        </tr>
+        @endforelse
+    </tbody>
+</table>
+
+{{-- B) SECCIÓN COMUNES (CONDICIONAL) --}}
+@if($specialElementsCommon->isNotEmpty())
+<div style="font-weight: bold; font-size: 10px; margin-bottom: 2px; margin-top: 5px;">Comunes:</div>
+
+<table style="width: 100%; border-collapse: collapse; font-size: 8px;">
+    <thead>
+        <tr style="background-color: #777; color: #fff; text-align: center; font-weight: bold;">
+            <td style="width: 10%; border: 1px solid #fff; padding: 2px;">Clave</td>
+            <td style="width: 45%; border: 1px solid #fff; padding: 2px;">Descripción</td>
+            <td style="width: 10%; border: 1px solid #fff; padding: 2px;">Cant.</td>
+            <td style="width: 15%; border: 1px solid #fff; padding: 2px;">Unidad</td>
+            <td style="width: 10%; border: 1px solid #fff; padding: 2px;">Edad</td>
+            <td style="width: 10%; border: 1px solid #fff; padding: 2px;">V. Útil</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($specialElementsCommon as $index => $item)
+        <tr style="background-color: {{ $index % 2 == 0 ? '#ddd' : '#eee' }};">
+            <td style="padding: 3px; text-align: center;">
+                {{ $item->key ?? '-' }}
+            </td>
+            <td style="padding: 3px;">
+                {{ ($item->description ?: $item->description_other) ?? 'Sin descripción' }}
+            </td>
+            <td style="padding: 3px; text-align: center;">
+                {{ number_format($item->quantity ?? 0, 2) }}
+            </td>
+            <td style="padding: 3px; text-align: center;">
+                {{ strtoupper($item->unit ?? '') }}
+            </td>
+            <td style="padding: 3px; text-align: center;">
+                {{ $item->age ?? 0 }}
+            </td>
+            <td style="padding: 3px; text-align: center;">
+                {{ $item->useful_life ?? 0 }}
+            </td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
+@endif
 
     {{-- 6. APLICABILIDAD DE LOS ENFOQUES --}}
     <div

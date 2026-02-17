@@ -143,11 +143,15 @@ Quitamos borde y fondo si hay imagen para que se vea limpia. --}}
     <div style="display: inline-block; text-align: right;">
         <span style="font-weight: bold; font-size: 11px; margin-right: 15px; vertical-align: middle;">Valor
             Concluido</span>
-        <span class="text-brand" style="font-size: 20px; font-weight: bold; vertical-align: middle;">
-            $ {{ number_format($valuation->valor_concluido ?? 3960000, 2) }}
-        </span>
-        <div style="font-size: 10px; font-weight: bold; margin-top: 8px; text-transform: uppercase;">
-            {{ $valuation->valor_concluido_texto ?? 'TRES MILLONES NOVECIENTOS SESENTA MIL PESOS 00/100 M.N.' }}
-        </div>
+<span class="text-brand" style="font-size: 20px; font-weight: bold;">
+    @if($valorConcluidoFinal > 0)
+    $ {{ number_format($valorConcluidoFinal, 2) }}
+    @else
+    $ -
+    @endif
+</span>
+<div style="font-size: 10px; font-weight: bold; text-transform: uppercase;">
+    {{ $valorConcluidoTexto }}
+</div>
     </div>
 </div>

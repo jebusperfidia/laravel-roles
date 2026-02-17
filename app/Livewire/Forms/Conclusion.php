@@ -7,31 +7,22 @@ use Masmerise\Toaster\Toaster;
 use Illuminate\Support\Facades\Session;
 use App\Models\Valuations\Valuation;
 use App\Models\Forms\Conclusions\ConclusionModel;
-
-// --- MODELOS DE DATOS ---
-use App\Models\Forms\ApplicableSurface\ApplicableSurfaceModel;
-use App\Models\Forms\Homologation\HomologationLandAttributeModel;
-use App\Models\Forms\Homologation\HomologationBuildingAttributeModel;
-use App\Models\Forms\MarketFocus\MarketFocusModel;
-use App\Models\Forms\LandDetails\LandDetailsModel;
-use App\Models\Forms\Building\BuildingModel;
-use App\Models\Forms\SpecialInstallation\SpecialInstallationModel;
 use App\Traits\ValuationLockTrait;
+use App\Services\ValuationCalculatorService; // <--- IMPORTANTE
 
 class Conclusion extends Component
 {
-
     use ValuationLockTrait;
     public $valuationId;
 
-    // --- VARIABLES PÚBLICAS (TOTALES) ---
+    // --- VARIABLES PÚBLICAS ---
     public $landValue = 0;
     public $marketValue = 0;
     public $hypotheticalValue = 0;
-    public $physicalValue = 0; // <--- AQUÍ CAERÁ EL TOTAL DE COSTOS
+    public $physicalValue = 0;
     public $otherValueAmount = 0;
 
-    // --- VARIABLES VISUALES Y DE SUPERFICIE ---
+    // --- VARIABLES VISUALES ---
     public $surfaceLand = 0;
     public $surfaceConst = 0;
     public $unitLand = 0;
@@ -46,193 +37,52 @@ class Conclusion extends Component
     public $difference = 0;
     public $range = '';
 
-    // Configuración para Ross-Heidecke (Cargada igual que en CostApproach)
-    protected $lifeValuesConfig;
-
-    public function mount()
+    // Inyección de dependencia en el mount
+    public function mount(ValuationCalculatorService $calculator)
     {
         $this->valuationId = Session::get('valuation_id');
         $valuation = Valuation::find($this->valuationId);
 
         if (!$valuation) return;
 
-        // Cargar config de vida útil
-        $this->lifeValuesConfig = config('properties_inputs.construction_life_values', []);
+        // 1. LLAMAMOS AL SERVICIO PARA OBTENER LOS CÁLCULOS FRESCOS 🧊
+        $calculatedData = $calculator->calculateValues($this->valuationId);
 
-        // =========================================================
-        // 1. VALOR DEL TERRENO (Lógica CostApproach)
-        // =========================================================
-        $surfaceModel = ApplicableSurfaceModel::where('valuation_id', $this->valuationId)->first();
-        $homologationLandModel = HomologationLandAttributeModel::where('valuation_id', $this->valuationId)->first();
+        if ($calculatedData) {
+            // Asignamos Valores Monetarios
+            $this->landValue = $calculatedData['landValue'];
+            $this->marketValue = $calculatedData['marketValue'];
+            $this->hypotheticalValue = $calculatedData['hypotheticalValue'];
+            $this->physicalValue = $calculatedData['physicalValue'];
 
-        $landSurface = $surfaceModel->surface_area ?? 0.0;
-        $landIndiviso = $surfaceModel->applicable_undivided ?? 0.0;
-        $landUnitValue = $homologationLandModel->unit_value_mode_lot ?? 0.0;
-
-        // Asignar a variables visuales
-        $this->surfaceLand = $landSurface;
-        $this->unitLand = $landUnitValue;
-
-        $landFractionValue = $landSurface * $landUnitValue;
-        $isCondo = stripos($valuation->property_type, 'condominio') !== false;
-
-        if ($isCondo) {
-            $indivisoDecimal = ($landIndiviso > 0) ? ($landIndiviso / 100) : 0;
-            $calculatedLandValue = $landFractionValue * $indivisoDecimal;
-        } else {
-            $calculatedLandValue = $landFractionValue;
+            // Asignamos Datos Informativos (Superficies/Unitarios)
+            $this->surfaceLand = $calculatedData['surfaceLand'];
+            $this->unitLand = $calculatedData['unitLand'];
+            $this->surfaceConst = $calculatedData['surfaceConst'];
+            $this->unitMarket = $calculatedData['unitMarket'];
+            $this->unitHypothetical = $calculatedData['unitHypothetical'];
+            $this->unitPhysical = $calculatedData['unitPhysical'];
         }
 
-        $this->landValue = round($calculatedLandValue, 2);
-
-
-        // =========================================================
-        // 2. VALOR DE MERCADO (Lógica MarketFocus)
-        // =========================================================
-        $homologationBuildModel = HomologationBuildingAttributeModel::where('valuation_id', $this->valuationId)->first();
-        $marketFocusModel = MarketFocusModel::where('valuation_id', $this->valuationId)->first();
-        $landDetailsModel = LandDetailsModel::where('valuation_id', $this->valuationId)->first();
-
-        $saleableBuiltArea = $surfaceModel->built_area ?? 0.0;
-        $constructionUnitValue = $homologationBuildModel->unit_value_mode_lot ?? 0.0;
-
-        $this->surfaceConst = $saleableBuiltArea;
-        $this->unitMarket = $constructionUnitValue;
-
-        $baseConstructionValue = $saleableBuiltArea * $constructionUnitValue;
-
-        // Excedentes
-        $valTerrenoExcedente = 0.0;
-        $useExcess = $landDetailsModel ? (bool)$landDetailsModel->use_excess_calculation : false;
-
-        if ($useExcess && $surfaceModel && $surfaceModel->private_lot > 0) {
-            $privateLot = (float)$surfaceModel->private_lot;
-            $privateLotType = (float)$surfaceModel->private_lot_type;
-            // Usamos unitario de tierra para excedente
-            $diferencia = ($privateLot * $landUnitValue) - ($privateLotType * $landUnitValue);
-            $surplusPct = $marketFocusModel ? (float)$marketFocusModel->surplus_percentage : 100;
-            $valTerrenoExcedente = $diferencia * ($surplusPct / 100);
-        }
-
-        $this->marketValue = round($baseConstructionValue + $valTerrenoExcedente, 2);
-
-
-        // =========================================================
-        // 3. COMPARATIVO HIPOTÉTICO (Avance de Obra)
-        // =========================================================
-        $buildingModel = BuildingModel::where('valuation_id', $this->valuationId)->first();
-        $progress = $buildingModel ? ($buildingModel->progress_general_works ?? 0) : 0;
-
-        $this->hypotheticalValue = round($this->marketValue * ($progress / 100), 2);
-        $this->unitHypothetical = $this->surfaceConst > 0 ? ($this->hypotheticalValue / $this->surfaceConst) : 0;
-
-
-        // =========================================================
-        // 4. VALOR FÍSICO / ENFOQUE DE COSTOS (Recálculo Total)
-        // =========================================================
-        // Fórmula: Terreno + Construcciones (Neto) + Instalaciones (Neto)
-
-        $totalConstructionsValue = 0;
-        $totalInstallationsValue = 0;
-
-        // A. CONSTRUCCIONES (Ross-Heidecke)
-        if ($buildingModel) {
-            // Privativas
-            $rawPrivates = $buildingModel->privates()->get();
-            $processedPrivates = $this->calculateConstructionValues($rawPrivates);
-            $totalConstructionsValue += $processedPrivates->sum('total_value');
-
-            // Comunes (Solo si es condominio)
-            if ($isCondo) {
-                $rawCommons = $buildingModel->commons()->get();
-                $processedCommons = $this->calculateConstructionValues($rawCommons);
-                $totalConstructionsValue += $processedCommons->sum('total_value');
-            }
-        }
-
-        // B. INSTALACIONES ESPECIALES
-        $allSpecialItems = SpecialInstallationModel::where('valuation_id', $this->valuationId)->get();
-
-        // Privativas
-        $privInst = $allSpecialItems->where('classification_type', 'private');
-        $totalInstallationsValue += $privInst->sum('amount'); // 'amount' ya trae el neto guardado en CostApproach
-
-        // Comunes (Solo si es condominio)
-        if ($isCondo) {
-            $commInst = $allSpecialItems->where('classification_type', 'common');
-            foreach ($commInst as $item) {
-                // Aplicamos indiviso a cada partida común
-                $indivisoDecimal = ($item->undivided ?? 0) / 100;
-                $totalInstallationsValue += ($item->amount * $indivisoDecimal);
-            }
-        }
-
-        // C. SUMA FINAL FÍSICO
-        $calculatedPhysical = $calculatedLandValue + $totalConstructionsValue + $totalInstallationsValue;
-
-        $this->physicalValue = round($calculatedPhysical, 2);
-        $this->unitPhysical = $this->surfaceConst > 0 ? ($this->physicalValue / $this->surfaceConst) : 0;
-
-
-        // =========================================================
-        // 5. CARGA DE DATOS GUARDADOS (Si existen)
-        // =========================================================
+        // 2. CARGA DE CONFIGURACIÓN GUARDADA (Usuario)
+        // Esto solo recupera "Qué elegiste", "Qué redondeo", "Valor manual"
         $conclusion = ConclusionModel::where('valuation_id', $this->valuationId)->first();
 
         if ($conclusion) {
             $this->otherValueAmount = $conclusion->other_value;
             $this->selectedValueType = $conclusion->selected_value_type;
             $this->rounding = $conclusion->rounding;
-            $this->concludedValue = $conclusion->concluded_value;
+            // OJO: El concluded_value se recalcula abajo con refreshMetrics,
+            // así aseguramos que si cambiaron los costos, el total se actualice aunque no hayas guardado.
         } else {
-            // Defaults iniciales
             $this->selectedValueType = 'physical';
             $this->rounding = 'Sin redondeo';
         }
 
+        // Recalcular métricas (Diferencia, Rango y Valor Concluido final)
         $this->refreshMetrics();
 
         $this->checkReadOnlyStatus($valuation);
-    }
-
-    /**
-     * Lógica de Ross-Heidecke replicada de CostApproach para recalcular valores netos
-     */
-    private function calculateConstructionValues($constructions)
-    {
-        return $constructions->map(function ($item) {
-            $claveCombinacion = $item->clasification . '_' . $item->use;
-            $vidaUtilTotal = $this->lifeValuesConfig[$claveCombinacion] ?? 0;
-            $edad = $item->age;
-
-            // Factor Edad
-            $factorEdad = 0.0;
-            if ($vidaUtilTotal > 0) {
-                $factorEdad = (0.100 * $vidaUtilTotal + 0.900 * ($vidaUtilTotal - $edad)) / $vidaUtilTotal;
-            }
-
-            // Factor Conservación
-            $factorConservacion = match ($item->conservation_state) {
-                '0. Ruinoso' => 0.0,
-                '0.8 Malo' => 0.8,
-                '1. Normal', '1. Bueno', '1. Nuevo' => 1.0,
-                '1.1 Muy bueno', '1.1 Recientemente remodelado' => 1.1,
-                default => 1.0,
-            };
-
-            // Factor Resultante
-            $factorResultante = $factorEdad * $factorConservacion * ($item->progress_work / 100);
-            $factorResultante = max($factorResultante, 0.600); // Mínimo 0.600 según tu lógica original
-
-            // Costo Neto y Total
-            $costoUnitarioNeto = $item->unit_cost_replacement * $factorResultante;
-            $valorTotal = $item->surface * $costoUnitarioNeto;
-
-            // Inyectamos el valor total calculado al objeto
-            $item->total_value = $valorTotal;
-
-            return $item;
-        });
     }
 
     public function refreshMetrics()
@@ -262,6 +112,7 @@ class Conclusion extends Component
     public function calculateConcludedValue()
     {
         $baseValue = 0;
+        // Limpiamos comas por si acaso
         $getValue = fn($val) => (float) str_replace(',', '', (string)$val);
 
         switch ($this->selectedValueType) {
@@ -297,6 +148,7 @@ class Conclusion extends Component
             case 'A miles':
                 $this->concludedValue = number_format(round($baseValue / 1000) * 1000, 2, '.', '');
                 break;
+            case 'Sin redondeo':
             default:
                 $this->concludedValue = number_format($baseValue, 2, '.', '');
                 break;
@@ -316,6 +168,7 @@ class Conclusion extends Component
                 'hypothetical_value' => $cleanValue($this->hypotheticalValue),
                 'physical_value' => $cleanValue($this->physicalValue),
                 'other_value' => $cleanValue($this->otherValueAmount),
+
                 'selected_value_type' => $this->selectedValueType,
                 'difference' => $cleanValue($this->difference),
                 'range' => $this->range,

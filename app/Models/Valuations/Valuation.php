@@ -4,14 +4,15 @@ namespace App\Models\Valuations;
 
 use App\Models\Forms\SpecialInstallation\SpecialInstallationModel;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\PropertyLocationModel;
-use App\Models\Forms\Comparable\ValuationComparableModel;
 use App\Models\Forms\Comparable\ComparableModel;
 
 use App\Models\Forms\Comparable\ValuationLandComparableModel;
 use App\Models\Forms\Comparable\ValuationBuildingComparableModel;
 use App\Models\Forms\Homologation\HomologationValuationFactorModel;
 use App\Models\Forms\Homologation\HomologationLandAttributeModel;
+use App\Models\Forms\Homologation\HomologationBuildingAttributeModel;
+use App\Models\Forms\ConstructionElements\ConstructionElementModel;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Valuation extends Model
 {
@@ -118,6 +119,9 @@ class Valuation extends Model
     protected $casts = [
         'pre_valuation' => 'boolean', // <--- AÑADE ESTA LÍNEA
     ];
+
+
+    protected $appends = ['full_address'];
 
 
     public function specialInstallations()
@@ -267,5 +271,88 @@ class Valuation extends Model
         return $this->hasOne(HomologationLandAttributeModel::class, 'valuation_id');
     }
 
+    public function homologationBuildingAttributes()
+    {
+        // Asegúrate de que este modelo exista en esta ruta
+        return $this->hasOne(HomologationBuildingAttributeModel::class, 'valuation_id');
+    }
+
+
+
+    /**
+     * Accessor para obtener la dirección completa unificada.
+     */
+    protected function fullAddress(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                // Si no hay calle, asumimos que no han capturado la dirección
+                if (empty($this->property_street)) {
+                    return null;
+                }
+
+                $address = $this->property_street;
+
+                if ($this->property_abroad_number) {
+                    $address .= " EXT: " . $this->property_abroad_number;
+                }
+
+                if ($this->property_inside_number) {
+                    $address .= " INT: " . $this->property_inside_number;
+                }
+
+                if ($this->property_block) {
+                    $address .= " MZ: " . $this->property_block;
+                }
+
+                if ($this->property_lot) {
+                    $address .= " LTE: " . $this->property_lot;
+                }
+
+                if ($this->property_condominium) {
+                    $address .= " COND: " . $this->property_condominium;
+                }
+
+                // --- LÓGICA DE COLONIA (FIX) ---
+                $colony = ($this->property_colony === 'no-listada')
+                    ? $this->property_other_colony
+                    : $this->property_colony;
+
+                if ($colony) {
+                    $address .= " COL: " . $colony;
+                }
+
+                if ($this->property_cp) {
+                    $address .= " CP: " . $this->property_cp;
+                }
+
+                // OJO: property_locality y property_entity suelen ser IDs en tu BD.
+                // Si quieres que aquí salgan los nombres (ej. BENITO JUÁREZ),
+                // necesitarías la lógica del DipomexService, pero para el modelo
+                // lo dejamos así para no romper nada.
+                if ($this->property_locality) {
+                    $address .= " MUN: " . $this->property_locality;
+                }
+
+                if ($this->property_entity) {
+                    $address .= ", " . $this->property_entity . ".";
+                }
+
+                // Devolvemos todo en mayúsculas y limpio de espacios dobles
+                return mb_strtoupper(preg_replace('/\s+/', ' ', trim($address)));
+            }
+        );
+    }
+
+
+    /**
+     * Relación con los elementos de construcción
+     */
+    public function constructionElement()
+    {
+        // Usamos hasOne porque un avalúo tiene un conjunto de elementos
+        // El segundo parámetro 'valuation_id' es la FK en la tabla construction_elements
+        return $this->hasOne(ConstructionElementModel::class, 'valuation_id');
+    }
 
 }

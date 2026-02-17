@@ -45,12 +45,13 @@
         @endif
 
 
+
         {{-- 4. ENFOQUE COMPARATIVO DEL MERCADO --}}
         @if(($config['sections']['comparables'] ?? false) && isset($landPivots) && $landPivots->count() >= 4)
         @include('pdf.sections.homologation-buildings')
         @endif
 
-
+{{--         <div class="page-break"></div> --}}
 
         @include('pdf.sections.coast-approach')
         <div class="page-break"></div>
