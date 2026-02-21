@@ -26,7 +26,7 @@
         bottom: -2.0cm;
         left: 0cm;
         right: 0cm;
-        height: 3cm;
+        height: 2.6cm;
     }
 
     /* 4. TABLAS GENERALES */

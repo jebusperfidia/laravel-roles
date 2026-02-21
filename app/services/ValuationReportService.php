@@ -16,13 +16,13 @@ use App\Models\Forms\LandDetails\LandDetailsModel;
 use App\Models\Forms\MarketFocus\MarketFocusModel;
 use App\Models\Forms\PhotoReport\PhotoReportModel;
 
+use App\Models\Forms\PropertyDescription\PropertyDescriptionModel;
 use App\Models\Forms\PropertyLocation\PropertyLocationModel;
 use App\Models\Forms\UrbanEquipment\UrbanEquipmentModel;
 use App\Models\Forms\UrbanFeatures\UrbanFeaturesModel;
 use App\Models\Valuations\Valuation;
 use App\Services\ValuationCalculatorService;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Log;
 use setasign\Fpdi\Fpdi; // Requiere: composer require setasign/fpdf setasign/fpdi
 
 class ValuationReportService
@@ -162,10 +162,10 @@ class ValuationReportService
         $finalIncomeValue = 0;
 
         // Obtenemos el valor numérico (o 0 si no existe)
-        $valorConcluido = $conclusionModel ? (float)$conclusionModel->concluded_value : 0;
+       // $valorConcluido = $conclusionModel ? (float)$conclusionModel->concluded_value : 0;
 
         // Convertimos a texto usando el Helper
-        $valorConcluidoTexto = NumberToLetter::convert($valorConcluido);
+        //$valorConcluidoTexto = NumberToLetter::convert($valorConcluido);
 
 
 
@@ -827,16 +827,15 @@ class ValuationReportService
         // 3. PROCESAMIENTO DE CONSTRUCCIONES (Ross-Heidecke)
         $processConstructions = function ($items) use ($lifeValuesConfig) {
             return collect($items)->map(function ($item) use ($lifeValuesConfig) {
-                // Generar clave para buscar vida útil (ej. "Moderna_Habitacional")
+                // Generar clave para buscar vida útil
                 $claveCombinacion = $item->clasification . '_' . $item->use;
-                // Si no encuentra la clave, usa 0 (o podrías poner un default como 60 u 80)
                 $vidaTotal = $lifeValuesConfig[$claveCombinacion] ?? 0;
                 $edad = $item->age;
 
                 // Factor Edad
                 $fEdad = ($vidaTotal > 0)
                     ? (0.100 * $vidaTotal + 0.900 * ($vidaTotal - $edad)) / $vidaTotal
-                    : 0; // Evitar división por cero
+                    : 0;
 
                 // Factor Conservación
                 $fCons = match ($item->conservation_state) {
@@ -847,29 +846,52 @@ class ValuationReportService
                     default => 1.0,
                 };
 
-                // Factor Resultante (mínimo 0.0)
+                // Factor Resultante
                 $fRes = max($fEdad * $fCons * ($item->progress_work / 100), 0.0);
-
-                // Costos
                 $costoNeto = $item->unit_cost_replacement * $fRes;
 
+                // Traducimos el texto a la clase numérica SHF
+                $claseNumero = match ($item->clasification) {
+                    'Minima'                               => '1',
+                    'Economica'                            => '2',
+                    'Interes social'                       => '3',
+                    'Media'                                => '4',
+                    'Semilujo'                             => '5',
+                    'Residencial'                          => '6',
+                    'Residencial plus', 'Residencial plus +' => '7',
+                    'Unica'                                => '0',
+                    default                                => '-',
+                };
+
                 return (object)[
-                    'description' => $item->description,
+                    'description'   => $item->description,
                     'clasification' => $item->clasification,
-                    'use' => $item->use,
-                    'levels' => $item->building_levels,
-                    'surface' => $item->surface,
-                    'unit_cost' => $item->unit_cost_replacement,
-                    'f_edad' => $fEdad,
-                    'f_cons' => $fCons,
-                    'f_res' => $fRes,
-                    'progress' => $item->progress_work,
-                    'net_cost' => $costoNeto,
-                    'total_value' => $item->surface * $costoNeto,
-                    'age' => $edad // Pasamos la edad para mostrarla
+                    'use'           => $item->use,
+                    'levels'        => $item->building_levels,
+                    'surface'       => $item->surface,
+                    'unit_cost'     => $item->unit_cost_replacement,
+                    'f_edad'        => $fEdad,
+                    'f_cons'        => $fCons,
+                    'f_res'         => $fRes,
+                    'progress'      => $item->progress_work,
+                    'net_cost'      => $costoNeto,
+                    'total_value'   => $item->surface * $costoNeto,
+                    'age'           => $edad,
+
+                    'clase_shf'     => $item->clasification ?? '-',
+                    'uso'           => $item->use ?? '-',
+                    'clase'         => $claseNumero,
+                    'fuente'        => $item->source_information ?? 'Escrituras',
+                    'niv_cpo'       => $item->building_levels ?? '-',
+                    'niv_tipo'      => $item->levels_construction_type ?? 1,
+
+                    'vmr'           => $vidaTotal,
+                    'vur'           => max($vidaTotal - $edad, 0),
+                    'edo_cons'      => preg_replace('/^[\d\.\s]+/', '', $item->conservation_state ?? '-'),
                 ];
             });
         };
+
 
         // Ejecutar procesamiento
         $privateConstructions = $buildingModel ? $processConstructions($buildingModel->privates()->get()) : collect();
@@ -987,14 +1009,20 @@ class ValuationReportService
                 $eId = $pivot->comparable->comparable_entity;
                 $mId = $pivot->comparable->comparable_locality;
 
-
                 // Si Dipomex tiene el nombre, lo usamos; si no, dejamos el ID para debuggear
                 $pivot->comparable->resolved_state = $estados[$eId] ?? $eId;
                 $pivot->comparable->resolved_municipality = $getNombreMunicipio($eId, $mId) ?? $mId;
+
+                // --- NUEVO: CÁLCULO FCUS (CUS Calculado) DIRECTO EN PHP ---
+                $niveles = (float)($pivot->comparable->comparable_allowed_levels ?? $pivot->comparable->comparable_max_levels ?? 0);
+                $areaLibre = (float)($pivot->comparable->comparable_free_area_required ?? $pivot->comparable->comparable_free_area ?? 0);
+                $areaLibreDec = ($areaLibre > 1) ? ($areaLibre / 100) : $areaLibre;
+
+                // Guardamos el CUS y las variables limpias en propiedades dinámicas para la vista
+                $pivot->comparable->calculated_cus = $niveles * (1 - $areaLibreDec);
+                $pivot->comparable->clean_area_libre = $areaLibre;
+                $pivot->comparable->clean_niveles = $niveles;
             }
-
-
-
 
             $fre = 1.0;
             $factorsMap = $comparableFactors->where('valuation_land_comparable_id', $pivot->id)
@@ -1111,6 +1139,19 @@ class ValuationReportService
                 // Resolvemos nombres
                 $pivot->comparable->resolved_state = $estados[$eId] ?? ($eId ?: 'N/A');
                 $pivot->comparable->resolved_municipality = $getNombreMunicipio($eId, $mId) ?? ($mId ?: 'N/A');
+
+                $c_sup_terreno = (float)($pivot->comparable->comparable_land_area ?? 0);
+                $c_sup_const   = (float)($pivot->comparable->comparable_built_area ?? 0);
+
+               // dd($c_sup_const, $c_sup_terreno);
+
+                $pivot->comparable->piso_nivel_val = $pivot->comparable->comparable_floor_level ?? 'N/A';
+
+                $pivot->comparable->c_sup_terreno_val = $c_sup_terreno;
+                $pivot->comparable->c_sup_const_val   = $c_sup_const;
+                $pivot->comparable->relacion_tc_val   = ($c_sup_const > 0) ? ($c_sup_terreno / $c_sup_const) : 0;
+
+                //dd($pivot->comparable->relacion_tc_val);
             }
 
             $myFactors = $allFactors->where('valuation_building_comparable_id', $pivot->id);
@@ -1167,6 +1208,7 @@ class ValuationReportService
             'superficie_const'   => $supConstBuilding,
             'relacion_tc'        => ($supConstBuilding > 0) ? ($supTerrenoBuilding / $supConstBuilding) : 0,
             'lote_moda'          => $loteModaSeguro,
+
         ];
 
 
@@ -1210,7 +1252,7 @@ class ValuationReportService
         $mapMicroBase64 = file_exists($microPath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($microPath)) : null;
         $mapMacroBase64 = file_exists($macroPath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($macroPath)) : null;
 
-    /*     dd($buildingPivots->map(function ($p) {
+        /*     dd($buildingPivots->map(function ($p) {
             return [
                 'id' => $p->comparable->id,
                 'fneg_obj' => $p->factors_map['FNEG'] ?? 'NO ENCONTRADO',
@@ -1218,6 +1260,128 @@ class ValuationReportService
                 'vuh_calculado' => $p->calculated_vuh
             ];
         })->toArray()); */
+
+
+
+
+
+
+
+        // =========================================================================
+        // --- SECCIÓN: DESCRIPCIÓN GENERAL, ATRIBUTOS Y SUPERFICIES ---
+        // =========================================================================
+
+        $propertyDesc = PropertyDescriptionModel::where('valuation_id', $id)->first();
+
+        // 1. INFO GENERAL
+        $gralInfo = (object)[
+            // Ahora sí los sacamos de $propertyDesc
+            'uso_actual'      => strtoupper($propertyDesc->actual_use ?? '-'),
+            'uso_multiple'    => preg_replace('/^\d+\.\s*/', '', $propertyDesc->multiple_use_space ?? '-'),
+            'nivel_ubicacion' => $propertyDesc->level_building ?? '-',
+        ];
+        // ---------------------------------------------------------
+        // CÁLCULO DE EDAD Y VIDA PONDERADA (Igual que en Livewire)
+        // ---------------------------------------------------------
+        $totalSupPrivada = 0;
+        $sumaEdad = 0;
+        $sumaVida = 0;
+
+        // Usamos $privateConstructions que ya se calculó en la línea 540
+        foreach ($privateConstructions as $item) {
+            $sup  = (float)$item->surface;
+            $edad = (int)$item->age;
+            $vida = (int)$item->vmr; // La vida total ya viene en 'vmr'
+
+            $totalSupPrivada += $sup;
+            $sumaEdad += ($edad * $sup);
+            $sumaVida += ($vida * $sup);
+        }
+
+        if ($totalSupPrivada > 0) {
+            $edadPonderadaCalc = round($sumaEdad / $totalSupPrivada);
+            $vidaPonderadaCalc = round($sumaVida / $totalSupPrivada);
+            $vidaRemanenteCalc = max($vidaPonderadaCalc - $edadPonderadaCalc, 0);
+        } else {
+            $edadPonderadaCalc = '-';
+            $vidaRemanenteCalc = '-';
+        }
+
+
+        $subjectInfo = (object)[
+            'superficie_terreno' => $supTerreno,
+            'superficie_const'   => $supConst,
+            'relacion_tc'        => ($supConst > 0) ? ($supTerreno / $supConst) : 0,
+            'lote_moda'          => $loteModa,
+            'edad'               => $edadPonderadaCalc, // <--- Ahora sí lleva valor
+        ];
+
+        $subjectBuildingInfo = (object)[
+            'superficie_terreno' => $supTerrenoBuilding,
+            'superficie_const'   => $supConstBuilding,
+            'relacion_tc'        => ($supConstBuilding > 0) ? ($supTerrenoBuilding / $supConstBuilding) : 0,
+            'lote_moda'          => $loteModaSeguro,
+            'edad'               => $edadPonderadaCalc, // <--- Y aquí también
+            'conjunto'           => $buildingModel->profitable_units_condominiums ?? '-',
+        ];
+
+
+        // 2. ATRIBUTOS (¡NOMBRES CORREGIDOS CON TU MODELO!)
+        $atributos = (object)[
+            'unidades_rentables' => $buildingModel->profitable_units_general ?? '-',
+            'avance_gral'        => $buildingModel->progress_general_works ?? '-',
+            'unidades_nucleo'    => $buildingModel->profitable_units_subject ?? '-',
+            'avance_comunes'     => $buildingModel->degree_progress_common_areas ?? '-',
+            'unidades_conjunto'  => $buildingModel->profitable_units_condominiums ?? '-',
+            'clase_gral'         => $buildingModel->general_class_property ?? '-',
+            'calidad_proyecto'   => strtoupper($propertyDesc->project_quality ?? '-'),
+
+            // Asignamos las variables ponderadas que acabamos de calcular:
+            'edad_ponderada'     => $edadPonderadaCalc,
+            'vida_remanente'     => $vidaRemanenteCalc,
+            'sup_ultimo_nivel'   => '-', // No existe en BD
+
+            'estado_conservacion' => strtoupper(preg_replace('/^[\d\.\s]+/', '', $buildingModel->conservation_status ?? '-')),
+        ];
+
+        // 3. ESCRITURAS (Usamos $land que ya tienes cargado arriba)
+        $escrituras = (object)[
+            'num'     => $land->deed_deed ?? '-',
+            'notaria' => $land->notary_office_deed ?? '-',
+            'fecha'   => $land->date_deed ?? '-',
+            'notario' => $land->notary_deed ?? '-',
+        ];
+
+        // 4. SUPERFICIES Y TERRENOS (Usamos $surfaceModel que ya tienes cargado)
+        $surfArea = (float)($surfaceModel->surface_area ?? 0);
+        $indiviso = (float)($surfaceModel->applicable_undivided ?? 0);
+        $loteProp = $surfArea * ($indiviso / 100);
+
+        $terreno = (object)[
+            'total'             => number_format($surfArea, 4),
+            'lote_privativo'    => number_format((float)($surfaceModel->private_lot ?? 0), 4),
+            'indiviso'          => number_format($indiviso, 4),
+            'lote_priv_tipo'    => number_format((float)($surfaceModel->private_lot_type ?? 0), 4),
+            'lote_proporcional' => number_format($loteProp, 2),
+        ];
+
+        $superficies = (object)[
+            'terreno_total'        => number_format($surfArea, 4),
+            'sup_construida'       => number_format((float)($surfaceModel->built_area ?? 0), 4),
+            'indiviso'             => number_format($indiviso, 4),
+            'sup_accesoria'        => number_format((float)($surfaceModel->accessory_area ?? 0), 4),
+            'lote_privativo'       => number_format((float)($surfaceModel->private_lot ?? 0), 4),
+            'sup_vendible'         => number_format((float)($surfaceModel->saleable_area ?? $surfaceModel->built_area ?? 0), 4),
+            'terreno_proporcional' => number_format($loteProp, 4),
+        ];
+
+
+
+
+
+
+
+
 
         // --- PASO 1: REPORTE BASE ---
         $pdfDom = Pdf::loadView('pdf.master-report', compact(
@@ -1398,6 +1562,13 @@ class ValuationReportService
 
             'totalCostApproach',
 
+            //Descripción General y Superficies
+            'gralInfo',
+            'atributos',
+            'escrituras',
+            'terreno',
+            'superficies',
+
             //Conclusion
             'valorConcluidoFinal',
             'valorConcluidoTexto',
@@ -1442,11 +1613,11 @@ class ValuationReportService
             $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
             $titleText = mb_convert_encoding('ANEXO: ' . ($doc->description ?: $doc->category), 'ISO-8859-1', 'UTF-8');
 
-            // --- VARIABLES DE ZONA SEGURA (En milímetros) ---
-            $maxW = 185;    // Ancho máximo
-            $maxH = 200;    // Alto máximo (Para no chocar con el footer)
-            $startY = 45;   // Dónde empieza (Debajo del título)
-            $startX = 15;   // Margen izquierdo
+            // --- VARIABLES DE ZONA SEGURA (AJUSTADAS) ---
+            $maxW = 205;    // Ancho máximo (se queda igual)
+            $maxH = 225;    // ¡AQUÍ ESTÁ LA MAGIA! Bajamos de 225 a 210 para liberar 1.5cm del footer
+            $startY = 28;   // Dónde empieza la imagen
+            $startX = 5.5;   // Margen izquierdo
 
             if ($ext === 'pdf') {
                 try {
@@ -1459,9 +1630,9 @@ class ValuationReportService
                         $tplBg = $fpdi->importPage(1);
                         $fpdi->useTemplate($tplBg, 0, 0, 216, 279);
 
-                        // 2. Título
+                        // 2. Título (Lo subimos un poco cambiando el 32 por un 28)
                         $fpdi->SetFont('Arial', 'B', 10);
-                        $fpdi->SetXY(10, 32);
+                        $fpdi->SetXY(10, 21);
                         $fpdi->Cell(0, 10, $titleText, 0, 1, 'C');
 
                         // 3. CÁLCULO DE ESCALA PARA EL PDF
@@ -1487,18 +1658,24 @@ class ValuationReportService
                     continue;
                 }
             } elseif (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+                // --- ZONA SEGURA PARA IMÁGENES (MÁS GRANDE) ---
+                $maxW = 180;    // Le subimos bastante al ancho (antes 140)
+                $maxH = 210;    // Le damos mucho más alto (antes 160)
+                $startY = 41;   // Subimos la foto un poco más hacia el título (antes 45)
+                $startX = 18;   // Recalculamos el centro: (216 - 180) / 2 = 18
+
                 $fpdi->AddPage('P', 'Letter');
 
-                // Fondo y Título igual
+                // Fondo y Título
                 $fpdi->setSourceFile($templatePath);
                 $tplBg = $fpdi->importPage(1);
                 $fpdi->useTemplate($tplBg, 0, 0, 216, 279);
+
                 $fpdi->SetFont('Arial', 'B', 10);
-                $fpdi->SetXY(10, 32);
+                $fpdi->SetXY(10, 28);
                 $fpdi->Cell(0, 10, $titleText, 0, 1, 'C');
 
-                // 3. Imagen con ajuste proporcional (FPDI lo hace auto si pasas W y H)
-                // Usamos la misma lógica de "ajustar al hueco"
+                // 3. Imagen con ajuste proporcional
                 $fpdi->Image($fullPath, $startX, $startY, $maxW, $maxH, '', '', '', false, 300, '', false, false, 0, 'CM');
             }
         }

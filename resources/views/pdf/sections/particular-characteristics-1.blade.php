@@ -159,8 +159,12 @@
 {{-- BLOQUE 3: MEDIDAS Y COLINDANCIAS (Iterativo por Grupos) --}}
 <div style="margin-bottom: 20px;">
     <div
-        style="font-weight: bold; font-size: 11px; border-bottom: 2px solid #25998b; margin-bottom: 8px; text-transform: uppercase;">
-        Medidas y colindancias (Area privativa):
+        style="font-weight: bold; font-size: 11px; border-bottom: 1px solid #000; margin-bottom: 8px;">
+        Medidas y colindancias:
+    </div>
+    <div
+        style="font-weight: bold; font-size: 10px; margin-bottom: 8px;">
+        COLINDANCIAS ÁREA PRIVATIVA:
     </div>
 
     @forelse($neighborGroups as $group)

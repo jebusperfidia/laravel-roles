@@ -12,26 +12,26 @@
     <table class="form-table">
         <tr>
             <td class="label-cell">Puertas de acceso:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+           <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
                 {{ $construction['carpentry']['doors_access'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Puertas Interiores:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
                 {{ $construction['carpentry']['doors_inside'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Muebles fijos (general):</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
                 {{-- Mapeado a 'furniture' en el servicio --}}
                 {{ $construction['carpentry']['furniture'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Muebles fijos (recámaras):</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
                 {{-- Mapeado a 'closets' en el servicio --}}
                 {{ $construction['carpentry']['closets'] ?? 'NO PRESENTA' }}
             </td>
@@ -47,7 +47,7 @@
     <table class="form-table">
         <tr>
             <td class="label-cell">Muebles de Baño:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
                 {{ $construction['installations']['bath_furniture'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
@@ -56,7 +56,7 @@
                 Ramaleos Hidráulicos:<br>
                 <span style="font-size: 8px; font-weight: normal; color: #555;">(Tipo / Material)</span>
             </td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
                 {{ $construction['installations']['hydraulic'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
@@ -65,7 +65,7 @@
                 Ramaleos Sanitarios:<br>
                 <span style="font-size: 8px; font-weight: normal; color: #555;">(Tipo / Material)</span>
             </td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
                 {{ $construction['installations']['sanitary'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
@@ -74,7 +74,7 @@
                 Instalaciones Eléctricas:<br>
                 <span style="font-size: 8px; font-weight: normal; color: #555;">(Tipo / Material)</span>
             </td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
                 {{ $construction['installations']['electric'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
@@ -89,19 +89,19 @@
     <table class="form-table">
         <tr>
             <td class="label-cell">Puerta Patio Servicio:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
                 {{ $construction['smithy']['service_door'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Ventanería:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
                 {{ $construction['smithy']['windows'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Otros (Especificar):</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+           <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
                 {{ $construction['smithy']['others'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
@@ -116,25 +116,25 @@
     <table class="form-table">
         <tr>
             <td class="label-cell">Vidriería:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
                 {{ $construction['others']['glass'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Cerrajería:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+           <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
                 {{ $construction['others']['locksmith'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Fachadas:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+            <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
                 {{ $construction['others']['facades'] ?? 'NO PRESENTA' }}
             </td>
         </tr>
         <tr>
             <td class="label-cell">Cuenta con elevador:</td>
-            <td class="value-cell" colspan="3" style="background-color: transparent; border-bottom: 1px dotted #333;">
+           <td class="value-cell" colspan="3" style="border-bottom: 1px dotted #333;">
                 {{ $construction['others']['elevator'] ?? 'NO PRESENTA' }}
             </td>
         </tr>

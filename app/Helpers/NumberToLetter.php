@@ -15,12 +15,13 @@ class NumberToLetter
         $enteros = floor($amount);
         $centavos = round(($amount - $enteros) * 100);
 
-        // Usamos la clase nativa de PHP 'NumberFormatter' si está disponible (es lo ideal)
-        // Si tu servidor no tiene 'intl' activado, avísame y te paso la versión manual de 500 líneas.
-        // Pero el 99% de los hostings modernos la tienen.
-
         $formatter = new NumberFormatter("es", NumberFormatter::SPELLOUT);
         $textoEnteros = strtoupper($formatter->format($enteros));
+
+        // --- MAGIA ANTI-DOMPDF: QUITAR ACENTOS ---
+        $vocalesConAcento = ['Á', 'É', 'Í', 'Ó', 'Ú', 'á', 'é', 'í', 'ó', 'ú'];
+        $vocalesSinAcento = ['A', 'E', 'I', 'O', 'U', 'A', 'E', 'I', 'O', 'U'];
+        $textoEnteros = str_replace($vocalesConAcento, $vocalesSinAcento, $textoEnteros);
 
         // Ajustes gramaticales típicos de México
         // "UN MILLON" -> "UN MILLON DE" si termina en millón exacto

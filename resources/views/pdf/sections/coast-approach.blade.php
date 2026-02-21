@@ -2,7 +2,7 @@
 {{-- SECCIÓN: ENFOQUE DE MERCADO (DINÁMICO) --}}
 {{-- ======================================================================= --}}
 
-<div style="font-family: Arial, Helvetica, sans-serif; font-size: 9px; margin-top: 10px;">
+<div style="font-family: Arial, Helvetica, sans-serif; font-size: 9px;">
 
     {{-- 1. HEADER --}}
     <div
