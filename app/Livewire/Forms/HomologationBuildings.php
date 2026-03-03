@@ -853,6 +853,7 @@ class HomologationBuildings extends Component
 
             $this->comparableFactors[$compId][$factor->acronym]['calificacion'] = number_format((float)($factor->rating ?? 1.0), 4, '.', '');
             $this->comparableFactors[$compId][$factor->acronym]['aplicable'] = number_format((float)($factor->applicable ?? 1.0), 4, '.', '');
+            $this->comparableFactors[$compId][$factor->acronym]['is_calculated'] = (bool)($factor->is_calculated ?? true);
         }
 
         $allFactors = $this->orderedComparableFactorsForView;
@@ -946,6 +947,7 @@ class HomologationBuildings extends Component
                 'aplicable' => ($acronym === 'FNEG') ? '0.9000' : '1.0000',
                 'factor_ajuste' => '1.0000',
                 'diferencia' => '0.0000',
+                'is_calculated' => true,
             ];
         }
     }
@@ -976,6 +978,58 @@ class HomologationBuildings extends Component
             $acronym = implode('.', $parts);
 
             $this->updateNumericFactor($comparableId, $acronym, $property, $value);
+        }
+    }
+
+
+
+
+    // Función de control del candadod de fórmulas
+    public function toggleFactorLock($comparableId, $acronym)
+    {
+        $this->ensureNotReadOnly();
+
+        $pivotId = $this->valuation->buildingComparablePivots()->where('comparable_id', $comparableId)->value('id');
+        if (!$pivotId) return;
+
+        // 1. Invertimos el estado actual (Si era true, pasa a false)
+        $currentState = $this->comparableFactors[$comparableId][$acronym]['is_calculated'] ?? true;
+        $newState = !$currentState;
+
+        // 2. Guardamos en la base de datos
+        HomologationComparableFactorModel::updateOrCreate(
+            [
+                'valuation_building_comparable_id' => $pivotId,
+                'acronym' => $acronym,
+                'homologation_type' => 'building'
+            ],
+            ['is_calculated' => $newState]
+        );
+
+        // 3. Actualizamos memoria
+        $this->comparableFactors[$comparableId][$acronym]['is_calculated'] = $newState;
+
+        // 4. Lógica de los estados UX
+        if ($newState) {
+            // Estado 4: Se cerró el candado -> Recalcular matemática y sobreescribir
+
+            // Verificamos si es el factor FEQ (ya sea el default o el dinámico)
+            $masterFactor = collect($this->subject_factors_ordered)->firstWhere('acronym', $acronym);
+            $isFeq = $masterFactor['is_feq'] ?? ($acronym === 'FEQ');
+
+            if ($isFeq) {
+                // MAGIA: Si es FEQ, lo mandamos a que vuelva a sumar todos los equipamientos
+                $this->calculateEquipmentFactor($pivotId);
+            } else {
+                // Si es cualquier otro (FSU, FIC, FEA), hace su cálculo normal
+                $this->recalculateSingleComparable($comparableId);
+            }
+
+            $this->recalculateConclusions();
+            Toaster::success('Fórmula aplicada correctamente.');
+        } else {
+            // Estado 2: Se abrió el candado -> El input se libera (no borramos su valor)
+            Toaster::success('Factor liberado para edición manual.');
         }
     }
 
@@ -1401,7 +1455,7 @@ class HomologationBuildings extends Component
 
         foreach ($allFactorsView as $factorView) {
             $sigla = $factorView['acronym'];
-
+            $isCalculated = $this->comparableFactors[$comparableId][$sigla]['is_calculated'] ?? true;
             $compRating = 1.0;
             $aplicable = 1.0;
             $diferencia_math = 0.0;
@@ -1450,56 +1504,75 @@ class HomologationBuildings extends Component
                 $aplicable = 1.0 + $diferencia_math;
                 $rating_to_save = $compRating;
             } elseif ($isFeq) {
-                $aplicable = $feqFactorAplicable;
-                $compRating = $feqFactorAplicable;
-                $diferencia_math = $aplicable - 1.0;
-                $rating_to_save = $feqFactorAplicable;
-            } elseif ($sigla === $currentFsuAcronym) {
-                $subjectLand = (float)$this->subject_surface_construction ?? 0;
-                $compLand = (float)($comparableModel->comparable_built_area  ?? 0);
-
-                if ($subjectLand > 0 && $compLand > 0) {
-                    $coeficiente = $compLand / $subjectLand;
-                    $compRating = pow($coeficiente, (1 / 12));
-                    //dd($subjectLand,$compLand, $coeficiente, $compRating);
+                if ($isCalculated) {
+                    // SE APLICA la fórmula automáticamente
+                    $aplicable = $feqFactorAplicable;
+                } else {
+                    // MODO MANUAL (Ahora lee de la columna de 'calificacion')
+                    $aplicable = (float)($factorData['calificacion'] ?? 1.0);
                 }
+
+                $compRating = $aplicable;
+                $diferencia_math = $aplicable - 1.0;
+                $rating_to_save = $aplicable;
+            } elseif ($sigla === $currentFsuAcronym) {
+                if ($isCalculated) {
+
+                    $subjectLand = (float)$this->subject_surface_construction ?? 0;
+                    $compLand = (float)($comparableModel->comparable_built_area  ?? 0);
+
+                    if ($subjectLand > 0 && $compLand > 0) {
+                        $coeficiente = $compLand / $subjectLand;
+                        $compRating = pow($coeficiente, (1 / 12));
+                    }
+                } else {
+
+                    $compRating = (float)($factorData['calificacion'] ?? 1.0);
+                }
+
                 $diferencia_math = 0.0000;
                 $aplicable = $compRating;
                 $rating_to_save = $compRating;
-            } elseif ($sigla === 'FIC') {
-                // ... (Tu lógica FIC original se mantiene intacta) ...
-                $VUS = (float)$this->subject_vus;
-                $SCiv = (float)$this->subject_surface_construction;
-                $STiv = (float)$this->subject_surface_land;
-                $sujetoRating = 1.00;
-                $Pp  = (float)$comparableModel->comparable_offers;
-                $SCc = (float)($comparableModel->comparable_built_area ?? 0);
-                $STc = (float)($comparableModel->comparable_land_area ?? 0);
+         } elseif ($sigla === 'FIC') {
+                if ($isCalculated) {
 
-                if ($SCiv > 0 && $STiv > 0 && $SCc > 0 && $Pp > 0) {
-                    $intensidadSujeto = $SCiv / $STiv;
-                    $terrenoTeorico = $SCc / $intensidadSujeto;
-                    $diferenciaTerreno = $terrenoTeorico - $STc;
-                    $ajustePesos = $diferenciaTerreno * $VUS;
-                    $VUa = ($Pp + $ajustePesos) / $SCc;
-                    $VU = $Pp / $SCc;
-                    $FIC_Raw = $VUa / $VU;
+                    $VUS = (float)$this->subject_vus;
+                    $SCiv = (float)$this->subject_surface_construction;
+                    $STiv = (float)$this->subject_surface_land;
+                    $sujetoRating = 1.00;
+                    $Pp  = (float)$comparableModel->comparable_offers;
+                    $SCc = (float)($comparableModel->comparable_built_area ?? 0);
+                    $STc = (float)($comparableModel->comparable_land_area ?? 0);
+
+                    if ($SCiv > 0 && $STiv > 0 && $SCc > 0 && $Pp > 0) {
+                        $intensidadSujeto = $SCiv / $STiv;
+                        $terrenoTeorico = $SCc / $intensidadSujeto;
+                        $diferenciaTerreno = $terrenoTeorico - $STc;
+                        $ajustePesos = $diferenciaTerreno * $VUS;
+                        $VUa = ($Pp + $ajustePesos) / $SCc;
+                        $VU = $Pp / $SCc;
+                        $FIC_Raw = $VUa / $VU;
+                    } else {
+                        $FIC_Raw = 1.0;
+                    }
+
+                    $compRating = floor($FIC_Raw * 10000) / 10000;
+                    if ($FIC_Raw != 0) {
+                        $diferencia_raw = 1.0 - ($sujetoRating / $FIC_Raw);
+                    } else {
+                        $diferencia_raw = 0.0;
+                    }
+                    $diferencia_math = floor($diferencia_raw * 10000) / 10000;
+
                 } else {
-                    $FIC_Raw = 1.0;
+
+                    $compRating = (float)($factorData['calificacion'] ?? 1.0);
+                    $diferencia_math = $sujetoRating - $compRating;
                 }
 
-                if ($FIC_Raw != 0) {
-                    $diferencia_raw = 1.0 - ($sujetoRating / $FIC_Raw);
-                } else {
-                    $diferencia_raw = 0.0;
-                }
-
-                $diferencia_math = floor($diferencia_raw * 10000) / 10000;
                 $aplicable = 1.0 + $diferencia_math;
-                $compRating = floor($FIC_Raw * 10000) / 10000;
                 $rating_to_save = $compRating;
             }
-
 
 
 
@@ -2167,23 +2240,34 @@ class HomologationBuildings extends Component
 
         $feq = 1 + $decimalSum;
 
-        HomologationComparableFactorModel::updateOrCreate(
-            ['valuation_building_comparable_id' => $pivotId, 'acronym' => 'FEQ', 'homologation_type' => 'building'],
-            [
-                'rating' => 1.0000,
-                'applicable' => $feq,
-                'factor_name' => 'Factor Equipamiento'
-            ]
-        );
-
+        // Checamos el estado del candado
         $comparableId = $this->valuation->buildingComparablePivots()->find($pivotId)->comparable_id;
 
-        if (!isset($this->comparableFactors[$comparableId]['FEQ'])) {
-            $this->initializeComparableFactorStructure($comparableId, 'FEQ');
-        }
+        // CORRECCIÓN PARA QUE TOME EL ACRONIMO DINÁMICO (Por si le cambiaste el nombre)
+        $feqDef = collect($this->subject_factors_ordered)->firstWhere('is_feq', true);
+        $currentFeqAcronym = $feqDef ? $feqDef['acronym'] : 'FEQ';
 
-        $this->comparableFactors[$comparableId]['FEQ']['aplicable'] = number_format($feq, 4, '.', '');
-        $this->comparableFactors[$comparableId]['FEQ']['diferencia'] = number_format($decimalSum, 4, '.', '');
+        $isCalculated = $this->comparableFactors[$comparableId][$currentFeqAcronym]['is_calculated'] ?? true;
+
+        if ($isCalculated) {
+            HomologationComparableFactorModel::updateOrCreate(
+                ['valuation_building_comparable_id' => $pivotId, 'acronym' => $currentFeqAcronym, 'homologation_type' => 'building'],
+                [
+                    'rating' => 1.0000,
+                    'applicable' => $feq,
+                    'factor_name' => $feqDef['factor_name'] ?? 'Factor Equipamiento'
+                ]
+            );
+
+            if (!isset($this->comparableFactors[$comparableId][$currentFeqAcronym])) {
+                $this->initializeComparableFactorStructure($comparableId, $currentFeqAcronym);
+            }
+
+            // FORZAR ACTUALIZACIÓN EN LA VISTA AL CERRAR EL CANDADO
+            $this->comparableFactors[$comparableId][$currentFeqAcronym]['calificacion'] = number_format($feq, 4, '.', '');
+            $this->comparableFactors[$comparableId][$currentFeqAcronym]['aplicable'] = number_format($feq, 4, '.', '');
+            $this->comparableFactors[$comparableId][$currentFeqAcronym]['diferencia'] = number_format($decimalSum, 4, '.', '');
+        }
 
         $this->recalculateSingleComparable($comparableId);
     }

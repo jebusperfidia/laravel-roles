@@ -63,8 +63,11 @@ Quitamos borde y fondo si hay imagen para que se vea limpia. --}}
                 <tr>
                     <td class="label-top" style="width: 30%;">Nombre:</td>
                     <td class="value-top">
-                        {{ $valuation->applic_name }} {{ $valuation->applic_first_name }} {{
-                        $valuation->applic_second_name ?? '' }}
+                        {{ $valuation->applic_type_person === 'Moral'
+                        ? $valuation->applic_company_name
+                        : $valuation->applic_name . ' ' . $valuation->applic_first_name . ' ' .
+                        ($valuation->applic_second_name ?? '')
+                        }}
                     </td>
                 </tr>
             </table>
@@ -77,8 +80,11 @@ Quitamos borde y fondo si hay imagen para que se vea limpia. --}}
                 <tr>
                     <td class="label-top" style="width: 30%;">Nombre:</td>
                     <td class="value-top">
-                        {{ $valuation->owner_name }} {{ $valuation->owner_first_name }} {{ $valuation->owner_second_name
-                        ?? '' }}
+                        {{ $valuation->owner_type_person === 'Moral'
+                        ? $valuation->owner_company_name
+                        : $valuation->owner_name . ' ' . $valuation->owner_first_name . ' ' .
+                        ($valuation->owner_second_name ?? '')
+                        }}
                     </td>
                 </tr>
             </table>
@@ -143,15 +149,15 @@ Quitamos borde y fondo si hay imagen para que se vea limpia. --}}
     <div style="display: inline-block; text-align: right;">
         <span style="font-weight: bold; font-size: 11px; margin-right: 15px; vertical-align: middle;">Valor
             Concluido</span>
-<span class="text-brand" style="font-size: 20px; font-weight: bold;">
-    @if($valorConcluidoFinal > 0)
-    $ {{ number_format($valorConcluidoFinal, 2) }}
-    @else
-    $ -
-    @endif
-</span>
-<div style="font-size: 10px; font-weight: bold; text-transform: uppercase;">
-    {{ $valorConcluidoTexto }}
-</div>
+        <span class="text-brand" style="font-size: 20px; font-weight: bold;">
+            @if($valorConcluidoFinal > 0)
+            $ {{ number_format($valorConcluidoFinal, 2) }}
+            @else
+            $ -
+            @endif
+        </span>
+        <div style="font-size: 10px; font-weight: bold; text-transform: uppercase;">
+            {{ $valorConcluidoTexto }}
+        </div>
     </div>
 </div>

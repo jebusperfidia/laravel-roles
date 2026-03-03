@@ -1,13 +1,13 @@
 <div>
     @if($isReadOnly)
-        <div class="border-l-4 border-red-600 text-red-600 p-4 mb-4 rounded shadow-sm">
-            <p class="font-bold">Modo Lectura</p>
-            <p>El avalúo está en revisión. No puedes realizar modificaciones.</p>
-        </div>
-        @endif
-        @if(!$isReadOnly)
-        <div class="flex justify-end font-semibold text-sm text-red-600 pt-2 -mb-3"><span>* Campos obligatorios</span></div>
-        @endif
+    <div class="border-l-4 border-red-600 text-red-600 p-4 mb-4 rounded shadow-sm">
+        <p class="font-bold">Modo Lectura</p>
+        <p>El avalúo está en revisión. No puedes realizar modificaciones.</p>
+    </div>
+    @endif
+    @if(!$isReadOnly)
+    <div class="flex justify-end font-semibold text-sm text-red-600 pt-2 -mb-3"><span>* Campos obligatorios</span></div>
+    @endif
 
 
     {{-- CONTENEDOR PRINCIPAL: ENFOQUE DE COSTOS --}}
@@ -58,7 +58,7 @@
                                 <td class="px-2 py-1 border text-sm text-center font-semibold text-gray-700">
                                     ${{ number_format($landFractionValue, 2) }}
                                 </td>
-                                <td class="px-2 py-1 border text-sm text-center text-blue-900 font-bold">
+                                <td class="px-2 py-1 border text-sm text-center text-black font-bold">
                                     {{ number_format($landIndiviso, 4) }}%
                                 </td>
                                 <td class="px-2 py-1 border text-sm text-center font-bold text-black bg-gray-50">
@@ -385,11 +385,11 @@
                                     }}</td>
                                 <td class="px-2 py-1 border text-sm text-center">{{
                                     number_format($item->conservation_factor, 2) }}</td>
-                                <td class="px-2 py-1 border text-sm text-center font-bold text-blue-900">{{
+                                <td class="px-2 py-1 border text-sm text-center font-bold text-black">{{
                                     number_format($item->undivided, 4) }}%</td>
                                 <td class="px-2 py-1 border text-sm text-right">${{
                                     number_format($item->net_rep_unit_cost, 2) }}</td>
-                                <td class="px-2 py-1 border text-sm text-right text-gray-600">
+                                <td class="px-2 py-1 border text-sm text-right text-black">
                                     ${{ number_format($item->amount, 2) }}
                                 </td>
                                 <td class="px-2 py-1 border text-sm text-right font-semibold text-gray-900 bg-gray-50">
@@ -414,14 +414,14 @@
                 </div>
                 <div class="flex justify-end mt-2 flex-col items-end gap-1">
                     <div class="flex items-center gap-2">
-                        <span class="text-xs text-gray-500">Valor Inst. Especiales Comunes (Total Físico):</span>
-                        <span class="text-sm font-semibold text-gray-500">$ {{
+                        <span class="text-xs text-black">Valor Inst. Especiales Comunes (Total Físico):</span>
+                        <span class="text-sm font-semibold text-black">$ {{
                             number_format($totalValueInstCommonPhysical, 2) }}</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-sm font-semibold text-gray-700">Valor Inst. Especiales Comunes
+                        <span class="text-sm font-semibold text-black">Valor Inst. Especiales Comunes
                             (Proporcional):</span>
-                        <span class="text-lg font-bold text-gray-900">$ {{
+                        <span class="text-lg font-bold text-black">$ {{
                             number_format($totalValueInstCommonProportional, 2) }}</span>
                     </div>
                 </div>
@@ -441,13 +441,14 @@
 
             {{-- VALOR DEL TERRENO --}}
             <div class="form-grid form-grid--3 form-grid-3-variation pt-4">
-                <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start text-right">
+                {{-- Centrado en móvil, a la derecha en PC --}}
+                <div class="flex justify-center md:justify-end text-center md:text-right mb-1 md:mb-0">
                     <flux:label class="font-bold text-gray-900">VALOR DEL TERRENO:</flux:label>
                 </div>
-                <div class="radio-input text-left">
+                {{-- Centrado en móvil, a la izquierda en PC --}}
+                <div class="radio-input text-center md:text-left flex justify-center md:justify-start">
                     <flux:field>
-                        <div class="radio-group-horizontal">
-                            {{-- Valor calculado --}}
+                        <div class="radio-group-horizontal flex justify-center md:justify-start w-full">
                             <div class="text-sm font-semibold text-gray-900">$ {{ number_format($totalLandValue, 4) }}
                             </div>
                         </div>
@@ -457,12 +458,12 @@
 
             {{-- VALOR CONSTRUCCIONES PRIVATIVAS --}}
             <div class="form-grid form-grid--3 form-grid-3-variation pt-4">
-                <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start text-right">
+                <div class="flex justify-center md:justify-end text-center md:text-right mb-1 md:mb-0">
                     <flux:label class="font-bold text-gray-900">VALOR CONSTRUCCIONES PRIVATIVAS:</flux:label>
                 </div>
-                <div class="radio-input text-left">
+                <div class="radio-input text-center md:text-left flex justify-center md:justify-start">
                     <flux:field>
-                        <div class="radio-group-horizontal">
+                        <div class="radio-group-horizontal flex justify-center md:justify-start w-full">
                             <div class="text-sm font-semibold text-gray-900">$ {{ number_format($totalValuePrivate, 4)
                                 }}</div>
                         </div>
@@ -472,12 +473,12 @@
 
             {{-- VALOR CONSTRUCCIONES COMUNES --}}
             <div class="form-grid form-grid--3 form-grid-3-variation pt-4">
-                <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start text-right">
+                <div class="flex justify-center md:justify-end text-center md:text-right mb-1 md:mb-0">
                     <flux:label class="font-bold text-gray-900">VALOR CONSTRUCCIONES COMUNES:</flux:label>
                 </div>
-                <div class="radio-input text-left">
+                <div class="radio-input text-center md:text-left flex justify-center md:justify-start">
                     <flux:field>
-                        <div class="radio-group-horizontal">
+                        <div class="radio-group-horizontal flex justify-center md:justify-start w-full">
                             <div class="text-sm font-semibold text-gray-900">$ {{ number_format($totalValueCommon, 4) }}
                             </div>
                         </div>
@@ -487,16 +488,20 @@
 
             {{-- SUBTOTAL CONSTRUCCIONES --}}
             <div class="form-grid form-grid--3 form-grid-3-variation pt-4">
-                <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start text-right">
+                <div class="flex justify-center md:justify-end text-center md:text-right mb-1 md:mb-0">
                     <flux:label class="font-bold text-gray-900">SUBTOTAL CONSTRUCCIONES:</flux:label>
                 </div>
-                <div class="radio-input text-left">
+                <div class="radio-input text-center md:text-left flex justify-center md:justify-start">
                     <flux:field>
-                        <div class="radio-group-horizontal">
+                        <div class="radio-group-horizontal flex justify-center md:justify-start w-full">
                             <div class="text-sm font-bold text-gray-900">
                                 $ {{ number_format($totalValuePrivate + $totalValueCommon, 4) }}
-                                <span class="text-xs font-normal ml-2">(@if(stripos($valuation->property_type,
-                                    'condominio') !== false) privativas + comunes @else privativas @endif )</span>
+                                {{-- Forzamos a que este texto baje de línea en celulares con "block md:inline" --}}
+                                <span class="text-xs font-normal block md:inline md:ml-2 mt-1 md:mt-0 text-gray-600">
+                                    (@if(stripos($valuation->property_type, 'condominio') !== false) privativas +
+                                    comunes @else
+                                    privativas @endif )
+                                </span>
                             </div>
                         </div>
                     </flux:field>
@@ -505,18 +510,19 @@
 
             {{-- IMPORTE INSTALACIONES ESPECIALES --}}
             <div class="form-grid form-grid--3 form-grid-3-variation pt-4">
-                <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start text-right">
+                <div class="flex justify-center md:justify-end text-center md:text-right mb-1 md:mb-0">
                     <flux:label class="font-bold text-gray-900">IMPORTE INSTALACIONES ESPECIALES:</flux:label>
                 </div>
-                <div class="radio-input text-left">
+                <div class="radio-input text-center md:text-left flex justify-center md:justify-start">
                     <flux:field>
-                        <div class="radio-group-horizontal">
+                        <div class="radio-group-horizontal flex justify-center md:justify-start w-full">
                             <div class="text-sm font-bold text-gray-900">
-                                {{-- Aquí sumamos Privativas + Comunes Proporcionales --}}
                                 $ {{ number_format($totalValueInstPrivate + $totalValueInstCommonProportional, 4) }}
-                                <span class="text-xs font-normal ml-2">
+                                {{-- Bajar de línea en celulares --}}
+                                <span class="text-xs font-normal block md:inline md:ml-2 mt-1 md:mt-0 text-gray-600">
                                     (@if(stripos($valuation->property_type, 'condominio') !== false) privativas +
-                                    comunes proporcionales @else privativas @endif )
+                                    comunes
+                                    proporcionales @else privativas @endif )
                                 </span>
                             </div>
                         </div>
@@ -526,17 +532,18 @@
 
             {{-- IMPORTE TOTAL DEL ENFOQUE DE COSTOS --}}
             <div class="form-grid form-grid--3 form-grid-3-variation pt-4">
-                <div class="flex xl:justify-end lg:justify-end md:justify-end sm:justify-start text-right">
+                <div class="flex justify-center md:justify-end text-center md:text-right mb-1 md:mb-0">
                     <flux:label class="font-bold text-gray-900">IMPORTE TOTAL DEL ENFOQUE DE COSTOS:</flux:label>
                 </div>
-                <div class="radio-input text-left">
+                <div class="radio-input text-center md:text-left flex justify-center md:justify-start">
                     <flux:field>
-                        <div class="radio-group-horizontal">
+                        <div class="radio-group-horizontal flex justify-center md:justify-start w-full">
                             <div class="text-base font-bold text-gray-900">
-                                {{-- Suma total: Terreno (calculado) + Construcciones + Instalaciones --}}
                                 $ {{ number_format($totalLandValue + ($totalValuePrivate + $totalValueCommon) +
                                 ($totalValueInstPrivate + $totalValueInstCommonProportional), 4) }}
-                                <div class="text-xs font-normal mt-1">($ Terreno + construcciones + instalaciones)</div>
+                                <div class="text-xs font-normal mt-1 text-gray-600">($ Terreno + construcciones +
+                                    instalaciones)
+                                </div>
                             </div>
                         </div>
                     </flux:field>

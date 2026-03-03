@@ -34,7 +34,11 @@
 
 
         @include('pdf.sections.particular-characteristics-2')
+
+        @if(!$isPreValuation)
         <div class="page-break"></div>
+        @endif
+
 
         @include('pdf.sections.particular-characteristics-3')
         <div class="page-break"></div>

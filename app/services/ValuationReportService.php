@@ -44,6 +44,8 @@ class ValuationReportService
 
         $valuation = Valuation::findOrFail($id);
 
+        $isPreValuation = (bool) $valuation->pre_valuation;
+
         $valuation->loadMissing('homologationLandAttributes');
 
         // 2. CÁLCULO DE T/C MANUAL (Para asegurar que no llegue en 0)
@@ -473,24 +475,31 @@ class ValuationReportService
 
 
         // --- B) VIALIDADES Y COLINDANCIAS (Datos fijos) ---
-        $land_streetFront = $land->street_with_front ?? '';
+        $land_streetFront = $land->street_with_front ?? '-';
 
         // Transversales
-        $land_crossStreet1 = $land->cross_street_1 ?? '';
-        $land_crossOrient1 = $land->cross_street_orientation_1 ?? '';
+        $land_crossStreet1 = $land->cross_street_1 ?? '-';
+        $land_crossOrient1 = $land->cross_street_orientation_1 ?? '-';
         // Combinamos si hay segunda calle transversal, o solo mostramos la primera
-        $land_crossStreets = $land_crossStreet1;
+      /*   $land_crossStreets = $land_crossStreet1;
         if (!empty($land->cross_street_2)) {
             $land_crossStreets .= ' / ' . $land->cross_street_2;
-        }
+        } */
+
+        $land_crossStreet2 = $land->cross_street_2 ?? '-';
+        $land_crossOrient2 = $land->cross_street_orientation_2 ?? '-';
 
         // Limítrofes
-        $land_borderStreet1 = $land->border_street_1 ?? '';
-        $land_borderOrient1 = $land->border_street_orientation_1 ?? '';
-        $land_borderStreets = $land_borderStreet1;
-        if (!empty($land->border_street_2)) {
+        $land_borderStreet1 = $land->border_street_1 ?? '-';
+        $land_borderOrient1 = $land->border_street_orientation_1 ?? '-';
+
+        $land_borderStreet2 = $land->border_street_2 ?? '-';
+        $land_borderOrient2 = $land->border_street_orientation_2 ?? '-';
+
+      /*   $land_borderStreets = $land_borderStreet1; */
+/*         if (!empty($land->border_street_2)) {
             $land_borderStreets .= ' / ' . $land->border_street_2;
-        }
+        } */
 
         $land_panoramic   = $land->panoramic_features ?? 'Sin relevancia';
 
@@ -592,6 +601,8 @@ class ValuationReportService
         ]);
 
         $ce = $valuation->constructionElement;
+
+        $constructionSummary = $ce->summary ?? 'No se ha redactado un resumen de construcción.';
 
         // Helpers locales para formateo
         $fmt = fn($val) => !empty($val) ? strtoupper($val) : 'NO PRESENTA';
@@ -1225,7 +1236,7 @@ class ValuationReportService
         // --- DEFINICIÓN DE FOTOS Y ANEXOS (ESTO ES LO QUE TE FALTABA) ---
         // =========================================================================
 
-        $annexCategories = ['Documento anexo / evidencia', 'Proyecto arquitectonico / croquis'];
+        $annexCategories = ['Documento anexo / evidencia', 'Proyecto arquitectónico / croquis', 'Proyecto arquitectonico / croquis'];
 
         // Cargar todo el media
         $allMedia = PhotoReportModel::where('valuation_id', $id)
@@ -1499,10 +1510,14 @@ class ValuationReportService
             'land_configuration',
             'land_roadType',
             'land_streetFront',
-            'land_crossStreets',
+            'land_crossStreet1',
             'land_crossOrient1',
-            'land_borderStreets',
+            'land_crossStreet2',
+            'land_crossOrient2',
+            'land_borderStreet1',
             'land_borderOrient1',
+            'land_borderStreet2',
+            'land_borderOrient2',
             'land_panoramic',
             'land_restrictions',
 
@@ -1515,6 +1530,8 @@ class ValuationReportService
             //Elementos de construcción
             'construction',
             'finishingOthers',
+            'isPreValuation',
+            'constructionSummary',
 
             //Instalaciones especiales
             'specialElementsPrivate',

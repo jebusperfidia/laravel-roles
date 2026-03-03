@@ -29,6 +29,7 @@ return new class extends Migration
             $table->boolean('is_editable')->default(false);
             $table->boolean('is_custom')->default(false);
             $table->boolean('is_feq')->default(false);
+            $table->boolean('is_calculated')->default(true);
 
             // --- Columnas de Valor (Tus nombres) ---
             $table->decimal('rating', 10, 4)->default(1.0000);

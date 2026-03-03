@@ -51,74 +51,74 @@
     </div>
 
 
- {{-- TABLA DE DATOS DE VIALIDADES --}}
-<table class="form-table">
-    {{-- Fila 1: Calle con frente --}}
-    <tr>
-        <td class="label-cell" style="width: 20%;">Calle con frente(s):</td>
-        <td class="value-cell" colspan="3">{{ strtoupper($land_streetFront) }}</td>
-    </tr>
+    {{-- TABLA DE DATOS DE VIALIDADES --}}
+    <table class="form-table">
+        {{-- Fila 1: Calle con frente --}}
+        <tr>
+            <td class="label-cell" style="width: 20%;">Calle con frente(s):</td>
+            <td class="value-cell" colspan="3">{{ strtoupper($land_streetFront) }}</td>
+        </tr>
 
-    {{-- Fila 2: Transversal --}}
-    <tr>
-        <td class="label-cell" style="width: 20%;">Calle transversal:</td>
-        <td class="value-cell" style="width: 30%;">{{ strtoupper($land_crossStreets) }}</td>
-        <td class="label-cell" style="width: 20%;">Orientación:</td>
-        <td class="value-cell" style="width: 30%;">{{ strtoupper($land_crossOrient1) }}</td>
-    </tr>
+        {{-- Fila 2: Transversal --}}
+        <tr>
+            <td class="label-cell" style="width: 20%;">Calle transversal:</td>
+            <td class="value-cell" style="width: 30%;">{{ strtoupper($land_crossStreet1) }}</td>
+            <td class="label-cell" style="width: 20%;">Orientación:</td>
+            <td class="value-cell" style="width: 30%;">{{ strtoupper($land_crossOrient1) }}</td>
+        </tr>
 
-    {{-- Fila 3: Limítrofes --}}
-    <tr>
-        <td class="label-cell">Calles limítrofes:</td>
-        <td class="value-cell">{{ strtoupper($land_borderStreets) }}</td>
-        <td class="label-cell">Orientación:</td>
-        <td class="value-cell">{{ strtoupper($land_borderOrient1) }}</td>
-    </tr>
+        {{-- Fila 3: Limítrofes --}}
+        <tr>
+            <td class="label-cell">Calle transversal:</td>
+            <td class="value-cell" style="width: 30%;">{{ strtoupper($land_crossStreet2) }}</td>
+            <td class="label-cell" style="width: 20%;">Orientación:</td>
+            <td class="value-cell" style="width: 30%;">{{ strtoupper($land_crossOrient2) }}</td>
+        </tr>
 
-    {{-- Fila 4: Panorámicas (Con celda de orientación vacía o fija para mantener estructura) --}}
-    <tr>
-        <td class="label-cell">Carac. Panorámicas:</td>
-        <td class="value-cell">SIN RELEVANCIA</td> {{-- O usa la variable $land_panoramic si aplica aquí --}}
-        <td class="label-cell">Orientación:</td>
-        <td class="value-cell">-</td> {{-- Campo de relleno para estructura --}}
-    </tr>
+        {{-- Fila 4: Panorámicas (Con celda de orientación vacía o fija para mantener estructura) --}}
+        <tr>
+            <td class="label-cell">Calles limítrofes:</td>
+            <td class="value-cell" style="width: 30%;">{{ strtoupper($land_borderStreet1) }}</td>
+            <td class="label-cell" style="width: 20%;">Orientación:</td>
+            <td class="value-cell" style="width: 30%;">{{ strtoupper($land_borderOrient1) }}</td>
+        </tr>
 
-    {{-- Fila 5: Restricciones (Con celda de orientación vacía o fija) --}}
-    <tr>
-        <td class="label-cell">Restricciones:</td>
-        <td class="value-cell">LAS PROPIAS DEL REGLAMENTO</td>
-        <td class="label-cell">Orientación:</td>
-        <td class="value-cell">-</td> {{-- Campo de relleno para estructura --}}
-    </tr>
+        {{-- Fila 5: Restricciones (Con celda de orientación vacía o fija) --}}
+        <tr>
+            <td class="label-cell">Calles limítrofes:</td>
+            <td class="value-cell" style="width: 30%;">{{ strtoupper($land_borderStreet2) }}</td>
+            <td class="label-cell" style="width: 20%;">Orientación:</td>
+            <td class="value-cell" style="width: 30%;">{{ strtoupper($land_borderOrient2) }}</td>
+        </tr>
 
-    {{-- Fila 6: Características panorámicas (Full Width) --}}
-    <tr>
-        <td class="label-cell">Características panorámicas:</td>
-        <td class="value-cell" colspan="3">{{ strtoupper($land_panoramic) }}</td>
-    </tr>
+        {{-- Fila 6: Características panorámicas (Full Width) --}}
+        <tr>
+            <td class="label-cell">Características panorámicas:</td>
+            <td class="value-cell" colspan="3">{{ strtoupper($land_panoramic) }}</td>
+        </tr>
 
-    {{-- Fila 7: Servidumbre (Full Width) --}}
-    <tr>
-        <td class="label-cell">Servidumbre y/o restricciones:</td>
-        <td class="value-cell" colspan="3">{{ strtoupper($land_restrictions) }}</td>
-    </tr>
+        {{-- Fila 7: Servidumbre (Full Width) --}}
+        <tr>
+            <td class="label-cell">Servidumbre y/o restricciones:</td>
+            <td class="value-cell" colspan="3">{{ strtoupper($land_restrictions) }}</td>
+        </tr>
 
-    {{-- Fila 8: Ubicación / Configuración --}}
-    <tr>
-        <td class="label-cell">Ubicación:</td>
-        <td class="value-cell">{{ strtoupper($land_location) }}</td>
-        <td class="label-cell">Configuración:</td>
-        <td class="value-cell">{{ strtoupper($land_configuration) }}</td>
-    </tr>
+        {{-- Fila 8: Ubicación / Configuración --}}
+        <tr>
+            <td class="label-cell">Ubicación:</td>
+            <td class="value-cell">{{ strtoupper($land_location) }}</td>
+            <td class="label-cell">Configuración:</td>
+            <td class="value-cell">{{ strtoupper($land_configuration) }}</td>
+        </tr>
 
-    {{-- Fila 9: Topografía / Tipo Vialidad --}}
-    <tr>
-        <td class="label-cell">Topografía:</td>
-        <td class="value-cell">{{ strtoupper($land_topography) }}</td>
-        <td class="label-cell">Tipo de vialidad:</td>
-        <td class="value-cell">{{ strtoupper($land_roadType) }}</td>
-    </tr>
-</table>
+        {{-- Fila 9: Topografía / Tipo Vialidad --}}
+        <tr>
+            <td class="label-cell">Topografía:</td>
+            <td class="value-cell">{{ strtoupper($land_topography) }}</td>
+            <td class="label-cell">Tipo de vialidad:</td>
+            <td class="value-cell">{{ strtoupper($land_roadType) }}</td>
+        </tr>
+    </table>
 </div>
 
 
@@ -158,12 +158,10 @@
 </div>
 {{-- BLOQUE 3: MEDIDAS Y COLINDANCIAS (Iterativo por Grupos) --}}
 <div style="margin-bottom: 20px;">
-    <div
-        style="font-weight: bold; font-size: 11px; border-bottom: 1px solid #000; margin-bottom: 8px;">
+    <div style="font-weight: bold; font-size: 11px; border-bottom: 1px solid #000; margin-bottom: 8px;">
         Medidas y colindancias:
     </div>
-    <div
-        style="font-weight: bold; font-size: 10px; margin-bottom: 8px;">
+    <div style="font-weight: bold; font-size: 10px; margin-bottom: 8px;">
         COLINDANCIAS ÁREA PRIVATIVA:
     </div>
 
@@ -195,21 +193,23 @@
             </tr>
 
             {{-- Vecinos del grupo actual --}}
-         @foreach($group->neighbors as $neighbor)
-        <tr>
-            <td style="font-size:9px; border:1px solid #ccc; padding:4px; text-align: center; background-color: #fff;">
-                {{ strtoupper($neighbor->orientation) }}
-            </td>
-            <td style="font-size:9px; border:1px solid #ccc; padding:4px; text-align: center; background-color: #fff;">
-                {{ number_format($neighbor->extent, 2) }} m
-            </td>
-            {{-- Celda de Colindancia: Agregado text-align: center; --}}
-            <td
-                style="font-size:9px; border:1px solid #ccc; padding:4px; text-transform:uppercase; background-color: #fff; text-align: center;">
-                {{ strtoupper($neighbor->adjacent) }}
-            </td>
-        </tr>
-        @endforeach
+            @foreach($group->neighbors as $neighbor)
+            <tr>
+                <td
+                    style="font-size:9px; border:1px solid #ccc; padding:4px; text-align: center; background-color: #fff;">
+                    {{ strtoupper($neighbor->orientation) }}
+                </td>
+                <td
+                    style="font-size:9px; border:1px solid #ccc; padding:4px; text-align: center; background-color: #fff;">
+                    {{ number_format($neighbor->extent, 2) }} m
+                </td>
+                {{-- Celda de Colindancia: Agregado text-align: center; --}}
+                <td
+                    style="font-size:9px; border:1px solid #ccc; padding:4px; text-transform:uppercase; background-color: #fff; text-align: center;">
+                    {{ strtoupper($neighbor->adjacent) }}
+                </td>
+            </tr>
+            @endforeach
         </table>
     </div>
     @empty

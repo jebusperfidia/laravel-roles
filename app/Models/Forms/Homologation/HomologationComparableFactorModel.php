@@ -21,6 +21,7 @@ class HomologationComparableFactorModel extends Model
         'is_editable',
         'is_custom',
         'is_feq',
+        'is_calculated',
         'rating',
         'applicable',
         'homologation_type',
@@ -29,6 +30,8 @@ class HomologationComparableFactorModel extends Model
     protected $casts = [
         'is_editable' => 'boolean',
         'is_custom' => 'boolean',
+        'is_feq' => 'boolean',
+        'is_calculated' => 'boolean',
         'rating' => 'float',
         'applicable' => 'float',
     ];

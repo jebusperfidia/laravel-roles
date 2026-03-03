@@ -5,6 +5,8 @@
     <style>
         .map-container {
             height: 350px;
+            width: 100%;
+            min-width: 0;
             border-radius: 12px;
             z-index: 1;
         }
@@ -327,7 +329,6 @@
 
 
 
-
         {{-- CONTENEDOR 2 --}}
         <div class="form-container">
             <div class="form-container__header">
@@ -335,7 +336,7 @@
             </div>
             <div class="form-container__content">
 
-              {{--   @if (!$landDetail)
+                {{-- @if (!$landDetail)
 
                 <div class="font-semibold text-sm text-red-600 mb-2"><span>Debes guardar los datos principales para
                         poder usar esta opción</span></div>
@@ -350,14 +351,14 @@
                     <div>
                         <div class="flex items-center gap-4">
                             {{-- Input de archivo oculto para múltiples selecciones --}}
-                            <input type="file" wire:model="photos" class="sr-only" id="file-upload" multiple
-                                @if(!$landDetail) disabled @endif>
+                            <input type="file" wire:model="photos" class="sr-only" id="file-upload" multiple @if(!$landDetail)
+                                disabled @endif>
 
                             {{-- Botón estilizado para seleccionar archivos --}}
                             <label for="file-upload"
                                 class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                <svg class="h-5 w-5 text-gray-500 mr-2" xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 20 20" fill="currentColor">
+                                <svg class="h-5 w-5 text-gray-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                    fill="currentColor">
                                     <path fill-rule="evenodd"
                                         d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 4-4z"
                                         clip-rule="evenodd" />
@@ -402,12 +403,11 @@
                             {{ session('message') }}
                         </div>
                         @endif --}}
-                        <div wire:loading wire:target="photos"
-                            class="mt-2 text-sm text-blue-600 flex items-center gap-2">
-                            <svg class="animate-spin h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg"
-                                fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                    stroke-width="4"></circle>
+                        <div wire:loading wire:target="photos" class="mt-2 text-sm text-blue-600 flex items-center gap-2">
+                            <svg class="animate-spin h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                                </circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                             </svg>
                             Subiendo archivos...
@@ -451,8 +451,8 @@
 
                             @elseif ($file->file_type === 'pdf')
                             <div class="w-full">
-                                <embed src="{{ asset('land_details/' . $file->file_path) }}" type="application/pdf"
-                                    width="100%" height="250px" />
+                                <embed src="{{ asset('land_details/' . $file->file_path) }}" type="application/pdf" width="100%"
+                                    height="250px" />
 
                                 <a href="{{ asset('land_details/' . $file->file_path) }}" target="_blank"
                                     class="text-xs text-blue-600 hover:underline block mt-1 text-center">
@@ -477,11 +477,17 @@
                 </div>
 
 
-              {{--   @if (!$landDetail)
+                {{-- @if (!$landDetail)
                 <div class="font-semibold text-sm text-red-600"><span>Debes guardar los datos principales para poder
                         usar esta
                         opción</span></div>
                 @endif --}}
+
+
+
+
+
+
                 <div class="flex justify-between text-lg border-b-2 border-gray-300 mt-8">
                     <h2>Grupos de colindancias</h2>
                     @if(!$isReadOnly)
@@ -512,54 +518,58 @@
                         @endif
                     </div>
 
-                    <div class="mt-2">
-                        <div class="overflow-x-auto max-w-full">
-                            <table class="min-w-[550px] table-fixed w-full border-2">
-                                <thead>
-                                    <tr class="bg-gray-100">
-                                        <th class="px-2 py-1 border whitespace-nowrap">Orientación</th>
-                                        <th class="py-1 border">Medida</th>
-                                        <th class="px-2 py-1 border">Colindancia</th>
-                                        <th class="w-[100px] py-1 border">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($group->neighbors as $neighbor)
-                                    <tr>
-                                        <td class="px-2 py-1 border text-xs text-center">{{ $neighbor->orientation }}
-                                        </td>
-                                        <td class="px-2 py-1 border text-sm text-center">{{ $neighbor->extent }}</td>
-                                        <td class="px-2 py-1 border text-sm text-center">{{ $neighbor->adjacent }}</td>
-                                        <td class="my-2 flex justify-evenly">
-                                            @if(!$isReadOnly)
-                                            <flux:button type="button" icon-leading="pencil"
-                                                class="cursor-pointer btn-intermediary btn-buildins"
-                                                wire:click='openEditElement({{ $neighbor->id }})' />
-                                            <flux:button
-                                                onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
-                                                wire:click="deleteElement({{ $neighbor->id }})" type="button"
-                                                icon-leading="trash" class="cursor-pointer btn-deleted btn-buildings" />
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="4" class="text-center py-2 text-gray-500">No hay elementos en este
-                                            grupo.</td>
-                                    </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                    <div class="form-grid form-grid--2 pt-4">
+                        <div class="mt-2 min-w-0 w-full">
+                            <div class="overflow-x-auto w-full border border-gray-200 rounded-lg">
+                                <table class="min-w-[550px] table-fixed w-full">
+                                    <thead>
+                                        <tr class="bg-gray-100">
+                                            <th class="px-2 py-1 border whitespace-nowrap">Orientación</th>
+                                            <th class="py-1 border">Medida</th>
+                                            <th class="px-2 py-1 border">Colindancia</th>
+                                            <th class="w-[100px] py-1 border">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse ($group->neighbors as $neighbor)
+                                        <tr>
+                                            <td class="px-2 py-1 border text-xs text-center">{{ $neighbor->orientation }}
+                                            </td>
+                                            <td class="px-2 py-1 border text-sm text-center">{{ $neighbor->extent }}</td>
+                                            <td class="px-2 py-1 border text-sm text-center">{{ $neighbor->adjacent }}</td>
+                                            <td class="my-2 flex justify-evenly">
+                                                @if(!$isReadOnly)
+                                                <flux:button type="button" icon-leading="pencil"
+                                                    class="cursor-pointer btn-intermediary btn-buildins"
+                                                    wire:click='openEditElement({{ $neighbor->id }})' />
+                                                <flux:button
+                                                    onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
+                                                    wire:click="deleteElement({{ $neighbor->id }})" type="button"
+                                                    icon-leading="trash" class="cursor-pointer btn-deleted btn-buildings" />
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center py-2 text-gray-500">No hay elementos en este
+                                                grupo.</td>
+                                        </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
+                    @empty
+                    <div class="text-center py-6 text-gray-500 text-sm border border-dashed rounded-md mt-6">
+                        No hay grupos registrados.
+                    </div>
+                    @endforelse
                 </div>
-                @empty
-                <div class="text-center py-6 text-gray-500 text-sm border border-dashed rounded-md mt-6">
-                    No hay grupos registrados.
-                </div>
-                @endforelse
             </div>
+
         </div>
+
 
 
 
@@ -682,7 +692,7 @@
                                 focus:border-red-500',
                                 ])
                                 >
-                                <span class="flex-1 text-left text-gray-700">
+                                <span class="flex-1 text-left text-gray-700 ">
                                     @switch($ct_location)
                                     @case('')
                                     -- Selecciona una opción --

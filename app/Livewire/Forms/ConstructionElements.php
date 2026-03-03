@@ -447,9 +447,9 @@ class ConstructionElements extends Component
                 $dataCarpentry,
                 $dataIronwork,
                 $dataHydraulicSanitary,
-                $dataOtherElement,
+                $dataOtherElement
 
-            ) {
+           ) {
                 // Si ConstructionElementModel SÓLO tiene la clave foránea y timestamps:
                 $dataConstructionElement = [];
                 // 1. CREAR/OBTENER EL ELEMENTO PADRE (construction_elements)
@@ -466,7 +466,7 @@ class ConstructionElements extends Component
 
                 // updateOrCreate: Busca un registro hijo ligado a $constructionElement.
                 // Si existe, lo actualiza. Si NO existe, LO CREA.
-                // 🔑 Eloquent INYECTA AUTOMÁTICAMENTE: 'construction_elements_id' => $constructionElement->id
+                // Eloquent INYECTA AUTOMÁTICAMENTE: 'construction_elements_id' => $constructionElement->id
 
                 $constructionElement->structuralWork()->updateOrCreate([], $dataStructuralWork);
                 $constructionElement->finishing1()->updateOrCreate([], $dataFinishing1);

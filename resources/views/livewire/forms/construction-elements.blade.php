@@ -18,7 +18,7 @@
 
                 @unless ($preValuation)
 
-                <div class="form-container__content">
+                <div class="form-container__content min-w-0">
                     <div class="flex flex-col w-full h-full">
 
                         {{-- Navbar responsivo con hamburguesa --}}
@@ -175,7 +175,7 @@
                         {{-- Menú desplegable en móvil --}}
                         <div x-show="open" x-transition class="xl:hidden bg-white border-b border-gray-200">
                             <ul class="flex flex-col divide-y divide-gray-100">
-                                @foreach ($tabs as $key => $label)
+                                @foreach ($tabs as $key => $tab)
                                 {{-- VERIFICACIÓN DE ERRORES DEL TAB --}}
                                 @php
                                 $hasErrors = $errors->hasAny($tab['fields']);
@@ -215,8 +215,7 @@
 
 
 
-
-                    <fieldset @disabled($isReadOnly)>
+                <fieldset @disabled($isReadOnly) class="min-w-0 w-full">
 
                     {{-- Obra negra --}}
                     @if ($activeTab === 'obra_negra')
@@ -334,9 +333,9 @@
                     {{-- Finishes --}}
                     @if ($activeTab === 'acabados1')
                     {{-- <div class="form-container__content"> --}}
-                        <div class="mt-8">
-                            <div class="overflow-x-auto max-w-full">
-                                <table class="min-w-[550px] table-fixed w-full border-2 ">
+                       <div class="mt-8 relative w-full overflow-hidden">
+                           <div class="w-full overflow-x-auto overflow-y-hidden border border-gray-200 rounded-sm block">
+                             <table class="min-w-[900px] table-fixed w-full">
                                     <thead>
                                         <tr class="bg-gray-100">
                                             <th class="w-[140px] px-2 py-1 border">Espacio</th>
@@ -765,9 +764,9 @@
                         </flux:modal.trigger> --}}
 
                         {{-- Tabla otros acabados --}}
-                        <div class="mt-8">
-                            <div class="overflow-x-auto max-w-full">
-                                <table class="min-w-[550px] table-fixed w-full border-2 ">
+                        <div class="mt-8 relative w-full overflow-hidden">
+                            <div class="w-full overflow-x-auto overflow-y-hidden border border-gray-200 rounded-sm block">
+                                <table class="min-w-[900px] table-fixed w-full">
                                     <thead>
                                         <tr class="bg-gray-100">
                                             <th class="px-2 py-1 border whitespace-nowrap">Espacio</th>

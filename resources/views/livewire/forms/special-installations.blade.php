@@ -7,82 +7,82 @@
     @endif
 
     <div class="form-container">
-            <div class="form-container__header">
-                Instalaciones especiales
-            </div>
-            <div class="form-container__content">
+        <div class="form-container__header">
+            Instalaciones especiales
+        </div>
+        <div class="form-container__content">
 
-                {{-- Navbar responsivo con hamburguesa --}}
-                <div x-data="{ open: false }" class="w-full">
-                    @php
-                    $tabs = [
-                    'privativas' => 'Privativas',
-                    /* 'comunes' => 'Comunes', */
-                    ];
+            {{-- Navbar responsivo con hamburguesa --}}
+            <div x-data="{ open: false }" class="w-full">
+                @php
+                $tabs = [
+                'privativas' => 'Privativas',
+                /* 'comunes' => 'Comunes', */
+                ];
 
-                    if(stripos($valuation->property_type, 'condominio')){
-                    $tabs = array_merge($tabs, ['comunes' => 'Comunes']);
-                    }
+                if(stripos($valuation->property_type, 'condominio')){
+                $tabs = array_merge($tabs, ['comunes' => 'Comunes']);
+                }
 
-                    $lastKey = array_key_last($tabs);
-                    @endphp
+                $lastKey = array_key_last($tabs);
+                @endphp
 
-                    {{-- Navbar para pantallas grandes (≥950px) --}}
-                    <flux:navbar class="hidden xl:flex bg-white border-b-2">
-                        @foreach ($tabs as $key => $label)
-                        <flux:navbar.item wire:click.prevent="setTab('{{ $key }}')"
-                            :active="$activeTab === '{{ $key }}'" class="cursor-pointer px-4 py-2 transition-colors
+                {{-- Navbar para pantallas grandes (≥950px) --}}
+                <flux:navbar class="hidden xl:flex bg-white border-b-2">
+                    @foreach ($tabs as $key => $label)
+                    <flux:navbar.item wire:click.prevent="setTab('{{ $key }}')" :active="$activeTab === '{{ $key }}'"
+                        class="cursor-pointer px-4 py-2 transition-colors
                                                         {{ $activeTab === $key
                                                             ? 'border-b-2 border-[#43A497] text-[#3A8B88] font-semibold'
                                                             : 'text-gray-600 hover:text-[#5CBEB4]' }}">
-                            <span class="text-[16px]">{{ $label }}</span>
-                        </flux:navbar.item>
+                        <span class="text-[16px]">{{ $label }}</span>
+                    </flux:navbar.item>
 
-                        @if ($key !== $lastKey)
-                        <span class="text-gray-300 select-none self-center">•</span>
-                        @endif
-                        @endforeach
-                    </flux:navbar>
+                    @if ($key !== $lastKey)
+                    <span class="text-gray-300 select-none self-center">•</span>
+                    @endif
+                    @endforeach
+                </flux:navbar>
 
-                    {{-- Menú hamburguesa para pantallas pequeñas (<950px) --}} <div
-                        class="xl:hidden flex justify-end p-4 bg-white border-b-2">
-                        {{-- <span class="text-lg font-semibold text-[#3A8B88]">Opciones</span> --}}
-                        <button type="button" @click="open = !open"
-                            class="text-[#000000] focus:outline-none cursor-pointer">
-                            <template x-if="!open">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
-                                    viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                            </template>
-                            <template x-if="open">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
-                                    viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </template>
-                        </button>
-                </div>
+                {{-- Menú hamburguesa para pantallas pequeñas (<950px) --}} <div
+                    class="xl:hidden flex justify-end p-4 bg-white border-b-2">
+                    {{-- <span class="text-lg font-semibold text-[#3A8B88]">Opciones</span> --}}
+                    <button type="button" @click="open = !open"
+                        class="text-[#000000] focus:outline-none cursor-pointer">
+                        <template x-if="!open">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </template>
+                        <template x-if="open">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </template>
+                    </button>
+            </div>
 
-                {{-- Menú desplegable en móvil --}}
-                <div x-show="open" x-transition class="xl:hidden bg-white border-b border-gray-200">
-                    <ul class="flex flex-col divide-y divide-gray-100">
-                        @foreach ($tabs as $key => $label)
-                        <li>
-                            <button type="button" wire:click.prevent="setTab('{{ $key }}')" @click="open = false" class="cursor-pointer w-full text-left px-4 py-3 transition-colors
+            {{-- Menú desplegable en móvil --}}
+            <div x-show="open" x-transition class="xl:hidden bg-white border-b border-gray-200">
+                <ul class="flex flex-col divide-y divide-gray-100">
+                    @foreach ($tabs as $key => $label)
+                    <li>
+                        <button type="button" wire:click.prevent="setTab('{{ $key }}')" @click="open = false" class="cursor-pointer w-full text-left px-4 py-3 transition-colors
                                                                 {{ $activeTab === $key
                                                                     ? 'border-l-4 border-[#43A497] bg-[#F0FDFD] text-[#3A8B88] font-semibold'
                                                                     : 'text-gray-700 hover:bg-gray-100' }}">
-                                {{ $label }}
-                            </button>
-                        </li>
-                        @endforeach
-                    </ul>
-                </div>
+                            {{ $label }}
+                        </button>
+                    </li>
+                    @endforeach
+                </ul>
+            </div>
 
 
 
-                <fieldset @disabled($isReadOnly)>
+            <fieldset @disabled($isReadOnly) class="min-w-0 w-full">
 
                 @if ($activeTab === 'privativas')
 
@@ -105,7 +105,7 @@
                 {{-- TABLA DE ELEMENTOS --}}
                 <div class="mt-2">
                     <div class="overflow-x-auto max-w-full">
-                        <table class="min-w-[550px] table-fixed w-full border-2 ">
+                        <table class="min-w-[1200px] w-full border-2">
                             <thead>
                                 <tr class="bg-gray-100">
                                     <th class="px-2 py-1 border">Clave</th>
@@ -141,22 +141,30 @@
                                         {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
                                     </td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{number_format($item->quantity)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        {{number_format($item->quantity)}}
+                                    </td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        ${{number_format($item->new_rep_unit_cost, 4)}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">
                                         @php
-                                        $factorObj = collect($select_conservation_factor)->firstWhere('clave', $item->conservation_factor);
+                                        $factorObj = collect($select_conservation_factor)->firstWhere('clave',
+                                        $item->conservation_factor);
                                         @endphp
-                                        {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' : $item->conservation_factor }}
+                                        {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' :
+                                        $item->conservation_factor }}
                                     </td>
-                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        ${{number_format($item->net_rep_unit_cost, 4)}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">N/A</td>
-                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount,
+                                        4)}}</td>
                                     <td class="my-2 flex justify-evenly">
-                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
+                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                            --}}
                                             <flux:button type="button" icon-leading="pencil"
                                                 class="cursor-pointer btn-intermediary btn-buildins"
                                                 wire:click="openEditElement('private','installations',{{$item->id}})" />
@@ -165,7 +173,8 @@
                                                 --}}
                                                 <flux:button
                                                     onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
-                                                    wire:click="deleteElement('private','installations',{{$item->id}})" icon-leading="trash"
+                                                    wire:click="deleteElement('private','installations',{{$item->id}})"
+                                                    icon-leading="trash"
                                                     class="cursor-pointer btn-deleted btn-buildings" />
                                                 {{-- </flux:modal-trigger> --}}
                                     </td>
@@ -176,6 +185,7 @@
                         </table>
                     </div>
                 </div>
+
 
 
                 <div class="form-grid form-grid--3 mt-[64px] mb-2 text-lg">
@@ -192,7 +202,7 @@
                 {{-- TABLA DE ELEMENTOS --}}
                 <div class="mt-2">
                     <div class="overflow-x-auto max-w-full">
-                        <table class="min-w-[550px] table-fixed w-full border-2 ">
+                        <table class="min-w-[1200px] w-full border-2">
                             <thead>
                                 <tr class="bg-gray-100">
                                     <th class="px-2 py-1 border">Clave</th>
@@ -223,27 +233,35 @@
                                 @foreach ($privateAccessories as $item)
                                 <tr>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
-                                   <td class="px-2 py-1 border text-sm text-center">
+                                    <td class="px-2 py-1 border text-sm text-center">
 
-                                    {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
-                                </td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{number_format($item->quantity)}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
-                               <td class="px-2 py-1 border text-sm text-center">
-                                    @php
-                                    $factorObj = collect($select_conservation_factor)->firstWhere('clave', $item->conservation_factor);
-                                    @endphp
-                                    {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' : $item->conservation_factor }}
-                                </td>
-                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">N/A</td>
-                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
+                                        {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        {{number_format($item->quantity)}}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        ${{number_format($item->new_rep_unit_cost, 4)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        @php
+                                        $factorObj = collect($select_conservation_factor)->firstWhere('clave',
+                                        $item->conservation_factor);
+                                        @endphp
+                                        {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' :
+                                        $item->conservation_factor }}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        ${{number_format($item->net_rep_unit_cost, 4)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">N/A</td>
+                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount,
+                                        4)}}</td>
                                     <td class="my-2 flex justify-evenly">
-                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
+                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                            --}}
                                             <flux:button type="button" icon-leading="pencil"
                                                 class="cursor-pointer btn-intermediary btn-buildins"
                                                 wire:click="openEditElement('private','accessories',{{$item->id}})" />
@@ -252,7 +270,8 @@
                                                 --}}
                                                 <flux:button
                                                     onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
-                                                    wire:click="deleteElement('private','accessories',{{$item->id}})" icon-leading="trash"
+                                                    wire:click="deleteElement('private','accessories',{{$item->id}})"
+                                                    icon-leading="trash"
                                                     class="cursor-pointer btn-deleted btn-buildings" />
                                                 {{-- </flux:modal-trigger> --}}
                                     </td>
@@ -282,7 +301,7 @@
                 {{-- TABLA DE ELEMENTOS --}}
                 <div class="mt-2">
                     <div class="overflow-x-auto max-w-full">
-                        <table class="min-w-[550px] table-fixed w-full border-2 ">
+                        <table class="min-w-[1200px] w-full border-2">
                             <thead>
                                 <tr class="bg-gray-100">
                                     <th class="px-2 py-1 border">Clave</th>
@@ -312,28 +331,36 @@
                                 @else
                                 @foreach ($privateWorks as $item)
                                 <tr>
-                                  <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
-                               <td class="px-2 py-1 border text-sm text-center">
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
 
-                                {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
-                            </td>
-                            <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
-                            <td class="px-2 py-1 border text-sm text-center">{{number_format($item->quantity)}}</td>
-                            <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
-                            <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
-                            <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
-                            <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
-                            <td class="px-2 py-1 border text-sm text-center">
-                                @php
-                                $factorObj = collect($select_conservation_factor)->firstWhere('clave', $item->conservation_factor);
-                                @endphp
-                                {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' : $item->conservation_factor }}
-                            </td>
-                            <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
-                            <td class="px-2 py-1 border text-sm text-center">N/A</td>
-                            <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
+                                        {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        {{number_format($item->quantity)}}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        ${{number_format($item->new_rep_unit_cost, 4)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        @php
+                                        $factorObj = collect($select_conservation_factor)->firstWhere('clave',
+                                        $item->conservation_factor);
+                                        @endphp
+                                        {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' :
+                                        $item->conservation_factor }}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        ${{number_format($item->net_rep_unit_cost, 4)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">N/A</td>
+                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount,
+                                        4)}}</td>
                                     <td class="my-2 flex justify-evenly">
-                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
+                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                            --}}
                                             <flux:button type="button" icon-leading="pencil"
                                                 class="cursor-pointer btn-intermediary btn-buildins"
                                                 wire:click="openEditElement('private','works',{{$item->id}})" />
@@ -342,7 +369,8 @@
                                                 --}}
                                                 <flux:button
                                                     onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
-                                                    wire:click="deleteElement('private','works',{{$item->id}})" type="button" icon-leading="trash"
+                                                    wire:click="deleteElement('private','works',{{$item->id}})"
+                                                    type="button" icon-leading="trash"
                                                     class="cursor-pointer btn-deleted btn-buildings" />
                                                 {{-- </flux:modal-trigger> --}}
                                     </td>
@@ -376,7 +404,7 @@
                 {{-- TABLA DE ELEMENTOS --}}
                 <div class="mt-2">
                     <div class="overflow-x-auto max-w-full">
-                        <table class="min-w-[550px] table-fixed w-full border-2 ">
+                        <table class="min-w-[1200px] w-full border-2">
                             <thead>
                                 <tr class="bg-gray-100">
                                     <th class="px-2 py-1 border">Clave</th>
@@ -406,28 +434,36 @@
                                 @else
                                 @foreach ($commonInstallations as $item)
                                 <tr>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
 
-                                    {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
-                                </td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{number_format($item->quantity)}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">
-                                    @php
-                                    $factorObj = collect($select_conservation_factor)->firstWhere('clave', $item->conservation_factor);
-                                    @endphp
-                                    {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' : $item->conservation_factor }}
-                                </td>
-                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}} %</td>
-                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
+                                        {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        {{number_format($item->quantity)}}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        ${{number_format($item->new_rep_unit_cost, 4)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        @php
+                                        $factorObj = collect($select_conservation_factor)->firstWhere('clave',
+                                        $item->conservation_factor);
+                                        @endphp
+                                        {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' :
+                                        $item->conservation_factor }}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        ${{number_format($item->net_rep_unit_cost, 4)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}} %</td>
+                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount,
+                                        4)}}</td>
                                     <td class="my-2 flex justify-evenly">
-                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
+                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                            --}}
                                             <flux:button type="button" icon-leading="pencil"
                                                 class="cursor-pointer btn-intermediary btn-buildins"
                                                 wire:click="openEditElement('common','installations',{{$item->id}})" />
@@ -436,7 +472,8 @@
                                                 --}}
                                                 <flux:button
                                                     onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
-                                                    wire:click="deleteElement('common','installations',{{$item->id}})" type="button" icon-leading="trash"
+                                                    wire:click="deleteElement('common','installations',{{$item->id}})"
+                                                    type="button" icon-leading="trash"
                                                     class="cursor-pointer btn-deleted btn-buildings" />
                                                 {{-- </flux:modal-trigger> --}}
                                     </td>
@@ -464,7 +501,7 @@
                 {{-- TABLA DE ELEMENTOS --}}
                 <div class="mt-2">
                     <div class="overflow-x-auto max-w-full">
-                        <table class="min-w-[550px] table-fixed w-full border-2 ">
+                        <table class="min-w-[1200px] w-full border-2">
                             <thead>
                                 <tr class="bg-gray-100">
                                     <th class="px-2 py-1 border">Clave</th>
@@ -494,28 +531,36 @@
                                 @else
                                 @foreach ($commonAccessories as $item)
                                 <tr>
-                                   <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->key}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
 
-                                    {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
-                                </td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{number_format($item->quantity)}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">
-                                    @php
-                                    $factorObj = collect($select_conservation_factor)->firstWhere('clave', $item->conservation_factor);
-                                    @endphp
-                                    {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' : $item->conservation_factor }}
-                                </td>
-                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
-                                <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}} %</td>
-                                <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
+                                        {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        {{number_format($item->quantity)}}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        ${{number_format($item->new_rep_unit_cost, 4)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        @php
+                                        $factorObj = collect($select_conservation_factor)->firstWhere('clave',
+                                        $item->conservation_factor);
+                                        @endphp
+                                        {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' :
+                                        $item->conservation_factor }}
+                                    </td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        ${{number_format($item->net_rep_unit_cost, 4)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}} %</td>
+                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount,
+                                        4)}}</td>
                                     <td class="my-2 flex justify-evenly">
-                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
+                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                            --}}
                                             <flux:button type="button" icon-leading="pencil"
                                                 class="cursor-pointer btn-intermediary btn-buildins"
                                                 wire:click="openEditElement('common','accessories',{{$item->id}})" />
@@ -524,7 +569,8 @@
                                                 --}}
                                                 <flux:button
                                                     onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
-                                                    wire:click="deleteElement('common','accessories',{{$item->id}})" type="button" icon-leading="trash"
+                                                    wire:click="deleteElement('common','accessories',{{$item->id}})"
+                                                    type="button" icon-leading="trash"
                                                     class="cursor-pointer btn-deleted btn-buildings" />
                                                 {{-- </flux:modal-trigger> --}}
                                     </td>
@@ -550,7 +596,7 @@
                 {{-- TABLA DE ELEMENTOS --}}
                 <div class="mt-2">
                     <div class="overflow-x-auto max-w-full">
-                        <table class="min-w-[550px] table-fixed w-full border-2 ">
+                        <table class="min-w-[1200px] w-full border-2">
                             <thead>
                                 <tr class="bg-gray-100">
                                     <th class="px-2 py-1 border">Clave</th>
@@ -586,22 +632,30 @@
                                         {{ $item->key . ' - ' . ($item->description ?: $item->description_other) }}
                                     </td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->unit}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">{{number_format($item->quantity)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        {{number_format($item->quantity)}}
+                                    </td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->age}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->useful_life}}</td>
-                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->new_rep_unit_cost, 4)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        ${{number_format($item->new_rep_unit_cost, 4)}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->age_factor}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">
                                         @php
-                                        $factorObj = collect($select_conservation_factor)->firstWhere('clave', $item->conservation_factor);
+                                        $factorObj = collect($select_conservation_factor)->firstWhere('clave',
+                                        $item->conservation_factor);
                                         @endphp
-                                        {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' : $item->conservation_factor }}
+                                        {{ $factorObj ? $factorObj['nombre'] . ' - ' . $factorObj['factor'] .'' :
+                                        $item->conservation_factor }}
                                     </td>
-                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->net_rep_unit_cost, 4)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">
+                                        ${{number_format($item->net_rep_unit_cost, 4)}}</td>
                                     <td class="px-2 py-1 border text-sm text-center">{{$item->undivided}} %</td>
-                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount, 4)}}</td>
+                                    <td class="px-2 py-1 border text-sm text-center">${{number_format($item->amount,
+                                        4)}}</td>
                                     <td class="my-2 flex justify-evenly">
-                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end"> --}}
+                                        {{-- <flux:modal.trigger name="edit-construction" class="flex justify-end">
+                                            --}}
                                             <flux:button type="button" icon-leading="pencil"
                                                 class="cursor-pointer btn-intermediary btn-buildins"
                                                 wire:click="openEditElement('common','works',{{$item->id}})" />
@@ -610,7 +664,8 @@
                                                 --}}
                                                 <flux:button
                                                     onclick="confirm('¿Estás seguro de que deseas eliminar este elemento?') || event.stopImmediatePropagation()"
-                                                    wire:click="deleteElement('common','works',{{$item->id}})" type="button" icon-leading="trash"
+                                                    wire:click="deleteElement('common','works',{{$item->id}})"
+                                                    type="button" icon-leading="trash"
                                                     class="cursor-pointer btn-deleted btn-buildings" />
                                                 {{-- </flux:modal-trigger> --}}
                                     </td>
@@ -639,22 +694,33 @@
 
                                 {{-- Valor de ejemplo para usar en los for --}}
                                 <tr>
-                                    <td class="px-2 py-2 text-xs text-center">Importe total instalaciones especiales:
+                                    <td class="px-2 py-2 text-xs text-center">Importe total instalaciones
+                                        especiales:
                                     </td>
-                                    <td class="px-2 py-2 text-xs text-center">{{number_format($subTotalPrivateInstallations,4)}}</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{number_format($subTotalCommonInstallations,4)}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">
+                                        {{number_format($subTotalPrivateInstallations,4)}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">
+                                        {{number_format($subTotalCommonInstallations,4)}}</td>
                                 </tr>
 
                                 <tr>
-                                    <td class="px-2 py-2 text-xs text-center">Importe total elementos accesorios:</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{number_format($subTotalPrivateAccessories,4)}}</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{number_format($subTotalCommonAccessories,4)}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">Importe total elementos accesorios:
+                                    </td>
+                                    <td class="px-2 py-2 text-xs text-center">
+                                        {{number_format($subTotalPrivateAccessories,4)}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">
+                                        {{number_format($subTotalCommonAccessories,4)}}</td>
                                 </tr>
 
                                 <tr>
-                                    <td class="px-2 py-2 text-xs text-center">Importe total obras complementarias:</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{number_format($subTotalPrivateWorks,4)}}</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{number_format($subTotalCommonWorks,4)}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">Importe total obras complementarias:
+                                    </td>
+                                    <td class="px-2 py-2 text-xs text-center">
+                                        {{number_format($subTotalPrivateWorks,4)}}
+                                    </td>
+                                    <td class="px-2 py-2 text-xs text-center">
+                                        {{number_format($subTotalCommonWorks,4)}}
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -663,7 +729,7 @@
 
 
 
-               <div class="mt-[64px] form-grid form-grid--2-center">
+                <div class="mt-[64px] form-grid form-grid--2-center">
                     <div class="overflow-x-auto">
                         <table class="min-w-[550px] table-fixed w-full border-2 ">
                             <thead>
@@ -679,15 +745,19 @@
                                 <tr>
                                     <td class="px-2 py-2 text-xs text-center">Importe Total:
                                         (Inst. Especiales, Obras Comp. y Elem. Accesorios)</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{number_format($totalPrivateInstallations,4)}}</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{number_format($totalCommonInstallations, 4)}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">
+                                        {{number_format($totalPrivateInstallations,4)}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">
+                                        {{number_format($totalCommonInstallations,
+                                        4)}}</td>
                                 </tr>
 
                                 <tr>
                                     <td class="px-2 py-2 text-xs text-center">Importe PRO INDIVISO:
                                         (Inst. Especiales, Obras Comp. y Elem. Accesorios)</td>
                                     <td class="px-2 py-2 text-xs text-center">No aplica</td>
-                                    <td class="px-2 py-2 text-xs text-center">{{number_format($totalCommonProportional,4)}}</td>
+                                    <td class="px-2 py-2 text-xs text-center">
+                                        {{number_format($totalCommonProportional,4)}}</td>
                                 </tr>
 
                             </tbody>
@@ -696,8 +766,8 @@
                 </div>
 
 
-            </div>
         </div>
+    </div>
 </div>
 </fieldset>
 
@@ -752,8 +822,8 @@
                         -- Selecciona una opción --
                         @endif
                     </span>
-                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
@@ -837,8 +907,8 @@
                         -- Selecciona una opción --
                         @endif
                     </span>
-                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
@@ -916,8 +986,8 @@
                         -- Selecciona una opción --
                         @endif
                     </span>
-                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
@@ -1012,7 +1082,7 @@
         <flux:field class="flux-field">
             <flux:label>Vida útil<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model.live='usefulLife'
-          :disabled="!($descriptionSI === 'IE19' || $descriptionAE === 'EA12' || $descriptionCW === 'OC17')"/>
+                :disabled="!($descriptionSI === 'IE19' || $descriptionAE === 'EA12' || $descriptionCW === 'OC17')" />
             <div class="error-container">
                 <flux:error name="usefulLife" />
             </div>
@@ -1025,14 +1095,14 @@
             </div>
         </flux:field>
 
-       {{--  <flux:field class="flux-field">
+        {{-- <flux:field class="flux-field">
             <flux:label>Factor de edad<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model='ageFactor' />
             <div class="error-container">
                 <flux:error name="ageFactor" />
             </div>
         </flux:field>
- --}}
+        --}}
 
         {{-- Inicia --}}
         <div class="relative inline-block w-full">
@@ -1042,33 +1112,35 @@
             <flux:dropdown inline position="bottom" align="start" class="w-full">
 
                 {{-- BOTÓN --}}
-              {{-- BOTÓN CON LÓGICA SEGURA --}}
-            <button @click.stop.prevent
-                @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('conservationFactor'),
-                'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
-                $errors->has('conservationFactor'),
-                ])>
+                {{-- BOTÓN CON LÓGICA SEGURA --}}
+                <button @click.stop.prevent
+                    @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
+                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=>
+                    !$errors->has('conservationFactor'),
+                    'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
+                    $errors->has('conservationFactor'),
+                    ])>
 
-                <span class="flex-1 text-left text-gray-700 truncate">
-                    @php
-                    // Buscamos el elemento completo basado en la clave guardada
-                    $seleccionado = collect($select_conservation_factor)->firstWhere('clave', $conservationFactor);
-                    @endphp
+                    <span class="flex-1 text-left text-gray-700 truncate">
+                        @php
+                        // Buscamos el elemento completo basado en la clave guardada
+                        $seleccionado = collect($select_conservation_factor)->firstWhere('clave',
+                        $conservationFactor);
+                        @endphp
 
-                    @if($seleccionado)
-                    {{-- AQUÍ DECIDES QUÉ MOSTRAR: Nombre y Factor --}}
-                    {{ $seleccionado['nombre'] }} - {{ $seleccionado['factor'] }}
-                    @else
-                    -- Selecciona una opción --
-                    @endif
-                </span>
+                        @if($seleccionado)
+                        {{-- AQUÍ DECIDES QUÉ MOSTRAR: Nombre y Factor --}}
+                        {{ $seleccionado['nombre'] }} - {{ $seleccionado['factor'] }}
+                        @else
+                        -- Selecciona una opción --
+                        @endif
+                    </span>
 
-                <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
 
                 {{-- MENÚ --}}
                 <!-- CAMBIO 2: Se cambió w-3/5 por w-full para que el menú ocupe todo el ancho por defecto -->
@@ -1115,7 +1187,7 @@
         </div>
         {{-- Finaliza --}}
 
-{{--         <flux:field class="flux-field pt-4">
+        {{-- <flux:field class="flux-field pt-4">
             <flux:label>Costo Unit Neto Rep<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model='netRepUnitCost' />
             <div class="error-container">
@@ -1126,7 +1198,7 @@
         @if ($classificationType === 'common')
         <flux:field class="flux-field pt-4">
             <flux:label>%Indiviso<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='undivided'/>
+            <flux:input type="number" wire:model='undivided' />
             <div class="error-container">
                 <flux:error name="undivided" />
             </div>
@@ -1135,7 +1207,7 @@
 
 
 
-      {{--   <flux:field class="flux-field">
+        {{-- <flux:field class="flux-field">
             <flux:label>Importe<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model='amount' />
             <div class="error-container">
@@ -1245,7 +1317,7 @@
             <div>
                 <flux:error name="descriptionSI" />
             </div>
-          {{--   {{$descriptionSI}} --}}
+            {{-- {{$descriptionSI}} --}}
         </div>
         {{-- Finaliza --}}
         @endif
@@ -1285,8 +1357,8 @@
                         -- Selecciona una opción --
                         @endif
                     </span>
-                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
@@ -1364,8 +1436,8 @@
                         -- Selecciona una opción --
                         @endif
                     </span>
-                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
@@ -1464,7 +1536,7 @@
         <flux:field class="flux-field">
             <flux:label>Vida útil<span class="sup-required">*</span></flux:label>
             <flux:input type="number" wire:model='usefulLife'
-            :disabled="!($descriptionSI === 'IE19' || $descriptionAE === 'EA12' || $descriptionCW === 'OC17' || $descriptionCW === 'OC18' || $descriptionCW === 'OC06')"/>
+                :disabled="!($descriptionSI === 'IE19' || $descriptionAE === 'EA12' || $descriptionCW === 'OC17' || $descriptionCW === 'OC18' || $descriptionCW === 'OC06')" />
             <div class="error-container">
                 <flux:error name="usefulLife" />
             </div>
@@ -1477,14 +1549,14 @@
             </div>
         </flux:field>
 
-{{--         <flux:field class="flux-field">
+        {{-- <flux:field class="flux-field">
             <flux:label>Factor de edad<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='ageFactor' disabled/>
+            <flux:input type="number" wire:model='ageFactor' disabled />
             <div class="error-container">
                 <flux:error name="ageFactor" />
             </div>
         </flux:field>
- --}}
+        --}}
 
         {{-- Inicia --}}
         <div class="relative inline-block w-full">
@@ -1497,7 +1569,8 @@
                 {{-- BOTÓN CON LÓGICA SEGURA --}}
                 <button @click.stop.prevent
                     @class([ 'w-full flex items-center px-3 py-2 bg-white rounded-md shadow-sm cursor-pointer focus:outline-none'
-                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=> !$errors->has('conservationFactor'),
+                    , 'border border-gray-300 text-gray-700 hover:border-gray-400'=>
+                    !$errors->has('conservationFactor'),
                     'border border-red-500 text-red-700 focus:ring-1 focus:ring-red-500 focus:border-red-500' =>
                     $errors->has('conservationFactor'),
                     ])>
@@ -1505,7 +1578,8 @@
                     <span class="flex-1 text-left text-gray-700 truncate">
                         @php
                         // Buscamos el elemento completo basado en la clave guardada
-                        $seleccionado = collect($select_conservation_factor)->firstWhere('clave', $conservationFactor);
+                        $seleccionado = collect($select_conservation_factor)->firstWhere('clave',
+                        $conservationFactor);
                         @endphp
 
                         @if($seleccionado)
@@ -1516,8 +1590,8 @@
                         @endif
                     </span>
 
-                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w-3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
@@ -1578,7 +1652,7 @@
         @if ($classificationType === 'common')
         <flux:field class="flux-field pt-4">
             <flux:label>%Indiviso<span class="sup-required">*</span></flux:label>
-            <flux:input type="number" wire:model='undivided'/>
+            <flux:input type="number" wire:model='undivided' />
             <div class="error-container">
                 <flux:error name="undivided" />
             </div>
@@ -1594,7 +1668,7 @@
         </flux:field> --}}
 
         <div class="flex pt-8">
-            <flux:spacer/>
+            <flux:spacer />
 
             <flux:button type="button" class="btn-primary btn-table cursor-pointer" variant="primary"
                 wire:click='addElement'>Guardar elemento

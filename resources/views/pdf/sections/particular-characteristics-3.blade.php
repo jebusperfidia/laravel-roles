@@ -1,7 +1,7 @@
 {{-- ======================================================================= --}}
 {{-- SECCIÓN: CARPINTERÍA, INSTALACIONES Y ENFOQUES --}}
 {{-- ======================================================================= --}}
-
+@if(!$isPreValuation)
 <div style="margin-top: 10px; margin-bottom: 10px;">
 
     {{-- 1. CARPINTERÍA --}}
@@ -141,6 +141,9 @@
     </table>
 
 </div>
+@endif
+
+
 
 {{-- 5. INSTALACIONES ESPECIALES (TABLA DINÁMICA) --}}
 <div

@@ -1,4 +1,3 @@
-
 <div style="font-weight: bold; font-size: 14px; color: #000; margin-bottom: 5px; text-transform: uppercase;">
     II. ENFOQUE COMPARATIVO DE MERCADO
 </div>
@@ -147,7 +146,8 @@
     <tbody>
         {{-- FOTOS --}}
         <tr>
-            <td style="border: 1px solid #e5e7eb; background: #f9fafb; padding: 4px; color: #000; font-weight: bold;">FOTO</td>
+            <td style="border: 1px solid #e5e7eb; background: #f9fafb; padding: 4px; color: #000; font-weight: bold;">
+                FOTO</td>
             @foreach($landPivots as $pivot)
             <td style="border: 1px solid #e5e7eb; text-align: center; padding: 2px;">
                 @php
@@ -185,7 +185,7 @@
             @foreach($landPivots as $pivot)
             <td style="{{ $rowStyle1 }} text-transform: uppercase; font-weight: bold;">
                 {{ $pivot->comparable->comparable_characteristics ?? '-' }}
-              </td>
+            </td>
             @endforeach
         </tr>
         <tr>
@@ -198,8 +198,13 @@
         <tr>
             <td style="{{ $labelStyle }} font-weight: bold;">COLONIA Y C.P.</td>
             @foreach($landPivots as $pivot)
-            <td style="{{ $rowStyle1 }} font-weight: bold;">{{ $pivot->comparable->comparable_colony }} {{
-                $pivot->comparable->comparable_cp }}</td>
+            <td style="{{ $rowStyle1 }} font-weight: bold;">
+                {{ $pivot->comparable->comparable_colony === 'no-listada'
+                ? $pivot->comparable->comparable_other_colony
+                : $pivot->comparable->comparable_colony
+                }}
+                {{ $pivot->comparable->comparable_cp }}
+            </td>
             @endforeach
         </tr>
         {{-- MUNICIPIO --}}
@@ -243,36 +248,36 @@
                 }}</td>
             @endforeach
         </tr>
-       <tr>
-        <td style="{{ $labelStyle }} font-weight: bold;">ÁREA LIBRE</td>
-        @foreach($landPivots as $pivot)
-        <td style="{{ $rowStyle1 }} font-weight: bold;">
-            {{ number_format($pivot->comparable->clean_area_libre ?? 0, 0) }}%
-        </td>
-        @endforeach
-    </tr>
-    <tr>
-        <td style="{{ $labelStyle }} font-weight: bold;">NIVELES</td>
-        @foreach($landPivots as $pivot)
-        <td style="{{ $rowStyleBg }} font-weight: bold;">
-            {{ number_format($pivot->comparable->clean_niveles ?? 0, 1) }}
-        </td>
-        @endforeach
-    </tr>
-    <tr>
-        <td style="{{ $labelStyle }} font-weight: bold;">USO SUELO</td>
-        @foreach($landPivots as $pivot)
-        <td style="{{ $rowStyle1 }} font-weight: bold;">{{ $pivot->comparable->comparable_land_use ?? '-' }}</td>
-        @endforeach
-    </tr>
-    <tr>
-        <td style="{{ $labelStyle }} font-weight: bold;">CUS</td>
-        @foreach($landPivots as $pivot)
-        <td style="{{ $rowStyleBg }} font-weight: bold;">
-            {{ number_format($pivot->comparable->calculated_cus ?? 0, 2) }}
-        </td>
-        @endforeach
-    </tr>
+        <tr>
+            <td style="{{ $labelStyle }} font-weight: bold;">ÁREA LIBRE</td>
+            @foreach($landPivots as $pivot)
+            <td style="{{ $rowStyle1 }} font-weight: bold;">
+                {{ number_format($pivot->comparable->clean_area_libre ?? 0, 0) }}%
+            </td>
+            @endforeach
+        </tr>
+        <tr>
+            <td style="{{ $labelStyle }} font-weight: bold;">NIVELES</td>
+            @foreach($landPivots as $pivot)
+            <td style="{{ $rowStyleBg }} font-weight: bold;">
+                {{ number_format($pivot->comparable->clean_niveles ?? 0, 1) }}
+            </td>
+            @endforeach
+        </tr>
+        <tr>
+            <td style="{{ $labelStyle }} font-weight: bold;">USO SUELO</td>
+            @foreach($landPivots as $pivot)
+            <td style="{{ $rowStyle1 }} font-weight: bold;">{{ $pivot->comparable->comparable_land_use ?? '-' }}</td>
+            @endforeach
+        </tr>
+        <tr>
+            <td style="{{ $labelStyle }} font-weight: bold;">CUS</td>
+            @foreach($landPivots as $pivot)
+            <td style="{{ $rowStyleBg }} font-weight: bold;">
+                {{ number_format($pivot->comparable->calculated_cus ?? 0, 2) }}
+            </td>
+            @endforeach
+        </tr>
         <tr>
             <td style="{{ $labelStyle }} font-weight: bold;">SUP.TERRENO M2</td>
             @foreach($landPivots as $pivot)
@@ -289,14 +294,15 @@
         </tr>
 
         {{-- CALCULO RÁPIDO PARA VALOR HOMOLOGADO --}}
-       <tr style="background: #f0fdfa;">
-        <td style="border: 1px solid #e5e7eb; padding: 2px 4px; color: #000; font-weight: bold;">VALOR.UNIT.HOMOLOGADO</td>
-        @foreach($landPivots as $pivot)
-        <td style="border: 1px solid #e5e7eb; padding: 2px; font-weight: bold; color: #000; text-align: left;">
-            ${{ number_format($pivot->calculated_val_hom, 2) }}
-        </td>
-        @endforeach
-    </tr>
+        <tr style="background: #f0fdfa;">
+            <td style="border: 1px solid #e5e7eb; padding: 2px 4px; color: #000; font-weight: bold;">
+                VALOR.UNIT.HOMOLOGADO</td>
+            @foreach($landPivots as $pivot)
+            <td style="border: 1px solid #e5e7eb; padding: 2px; font-weight: bold; color: #000; text-align: left;">
+                ${{ number_format($pivot->calculated_val_hom, 2) }}
+            </td>
+            @endforeach
+        </tr>
 
         {{-- FACTOR NEGOCIACIÓN --}}
         <tr>
@@ -330,44 +336,46 @@
             @endforeach
         </tr>
 
-    {{-- DESGLOSE DINÁMICO DE TODOS LOS FACTORES (Incluye editables) --}}
-    @foreach($orderedHeaders as $header)
-    <tr>
-        <td style="border: 1px solid #e5e7eb; background: #f3f4f6; padding: 2px 4px; color: #000; font-weight: bold;">
-            {{ $header->factor_name }} ({{ $header->acronym }})
-        </td>
-        @foreach($landPivots as $pivot)
-        @php
-        $fMap = $pivot->factors_mapped ?? [];
-        $fact = $fMap[$header->acronym] ?? null;
-        @endphp
-        <td style="border: 1px solid #e5e7eb; padding: 0;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 7px;">
-                <tr>
-                    <td style="width: 50%; text-align: center; border-right: 1px solid #eee; padding: 2px; font-weight: bold;">
-                        {{ $fact ? number_format($fact->rating, 2) : '1.00' }}
-                    </td>
-                    <td style="width: 50%; text-align: center; font-weight: bold; padding: 2px; color: #000;">
-                        {{ $fact ? number_format($fact->applicable, 2) : '1.00' }}
-                    </td>
-                </tr>
-            </table>
-        </td>
+        {{-- DESGLOSE DINÁMICO DE TODOS LOS FACTORES (Incluye editables) --}}
+        @foreach($orderedHeaders as $header)
+        <tr>
+            <td
+                style="border: 1px solid #e5e7eb; background: #f3f4f6; padding: 2px 4px; color: #000; font-weight: bold;">
+                {{ $header->factor_name }} ({{ $header->acronym }})
+            </td>
+            @foreach($landPivots as $pivot)
+            @php
+            $fMap = $pivot->factors_mapped ?? [];
+            $fact = $fMap[$header->acronym] ?? null;
+            @endphp
+            <td style="border: 1px solid #e5e7eb; padding: 0;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 7px;">
+                    <tr>
+                        <td
+                            style="width: 50%; text-align: center; border-right: 1px solid #eee; padding: 2px; font-weight: bold;">
+                            {{ $fact ? number_format($fact->rating, 2) : '1.00' }}
+                        </td>
+                        <td style="width: 50%; text-align: center; font-weight: bold; padding: 2px; color: #000;">
+                            {{ $fact ? number_format($fact->applicable, 2) : '1.00' }}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            @endforeach
+        </tr>
         @endforeach
-    </tr>
-    @endforeach
 
-  {{-- FACTOR RESULTANTE FINAL --}}
-<tr style="background: #f3f4f6; border-top: 1.5px solid #25998b;">
-    <td style="border: 1px solid #d1d5db; padding: 2px 4px; color: #000; font-weight: bold;">FRE TOTAL</td>
-    @foreach($landPivots as $pivot)
-    <td
-        style="border: 1px solid #d1d5db; text-align: center; font-weight: bold; color: #000; font-size: 8.5px; padding: 2px;">
-        {{ number_format($pivot->calculated_fre, 2) }}
-    </td>
-    @endforeach
-</tr>
-</tbody>
+        {{-- FACTOR RESULTANTE FINAL --}}
+        <tr style="background: #f3f4f6; border-top: 1.5px solid #25998b;">
+            <td style="border: 1px solid #d1d5db; padding: 2px 4px; color: #000; font-weight: bold;">FRE TOTAL</td>
+            @foreach($landPivots as $pivot)
+            <td
+                style="border: 1px solid #d1d5db; text-align: center; font-weight: bold; color: #000; font-size: 8.5px; padding: 2px;">
+                {{ number_format($pivot->calculated_fre, 2) }}
+            </td>
+            @endforeach
+        </tr>
+    </tbody>
 </table>
 
 {{-- TABLA ESTADÍSTICA DE PONDERACIÓN Y GRÁFICA --}}
@@ -473,7 +481,8 @@
                 {{-- MEDIA ARITMÉTICA --}}
                 <div
                     style="background: #6b7280; color: white; padding: 3px; text-align: right; font-size: 9px; font-weight: bold;">
-                    Media aritmética: <span style="margin-left: 5px;">${{ number_format($stats['homologated']['avg'], 2) }}</span>
+                    Media aritmética: <span style="margin-left: 5px;">${{ number_format($stats['homologated']['avg'], 2)
+                        }}</span>
                 </div>
 
                 {{-- CONCLUSIÓN --}}
@@ -516,4 +525,4 @@
     </table>
 </div>
 
- --}}
+--}}

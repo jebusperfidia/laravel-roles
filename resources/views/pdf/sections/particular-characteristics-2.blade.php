@@ -315,6 +315,22 @@
         ELEMENTOS DE LA CONSTRUCCIÓN
     </div>
 
+
+ @if($isPreValuation)
+
+ <div style="font-weight: bold; font-size: 11px; border-bottom: 1px solid #adadad; margin-bottom: 2px;">
+    Resumen de elementos
+</div>
+    {{-- Resumen --}}
+        <table class="form-table" style="margin-top: 5px;">
+            <tr>
+                <td class="label-cell">Resumen:</td>
+                <td class="value-cell" style="border-bottom: 1px dotted #333;">
+                    {{ $constructionSummary }}
+                </td>
+            </tr>
+        </table>
+    @else
     {{-- 1. OBRA NEGRA --}}
     <div style="font-weight: bold; font-size: 11px; border-bottom: 1px solid #adadad; margin-bottom: 2px;">
         Obra negra
@@ -573,3 +589,4 @@
             </td>
         </tr>
     </table>
+@endif

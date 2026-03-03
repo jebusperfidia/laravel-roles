@@ -59,19 +59,20 @@
                         </td>
                         <td style="padding: 3px 5px; color: #000; text-align: right;">Edad:</td>
                         <td style="padding: 3px 5px; font-weight: bold; color: #000; background-color: #e5e7eb;">
-                            {{ $subjectBuildingInfo->edad ?? '-' }} {{ is_numeric($subjectBuildingInfo->edad) ? 'años' : '' }}
+                            {{ $subjectBuildingInfo->edad ?? '-' }} {{ is_numeric($subjectBuildingInfo->edad) ? 'años' :
+                            '' }}
                         </td>
                     </tr>
 
                     {{-- FILA 4: CONJUNTO Y LOTE MODA --}}
-                <tr>
+                    <tr>
                         <td style="padding: 3px 5px; color: #000; text-align: right;">Conjunto:</td>
                         <td style="padding: 3px 5px; font-weight: bold; color: #000; background-color: #e5e7eb;">
                             {{ $subjectBuildingInfo->conjunto ?? '-' }}
                         </td>
                         <td style="padding: 3px 5px; color: #000; text-align: right;">Lote moda:</td>
                         <td style="padding: 3px 5px; font-weight: bold; color: #000; background-color: #e5e7eb;">
-                           {{ number_format($subjectBuildingInfo->lote_moda, 2) }} M2
+                            {{ number_format($subjectBuildingInfo->lote_moda, 2) }} M2
                     </tr>
                 </table>
 
@@ -87,9 +88,9 @@
                             {{ number_format($subjectBuildingInfo->superficie_terreno, 2) }} M2
                         </td>
                         <td style="padding: 3px 5px; color: #000; text-align: right; width: 22%;">Sup. Construida:</td>
-                       <td style="padding: 3px 5px; font-weight: bold; color: #000; background-color: #e5e7eb;">
-                        {{ number_format($subjectBuildingInfo->superficie_const, 2) }} M2
-                    </td>
+                        <td style="padding: 3px 5px; font-weight: bold; color: #000; background-color: #e5e7eb;">
+                            {{ number_format($subjectBuildingInfo->superficie_const, 2) }} M2
+                        </td>
                         <td style="padding: 3px 5px; color: #000; text-align: right; width: 18%;">Relación. T/C:</td>
                         <td style="padding: 3px 5px; font-weight: bold; color: #000; background-color: #e5e7eb;">
                             {{ number_format($subjectBuildingInfo->relacion_tc, 2) }}
@@ -173,7 +174,8 @@
 
         {{-- 1. FOTO --}}
         <tr>
-            <td style="border: 1px solid #e5e7eb; background: #f9fafb; padding: 4px; color: #000; font-weight: bold;">FOTO</td>
+            <td style="border: 1px solid #e5e7eb; background: #f9fafb; padding: 4px; color: #000; font-weight: bold;">
+                FOTO</td>
             @foreach($buildingPivots as $pivot)
             <td style="border: 1px solid #e5e7eb; text-align: center; padding: 2px;">
                 @php
@@ -223,8 +225,12 @@
         <tr>
             <td style="{{ $labelStyle }}">COLONIA Y C.P.</td>
             @foreach($buildingPivots as $pivot)
-            <td style="{{ $rowStyle1 }} font-weight: bold;">{{ $pivot->comparable->comparable_colony }} {{
-                $pivot->comparable->comparable_cp }}</td>
+            <td style="{{ $rowStyle1 }} font-weight: bold;">
+                {{ $pivot->comparable->comparable_colony === 'no-listada'
+                ? $pivot->comparable->comparable_other_colony
+                : $pivot->comparable->comparable_colony
+                }}
+            </td>
             @endforeach
         </tr>
 
@@ -258,7 +264,7 @@
         </tr>
 
         {{-- 8. TELÉFONO --}}
-  {{--       <tr>
+        {{-- <tr>
             <td style="{{ $labelStyle }}">TELÉFONO</td>
             @foreach($buildingPivots as $pivot)
             <td style="{{ $rowStyle1 }}">{{ $pivot->comparable->comparable_phone ?? '-' }}</td>
@@ -286,7 +292,8 @@
         <tr>
             <td style="{{ $labelStyle }}">CONSERVACIÓN</td>
             @foreach($buildingPivots as $pivot)
-            <td style="{{ $rowStyleBg }} font-weight: bold;">{{ $pivot->comparable->comparable_conservation ?? 'Bueno' }}</td>
+            <td style="{{ $rowStyleBg }} font-weight: bold;">{{ $pivot->comparable->comparable_conservation ?? 'Bueno'
+                }}</td>
             @endforeach
         </tr>
 
@@ -294,7 +301,8 @@
         <tr>
             <td style="{{ $labelStyle }}">NIVELES</td>
             @foreach($buildingPivots as $pivot)
-            <td style="{{ $rowStyle1 }} font-weight: bold;">{{ $pivot->comparable->levels ?? $pivot->comparable->comparable_levels ?? 1 }}
+            <td style="{{ $rowStyle1 }} font-weight: bold;">{{ $pivot->comparable->levels ??
+                $pivot->comparable->comparable_levels ?? 1 }}
             </td>
             @endforeach
         </tr>
@@ -371,41 +379,41 @@
 
 
         {{-- 20. FNEG (Factor Negociación) --}}
- <tr>
-    <td style="{{ $labelStyle }}">FNEG</td>
-    @foreach($buildingPivots as $pivot)
-    @php
-    $fnegObj = $pivot->factors_mapped['FNEG'] ?? null;
-    // USAMOS EL APLICABLE (0.99)
-    $fnegVal = $fnegObj ? $fnegObj->applicable : 1.00;
-    @endphp
-    <td style="{{ $rowStyle1 }} font-weight: bold;">{{ number_format($fnegVal, 2) }}</td>
-    @endforeach
-</tr>
+        <tr>
+            <td style="{{ $labelStyle }}">FNEG</td>
+            @foreach($buildingPivots as $pivot)
+            @php
+            $fnegObj = $pivot->factors_mapped['FNEG'] ?? null;
+            // USAMOS EL APLICABLE (0.99)
+            $fnegVal = $fnegObj ? $fnegObj->applicable : 1.00;
+            @endphp
+            <td style="{{ $rowStyle1 }} font-weight: bold;">{{ number_format($fnegVal, 2) }}</td>
+            @endforeach
+        </tr>
 
-      {{-- SEPARADOR FACTORES --}}
-    <tr style="background: #9ca3af; color: white;">
-        {{-- Se agregó el borde y el padding 2px 4px --}}
-        <td style="border: 1px solid #6b7280; padding: 2px 4px; text-align: center;">FACTORES</td>
+        {{-- SEPARADOR FACTORES --}}
+        <tr style="background: #9ca3af; color: white;">
+            {{-- Se agregó el borde y el padding 2px 4px --}}
+            <td style="border: 1px solid #6b7280; padding: 2px 4px; text-align: center;">FACTORES</td>
 
-        @foreach($buildingPivots as $pivot)
-        {{-- Se agregó el borde a la celda contenedora --}}
-        <td style="border: 1px solid #6b7280; padding: 0;">
-            {{-- Font size ajustado a 6.5px para igualar --}}
-            <table style="width: 100%; border-collapse: collapse; color: white; font-size: 6.5px;">
-                <tr>
-                    {{-- Se agregó el padding de 2px a cada subdivisión --}}
-                    <td style="width: 50%; text-align: center; border-right: 1px solid #d1d5db; padding: 2px;">
-                        Factor
-                    </td>
-                    <td style="width: 50%; text-align: center; padding: 2px;">
-                        Aplicable
-                    </td>
-                </tr>
-            </table>
-        </td>
-        @endforeach
-    </tr>
+            @foreach($buildingPivots as $pivot)
+            {{-- Se agregó el borde a la celda contenedora --}}
+            <td style="border: 1px solid #6b7280; padding: 0;">
+                {{-- Font size ajustado a 6.5px para igualar --}}
+                <table style="width: 100%; border-collapse: collapse; color: white; font-size: 6.5px;">
+                    <tr>
+                        {{-- Se agregó el padding de 2px a cada subdivisión --}}
+                        <td style="width: 50%; text-align: center; border-right: 1px solid #d1d5db; padding: 2px;">
+                            Factor
+                        </td>
+                        <td style="width: 50%; text-align: center; padding: 2px;">
+                            Aplicable
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            @endforeach
+        </tr>
 
         @foreach($orderedBuildingHeaders as $header)
         @if(strtoupper($header->acronym) != 'FNEG')
