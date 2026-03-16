@@ -370,7 +370,7 @@
                     </div>
                     </fieldset>
 
-                    {{-- TABLA DE FACTORES DE AJUSTE --}}
+                    {{-- TABLA DE FACTORES --}}
                     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm md:w-2/3 w-full"
                         wire:key="container-factores-{{ $selectedComparableId }}">
 
@@ -379,13 +379,13 @@
                         </h4>
 
                         <div class="overflow-x-auto border border-gray-300 rounded-md">
-                            {{-- 1. Quitamos table-fixed, ponemos table-auto y le damos un min-w-[600px] --}}
+
                             <table class="min-w-[600px] w-full text-md table-auto">
                                 <thead>
                                     <tr
                                         class="bg-gray-100 text-md font-semibold text-gray-500 border-b border-gray-300">
-                                        {{-- 2. Cambiamos los w-20 y w-24 por min-w-[...] para que los inputs no se
-                                        aplasten --}}
+                                        {{-- Columna del Candado --}}
+                                        <th class="text-center py-2 px-1 w-6"></th>
                                         <th class="text-left py-2 px-3 min-w-[100px]">Factor</th>
                                         <th class="text-left py-2 px-2 min-w-[100px]">Cal. Sujeto</th>
                                         <th class="text-left py-2 px-2 min-w-[120px]">Cal. Comp.</th>
@@ -393,7 +393,6 @@
                                         <th class="text-left py-2 px-3 min-w-[120px]">Aplicable</th>
                                     </tr>
                                 </thead>
-                                {{-- AÑADIMOS KEY AL TBODY PARA DAR ESTABILIDAD AL BLOQUE ENTERO --}}
                                 <tbody class="divide-y divide-gray-200 bg-white"
                                     wire:key="tbody-{{ $selectedComparableId }}">
                                     @foreach ($this->orderedComparableFactorsForView as $index => $factor)
@@ -406,59 +405,95 @@
                                     $diferencia = $factorData['diferencia'] ?? '0.0000';
                                     $aplicableCalc = $factorData['aplicable'] ?? '1.0000';
 
-                                    $isEditable = !in_array($sigla, ['FNEG', 'FSU', 'FCUS']);
+                                    $isFNEG = ($sigla === 'FNEG');
+
+                                    // Búsqueda del factor maestro en el Sujeto
+                                    $masterFactor = collect($subject_factors_ordered)->firstWhere('acronym', $sigla);
+                                    $isEditableBase = $masterFactor['is_editable'] ?? false;
+
+                                    // En Terrenos, FSU y FCUS son los que llevan candado
+                                    $lockableAcronyms = ['FSU'];
+                                    $isLockable = in_array($sigla, $lockableAcronyms);
+
+                                    // Ojo aquí: soporta si en tu controlador usaste is_calculated o is_locked
+                                    $isCalculated = $factorData['is_calculated'] ?? ($factorData['is_locked'] ?? true);
+
+                                    // ¿Debe mostrar input en Calificación Comparable?
+                                    if ($isLockable) {
+                                    $showInputCalificacion = !$isCalculated;
+                                    } else {
+                                    $showInputCalificacion = $isEditableBase && !$isFNEG;
+                                    }
+
+                                    // FNEG es el único que se edita en la columna Aplicable
+                                    $showInputAplicable = $isFNEG;
                                     @endphp
 
                                     <tr class="hover:bg-gray-50"
                                         wire:key="row-{{ $selectedComparableId }}-{{ $sigla }}">
-                                        {{-- 1. FACTOR --}}
+
+                                        {{-- 1. ÍCONO CANDADO --}}
+                                        <td class="py-1.5 px-1 align-middle text-center">
+                                            @if($isLockable)
+                                            <flux:button variant="ghost" size="sm"
+                                                icon="{{ $isCalculated ? 'lock-closed' : 'lock-open' }}"
+                                                class="!px-1 !py-1 !w-6 !h-6 !min-h-0 cursor-pointer text-black hover:text-[#5CBEB4] transition-colors"
+                                                wire:click="toggleFactorLock({{ $selectedComparableId }}, '{{ $sigla }}')"
+                                                :disabled="$isReadOnly"
+                                                title="{{ $isCalculated ? 'Cálculo automático' : 'Edición manual' }}" />
+                                            @endif
+                                        </td>
+
+                                        {{-- 2. FACTOR --}}
                                         <td class="py-1.5 px-3 align-middle">
                                             <flux:label class="!py-0 !px-0 !m-0 font-medium text-gray-700 block">
                                                 {{ $sigla }}
                                             </flux:label>
                                         </td>
 
-                                        {{-- 2. CALIFICACIÓN SUJETO --}}
+                                        {{-- 3. CALIFICACIÓN SUJETO --}}
                                         <td class="py-1.5 px-2 text-left align-middle">
                                             <flux:label class="text-gray-700">
-                                                @if($sigla === 'FNEG') - @else {{ $sujetoRating }} @endif
+                                                @if($isFNEG) - @else {{ $sujetoRating }} @endif
                                             </flux:label>
                                         </td>
 
-                                        {{-- 3. CALIFICACIÓN COMPARABLE --}}
+                                        {{-- 4. CALIFICACIÓN COMPARABLE --}}
                                         <td class="py-1.5 px-2 text-left align-middle">
-                                            @if($isEditable)
-                                            {{-- AQUÍ ESTÁ EL CAMBIO IMPORTANTE: .blur y wire:key ÚNICO --}}
+                                            @if($showInputCalificacion)
                                             <flux:input type="number" step="0.0001"
                                                 wire:model.blur="comparableFactors.{{ $selectedComparableId }}.{{ $sigla }}.calificacion"
                                                 wire:key="input-cal-{{ $selectedComparableId }}-{{ $sigla }}"
-                                                placeholder="1.0000" class="text-left h-9 text-sm w-full" />
-                                            @elseif($sigla === 'FNEG')
-                                            <flux:label class="text-gray-700 h-9 flex items-center px-1">-</flux:label>
+                                                placeholder="1.0000" class="text-left h-9 text-sm w-full font-semibold"
+                                                :disabled="$isReadOnly" />
+                                            @elseif($isFNEG)
+                                            <flux:label
+                                                class="text-gray-400 h-9 flex items-center justify-center font-bold">-
+                                            </flux:label>
                                             @else
-                                            <flux:label class="text-gray-700 h-9 flex items-center px-1">
+                                            <flux:label class="text-gray-700 h-9 flex items-center justify-center px-1">
                                                 {{ $compCalificacion }}
                                             </flux:label>
                                             @endif
                                         </td>
 
-                                        {{-- 4. DIFERENCIA --}}
+                                        {{-- 5. DIFERENCIA --}}
                                         <td class="py-1.5 px-3 text-left align-middle">
                                             <flux:label class="text-gray-900">
-                                                @if($sigla === 'FNEG') - @else {{ $diferencia }} @endif
+                                                @if($isFNEG) - @else {{ $diferencia }} @endif
                                             </flux:label>
                                         </td>
 
-                                        {{-- 5. APLICABLE --}}
+                                        {{-- 6. APLICABLE --}}
                                         <td class="py-1.5 px-3 text-left align-middle">
-                                            @if($sigla === 'FNEG')
-                                            {{-- AQUÍ TAMBIÉN: .blur y wire:key ÚNICO --}}
-                                            <flux:input type="number" step="0.0001"
+                                            @if($showInputAplicable)
+                                            <flux:input type="number" step="0.0001" placeholder="0.9000"
                                                 wire:model.blur="comparableFactors.{{ $selectedComparableId }}.{{ $sigla }}.aplicable"
                                                 wire:key="input-app-{{ $selectedComparableId }}-{{ $sigla }}"
-                                                placeholder="0.9000" class="text-left h-9 text-sm w-full" />
+                                                :disabled="$isReadOnly"
+                                                class="text-left h-9 text-sm w-full font-bold text-blue-800 bg-blue-50 border-blue-200" />
                                             @else
-                                            <flux:label class="text-gray-900 font-bold">
+                                            <flux:label class="text-gray-900 font-bold block text-center">
                                                 {{ $aplicableCalc }}
                                             </flux:label>
                                             @endif
@@ -468,14 +503,15 @@
                                 </tbody>
                                 <tfoot class="bg-gray-100 border-t-2 border-gray-300">
                                     <tr class="font-extrabold text-md">
-                                        <td colspan="4" class="py-2 px-3 text-right">FACTOR RESULTANTE (FRE):</td>
+                                        {{-- Cambiado el colspan a 5 por la nueva columna del candado --}}
+                                        <td colspan="5" class="py-2 px-3 text-right">FACTOR RESULTANTE (FRE):</td>
                                         <td class="py-2 px-3 text-left text-gray-900">
                                             {{ $comparableFactors[$selectedComparableId]['FRE']['factor_ajuste'] ??
                                             '1.0000' }}
                                         </td>
                                     </tr>
                                     <tr class="font-extrabold text-md">
-                                        <td colspan="4" class="py-2 px-3 text-right">Valor Unitario Homologado:</td>
+                                        <td colspan="5" class="py-2 px-3 text-right">Valor Unitario Homologado:</td>
                                         <td class="py-2 px-3 text-left text-gray-900">
                                             ${{
                                             number_format($comparableFactors[$selectedComparableId]['FRE']['valor_homologado']

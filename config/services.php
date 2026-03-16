@@ -38,4 +38,8 @@ return [
         'key' => env('DIPOMEX_API_KEY'),
     ],
 
+    'copomex' => [
+        'token' => env('COPOMEX_TOKEN'),
+    ],
+
 ];

@@ -38,9 +38,9 @@ return new class extends Migration
             $table->string('comparable_property', 100); // Tipo de inmueble
             $table->string('comparable_cp', 5)->nullable();
             $table->string('comparable_entity', 100)->nullable();
-            $table->string('comparable_entity_name', 100)->nullable();
+            /*     $table->string('comparable_entity_name', 100)->nullable(); */
             $table->string('comparable_locality', 100)->nullable();
-            $table->string('comparable_locality_name', 100)->nullable();
+            /*   $table->string('comparable_locality_name', 100)->nullable(); */
             $table->string('comparable_colony', 100)->nullable();
             $table->string('comparable_other_colony', 100)->nullable();
             $table->string('comparable_street', 255);

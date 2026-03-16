@@ -24,10 +24,14 @@
     </div>
 
     {{-- 3. BLOQUE CENTRAL (Paginación) --}}
-    {{-- TAMBIÉN SUBIMOS A 30px para que quede alineado con los teléfonos --}}
+    {{-- Condicionamos solo el texto para la plantilla base de FPDI. En Fpdi la insertaremos encima. --}}
     <div style="position: absolute; bottom: 30px; left: 0; width: 100%; text-align: center; pointer-events: none;">
         <div style="font-size: 10px; font-weight: bold; color: #666;">
+            @if(isset($isTemplate) && $isTemplate)
+            &nbsp;
+            @else
             Página <span class="page-number"></span>
+            @endif
         </div>
     </div>
 </footer>

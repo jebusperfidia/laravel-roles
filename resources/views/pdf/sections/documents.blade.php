@@ -20,15 +20,6 @@
 </html>
 @else
 {{-- MODO SECCIÓN: Para el flujo normal del master-report (DomPDF) --}}
-{{-- Este bloque solo se ejecutará si DomPDF llega a pintar anexos (que ahora los filtramos) --}}
-@if(isset($annexes) && $annexes->count() > 0)
-@foreach($annexes as $doc)
-<div class="page-break"></div>
-<div style="text-align: center;">
-    <h2 style="font-size: 14px;">ANEXO: {{ $doc->description ?: $doc->category }}</h2>
-    {{-- Aquí no pintamos la imagen/pdf porque eso lo hace FPDI después --}}
-    {{-- Pero dejamos el espacio por si acaso --}}
-</div>
-@endforeach
-@endif
+{{-- Los anexos se omiten de pintar aquí porque ValuationReportService los inyecta posteriormente
+con Fpdi fusionado directamente después del DomPDF --}}
 @endif

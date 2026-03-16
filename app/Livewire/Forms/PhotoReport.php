@@ -29,7 +29,7 @@ class PhotoReport extends Component
         'Sin clasificar',
         'Fachada',
         'Fachada posterior',
-        'Proyecto arquitectónico / croquis',
+        'Proyecto arquitectonico / croquis',
         'Estancia comedor',
         'Cocina',
         'Baño',
@@ -43,7 +43,7 @@ class PhotoReport extends Component
 
     // NUEVO: Categorías exclusivas para PDFs (Edita estos nombres)
     public $pdfCategories = [
-        'Proyecto arquitectónico / croquis',
+        'Proyecto arquitectonico / croquis',
         'Documento anexo / evidencia',
     ];
 
@@ -143,6 +143,7 @@ class PhotoReport extends Component
                 'rotation_angle' => 0,
                 'sort_order' => $maxOrder,
                 'is_printable' => true,
+                'category' => $this->pdfCategories[0] ?? 'Proyecto arquitectonico / croquis',
 
             ]);
         }
@@ -206,8 +207,8 @@ class PhotoReport extends Component
                 }
 
                 // REGLA 2: EN MEDIO (PESO 20)
-                // Es PDF -O- es una imagen categorizada como "Documento anexo..."
-                if ($isPdf || $cat === 'Documento anexo / evidencia') {
+                // Es PDF -O- es una imagen categorizada como anexo/documento
+                if ($isPdf || $cat === 'Documento anexo / evidencia' || $cat === 'Proyecto arquitectonico / croquis') {
                     return 20;
                 }
 
@@ -268,7 +269,7 @@ class PhotoReport extends Component
 
             // Opcional: Si quieres ser muy agresivo, no muestres toaster aquí,
             // porque visualmente la fila "salta" de lugar y eso ya es feedback suficiente.
-            Toaster::success('Lista reordenada automáticamente');
+            Toaster::success('Categoría cambiada con éxito');
             return;
         }
 

@@ -30,7 +30,7 @@
 
         {{-- 3. CARACTERÍSTICAS PARTICULARES --}}
         @include('pdf.sections.particular-characteristics-1')
-         <div class="page-break"></div>
+        <div class="page-break"></div>
 
 
         @include('pdf.sections.particular-characteristics-2')
@@ -55,7 +55,7 @@
         @include('pdf.sections.homologation-buildings')
         @endif
 
-{{--         <div class="page-break"></div> --}}
+        {{-- <div class="page-break"></div> --}}
 
         @include('pdf.sections.coast-approach')
         <div class="page-break"></div>
@@ -64,10 +64,10 @@
 
         {{-- 5. CONCLUSIONES --}}
         @include('pdf.sections.conclusions')
-        <div class="page-break"></div>
 
         {{-- 6. FOTOS --}}
         @if($photos->count() > 0)
+        <div class="page-break"></div>
         @include('pdf.sections.photos')
         @endif
 

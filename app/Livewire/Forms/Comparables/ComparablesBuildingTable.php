@@ -69,7 +69,7 @@ final class ComparablesBuildingTable extends PowerGridComponent
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
-             ->add('id')
+            ->add('id')
             ->add('valuation_id')
             /* ->add('comparable_type') */
             /* ->add('comparable_key')
@@ -78,9 +78,9 @@ final class ComparablesBuildingTable extends PowerGridComponent
             ->add('comparable_property') */
             /* ->add('comparable_entity') */
             ->add('comparable_folio')
-            ->add('comparable_entity_name')
+            ->add('comparable_entity')
             /* ->add('comparable_locality') */
-            ->add('comparable_locality_name')
+            ->add('comparable_locality')
             // --- INICIO DE LÓGICA DE COLONIA ---
             ->add('comparable_colony') // Campo original (para búsquedas)
             ->add('comparable_other_colony') // Campo de respaldo
@@ -183,7 +183,7 @@ final class ComparablesBuildingTable extends PowerGridComponent
     public function columns(): array
     {
         return [
-             Column::make('Id', 'id'),
+            Column::make('Id', 'id'),
             /*Column::make('Valuation id', 'valuation_id'), */
             /* Column::make('Comparable type', 'comparable_type')
                 ->sortable()
@@ -209,7 +209,7 @@ final class ComparablesBuildingTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(), */
 
-            Column::make('Estado', 'comparable_entity_name')
+            Column::make('Estado', 'comparable_entity')
                 ->sortable()
                 ->searchable(),
 
@@ -217,7 +217,7 @@ final class ComparablesBuildingTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(),
 */
-            Column::make('Ciudad', 'comparable_locality_name')
+            Column::make('Ciudad', 'comparable_locality')
                 ->sortable()
                 ->searchable(),
 
@@ -225,7 +225,7 @@ final class ComparablesBuildingTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(),
 
-          /*   Column::make('Otra colonia', 'comparable_other_colony')
+            /*   Column::make('Otra colonia', 'comparable_other_colony')
                 ->sortable()
                 ->searchable(), */
 

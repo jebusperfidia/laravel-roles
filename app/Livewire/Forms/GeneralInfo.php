@@ -9,7 +9,7 @@ use App\Models\Users\Assignment;
 use App\Models\Valuations\Valuation;
 use Illuminate\Support\Facades\Validator;
 use Masmerise\Toaster\Toaster;
-use App\Services\DipomexService;
+use App\Services\CopomexService;
 use App\Traits\ValuationLockTrait;
 
 class GeneralInfo extends Component
@@ -22,7 +22,7 @@ class GeneralInfo extends Component
     // Arrays públicos para consumir datos para los input select largos
     public array $levels_input, $propertiesTypes_input, $landUse_input;
 
-    //Variables para almacenar los datos obtenidos desde la API de Dipomex
+    //Variables para almacenar los datos obtenidos desde la API de COPOMEX
 
     //Variables para primer contenedor de direcciones
     public $states = [];
@@ -48,7 +48,7 @@ class GeneralInfo extends Component
         $gi_ownerAbroadNumber, $gi_ownerInsideNumber, $gi_copyFromProperty = false;
 
     //Variables tercer contenedor
-    public $gi_applicTypePerson, $gi_applicRfc, $gi_applicCurp ,$gi_applicName, $gi_applicFirstName, $gi_applicSecondName,
+    public $gi_applicTypePerson, $gi_applicRfc, $gi_applicCurp, $gi_applicName, $gi_applicFirstName, $gi_applicSecondName,
         $gi_applicCp, $gi_applicEntity, $gi_applicLocality, $gi_applicColony, $gi_applicOtherColony,
         $gi_applicStreet, $gi_applicAbroadNumber, $gi_applicInsideNumber, $gi_applicPhone, $gi_copyFromProperty2 = false;
 
@@ -64,16 +64,19 @@ class GeneralInfo extends Component
     //Variable quinto contenedor
     public  $gi_purpose, $gi_purposeOther, $gi_objective, $gi_ownerShipRegime;
 
+    //Variable para validar status API Copomex
+    public bool $apiOffline = false;
+
 
     /**
      * Usamos inyección de dependencias para obtener nuestro nuevo servicio.
      */
-    public function mount(DipomexService $dipomex)
+    public function mount(CopomexService $copomex)
     {
 
         //Datos para cargar valores en los select de estados, municipios y colonias primer contenedor
         //$this->gi_ownerCp = '37549';
-       /*  $this->gi_ownerEntity = '11';
+        /*  $this->gi_ownerEntity = '11';
         $this->gi_ownerLocality = '13'; */
         //$this->gi_ownerColony = '10 de Mayo';
         //$this->gi_ownerOtherColony = 'La escondida 2';
@@ -82,7 +85,7 @@ class GeneralInfo extends Component
         //Obtenemos los datos para diferentes input select, desde el archivo de configuración properties_inputs
         $this->levels_input = config('properties_inputs.levels', []);
         $this->propertiesTypes_input = config('properties_inputs.property_types', []);
-       /*  $this->propertiesTypesSigapred_input = config('properties_inputs.property_types_sigapred'); */
+        /*  $this->propertiesTypesSigapred_input = config('properties_inputs.property_types_sigapred'); */
         $this->landUse_input = config('properties_inputs.land_use');
 
         //Traemos el modelo users para poder mostrar en el select de valuadores
@@ -182,101 +185,57 @@ class GeneralInfo extends Component
         //Obtenemos el nombre del valuador a partir de las consultas ya generadas
         $this->gi_valuator = User::where('id', $assignament->appraiser_id)->value('name');
 
-          //Obtenemos los estados
-        $this->states = $dipomex->getEstados();
-        $this->states2 = $dipomex->getEstados();
-        $this->states3 = $dipomex->getEstados();
+        // Obtenemos los estados (todos comparten el mismo catálogo cacheado)
+        $estados = $copomex->getEstados();
 
-        //dd($this->gi_ownerCp);
-        //dd($this->gi_propertyCp);
-        //dd($this->gi_applicCp);
+        // Si es estrictamente 'false', la API está caída
+        if ($estados === false) {
+            $this->apiOffline = true;
+            Toaster::error('El servicio de Copomex no responde, algunas funciones estarán limitadas');
+            $estados = []; // Fallback para no romper la vista
+        } else {
+            $this->apiOffline = false;
+        }
 
+        $this->states  = $estados;
+        $this->states2 = $estados;
+        $this->states3 = $estados;
 
-        // VERIFICAMOS SI EXISTE UN CP para buscar la dirección.
-        if ($this->gi_ownerCp  !== null) {
-            $data = $dipomex->buscarPorCodigoPostal($this->gi_ownerCp);
+        // ── PROPIETARIO ────────────────────────────────────────────────────────
+        // Si hay estado, cargamos sus municipios
+        if (! empty($this->gi_ownerEntity)) {
+            $this->municipalities = $copomex->getMunicipiosPorEstado($this->gi_ownerEntity);
+        }
 
-
-            // Buscar el ID del estado con base en el nombre
-            $estadoId = array_search($data['estado'], $this->states);
-
-
-            // Setear el id del estado seleccionado
-            $this->gi_ownerEntity = $estadoId;
-
-            // Poblar municipios inmediatamente
-            $this->municipalities = $dipomex->getMunicipiosPorEstado($estadoId);
-            //dd($this->municipalities);
-
-            //Obtenemos el ID del municipio con base en el nombre
-            $municipioId = array_search($data['municipio'], $this->municipalities);
-
-            //Asignamos el valor del municipio
-            $this->gi_ownerLocality = $municipioId;
-
-            // Asignar colonias
-            $this->colonies = $data['colonias'];
-            //dd($this->colonies);
+        // Si hay estado y municipio, cargamos sus colonias (independiente del CP)
+        if (! empty($this->gi_ownerEntity) && ! empty($this->gi_ownerLocality)) {
+            $this->colonies = $copomex->getColoniasPorMunicipio($this->gi_ownerEntity, $this->gi_ownerLocality);
         }
 
 
 
 
-
-        // VERIFICAMOS SI EXISTE UN CP para buscar la dirección.
-        if ($this->gi_applicCp  !== null) {
-            $data = $dipomex->buscarPorCodigoPostal($this->gi_applicCp);
-
-
-            // Buscar el ID del estado con base en el nombre
-            $estadoId = array_search($data['estado'], $this->states2);
-
-
-            // Setear el id del estado seleccionado
-            $this->gi_applicEntity = $estadoId;
-
-            // Poblar municipios inmediatamente
-            $this->municipalities2 = $dipomex->getMunicipiosPorEstado($estadoId);
-            //dd($this->municipalities);
-
-            //Obtenemos el ID del municipio con base en el nombre
-            $municipioId = array_search($data['municipio'], $this->municipalities2);
-
-            //Asignamos el valor del municipio
-            $this->gi_applicLocality = $municipioId;
-
-            // Asignar colonias
-            $this->colonies2 = $data['colonias'];
-            //dd($this->colonies);
+        // ── SOLICITANTE ────────────────────────────────────────────────────────
+        // Si hay estado, cargamos sus municipios
+        if (! empty($this->gi_applicEntity)) {
+            $this->municipalities2 = $copomex->getMunicipiosPorEstado($this->gi_applicEntity);
         }
 
-        // VERIFICAMOS SI EXISTE UN CP para buscar la dirección.
-        if ($this->gi_propertyCp  !== null) {
-            $data = $dipomex->buscarPorCodigoPostal($this->gi_propertyCp);
-
-
-            // Buscar el ID del estado con base en el nombre
-            $estadoId = array_search($data['estado'], $this->states3);
-
-
-            // Setear el id del estado seleccionado
-            $this->gi_propertyEntity = $estadoId;
-
-            // Poblar municipios inmediatamente
-            $this->municipalities3 = $dipomex->getMunicipiosPorEstado($estadoId);
-            //dd($this->municipalities);
-
-            //Obtenemos el ID del municipio con base en el nombre
-            $municipioId = array_search($data['municipio'], $this->municipalities3);
-
-            //Asignamos el valor del municipio
-            $this->gi_propertyLocality = $municipioId;
-
-            // Asignar colonias
-            $this->colonies3 = $data['colonias'];
-            //dd($this->colonies);
+        // Si hay estado y municipio, cargamos sus colonias (independiente del CP)
+        if (! empty($this->gi_applicEntity) && ! empty($this->gi_applicLocality)) {
+            $this->colonies2 = $copomex->getColoniasPorMunicipio($this->gi_applicEntity, $this->gi_applicLocality);
         }
 
+        // ── INMUEBLE ───────────────────────────────────────────────────────────
+        // Si hay estado, cargamos sus municipios
+        if (! empty($this->gi_propertyEntity)) {
+            $this->municipalities3 = $copomex->getMunicipiosPorEstado($this->gi_propertyEntity);
+        }
+
+        // Si hay estado y municipio, cargamos sus colonias (independiente del CP)
+        if (! empty($this->gi_propertyEntity) && ! empty($this->gi_propertyLocality)) {
+            $this->colonies3 = $copomex->getColoniasPorMunicipio($this->gi_propertyEntity, $this->gi_propertyLocality);
+        }
 
         //dd($this->gi_preValuation);
     }
@@ -439,7 +398,7 @@ class GeneralInfo extends Component
 
 
         //Validaciones si la colonia no está listada
-          if ($this->gi_ownerColony === 'no-listada') {
+        if ($this->gi_ownerColony === 'no-listada') {
             $container2 = array_merge($container2, [
                 'gi_ownerOtherColony'  => 'required|string|max:50'
             ]);
@@ -464,7 +423,7 @@ class GeneralInfo extends Component
         ];
 
         //Validaciones si la colonia no está listada
-       /*  if ($this->gi_applicColony === 'no-listada') {
+        /*  if ($this->gi_applicColony === 'no-listada') {
             $container2 = array_merge($container3, [
                 'gi_applicOtherColony'  => 'required|string|max:50'
             ]);
@@ -529,7 +488,7 @@ class GeneralInfo extends Component
 
 
 
-        if (stripos($this->gi_propertyType, 'terreno') === false){
+        if (stripos($this->gi_propertyType, 'terreno') === false) {
             $container4 = array_merge($container4, [
                 'gi_propertyTypeHousing' => 'required',
                 'gi_propertyConstructor' => 'required',
@@ -556,7 +515,7 @@ class GeneralInfo extends Component
         }
 
 
-      /*   if (stripos($this->gi_propertyType, 'condominio') !== false) {
+        /*   if (stripos($this->gi_propertyType, 'condominio') !== false) {
             $container5 = array_merge($container5, [
                 'gi_purposeSigapred'  => 'required'
             ]);
@@ -576,7 +535,7 @@ class GeneralInfo extends Component
 
 
         //Genereamos una variable para validar posteriormente si hay algún error de validación desde el método save
-       return  Validator::make(
+        return  Validator::make(
             $this->all(),
             //hacemos la validación final enviando 3 atributos, el primero las reglas
             //el segundo un atributo para no reemplazar los mensajes de validación
@@ -588,9 +547,9 @@ class GeneralInfo extends Component
     }
 
 
-    //Función para búsqueda del código postal del propietario, usando API Dipomex
-    //Las funciones se repiten para cáda uno, seperando la lógica y evitando que se mezclen los datos
-    public function buscarCP1(DipomexService $dipomex)
+    //Función para búsqueda del código postal del propietario, usando API COPOMEX
+    //Las funciones se repiten para cáda uno, separando la lógica y evitando que se mezclen los datos
+    public function buscarCP1(CopomexService $copomex)
     {
         $this->ensureNotReadOnly();
         //Validamos que el campo no esté vacío y contenga 5 dígitos
@@ -608,40 +567,38 @@ class GeneralInfo extends Component
             ]
         );
 
-        $data = $dipomex->buscarPorCodigoPostal($this->gi_ownerCp);
+        if ($this->apiOffline) {
+            Toaster::error('El servicio de autocompletado está fuera de línea en este momento, por favor intente más tarde.');
+            return;
+        }
 
-        //Si por alguna razón la respueta está vacía, reseteamos los campos y mostramos un error
+        $data = $copomex->buscarPorCodigoPostal($this->gi_ownerCp);
+
+        // 1. Validamos caída de servidor
+        if ($data === false) {
+            $this->apiOffline = true;
+            Toaster::error('El servicio de autocompletado está fuera de línea en este momento, por favor intente más tarde.');
+            return;
+        }
+
+        // 2. Validamos CP inexistente (La API funcionó pero devolvió vacío)
         if (empty($data)) {
             Toaster::error('No se encontró información para el código postal proporcionado.');
-            $this->reset(['gi_ownerCp','gi_ownerEntity', 'gi_ownerLocality', 'gi_ownerColony', 'municipalities', 'colonies']);
+            $this->reset(['gi_ownerEntity', 'gi_ownerLocality', 'gi_ownerColony', 'municipalities', 'colonies']); // <-- Asegúrate de resetear las de este contenedor
             return;
         }
 
-        // Buscar el ID del estado con base en el nombre
-        $estadoId = array_search($data['estado'], $this->states);
+        // 3. Todo salió bien
+        $this->apiOffline = false;
+        // Con COPOMEX los valores son nombres directos (no IDs numéricos)
+        $this->gi_ownerEntity   = $data['estado']    ?? '';
+        $this->gi_ownerLocality = $data['municipio'] ?? '';
 
-        //Si no se encuentra el estado, mostramos un error
-        if ($estadoId === false) {
-            Toaster::error('No se encontró el estado correspondiente al código postal.');
-            return;
-        }
-
-        // Setear el id del estado seleccionado
-        $this->gi_ownerEntity = $estadoId;
-
-        // Poblar municipios inmediatamente
-        $this->municipalities = $dipomex->getMunicipiosPorEstado($estadoId);
-        //dd($this->municipalities);
-
-        //Obtenemos el ID del municipio con base en el nombre
-        $municipioId = array_search($data['municipio'], $this->municipalities);
-
-        //Asignamos el valor del municipio
-        $this->gi_ownerLocality = $municipioId;
+        // Poblar municipios del estado encontrado (ya viene cacheado)
+        $this->municipalities = $copomex->getMunicipiosPorEstado($this->gi_ownerEntity);
 
         // Asignar colonias
-        $this->colonies = $data['colonias'];
-        //dd($this->colonies);
+        $this->colonies = $data['colonias'] ?? [];
 
         Toaster::success('Información encontrada correctamente.');
     }
@@ -650,46 +607,52 @@ class GeneralInfo extends Component
 
     //Creamos un watcher para cuando se actualice el valor del select de estados
     //Este llamará al método del servicio para poblar los municipios
-    public function updatedGiOwnerEntity($estadoId, DipomexService $dipomex)
+    public function updatedGiOwnerEntity(string $estadoNombre, CopomexService $copomex)
     {
         $this->ensureNotReadOnly();
         $this->reset(['gi_ownerLocality', 'gi_ownerColony', 'municipalities', 'colonies']);
 
-        if ($estadoId) {
-            $this->municipalities = $dipomex->getMunicipiosPorEstado($estadoId);
+        if ($estadoNombre) {
+            $resultado = $copomex->getMunicipiosPorEstado($estadoNombre);
+
+            // VALIDACIÓN ESTRICTA DE CAÍDA DE API
+            if ($resultado === false) {
+                $this->apiOffline = true;
+                Toaster::error('El servicio de Copomex no responde, algunas funciones estarán limitadas');
+                $this->municipalities = [];
+            } else {
+                $this->apiOffline = false;
+                $this->municipalities = $resultado;
+            }
         }
     }
 
     //Creamos un watcher para cuando se actualice el valor del select de municipios
     //Este llamará al método del servicio para poblar las colonias
-    public function updatedGiOwnerLocality($municipioId, DipomexService $dipomex)
+    public function updatedGiOwnerLocality(string $municipioNombre, CopomexService $copomex)
     {
         $this->ensureNotReadOnly();
-        /* $this->reset(['gi_ownerColony', 'colonies']);
-
-        if ($selectedMunicipio && $this->gi_ownerEntity) {
-
-            $municipios = $dipomex->getMunicipiosPorEstado($this->gi_ownerEntity); // método que devuelve todos
-            $municipio = collect($municipios)->firstWhere('MUNICIPIO', $selectedMunicipio);
-
-            if ($municipio) {
-                $municipioId = $municipio['MUNICIPIO_ID'];
-                $this->colonies = $dipomex->getColoniasPorMunicipio($this->gi_ownerEntity, $municipioId);
-            }
-        } */
-
         $this->reset(['gi_ownerColony', 'colonies']);
 
-        if ($municipioId && $this->gi_ownerEntity) {
-            // Como ahora gi_ownerLocality tiene el MUNICIPIO_ID, lo pasamos directo
-            $this->colonies = $dipomex->getColoniasPorMunicipio($this->gi_ownerEntity, $municipioId);
+        if ($municipioNombre && $this->gi_ownerEntity) {
+            $resultado = $copomex->getColoniasPorMunicipio($this->gi_ownerEntity, $municipioNombre);
+
+            // VALIDACIÓN ESTRICTA DE CAÍDA DE API
+            if ($resultado === false) {
+                $this->apiOffline = true;
+                Toaster::error('El servicio de Copomex no responde, algunas funciones estarán limitadas');
+                $this->colonies = [];
+            } else {
+                $this->apiOffline = false;
+                $this->colonies = $resultado;
+            }
         }
     }
 
 
 
     //Función para búsqueda del código postal del solicitante, usando API Dipomex
-    public function buscarCP2(DipomexService $dipomex)
+    public function buscarCP2(CopomexService $dipomex)
     {
         $this->ensureNotReadOnly();
         /*  $this->validate([
@@ -707,75 +670,89 @@ class GeneralInfo extends Component
             ]
         );
 
+        if ($this->apiOffline) {
+            Toaster::error('El servicio de autocompletado está fuera de línea en este momento, por favor intente más tarde.');
+            return;
+        }
+
+
         $data = $dipomex->buscarPorCodigoPostal($this->gi_applicCp);
 
+        // 1. Validamos caída de servidor
+        if ($data === false) {
+            $this->apiOffline = true;
+            Toaster::error('El servicio de autocompletado está fuera de línea en este momento, por favor intente más tarde.');
+            return;
+        }
+
+        // 2. Validamos CP inexistente (La API funcionó pero devolvió vacío)
         if (empty($data)) {
             Toaster::error('No se encontró información para el código postal proporcionado.');
-            $this->reset(['gi_applicCp','gi_applicEntity', 'gi_applicLocality', 'gi_applicColony', 'municipalities2', 'colonies2']);
+            $this->reset(['gi_applicEntity', 'gi_applicLocality', 'gi_applicColony', 'municipalities2', 'colonies2']); // <-- Asegúrate de resetear las de este contenedor
             return;
         }
 
-        // Buscar el ID del estado con base en el nombre
-        $estadoId = array_search($data['estado'], $this->states);
+        // 3. Todo salió bien
+        $this->apiOffline = false;
 
-        if ($estadoId === false) {
-            Toaster::error('No se encontró el estado correspondiente al código postal.');
-            return;
-        }
+        // Con COPOMEX los valores son nombres directos
+        $this->gi_applicEntity   = $data['estado']    ?? '';
+        $this->gi_applicLocality = $data['municipio'] ?? '';
 
-        // Setear el id del estado seleccionado
-        $this->gi_applicEntity = $estadoId;
-
-        //  Poblar municipios inmediatamente
-        $this->municipalities2 = $dipomex->getMunicipiosPorEstado($estadoId);
-        //dd($this->municipalities);
-
-        //Obtenemos el ID del municipio con base en el nombre
-        $municipioId = array_search($data['municipio'], $this->municipalities2);
-
-        //Asignamos el valor del municipio
-        $this->gi_applicLocality = $municipioId;
-
-        //dd($this->gi_ownerLocality);
-
-
-        //dd($municipio);
+        // Poblar municipios del estado encontrado (ya viene cacheado)
+        $this->municipalities2 = $dipomex->getMunicipiosPorEstado($this->gi_applicEntity);
 
         // Asignar colonias
-        $this->colonies2 = $data['colonias'];
+        $this->colonies2 = $data['colonias'] ?? [];
 
         Toaster::success('Información encontrada correctamente.');
-        //Toaster::success('Hasta aquí todo bien');
     }
 
 
     //Creamos un watcher para cuando se actualice el valor del select de estados
-    public function updatedGiApplicEntity($estadoId, DipomexService $dipomex)
+    public function updatedGiApplicEntity(string $estadoNombre, CopomexService $copomex)
     {
         $this->ensureNotReadOnly();
         $this->reset(['gi_applicLocality', 'gi_applicColony', 'municipalities2', 'colonies2']);
 
-        if ($estadoId) {
-            $this->municipalities2 = $dipomex->getMunicipiosPorEstado($estadoId);
+        if ($estadoNombre) {
+            $resultado = $copomex->getMunicipiosPorEstado($estadoNombre);
+
+            // VALIDACIÓN DE API
+            if ($resultado === false) {
+                $this->apiOffline = true;
+                Toaster::error('El servicio de Copomex no responde, algunas funciones estarán limitadas');
+                $this->municipalities2 = [];
+            } else {
+                $this->apiOffline = false;
+                $this->municipalities2 = $resultado;
+            }
         }
     }
 
     //Creamos un watcher para cuando se actualice el valor del select de municipios
-    public function updatedGiApplicLocality($municipioId, DipomexService $dipomex)
+    public function updatedGiApplicLocality(string $municipioNombre, CopomexService $copomex)
     {
         $this->ensureNotReadOnly();
-
         $this->reset(['gi_applicColony', 'colonies2']);
 
-        if ($municipioId && $this->gi_applicEntity) {
-            // Como ahora gi_ownerLocality tiene el MUNICIPIO_ID, lo pasamos directo
-            $this->colonies2 = $dipomex->getColoniasPorMunicipio($this->gi_applicEntity, $municipioId);
+        if ($municipioNombre && $this->gi_applicEntity) {
+            $resultado = $copomex->getColoniasPorMunicipio($this->gi_applicEntity, $municipioNombre);
+
+            // VALIDACIÓN DE API
+            if ($resultado === false) {
+                $this->apiOffline = true;
+                Toaster::error('El servicio de Copomex no responde, algunas funciones estarán limitadas');
+                $this->colonies2 = [];
+            } else {
+                $this->apiOffline = false;
+                $this->colonies2 = $resultado;
+            }
         }
     }
 
-
     //Función para búsqueda del código postal del inmueble, usando API Dipomex
-    public function buscarCP3(DipomexService $dipomex)
+    public function buscarCP3(CopomexService $dipomex)
     {
         $this->ensureNotReadOnly();
         /*  $this->validate([
@@ -792,72 +769,91 @@ class GeneralInfo extends Component
             ]
         );
 
+        if ($this->apiOffline) {
+            Toaster::error('El servicio de autocompletado está fuera de línea en este momento, por favor intente más tarde.');
+            return;
+        }
+
         $data = $dipomex->buscarPorCodigoPostal($this->gi_propertyCp);
 
+        // 1. Validamos caída de servidor
+        if ($data === false) {
+            $this->apiOffline = true;
+            Toaster::error('El servicio de autocompletado está fuera de línea en este momento, por favor intente más tarde.');
+            return;
+        }
+
+        // 2. Validamos CP inexistente (La API funcionó pero devolvió vacío)
         if (empty($data)) {
             Toaster::error('No se encontró información para el código postal proporcionado.');
-            $this->reset(['gi_propertyCp','gi_propertyEntity', 'gi_propertyLocality', 'gi_propertyColony', 'municipalities3', 'colonies3']);
+            $this->reset(['gi_propertyEntity', 'gi_propertyLocality', 'gi_propertyColony', 'municipalities3', 'colonies3']); // <-- Asegúrate de resetear las de este contenedor
             return;
         }
 
-        // Buscar el ID del estado con base en el nombre
-        $estadoId = array_search($data['estado'], $this->states);
+        // 3. Todo salió bien
+        $this->apiOffline = false;
 
-        if ($estadoId === false) {
-            Toaster::error('No se encontró el estado correspondiente al código postal.');
-            return;
-        }
+        // Con COPOMEX los valores son nombres directos
+        $this->gi_propertyEntity   = $data['estado']    ?? '';
+        $this->gi_propertyLocality = $data['municipio'] ?? '';
+        $this->gi_propertyCity     = $data['ciudad']    ?? '';
 
-        // Setear el id del estado seleccionado
-        $this->gi_propertyEntity = $estadoId;
-
-        // Poblar municipios inmediatamente
-        $this->municipalities3 = $dipomex->getMunicipiosPorEstado($estadoId);
-
-        //Obtenemos el ID del municipio con base en el nombre
-        $municipioId = array_search($data['municipio'], $this->municipalities3);
-
-        //Asignamos el valor del municipio
-        $this->gi_propertyLocality = $municipioId;
-
+        // Poblar municipios del estado encontrado (ya viene cacheado)
+        $this->municipalities3 = $dipomex->getMunicipiosPorEstado($this->gi_propertyEntity);
 
         // Asignar colonias
-        $this->colonies3 = $data['colonias'];
+        $this->colonies3 = $data['colonias'] ?? [];
 
         Toaster::success('Información encontrada correctamente.');
-        //Toaster::success('Hasta aquí todo bien');
     }
 
 
 
     //Creamos un watcher para cuando se actualice el valor del select de estados
-    public function updatedGiPropertyEntity($estadoId, DipomexService $dipomex)
+    public function updatedGiPropertyEntity(string $estadoNombre, CopomexService $copomex)
     {
         $this->ensureNotReadOnly();
         $this->reset(['gi_propertyLocality', 'gi_propertyColony', 'municipalities3', 'colonies3']);
 
-        if ($estadoId) {
-            $this->municipalities3 = $dipomex->getMunicipiosPorEstado($estadoId);
+        if ($estadoNombre) {
+            $resultado = $copomex->getMunicipiosPorEstado($estadoNombre);
+
+            // VALIDACIÓN DE API
+            if ($resultado === false) {
+                $this->apiOffline = true;
+                Toaster::error('El servicio de Copomex no responde, algunas funciones estarán limitadas');
+                $this->municipalities3 = [];
+            } else {
+                $this->apiOffline = false;
+                $this->municipalities3 = $resultado;
+            }
         }
     }
-
     //Creamos un watcher para cuando se actualice el valor del select de municipios
-    public function updatedGiPropertyLocality($municipioId, DipomexService $dipomex)
+    public function updatedGiPropertyLocality(string $municipioNombre, CopomexService $copomex)
     {
-
         $this->ensureNotReadOnly();
         $this->reset(['gi_propertyColony', 'colonies3']);
 
-        if ($municipioId && $this->gi_propertyEntity) {
-            // Como ahora gi_ownerLocality tiene el MUNICIPIO_ID, lo pasamos directo
-            $this->colonies3 = $dipomex->getColoniasPorMunicipio($this->gi_propertyEntity, $municipioId);
+        if ($municipioNombre && $this->gi_propertyEntity) {
+            $resultado = $copomex->getColoniasPorMunicipio($this->gi_propertyEntity, $municipioNombre);
+
+            // VALIDACIÓN DE API
+            if ($resultado === false) {
+                $this->apiOffline = true;
+                Toaster::error('El servicio de Copomex no responde, algunas funciones estarán limitadas');
+                $this->colonies3 = [];
+            } else {
+                $this->apiOffline = false;
+                $this->colonies3 = $resultado;
+            }
         }
     }
 
-
     //Generamos los watcher para los checkbox de copiar direcciones
-    public function updatedGiCopyFromProperty($value){
-        if($value){
+    public function updatedGiCopyFromProperty($value)
+    {
+        if ($value) {
 
             /*  $this->validate([
                 'gi_propertyCp' => 'required|min:5',
@@ -909,16 +905,16 @@ class GeneralInfo extends Component
             $this->colonies = $this->colonies3;
             $this->reset('gi_copyFromProperty');
             Toaster::success('Datos copiados correctamente');
-
         } else {
-           /*  $this->reset(['gi_ownerCp', 'gi_ownerEntity', 'gi_ownerLocality', 'gi_ownerColony', 'gi_ownerStreet', 'gi_ownerAbroadNumber', 'gi_ownerInsideNumber', 'municipalities', 'colonies']); */
+            /*  $this->reset(['gi_ownerCp', 'gi_ownerEntity', 'gi_ownerLocality', 'gi_ownerColony', 'gi_ownerStreet', 'gi_ownerAbroadNumber', 'gi_ownerInsideNumber', 'municipalities', 'colonies']); */
         }
     }
 
 
-    public function updatedGiCopyFromProperty2($value){
+    public function updatedGiCopyFromProperty2($value)
+    {
         $this->ensureNotReadOnly();
-        if($value){
+        if ($value) {
 
             /* if(empty($this->gi_propertyCp)){
                 Toaster::error('Primero debe llenar los datos del inmueble');
@@ -959,16 +955,16 @@ class GeneralInfo extends Component
             $this->colonies2 = $this->colonies3;
             $this->reset('gi_copyFromProperty2');
             Toaster::success('Datos copiados correctamente');
-
         } else {
-           /*  $this->reset(['gi_ownerCp', 'gi_ownerEntity', 'gi_ownerLocality', 'gi_ownerColony', 'gi_ownerStreet', 'gi_ownerAbroadNumber', 'gi_ownerInsideNumber', 'municipalities', 'colonies']); */
+            /*  $this->reset(['gi_ownerCp', 'gi_ownerEntity', 'gi_ownerLocality', 'gi_ownerColony', 'gi_ownerStreet', 'gi_ownerAbroadNumber', 'gi_ownerInsideNumber', 'municipalities', 'colonies']); */
         }
     }
 
 
-    public function updatedGiCopyFromOwner($value){
+    public function updatedGiCopyFromOwner($value)
+    {
         $this->ensureNotReadOnly();
-        if($value){
+        if ($value) {
 
             /* if(empty($this->gi_ownerCp)){
                 Toaster::error('Primero debe llenar los datos del propietario');
@@ -1010,7 +1006,6 @@ class GeneralInfo extends Component
             $this->colonies3 = $this->colonies;
             $this->reset('gi_copyFromOwner');
             Toaster::success('Datos copiados correctamente');
-
         }
     }
 
@@ -1098,7 +1093,7 @@ class GeneralInfo extends Component
             // Contenedor 5: Detalles adicionales del inmueble
             'gi_purpose' => 'propósito del avalúo',
             'gi_purposeOther' => 'otro',
-           /*  'gi_purposeSigapred' => 'propósito del avalúo sigapred', */
+            /*  'gi_purposeSigapred' => 'propósito del avalúo sigapred', */
             'gi_objective' => 'Objeto del avalúo',
             'gi_ownerShipRegime' => 'Régimen del avalúo'
         ];

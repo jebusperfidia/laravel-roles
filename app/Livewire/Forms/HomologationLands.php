@@ -294,6 +294,8 @@ class HomologationLands extends Component
         // FCUS Sujeto
         $fcusRating = ($newCus > 0) ? sqrt($newCus) : 1.0;
 
+        $fcusRating = max(0.6, $fcusRating);
+
         HomologationValuationFactorModel::where('valuation_id', $this->idValuation)
             ->where('homologation_type', 'land')
             ->where('acronym', 'FCUS')
@@ -365,7 +367,6 @@ class HomologationLands extends Component
             $this->comparables = $this->valuation->landComparables()->orderBy('position')->get();
         }
         $this->comparablesCount = $this->comparables->count();
-
     }
 
     // ==========================================================
@@ -459,12 +460,15 @@ class HomologationLands extends Component
             // FIX: Formateo consistente a 4 decimales para todos los factores numéricos
             $calif = number_format((float)($factor->rating ?? 1.0), 4, '.', '');
 
+            $isLocked = isset($factor->is_locked) ? (bool)$factor->is_locked : true;
+
             $this->comparableFactors[$compId][$factor->acronym] = [
                 'factor_id' => $factor->id,
                 'calificacion' => $calif,
                 'aplicable' => number_format($dbApplicable, 4, '.', ''), // Input de FNEG
                 'factor_ajuste' => number_format($dbApplicable, 4, '.', ''), // 🚨 AQUÍ EL SECRETO: Inicializamos con el valor de la BD
                 'diferencia' => '0.0000',
+                'is_locked' => $isLocked,
             ];
         }
 
@@ -735,7 +739,7 @@ class HomologationLands extends Component
     // == CÁLCULOS MATEMÁTICOS (NUCLEAR + CARGA SEGURA)
     // ==========================================================
 
-    private function persistAutomaticFactor($comparableId, $acronym, $rating, $applicable)
+    /*     private function persistAutomaticFactor($comparableId, $acronym, $rating, $applicable)
     {
         $pivotId = $this->getPivotIdForComparable($comparableId);
         if (!$pivotId) return null;
@@ -755,6 +759,42 @@ class HomologationLands extends Component
                 'applicable' => $applicable
             ]
         );
+    }
+ */
+
+
+    public function toggleFactorLock($comparableId, $sigla)
+    {
+        $this->ensureNotReadOnly();
+
+        if (!isset($this->comparableFactors[$comparableId][$sigla])) return;
+
+        // Invertimos el estado
+        $currentCalc = $this->comparableFactors[$comparableId][$sigla]['is_calculated'] ?? true;
+        $newCalc = !$currentCalc;
+
+        // Actualizamos memoria
+        $this->comparableFactors[$comparableId][$sigla]['is_calculated'] = $newCalc;
+
+        // Guardamos en BD silenciosamente
+        $pivotId = $this->getPivotIdForComparable($comparableId);
+        if ($pivotId) {
+            HomologationComparableFactorModel::where('valuation_land_comparable_id', $pivotId)
+                ->where('acronym', $sigla)
+                ->where('homologation_type', 'land')
+                ->update(['is_calculated' => $newCalc]);
+        }
+
+        // Lógica de estados UX (Igualita a Buildings)
+        if ($newCalc) {
+            // Estado 4: Se cerró el candado -> Recalcular matemática y sobreescribir
+            $this->recalculateSingleComparable($comparableId);
+            $this->recalculateConclusions();
+            Toaster::success('Fórmula aplicada correctamente.');
+        } else {
+            // Estado 2: Se abrió el candado -> El input se libera (no recalculamos para no perder precisión)
+            Toaster::success('Factor liberado para edición manual.');
+        }
     }
 
     public function recalculateSingleComparable($comparableId)
@@ -812,22 +852,31 @@ class HomologationLands extends Component
             // =========================================================
 
             if ($sigla === 'FSU') {
-                // ... (Tu lógica FSU intacta)
-                $rawSurface = $comparableModel->comparable_land_area ?? 0;
-                $compSurface = (float) str_replace(',', '', (string)$rawSurface);
+                // Leemos is_calculated
+                $isCalculated = $factorData['is_calculated'] ?? true;
 
-                if ($subjectLoteModa > 0 && $compSurface > 0) {
-                    $coeficiente = $compSurface / $subjectLoteModa;
-                    $compRating = pow($coeficiente, (1 / 12));
+                if ($isCalculated) {
+                    // CANDADO CERRADO: Cálculo Automático
+                    $rawSurface = $comparableModel->comparable_land_area ?? 0;
+                    $compSurface = (float) str_replace(',', '', (string)$rawSurface);
+
+                    if ($subjectLoteModa > 0 && $compSurface > 0) {
+                        $coeficiente = $compSurface / $subjectLoteModa;
+                        $compRating = pow($coeficiente, (1 / 12)); // O la fórmula exacta que tengas
+                    } else {
+                        $compRating = 1.0;
+                    }
+
+                    $compRating = max(0.6, $compRating);
                 } else {
-                    $compRating = 1.0;
+                    // CANDADO ABIERTO: Sobrescritura Manual
+                    $compRating = (float)($factorData['calificacion'] ?? 1.0);
                 }
+
                 $ratingCalculatedAutomatically = $compRating;
-               // $diferencia_math = 0;
                 $factor_ajuste = $compRating;
             } elseif ($sigla === 'FCUS') {
-                // 1. CÁLCULO DE LA CALIFICACIÓN DEL COMPARABLE (Tu lógica existente)
-                // Esto obtiene el valor "FCUS" de la columna amarilla del Excel (F6)
+                // 1. CÁLCULO DE LA CALIFICACIÓN DEL COMPARABLE
                 $niveles = (float)($comparableModel->comparable_allowed_levels ?? $comparableModel->comparable_max_levels ?? 0);
                 $areaLibre = (float)($comparableModel->comparable_free_area_required ?? $comparableModel->comparable_free_area ?? 0);
                 $areaLibreDec = ($areaLibre > 1) ? ($areaLibre / 100) : $areaLibre;
@@ -838,26 +887,24 @@ class HomologationLands extends Component
                 // pero según tu Excel si es 0 truena o da 0, así que calculemos la raíz normal.
                 $compRating = ($cusCalculado > 0) ? sqrt($cusCalculado) : 0.0;
 
+                $compRating = max(0.6, $compRating);
+
                 // Asignamos esto a la calificación automática
                 $ratingCalculatedAutomatically = $compRating;
 
                 // 2. LÓGICA DE APLICABLE (La fórmula del Excel)
                 // $sujetoRating es "G6" (Objeto)
                 // $compRating es "F6" (Comparable)
+                // 2. LÓGICA DE APLICABLE (Nueva versión solicitada)
+                // Diferencia de calificación (Sujeto - Comparable) + 1
 
                 if ($compRating > 0) {
-                    // Paso A: Valor Intermedio (Antes de aplicable)
-                    // Excel: = ((RAIZ(G6/F6)) - 1)
-                    $valorIntermedio = sqrt($sujetoRating / $compRating) - 1;
+                    // Calculamos la diferencia entre la calificación del sujeto y el comparable
+                    $diferencia_math = $sujetoRating - $compRating;
 
-                    // Paso B: Aplicable Final Final
-                    // Excel: 1 - ABS(Valor Intermedio)
-                    $factor_ajuste = 1.0 - abs($valorIntermedio);
-
-                    // Guardamos el valor intermedio en 'diferencia' para que coincida con tu visualización
-                    $diferencia_math = $valorIntermedio;
+                    // Al resultado de la diferencia le sumamos + 1
+                    $factor_ajuste = $diferencia_math + 1.0;
                 } else {
-                    // Si el FCUS del comparable es 0, el aplicable es 0
                     $factor_ajuste = 0.0;
                     $diferencia_math = 0.0;
                 }
@@ -996,10 +1043,12 @@ class HomologationLands extends Component
         // Guardar valor final en BD
         HomologationLandAttributeModel::updateOrCreate(
             ['valuation_id' => $this->idValuation],
-            ['unit_value_mode_lot' => $valorRedondeado,
+            [
+                'unit_value_mode_lot' => $valorRedondeado,
                 'conclusion_type_rounding' => $this->conclusion_tipo_redondeo, // Tipo Redondeo
                 'average_arithmetic' => $avgOferta ?? 0,            // Promedio Oferta (variable ya existente arriba)
-                'average_homologated' => $avgHomologado ?? 0],
+                'average_homologated' => $avgHomologado ?? 0
+            ],
 
         );
 
@@ -1176,7 +1225,7 @@ class HomologationLands extends Component
             $filePath = "{$folder}/{$name}";
 
             // Guardamos en el disco public (storage/app/public/homologation/lands)
-         Storage::disk('public')->put($filePath, base64_decode($image));
+            Storage::disk('public')->put($filePath, base64_decode($image));
         } catch (\Exception $e) {
             Log::error("Error al guardar captura de gráfica {$chartName}: " . $e->getMessage());
         }

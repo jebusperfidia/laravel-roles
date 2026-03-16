@@ -754,7 +754,7 @@ class HomologationBuildings extends Component
             $i->is_editable &&
                 !$i->is_custom &&
                 !$i->is_feq &&
-            !in_array($i->id, $processedIds)
+                !in_array($i->id, $processedIds)
         );
 
         if ($editableSystem) {
@@ -786,7 +786,7 @@ class HomologationBuildings extends Component
             }
         }
 
-      /*   $fcon = $allFactors->firstWhere('acronym', 'FCON');
+        /*   $fcon = $allFactors->firstWhere('acronym', 'FCON');
         if ($fcon) {
             $orderedList[] = $this->formatFactorForView($fcon);
             //$processedIds[] = $fcon->id;
@@ -1326,6 +1326,8 @@ class HomologationBuildings extends Component
                     // CORRECCIÓN: Quitamos el "floor" (machetazo) de 2 decimales.
                     // Usamos round a 4 decimales para mantener precisión estándar de factores.
                     $factorFinal = round($factorCalculado, 4);
+
+                    $factorFinal = max(0.6, $factorFinal);
                 }
             }
         }
@@ -1499,6 +1501,8 @@ class HomologationBuildings extends Component
                     $compRating = 1.0; // Evitar div by zero
                 }
 
+                $compRating = max(0.6, $compRating);
+
                 // 3. Diferencia y Aplicable
                 $diferencia_math = $sujetoRating - $compRating;
                 $aplicable = 1.0 + $diferencia_math;
@@ -1525,6 +1529,8 @@ class HomologationBuildings extends Component
                         $coeficiente = $compLand / $subjectLand;
                         $compRating = pow($coeficiente, (1 / 12));
                     }
+
+                    $compRating = max(0.6, $compRating);
                 } else {
 
                     $compRating = (float)($factorData['calificacion'] ?? 1.0);
@@ -1533,7 +1539,7 @@ class HomologationBuildings extends Component
                 $diferencia_math = 0.0000;
                 $aplicable = $compRating;
                 $rating_to_save = $compRating;
-         } elseif ($sigla === 'FIC') {
+            } elseif ($sigla === 'FIC') {
                 if ($isCalculated) {
 
                     $VUS = (float)$this->subject_vus;
@@ -1557,13 +1563,14 @@ class HomologationBuildings extends Component
                     }
 
                     $compRating = floor($FIC_Raw * 10000) / 10000;
+
+                    $compRating = max(0.6, $compRating);
                     if ($FIC_Raw != 0) {
                         $diferencia_raw = 1.0 - ($sujetoRating / $FIC_Raw);
                     } else {
                         $diferencia_raw = 0.0;
                     }
                     $diferencia_math = floor($diferencia_raw * 10000) / 10000;
-
                 } else {
 
                     $compRating = (float)($factorData['calificacion'] ?? 1.0);
@@ -1572,14 +1579,7 @@ class HomologationBuildings extends Component
 
                 $aplicable = 1.0 + $diferencia_math;
                 $rating_to_save = $compRating;
-            }
-
-
-
-
-
-
-            elseif ($isEditable || $isCustom || $isAVANC) {
+            } elseif ($isEditable || $isCustom || $isAVANC) {
                 $userInput = (float)($factorData['calificacion'] ?? 1.0);
 
                 if ($isAVANC) {
@@ -1617,10 +1617,7 @@ class HomologationBuildings extends Component
 
                 // El rating que guardamos es el del comparable para la base de datos
                 $rating_to_save = $compRating;
-            }
-
-
-            else {
+            } else {
                 // Default
                 $diferencia_math = $sujetoRating - $compRating;
                 $aplicable = 1.0 + $diferencia_math;
@@ -1798,7 +1795,7 @@ class HomologationBuildings extends Component
         $this->dispatch('updateBuildingChart2', data: $chartData2);
     }
 
-   /*  private function syncComparableFactorNames($oldAcronym, $newName, $newAcronym)
+    /*  private function syncComparableFactorNames($oldAcronym, $newName, $newAcronym)
     {
         $pivotIds = $this->valuation->buildingComparablePivots()->pluck('id');
         if ($pivotIds->isEmpty()) return;
@@ -2239,6 +2236,8 @@ class HomologationBuildings extends Component
         $decimalSum = $sumPercentages / 100;
 
         $feq = 1 + $decimalSum;
+
+        $feq = max(0.6, $feq);
 
         // Checamos el estado del candado
         $comparableId = $this->valuation->buildingComparablePivots()->find($pivotId)->comparable_id;

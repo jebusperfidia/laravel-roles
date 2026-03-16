@@ -21,19 +21,20 @@ use App\Models\Forms\PropertyLocation\PropertyLocationModel;
 use App\Models\Forms\UrbanEquipment\UrbanEquipmentModel;
 use App\Models\Forms\UrbanFeatures\UrbanFeaturesModel;
 use App\Models\Valuations\Valuation;
+//use App\Services\CopomexService;
 use App\Services\ValuationCalculatorService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use setasign\Fpdi\Fpdi; // Requiere: composer require setasign/fpdf setasign/fpdi
 
 class ValuationReportService
 {
-    protected $dipomexService;
+    //protected $copomexService;
     protected $headerType = 'ESTUDIO ÁLAMO: ARQUITECTURA + VALUACIÓN';
     protected $sections = ['cover' => true, 'photos' => true, 'comparables' => true, 'map' => false, 'annexes' => false];
 
-    public function __construct(DipomexService $dipomexService)
+    public function __construct()
     {
-        $this->dipomexService = $dipomexService;
+        //$this->copomexService = $copomexService;
     }
 
 
@@ -102,41 +103,19 @@ class ValuationReportService
         }
 
         // =========================================================================
-        // --- LÓGICA DE NOMBRES (DIPOMEX) ---
+        // --- NOMBRES GEOGRÁFICOS (ahora se guardan directamente como texto en BD) ---
         // =========================================================================
+        // Con COPOMEX los valores se almacenan como nombres, no como IDs numéricos.
+        // No se necesita llamada a la API para resolverlos.
 
-        // 1. Obtener estados una sola vez
-        $estados = $this->dipomexService->getEstados();
+        $estadoInmueble       = $valuation->property_entity   ?? 'N/A';
+        $municipioInmueble    = $valuation->property_locality  ?? 'N/A';
 
-        // 2. Cache local para no repetir peticiones si el estado es el mismo
-        $municipiosCache = [];
+        $estadoSolicitante    = $valuation->applic_entity      ?? 'N/A';
+        $municipioSolicitante = $valuation->applic_locality    ?? 'N/A';
 
-        $getNombreMunicipio = function ($estadoId, $municipioId) use (&$municipiosCache) {
-            if (!$estadoId || !$municipioId) return 'N/A';
-
-            // Si no hemos cargado los municipios de este estado, los traemos
-            if (!isset($municipiosCache[$estadoId])) {
-                $municipiosCache[$estadoId] = $this->dipomexService->getRawMunicipiosPorEstado($estadoId);
-            }
-
-            // Buscamos el nombre del municipio en el array del estado
-            foreach ($municipiosCache[$estadoId] as $mun) {
-                if ($mun['MUNICIPIO_ID'] == $municipioId) {
-                    return $mun['MUNICIPIO'];
-                }
-            }
-            return 'N/A';
-        };
-
-        // 3. Asignación de nombres para la vista
-        $estadoInmueble = $estados[$valuation->property_entity] ?? 'N/A';
-        $municipioInmueble = $getNombreMunicipio($valuation->property_entity, $valuation->property_locality);
-
-        $estadoSolicitante = $estados[$valuation->applic_entity] ?? 'N/A';
-        $municipioSolicitante = $getNombreMunicipio($valuation->applic_entity, $valuation->applic_locality);
-
-        $estadoPropietario = $estados[$valuation->owner_entity] ?? 'N/A';
-        $municipioPropietario = $getNombreMunicipio($valuation->owner_entity, $valuation->owner_locality);
+        $estadoPropietario    = $valuation->owner_entity       ?? 'N/A';
+        $municipioPropietario = $valuation->owner_locality     ?? 'N/A';
         // =========================================================================
         // --- LÓGICA DE COORDENADAS ---
         // =========================================================================
@@ -164,7 +143,7 @@ class ValuationReportService
         $finalIncomeValue = 0;
 
         // Obtenemos el valor numérico (o 0 si no existe)
-       // $valorConcluido = $conclusionModel ? (float)$conclusionModel->concluded_value : 0;
+        // $valorConcluido = $conclusionModel ? (float)$conclusionModel->concluded_value : 0;
 
         // Convertimos a texto usando el Helper
         //$valorConcluidoTexto = NumberToLetter::convert($valorConcluido);
@@ -481,7 +460,7 @@ class ValuationReportService
         $land_crossStreet1 = $land->cross_street_1 ?? '-';
         $land_crossOrient1 = $land->cross_street_orientation_1 ?? '-';
         // Combinamos si hay segunda calle transversal, o solo mostramos la primera
-      /*   $land_crossStreets = $land_crossStreet1;
+        /*   $land_crossStreets = $land_crossStreet1;
         if (!empty($land->cross_street_2)) {
             $land_crossStreets .= ' / ' . $land->cross_street_2;
         } */
@@ -496,8 +475,8 @@ class ValuationReportService
         $land_borderStreet2 = $land->border_street_2 ?? '-';
         $land_borderOrient2 = $land->border_street_orientation_2 ?? '-';
 
-      /*   $land_borderStreets = $land_borderStreet1; */
-/*         if (!empty($land->border_street_2)) {
+        /*   $land_borderStreets = $land_borderStreet1; */
+        /*         if (!empty($land->border_street_2)) {
             $land_borderStreets .= ' / ' . $land->border_street_2;
         } */
 
@@ -955,26 +934,18 @@ class ValuationReportService
 
 
         // =========================================================================
-        // --- PREPARACIÓN DE NOMBRES GEOGRÁFICOS (DIPOMEX) ---
+        // --- PREPARACIÓN DE NOMBRES GEOGRÁFICOS (COPOMEX) ---
         // =========================================================================
-        $estados = $this->dipomexService->getEstados();
-        $municipiosCache = [];
+        // Con COPOMEX los valores se guardan como nombres en la BD, no como IDs.
+        // Se leen directamente sin necesidad de llamar a la API.
+        $estadoInmueble2    = $valuation->property_entity  ?? 'N/A';
+        $municipioInmueble2 = $valuation->property_locality ?? 'N/A';
 
-        $getNombreMunicipio = function ($estadoId, $municipioId) use (&$municipiosCache) {
-            if (!$estadoId || !$municipioId) return null;
+        $estadoSolicitante2    = $valuation->applic_entity   ?? 'N/A';
+        $municipioSolicitante2 = $valuation->applic_locality ?? 'N/A';
 
-            if (!isset($municipiosCache[$estadoId])) {
-                $municipiosCache[$estadoId] = $this->dipomexService->getRawMunicipiosPorEstado($estadoId);
-            }
-
-            // Buscamos el nombre usando data_get por si vienen como objetos o arrays
-            foreach ($municipiosCache[$estadoId] as $mun) {
-                if (data_get($mun, 'MUNICIPIO_ID') == $municipioId) {
-                    return data_get($mun, 'MUNICIPIO');
-                }
-            }
-            return null;
-        };
+        $estadoPropietario2    = $valuation->owner_entity    ?? 'N/A';
+        $municipioPropietario2 = $valuation->owner_locality  ?? 'N/A';
 
         // =========================================================================
         // --- LÓGICA DE HOMOLOGACIÓN TERRENOS (LANDS) ---
@@ -1017,12 +988,14 @@ class ValuationReportService
         foreach ($landPivots as $pivot) {
             if ($pivot->comparable) {
                 // --- AQUÍ ESTÁ EL FIX PARA ESTADO Y MUNICIPIO ---
-                $eId = $pivot->comparable->comparable_entity;
-                $mId = $pivot->comparable->comparable_locality;
+                $estadoNombre    = $pivot->comparable->comparable_entity;
+                $municipioNombre = $pivot->comparable->comparable_locality;
 
-                // Si Dipomex tiene el nombre, lo usamos; si no, dejamos el ID para debuggear
-                $pivot->comparable->resolved_state = $estados[$eId] ?? $eId;
-                $pivot->comparable->resolved_municipality = $getNombreMunicipio($eId, $mId) ?? $mId;
+                // Con COPOMEX, comparable_entity y comparable_locality son nombres directos
+                $pivot->comparable->resolved_state        = $estadoNombre ?: 'N/A';
+                $pivot->comparable->resolved_municipality = $municipioNombre ?: 'N/A';
+
+                $c_sup_terreno = (float)($pivot->comparable->comparable_land_area ?? 0);
 
                 // --- NUEVO: CÁLCULO FCUS (CUS Calculado) DIRECTO EN PHP ---
                 $niveles = (float)($pivot->comparable->comparable_allowed_levels ?? $pivot->comparable->comparable_max_levels ?? 0);
@@ -1147,14 +1120,14 @@ class ValuationReportService
                 $eId = $pivot->comparable->comparable_entity;
                 $mId = $pivot->comparable->comparable_locality;
 
-                // Resolvemos nombres
-                $pivot->comparable->resolved_state = $estados[$eId] ?? ($eId ?: 'N/A');
-                $pivot->comparable->resolved_municipality = $getNombreMunicipio($eId, $mId) ?? ($mId ?: 'N/A');
+                // Con COPOMEX, comparable_entity y comparable_locality son nombres directos
+                $pivot->comparable->resolved_state        = $eId ?: 'N/A';
+                $pivot->comparable->resolved_municipality = $mId ?: 'N/A';
 
                 $c_sup_terreno = (float)($pivot->comparable->comparable_land_area ?? 0);
                 $c_sup_const   = (float)($pivot->comparable->comparable_built_area ?? 0);
 
-               // dd($c_sup_const, $c_sup_terreno);
+                // dd($c_sup_const, $c_sup_terreno);
 
                 $pivot->comparable->piso_nivel_val = $pivot->comparable->comparable_floor_level ?? 'N/A';
 
@@ -1236,7 +1209,7 @@ class ValuationReportService
         // --- DEFINICIÓN DE FOTOS Y ANEXOS (ESTO ES LO QUE TE FALTABA) ---
         // =========================================================================
 
-        $annexCategories = ['Documento anexo / evidencia', 'Proyecto arquitectónico / croquis', 'Proyecto arquitectonico / croquis'];
+        $annexCategories = ['Documento anexo / evidencia', 'Proyecto arquitectonico / croquis', 'Proyecto arquitectónico / croquis'];
 
         // Cargar todo el media
         $allMedia = PhotoReportModel::where('valuation_id', $id)
@@ -1244,14 +1217,23 @@ class ValuationReportService
             ->orderBy('sort_order', 'asc')
             ->get();
 
+        // Normalizamos las categorías permitidas para comparación
+        $normalizedAnnexCats = array_map(function ($val) {
+            return mb_strtolower(trim($val), 'UTF-8');
+        }, $annexCategories);
+
         // Separar Fotos (Para la galería del reporte)
-        $photos = $allMedia->filter(function ($item) use ($annexCategories) {
-            return !in_array($item->category, $annexCategories);
+        $photos = $allMedia->filter(function ($item) use ($normalizedAnnexCats) {
+            $cat = mb_strtolower(trim($item->category), 'UTF-8');
+            \Illuminate\Support\Facades\Log::info("EVAL FOTO ID {$item->id}: '$cat'");
+            \Illuminate\Support\Facades\Log::info("HEX: " . bin2hex($cat));
+            return !in_array($cat, $normalizedAnnexCats);
         });
 
         // Separar Anexos (Para el bucle final del PDF y para evitar el error)
-        $annexes = $allMedia->filter(function ($item) use ($annexCategories) {
-            return in_array($item->category, $annexCategories);
+        $annexes = $allMedia->filter(function ($item) use ($normalizedAnnexCats) {
+            $cat = mb_strtolower(trim($item->category), 'UTF-8');
+            return in_array($cat, $normalizedAnnexCats);
         });
 
         // Configuración de rutas de mapas (Ya las tenías, las dejo para que no falten)
@@ -1622,13 +1604,19 @@ class ValuationReportService
             $fpdi->useTemplate($tplIdx);
         }
 
+        // --- CÁLCULO DE PAGINACIÓN CONTINUA ---
+        $currentPage = $pageCount;
+
         // B) Procesamos los Anexos (Incrustamos PDFs o Imágenes)
         foreach ($annexes as $doc) {
             $fullPath = storage_path('app/public/' . $doc->file_path);
             if (!file_exists($fullPath)) continue;
 
             $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
-            $titleText = mb_convert_encoding('ANEXO: ' . ($doc->description ?: $doc->category), 'ISO-8859-1', 'UTF-8');
+
+            $rawTitle = 'ANEXO: ' . ($doc->description ?: $doc->category);
+
+            $titleText = mb_convert_encoding(mb_strtoupper($rawTitle, 'UTF-8'), 'ISO-8859-1', 'UTF-8');
 
             // --- VARIABLES DE ZONA SEGURA (AJUSTADAS) ---
             $maxW = 205;    // Ancho máximo (se queda igual)
@@ -1641,15 +1629,24 @@ class ValuationReportService
                     $pageCountDoc = $fpdi->setSourceFile($fullPath);
                     for ($k = 1; $k <= $pageCountDoc; $k++) {
                         $fpdi->AddPage('P', 'Letter');
+                        $fpdi->SetAutoPageBreak(false); // EVITA QUE SE CREE UNA PÁGINA NUEVA AL IMPRIMIR EL PIE DE PÁGINA
+                        $currentPage++;
 
                         // 1. Fondo (Header/Footer)
                         $fpdi->setSourceFile($templatePath);
                         $tplBg = $fpdi->importPage(1);
                         $fpdi->useTemplate($tplBg, 0, 0, 216, 279);
 
+                        // --- INSERTAR NÚMERO DE PÁGINA MANUALMENTE ---
+                        $fpdi->SetFont('Arial', 'B', 8);
+                        $fpdi->SetTextColor(102, 102, 102); // #666
+                        $fpdi->SetXY(0, 262); // LIGERAMENTE MÁS ARRIBA DEL SALTO DE PÁGINA (ANTES ESTABA EN 268)
+                        $fpdi->Cell(216, 10, mb_convert_encoding('Página ' . $currentPage, 'ISO-8859-1', 'UTF-8'), 0, 0, 'C');
+                        $fpdi->SetTextColor(0, 0, 0); // Reset
+
                         // 2. Título (Lo subimos un poco cambiando el 32 por un 28)
-                        $fpdi->SetFont('Arial', 'B', 10);
-                        $fpdi->SetXY(10, 21);
+                        $fpdi->SetFont('Arial', 'B', 11);
+                        $fpdi->SetXY(10, 20);
                         $fpdi->Cell(0, 10, $titleText, 0, 1, 'C');
 
                         // 3. CÁLCULO DE ESCALA PARA EL PDF
@@ -1682,14 +1679,23 @@ class ValuationReportService
                 $startX = 18;   // Recalculamos el centro: (216 - 180) / 2 = 18
 
                 $fpdi->AddPage('P', 'Letter');
+                $fpdi->SetAutoPageBreak(false); // EVITA QUE SE CREE UNA PÁGINA NUEVA AL IMPRIMIR EL PIE DE PÁGINA
+                $currentPage++;
 
                 // Fondo y Título
                 $fpdi->setSourceFile($templatePath);
                 $tplBg = $fpdi->importPage(1);
                 $fpdi->useTemplate($tplBg, 0, 0, 216, 279);
 
-                $fpdi->SetFont('Arial', 'B', 10);
-                $fpdi->SetXY(10, 28);
+                // --- INSERTAR NÚMERO DE PÁGINA MANUALMENTE ---
+                $fpdi->SetFont('Arial', 'B', 8);
+                $fpdi->SetTextColor(102, 102, 102); // #666
+                $fpdi->SetXY(0, 262); // LIGERAMENTE MÁS ARRIBA DEL SALTO DE PÁGINA (ANTES ESTABA EN 268)
+                $fpdi->Cell(216, 10, mb_convert_encoding('Página ' . $currentPage, 'ISO-8859-1', 'UTF-8'), 0, 0, 'C');
+                $fpdi->SetTextColor(0, 0, 0); // Reset
+
+                $fpdi->SetFont('Arial', 'B', 11);
+                $fpdi->SetXY(10, 20);
                 $fpdi->Cell(0, 10, $titleText, 0, 1, 'C');
 
                 // 3. Imagen con ajuste proporcional

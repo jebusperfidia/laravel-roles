@@ -3,15 +3,12 @@
 namespace App\Livewire\Valuations;
 
 use App\Models\Users\Assignment;
-use App\Services\DipomexService;
 use Illuminate\Database\Eloquent\Builder;
-use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
 use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 use App\Services\ValuationReportService;
 
@@ -25,32 +22,9 @@ final class CompletedTable extends PowerGridComponent
     {
         $this->user = Auth::user();
 
-        $normalizedStateId = str_pad($this->state, 2, '0', STR_PAD_LEFT);
-
-        // CAMBIO 1: Actualizamos llave de caché a _v2 para asegurar limpieza
-        $cacheKey = 'dipomex_munis_raw_v2_' . $normalizedStateId;
-
-        $rawMunis = Cache::remember($cacheKey, 60 * 60 * 24, function () use ($normalizedStateId) {
-            $dipomex = app(DipomexService::class);
-            return $dipomex->getMunicipiosPorEstado($normalizedStateId);
-        });
-
-        if (is_array($rawMunis)) {
-            foreach ($rawMunis as $item) {
-                if (is_array($item) && isset($item['MUNICIPIO_ID'])) {
-                    $idEntero = (int)$item['MUNICIPIO_ID'];
-                    $this->municipalitiesLookup[$idEntero] = $item['MUNICIPIO'];
-                } elseif (is_string($item)) {
-                    $key = key($rawMunis);
-                }
-            }
-
-            if (empty($this->municipalitiesLookup) && count($rawMunis) > 0) {
-                foreach ($rawMunis as $key => $val) {
-                    $this->municipalitiesLookup[(int)$key] = $val;
-                }
-            }
-        }
+        // Con COPOMEX, property_locality ya guarda el nombre del municipio directamente en la BD.
+        // No necesitamos llamar a la API ni construir un lookup de IDs.
+        // El campo municipalitiesLookup se deja vacío; la columna usa property_locality directo.
 
         return [
             PowerGrid::header()->showSearchInput()
@@ -96,14 +70,10 @@ final class CompletedTable extends PowerGridComponent
                 return $row->property_street . ' #' . $row->property_abroad_number . ', ' . $colonia;
             })
 
-            // --- ¡AQUÍ FALTABA ESTO! ---
-            // Definimos qué valor va en la columna 'property_locality_label'
+            // Con COPOMEX, property_locality ya contiene el nombre del municipio directamente
             ->add('property_locality_label', function ($row) {
-                $key = (int) $row->property_locality;
-                // Buscamos en el array que armamos en el setUp
-                return $this->municipalitiesLookup[$key] ?? $row->property_locality;
+                return $row->property_locality ?? '-';
             })
-            // ---------------------------
 
             ->add('property_cp')
             ->add('appraiser_name')
@@ -135,7 +105,7 @@ final class CompletedTable extends PowerGridComponent
         ];
     }
 
-    #[on('downloadPdf')]
+    #[On('downloadPdf')]
     public function downloadPdf($id)
     {
         // Inyectamos el servicio manualmente
@@ -151,7 +121,7 @@ final class CompletedTable extends PowerGridComponent
         }, 'Avaluo_' . $id . '.pdf');
     }
 
-/*
+    /*
     public function actions($row): array
     {
         return [
@@ -161,7 +131,7 @@ final class CompletedTable extends PowerGridComponent
                 ->class('cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 mr-2')
                 ->dispatch('downloadPdf', ['id' => $row->id]),
  */
-        /*     Button::add('summary')
+    /*     Button::add('summary')
                 ->slot('Resumen')
                 ->id()
                 ->class('cursor-pointer px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 mr-2')
@@ -173,6 +143,6 @@ final class CompletedTable extends PowerGridComponent
                 ->class('cursor-pointer px-4 py-2 text-xs font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700')
                 ->dispatch('openStatusModal', ['valuationId' => $row->id, 'currentStatus' => 3])
                 ->can($this->user->type === 'Administrador'), */
-   /*      ];
+    /*      ];
     } */
 }

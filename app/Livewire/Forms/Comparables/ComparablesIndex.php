@@ -15,7 +15,7 @@ use App\Models\Valuations\Valuation;
 use Flux\Flux;
 use Masmerise\Toaster\Toaster;
 use Illuminate\Support\Facades\Validator;
-use App\Services\DipomexService;
+use App\Services\CopomexService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str; // <-- Import Str to avoid Undefined type error
@@ -137,7 +137,7 @@ class ComparablesIndex extends Component
     //Variable para mostrar el valor del futuro ID al crear comparable o el valor real al editar
     public $comparableInformativeId;
 
-    public function mount(DipomexService $dipomex)
+    public function mount(CopomexService $copomex)
     {
 
         //Obtenemos el valor de los niveles para el input correspondiente
@@ -149,7 +149,7 @@ class ComparablesIndex extends Component
         //dd($this->comparableType);
 
         //Obtenemos los estados
-        $this->states = $dipomex->getEstados();
+        $this->states = $copomex->getEstados();
 
         //Añadimos la variable de sesión que validará el acceso a este componente
         $this->id = Session::get('valuation_id');
@@ -517,8 +517,10 @@ class ComparablesIndex extends Component
 
 
 
-    public function editComparable($idComparable, DipomexService $dipomex)
+    public function editComparable($idComparable)
     {
+        $copomex = app(CopomexService::class);
+
         //Reseteamos las validaciones
         $this->resetValidation();
         //Reseteamos los campos del modal
@@ -534,71 +536,15 @@ class ComparablesIndex extends Component
 
 
 
-
-        // Mapeo completo de MODELO (snake_case) a PROPIEDADES (camelCase)
-        /*  $this->comparableKey = $comparable->comparable_key;
-        $this->comparableFolio = $comparable->comparable_folio;
-        $this->comparableDischargedBy = $comparable->comparable_discharged_by;
-        $this->comparableProperty = $comparable->comparable_property;
-        $this->comparableEntity = $comparable->comparable_entity;
-        $this->comparableEntityName = $comparable->comparable_entity_name;
-        $this->comparableLocality = $comparable->comparable_locality;
-        $this->comparableLocalityName = $comparable->comparable_locality_name;
-        $this->comparableColony = $comparable->comparable_colony;
-        $this->comparableOtherColony = $comparable->comparable_other_colony;
-        $this->comparableStreet = $comparable->comparable_street;
-        $this->comparableBetweenStreet = $comparable->comparable_between_street;
-        $this->comparableAndStreet = $comparable->comparable_and_street;
-        $this->comparableCp = $comparable->comparable_cp;
-        $this->comparableName = $comparable->comparable_name;
-        $this->comparableLastName = $comparable->comparable_last_name;
-        $this->comparablePhone = $comparable->comparable_phone;
-        $this->comparableUrl = $comparable->comparable_url;
-        $this->comparableLandUse = $comparable->comparable_land_use;
-        $this->comparableDescServicesInfraestructure = $comparable->comparable_desc_services_infraestructure;
-        $this->comparableServicesInfraestructure = $comparable->comparable_services_infraestructure;
-        $this->comparableShape = $comparable->comparable_shape;
-        $this->comparableDensity = $comparable->comparable_density;
-        $this->comparableFront = $comparable->comparable_front;
-        $this->comparableFrontType = $comparable->comparable_front_type;
-        $this->comparableDescriptionForm = $comparable->comparable_description_form;
-        $this->comparableTopography = $comparable->comparable_topography;
-        $this->comparableCharacteristics = $comparable->comparable_characteristics;
-        $this->comparableCharacteristicsGeneral = $comparable->comparable_characteristics_general;
-        $this->comparableLocationBlock = $comparable->comparable_location_block;
-        $this->comparableStreetLocation = $comparable->comparable_street_location;
-        $this->comparableGeneralPropArea = $comparable->comparable_general_prop_area;
-        $this->comparableUrbanProximityReference = $comparable->comparable_urban_proximity_reference;
-        $this->comparableSourceInfImages = $comparable->comparable_source_inf_images;
-        $this->comparableAbroadNumber = $comparable->comparable_abroad_number;
-        $this->comparableInsideNumber = $comparable->comparable_inside_number;
-        $this->comparableAllowedLevels = $comparable->comparable_allowed_levels;
-        $this->comparableNumberFronts = $comparable->comparable_number_fronts;
-        $this->comparableFreeAreaRequired = $comparable->comparable_free_area_required;
-        $this->comparableSlope = $comparable->comparable_slope;
-
-
-        $this->comparableOffers = (float) $comparable->comparable_offers;
-        $this->comparableLandArea = (float) $comparable->comparable_land_area;
-        $this->comparableBuiltArea = (float) $comparable->comparable_built_area;
-        $this->comparableUnitValue = (float) $comparable->comparable_unit_value;
-        $this->comparableBargainingFactor = (float) $comparable->comparable_bargaining_factor;
-
-        $this->comparableActive = $comparable->is_active;
-
-
-        $this->comparablePhotosFile = $comparable->comparable_photos;
- */
-        // --- Mapeo de Campos Comunes ---
         // --- Mapeo de Campos Comunes ---
         //$this->comparableKey = $comparable->comparable_key;
         $this->comparableFolio = $comparable->comparable_folio;
         $this->comparableDischargedBy = $comparable->comparable_discharged_by;
         $this->comparableProperty = $comparable->comparable_property;
         $this->comparableEntity = $comparable->comparable_entity;
-        $this->comparableEntityName = $comparable->comparable_entity_name;
+        //$this->comparableEntityName = $comparable->comparable_entity_name;
         $this->comparableLocality = $comparable->comparable_locality;
-        $this->comparableLocalityName = $comparable->comparable_locality_name;
+        //$this->comparableLocalityName = $comparable->comparable_locality_name;
         $this->comparableColony = $comparable->comparable_colony;
         $this->comparableOtherColony = $comparable->comparable_other_colony;
         $this->comparableStreet = $comparable->comparable_street;
@@ -663,36 +609,17 @@ class ComparablesIndex extends Component
 
 
         // 1. Verificamos que tengamos un CP para buscar
-        if ($this->comparableCp) {
-            $data = $dipomex->buscarPorCodigoPostal($this->comparableCp);
-
-            if ($data && isset($data['estado'])) {
-                // 2. Buscar el ID del estado con base en el nombre devuelto
-                // (Asumiendo que $this->states ya fue cargado en el mount() o aquí)
-                if (empty($this->states)) {
-                    $this->states = $dipomex->getEstados(); // Aseguramos que los estados estén cargados
-                }
-                $estadoId = array_search($data['estado'], $this->states);
-
-                if ($estadoId !== false) {
-                    $this->comparableEntity = $estadoId; // Re-asignamos el ID del estado
-                }
-
-                // 3. Poblar municipios (AHORA que tenemos el ID del estado correcto)
-                $this->municipalities = $dipomex->getMunicipiosPorEstado($this->comparableEntity);
-
-                // 4. Buscar el ID del municipio con base en el nombre devuelto
-                $municipioId = array_search($data['municipio'], $this->municipalities);
-                if ($municipioId !== false) {
-                    $this->comparableLocality = $municipioId; // Re-asignamos el ID del municipio
-                }
-
-                // 5. Asignar colonias
-                // $this->comparableColony ya tiene el nombre correcto de la BD.
-                // Solo poblamos la lista para que el <select> pueda encontrarlo.
-                $this->colonies = $data['colonias'] ?? [];
-            }
+        // 1. Cargamos los municipios usando el nombre del estado que ya viene de la BD
+        if (!empty($this->comparableEntity)) {
+            $this->municipalities = $copomex->getMunicipiosPorEstado($this->comparableEntity);
         }
+
+        // 2. Cargamos las colonias usando el nombre del estado y municipio de la BD
+        if (!empty($this->comparableEntity) && !empty($this->comparableLocality)) {
+            $this->colonies = $copomex->getColoniasPorMunicipio($this->comparableEntity, $this->comparableLocality);
+        }
+
+
         Flux::modal('modal-comparable')->show();
     }
 
@@ -822,9 +749,9 @@ class ComparablesIndex extends Component
             'comparable_discharged_by' => $this->comparableDischargedBy,
             'comparable_property' => $this->comparableProperty,
             'comparable_entity' => $this->comparableEntity,
-            'comparable_entity_name' => $this->comparableEntityName,
+            //'comparable_entity_name' => $this->comparableEntityName,
             'comparable_locality' => $this->comparableLocality,
-            'comparable_locality_name' => $this->comparableLocalityName,
+            //'comparable_locality_name' => $this->comparableLocalityName,
             'comparable_colony' => $this->comparableColony,
             'comparable_other_colony' => $this->comparableOtherColony,
             'comparable_street' => $this->comparableStreet,
@@ -1205,7 +1132,7 @@ class ComparablesIndex extends Component
 
     //Función para búsqueda del código postal del propietario, usando API Dipomex
     //Las funciones se repiten para cáda uno, seperando la lógica y evitando que se mezclen los datos
-    public function buscarCP(DipomexService $dipomex)
+    public function buscarCP(CopomexService $copomex)
     {
         //Validamos que el campo no esté vacío y contenga 5 dígitos
         $this->validate(
@@ -1218,50 +1145,31 @@ class ComparablesIndex extends Component
             ]
         );
 
-        $data = $dipomex->buscarPorCodigoPostal($this->comparableCp);
+        $data = $copomex->buscarPorCodigoPostal($this->comparableCp);
 
-        //Si por alguna razón la respueta está vacía, reseteamos los campos y mostramos un error
+        // 1. Validamos caída de servidor / API
+        if ($data === false) {
+            Toaster::error('El servicio de autocompletado está fuera de línea en este momento, por favor intente más tarde.');
+            return;
+        }
+
+        // 2. Validamos CP inexistente (La API funcionó pero devolvió vacío)
         if (empty($data)) {
             Toaster::error('No se encontró información para el código postal proporcionado.');
-            $this->reset(['comparableCp', 'comparableEntity', 'comparableLocality', 'comparableColony', 'municipalities', 'colonies', 'comparableEntityName', 'comparableLocalityName']);
+            // NOTA: Quitamos 'comparableCp' del array para que NO se borre de la vista
+            $this->reset(['comparableEntity', 'comparableLocality', 'comparableColony', 'municipalities', 'colonies']);
             return;
         }
 
-        // Buscar el ID del estado con base en el nombre
-        $estadoId = array_search($data['estado'], $this->states);
+        // 3. Todo salió bien
+        $this->comparableEntity = $data['estado'] ?? '';
+        $this->comparableLocality = $data['municipio'] ?? '';
 
-        //Si no se encuentra el estado, mostramos un error
-        if ($estadoId === false) {
-            Toaster::error('No se encontró el estado correspondiente al código postal.');
-            return;
-        }
-
-        // Setear el id del estado seleccionado
-        $this->comparableEntity = $estadoId;
-
-        // <-- AGREGADO: Asignar el NOMBRE del estado
-        $this->comparableEntityName = $data['estado'];
-        //dd($this->comparableEntityName);
-
-        // Poblar municipios inmediatamente
-        $this->municipalities = $dipomex->getMunicipiosPorEstado($estadoId);
-        //dd($this->municipalities);
-
-        //Obtenemos el ID del municipio con base en el nombre
-        $municipioId = array_search($data['municipio'], $this->municipalities);
-
-        //Asignamos el valor del municipio
-        $this->comparableLocality = $municipioId;
-
-        // <-- AGREGADO: Asignar el NOMBRE del municipio
-        $this->comparableLocalityName = $data['municipio'];
+        // Poblar municipios del estado encontrado (ya viene cacheado)
+        $this->municipalities = $copomex->getMunicipiosPorEstado($this->comparableEntity);
 
         // Asignar colonias
-        $this->colonies = $data['colonias'];
-
-        //dd($this->colonies);
-
-        //dd($this->comparableLocalityName, $this->comparableEntityName, $this->comparableEntity, $this->comparableLocality);
+        $this->colonies = $data['colonias'] ?? [];
 
         Toaster::success('Información encontrada correctamente.');
     }
@@ -1271,34 +1179,42 @@ class ComparablesIndex extends Component
     //Creamos un watcher para cuando se actualice el valor del select de estados
     //Este llamará al método del servicio para poblar los municipios
     //Creamos un watcher para cuando se actualice el valor del select de estados
-    public function updatedComparableEntity($estadoId, DipomexService $dipomex)
+    public function updatedComparableEntity($estado, CopomexService $copomex)
     {
-        // <-- MODIFICADO: Reiniciar también los nombres de ubicación al cambiar el estado
-        $this->reset(['comparableLocality', 'comparableColony', 'municipalities', 'colonies', 'comparableLocalityName']);
+        // Limpiamos los dependientes sin rastro de *Name
+        $this->reset(['comparableLocality', 'comparableColony', 'municipalities', 'colonies']);
 
-        // <-- AGREGADO: Asignar el NOMBRE del estado si el ID es válido
-        $this->comparableEntityName = $this->states[$estadoId] ?? null;
+        if ($estado) {
+            $resultado = $copomex->getMunicipiosPorEstado($estado);
 
-        if ($estadoId) {
-            $this->municipalities = $dipomex->getMunicipiosPorEstado($estadoId);
+            if ($resultado === false) {
+                Toaster::error('El servicio de Copomex no responde, algunas funciones estarán limitadas');
+                $this->municipalities = [];
+            } else {
+                $this->municipalities = $resultado;
+            }
         }
     }
 
     //Creamos un watcher para cuando se actualice el valor del select de municipios
-    public function updatedComparableLocality($municipioId, DipomexService $dipomex)
+    public function updatedComparableLocality($municipio, CopomexService $copomex)
     {
-        // <-- MODIFICADO: Reiniciar también el nombre de la colonia al cambiar el municipio
+        // Limpiamos la colonia
         $this->reset(['comparableColony', 'colonies']);
 
-        // <-- AGREGADO: Asignar el NOMBRE del municipio si el ID es válido
-        // Asumiendo que $this->municipalities es un array ID => Nombre
-        $this->comparableLocalityName = $this->municipalities[$municipioId] ?? null;
+        if ($municipio && $this->comparableEntity) {
+            $resultado = $copomex->getColoniasPorMunicipio($this->comparableEntity, $municipio);
 
-        if ($municipioId && $this->comparableEntity) {
-            // Como ahora gi_ownerLocality tiene el MUNICIPIO_ID, lo pasamos directo
-            $this->colonies = $dipomex->getColoniasPorMunicipio($this->comparableEntity, $municipioId);
+            if ($resultado === false) {
+                Toaster::error('El servicio de Copomex no responde, algunas funciones estarán limitadas');
+                $this->colonies = [];
+            } else {
+                $this->colonies = $resultado;
+            }
         }
     }
+
+
 
 
     //Función para acortar URL usando URL clean https://urlclean.com

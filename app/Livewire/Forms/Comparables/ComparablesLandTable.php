@@ -86,9 +86,9 @@ final class ComparablesLandTable extends PowerGridComponent
             /* ->add('comparable_discharged_by') */
             ->add('comparable_property')
             /* ->add('comparable_entity') */
-            ->add('comparable_entity_name')
+            ->add('comparable_entity')
             /* ->add('comparable_locality') */
-            ->add('comparable_locality_name')
+            ->add('comparable_locality')
             // --- INICIO DE LÓGICA DE COLONIA ---
             ->add('comparable_colony') // Campo original (para búsquedas)
             ->add('comparable_other_colony') // Campo de respaldo
@@ -194,7 +194,7 @@ final class ComparablesLandTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(),
 */
-            Column::make('Estado', 'comparable_entity_name')
+            Column::make('Estado', 'comparable_entity')
                 ->sortable()
                 ->searchable(),
 
@@ -202,7 +202,7 @@ final class ComparablesLandTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(), */
 
-            Column::make('Ciudad', 'comparable_locality_name')
+            Column::make('Ciudad', 'comparable_locality')
                 ->sortable()
                 ->searchable(),
 

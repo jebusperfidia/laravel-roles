@@ -230,7 +230,7 @@ class Valuation extends Model
             'valuation_id',
             'comparable_id'
         )
-            ->withPivot(['id','position', 'is_active', 'created_by'])
+            ->withPivot(['id', 'position', 'is_active', 'created_by'])
             //->withPivot(['position', 'is_active', 'created_by'])
             ->withTimestamps()
             ->orderBy('pivot_position');
@@ -326,10 +326,9 @@ class Valuation extends Model
                     $address .= " CP: " . $this->property_cp;
                 }
 
-                // OJO: property_locality y property_entity suelen ser IDs en tu BD.
-                // Si quieres que aquí salgan los nombres (ej. BENITO JUÁREZ),
-                // necesitarías la lógica del DipomexService, pero para el modelo
-                // lo dejamos así para no romper nada.
+                // Ahora con Copomex, property_locality y property_entity guardan
+                // directamente el nombre (ej. BENITO JUÁREZ, QUINTANA ROO),
+                // por lo que se concatenan sin necesidad de hacer otra consulta.
                 if ($this->property_locality) {
                     $address .= " MUN: " . $this->property_locality;
                 }
@@ -354,5 +353,4 @@ class Valuation extends Model
         // El segundo parámetro 'valuation_id' es la FK en la tabla construction_elements
         return $this->hasOne(ConstructionElementModel::class, 'valuation_id');
     }
-
 }
