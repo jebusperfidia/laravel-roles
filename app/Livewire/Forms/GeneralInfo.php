@@ -202,39 +202,37 @@ class GeneralInfo extends Component
         $this->states3 = $estados;
 
         // ── PROPIETARIO ────────────────────────────────────────────────────────
-        // Si hay estado, cargamos sus municipios
+        // ── PROPIETARIO ────────────────────────────────────────────────────────
         if (! empty($this->gi_ownerEntity)) {
-            $this->municipalities = $copomex->getMunicipiosPorEstado($this->gi_ownerEntity);
+            $muns = $copomex->getMunicipiosPorEstado($this->gi_ownerEntity);
+            $this->municipalities = $muns === false ? [] : $muns;
         }
 
-        // Si hay estado y municipio, cargamos sus colonias (independiente del CP)
         if (! empty($this->gi_ownerEntity) && ! empty($this->gi_ownerLocality)) {
-            $this->colonies = $copomex->getColoniasPorMunicipio($this->gi_ownerEntity, $this->gi_ownerLocality);
+            $cols = $copomex->getColoniasPorMunicipio($this->gi_ownerEntity, $this->gi_ownerLocality);
+            $this->colonies = $cols === false ? [] : $cols;
         }
-
-
-
 
         // ── SOLICITANTE ────────────────────────────────────────────────────────
-        // Si hay estado, cargamos sus municipios
         if (! empty($this->gi_applicEntity)) {
-            $this->municipalities2 = $copomex->getMunicipiosPorEstado($this->gi_applicEntity);
+            $muns = $copomex->getMunicipiosPorEstado($this->gi_applicEntity);
+            $this->municipalities2 = $muns === false ? [] : $muns;
         }
 
-        // Si hay estado y municipio, cargamos sus colonias (independiente del CP)
         if (! empty($this->gi_applicEntity) && ! empty($this->gi_applicLocality)) {
-            $this->colonies2 = $copomex->getColoniasPorMunicipio($this->gi_applicEntity, $this->gi_applicLocality);
+            $cols = $copomex->getColoniasPorMunicipio($this->gi_applicEntity, $this->gi_applicLocality);
+            $this->colonies2 = $cols === false ? [] : $cols;
         }
 
         // ── INMUEBLE ───────────────────────────────────────────────────────────
-        // Si hay estado, cargamos sus municipios
         if (! empty($this->gi_propertyEntity)) {
-            $this->municipalities3 = $copomex->getMunicipiosPorEstado($this->gi_propertyEntity);
+            $muns = $copomex->getMunicipiosPorEstado($this->gi_propertyEntity);
+            $this->municipalities3 = $muns === false ? [] : $muns;
         }
 
-        // Si hay estado y municipio, cargamos sus colonias (independiente del CP)
         if (! empty($this->gi_propertyEntity) && ! empty($this->gi_propertyLocality)) {
-            $this->colonies3 = $copomex->getColoniasPorMunicipio($this->gi_propertyEntity, $this->gi_propertyLocality);
+            $cols = $copomex->getColoniasPorMunicipio($this->gi_propertyEntity, $this->gi_propertyLocality);
+            $this->colonies3 = $cols === false ? [] : $cols;
         }
 
         //dd($this->gi_preValuation);
@@ -595,8 +593,8 @@ class GeneralInfo extends Component
         $this->gi_ownerLocality = $data['municipio'] ?? '';
 
         // Poblar municipios del estado encontrado (ya viene cacheado)
-        $this->municipalities = $copomex->getMunicipiosPorEstado($this->gi_ownerEntity);
-
+        $muns = $copomex->getMunicipiosPorEstado($this->gi_ownerEntity);
+        $this->municipalities = $muns === false ? [] : $muns;
         // Asignar colonias
         $this->colonies = $data['colonias'] ?? [];
 
@@ -700,7 +698,8 @@ class GeneralInfo extends Component
         $this->gi_applicLocality = $data['municipio'] ?? '';
 
         // Poblar municipios del estado encontrado (ya viene cacheado)
-        $this->municipalities2 = $dipomex->getMunicipiosPorEstado($this->gi_applicEntity);
+        $muns = $dipomex->getMunicipiosPorEstado($this->gi_applicEntity);
+        $this->municipalities2 = $muns === false ? [] : $muns;
 
         // Asignar colonias
         $this->colonies2 = $data['colonias'] ?? [];
@@ -799,7 +798,8 @@ class GeneralInfo extends Component
         $this->gi_propertyCity     = $data['ciudad']    ?? '';
 
         // Poblar municipios del estado encontrado (ya viene cacheado)
-        $this->municipalities3 = $dipomex->getMunicipiosPorEstado($this->gi_propertyEntity);
+        $muns = $dipomex->getMunicipiosPorEstado($this->gi_propertyEntity);
+        $this->municipalities3 = $muns === false ? [] : $muns;
 
         // Asignar colonias
         $this->colonies3 = $data['colonias'] ?? [];

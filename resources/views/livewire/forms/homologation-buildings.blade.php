@@ -138,9 +138,18 @@
                                 @php
                                 $acronym = $factor['acronym'];
                                 $canEdit = $factor['can_edit'];
+
+                                // Primero tomamos el valor por defecto
+                                $hideRow = $factor['hide_in_subject'] ?? false;
+
+                                // Si es FIC y no aplica, forzamos el ocultado
+                                if ($acronym === 'FIC' && !$applyFIC) {
+                                $hideRow = true;
+                                }
+
                                 $isEditing = ($editing_factor_index === $index);
                                 $isCustom = $factor['is_custom'];
-                                $hideRow = $factor['hide_in_subject'] ?? false;
+
                                 @endphp
 
                                 @if(!$hideRow)
@@ -552,6 +561,10 @@
                                     // Definimos explícitamente cuáles factores SÍ llevan candado
                                     $lockableAcronyms = ['FSU', 'FIC', 'FEA'];
                                     $isLockable = in_array($sigla, $lockableAcronyms) || $isFEQ;
+
+                                    if ($sigla === 'FIC' && !$applyFIC) {
+                                    continue;
+                                    }
 
                                     $isCalculated =
                                     $this->comparableFactors[$selectedComparableId][$sigla]['is_calculated'] ?? true;

@@ -883,29 +883,25 @@ class HomologationLands extends Component
 
                 $cusCalculado = $niveles * (1 - $areaLibreDec);
 
-                // Si cusCalculado es 0, asignamos 0 (para validación posterior) o 1 según lógica,
-                // pero según tu Excel si es 0 truena o da 0, así que calculemos la raíz normal.
                 $compRating = ($cusCalculado > 0) ? sqrt($cusCalculado) : 0.0;
-
                 $compRating = max(0.6, $compRating);
 
                 // Asignamos esto a la calificación automática
                 $ratingCalculatedAutomatically = $compRating;
 
-                // 2. LÓGICA DE APLICABLE (La fórmula del Excel)
-                // $sujetoRating es "G6" (Objeto)
-                // $compRating es "F6" (Comparable)
-                // 2. LÓGICA DE APLICABLE (Nueva versión solicitada)
-                // Diferencia de calificación (Sujeto - Comparable) + 1
+                // 2. LÓGICA DE APLICABLE (La real, proporcional por división)
+                if ($compRating > 0 && $sujetoRating >= 0) {
+                    $raizSujeto = sqrt($sujetoRating);
+                    $raizComparable = sqrt($compRating);
 
-                if ($compRating > 0) {
-                    // Calculamos la diferencia entre la calificación del sujeto y el comparable
-                    $diferencia_math = $sujetoRating - $compRating;
+                    // El APLICABLE se calcula por división directa de las raíces
+                    $factor_ajuste = ($raizComparable > 0) ? ($raizSujeto / $raizComparable) : 1.0;
 
-                    // Al resultado de la diferencia le sumamos + 1
-                    $factor_ajuste = $diferencia_math + 1.0;
+                    // La DIFERENCIA pasa a ser un mero dato informativo (cuánto se movió de 1)
+                    // Sin ABS para que si penaliza (baja de 1), se vea el negativo correctamente
+                    $diferencia_math = $factor_ajuste - 1.0;
                 } else {
-                    $factor_ajuste = 0.0;
+                    $factor_ajuste = 1.0; // Lo dejamos en 1 para no matar el FRE si faltan datos
                     $diferencia_math = 0.0;
                 }
             } elseif ($sigla === 'FNEG') {

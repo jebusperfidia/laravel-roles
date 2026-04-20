@@ -449,8 +449,8 @@
                         <div class="radio-input">
                             <flux:field>
                                 <div class="radio-group-horizontal w-full">
-                                    <flux:select wire:model="ahc_costApproach w-full"
-                                        class=" text-gray-800 [&_option]:text-gray-900">
+                                    <flux:select wire:model="ahc_costApproach"
+                                        class=" text-gray-800 [&_option]:text-gray-900 w-full">
                                         <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                                         <flux:select.option value="Si se aplica">Si se aplica</flux:select.option>
                                         <flux:select.option value="No se aplica">No se aplica</flux:select.option>
@@ -470,8 +470,8 @@
                         <div class="radio-input">
                             <flux:field>
                                 <div class="radio-group-horizontal  w-full">
-                                    <flux:select wire:model.live="ach_incomeApproach w-full"
-                                        class=" text-gray-800 [&_option]:text-gray-900">
+                                    <flux:select wire:model.live="ach_incomeApproach"
+                                        class=" text-gray-800 [&_option]:text-gray-900 w-full">
                                         <flux:select.option value="">-- Selecciona una opción --</flux:select.option>
                                         <flux:select.option value="Si se apllica, usando terrenos directos o residual">
                                             Si se apllica, usando

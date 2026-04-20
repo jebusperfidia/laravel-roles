@@ -1,65 +1,59 @@
 <div>
-    <flux:heading size="xl" level="1">{{ __('Duplicado de avalúos') }}</flux:heading>
+    {{-- <flux:heading size="xl" level="1">{{ __('Duplicado de avalúos') }}</flux:heading>
     <flux:subheading size="lg" class="mb-6">{{ __('Duplicar información de avalúos existentes') }}</flux:subheading>
     <flux:separator variant="subtle" />
 
     <div>
-            {{-- <a href={{route('user.index')}} class="cursor-pointer px-3 py-2 text-xs font-medium text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300">
-                Regresar
-            </a> --}}
-           <div class="w-150">
+
+        <div class="w-150">
             <form wire:submit='save' class="mt-6 space-y-6">
-                    <label for="tipo" class="flux-label text-sm">Seleccione el avalúo padre o a duplicar</label>
-                    <flux:select wire:model="type" class="mt-2  text-gray-800 [&_option]:text-gray-900">
-                        <flux:select.option value="casa_habitacion">-- Selecciona una opción --</flux:select.option>
-                        <flux:select.option value="fiscal">AF1212</flux:select.option>
-                        <flux:select.option value="comercial">AF1313</flux:select.option>
-                    </flux:select>
-                    @error('type')
-                   {{--  <p class="text-sm text-red-600">El campo tipo de avalúo es obligatorio.</p> --}}
-                    <div role="alert" aria-live="polite" aria-atomic="true"
-                        class="mt-2 text-sm font-medium rounded-md flex items-center gap-2"
-                        data-flux-error="">
-                    <!-- Ícono triangular de advertencia -->
-                    <svg class="shrink-0 size-5 inline" xmlns="http://www.w3.org/2000/svg"
-                         viewBox="0 0 20 20" fill="#FA2C37" aria-hidden="true" data-slot="icon">
-                      <path fill-rule="evenodd"
+                <label for="tipo" class="flux-label text-sm">Seleccione el avalúo padre o a duplicar</label>
+                <flux:select wire:model="type" class="mt-2  text-gray-800 [&_option]:text-gray-900">
+                    <flux:select.option value="casa_habitacion">-- Selecciona una opción --</flux:select.option>
+                    <flux:select.option value="fiscal">AF1212</flux:select.option>
+                    <flux:select.option value="comercial">AF1313</flux:select.option>
+                </flux:select>
+                @error('type')
+
+                <div role="alert" aria-live="polite" aria-atomic="true"
+                    class="mt-2 text-sm font-medium rounded-md flex items-center gap-2" data-flux-error="">
+
+                    <svg class="shrink-0 size-5 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                        fill="#FA2C37" aria-hidden="true" data-slot="icon">
+                        <path fill-rule="evenodd"
                             d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
                             clip-rule="evenodd"></path>
                     </svg>
-                    <!-- Mensaje -->
+
                     <span class="text-[#FA2C37]">Debe seleccionar el avalúo padre.</span>
-                    </div>
-                    @enderror
-                    <label for="tipo" class="flux-label text-sm">Seleccione el avalúo hijo o donde se copiará la información</label>
-                    <flux:select wire:model="type" class="mt-2  text-gray-800 [&_option]:text-gray-900">
-                        <flux:select.option value="casa_habitacion">-- Selecciona una opción --</flux:select.option>
-                        <flux:select.option value="fiscal">AC1313</flux:select.option>
-                        <flux:select.option value="comercial">DB4852</flux:select.option>
-                    </flux:select>
-                    @error('type')
-                   {{--  <p class="text-sm text-red-600">El campo tipo de avalúo es obligatorio.</p> --}}
-                    <div role="alert" aria-live="polite" aria-atomic="true"
-                        class="mt-2 text-sm font-medium rounded-md flex items-center gap-2"
-                        data-flux-error="">
-                    <!-- Ícono triangular de advertencia -->
-                    <svg class="shrink-0 size-5 inline" xmlns="http://www.w3.org/2000/svg"
-                         viewBox="0 0 20 20" fill="#FA2C37" aria-hidden="true" data-slot="icon">
-                      <path fill-rule="evenodd"
+                </div>
+                @enderror
+                <label for="tipo" class="flux-label text-sm">Seleccione el avalúo hijo o donde se copiará la
+                    información</label>
+                <flux:select wire:model="type" class="mt-2  text-gray-800 [&_option]:text-gray-900">
+                    <flux:select.option value="casa_habitacion">-- Selecciona una opción --</flux:select.option>
+                    <flux:select.option value="fiscal">AC1313</flux:select.option>
+                    <flux:select.option value="comercial">DB4852</flux:select.option>
+                </flux:select>
+                @error('type')
+
+                <div role="alert" aria-live="polite" aria-atomic="true"
+                    class="mt-2 text-sm font-medium rounded-md flex items-center gap-2" data-flux-error="">
+
+                    <svg class="shrink-0 size-5 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                        fill="#FA2C37" aria-hidden="true" data-slot="icon">
+                        <path fill-rule="evenodd"
                             d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
                             clip-rule="evenodd"></path>
                     </svg>
-                    <!-- Mensaje -->
+
                     <span class="text-[#FA2C37]">Debe seleccionar el avalúo hijo.</span>
-                    </div>
-                    @enderror
-                <flux:button class="mt-10 btn-primary cursor-pointer" type="submit" variant="primary">Duplicar avalúo</flux:button>
+                </div>
+                @enderror
+                <flux:button class="mt-10 btn-primary cursor-pointer" type="submit" variant="primary">Duplicar avalúo
+                </flux:button>
             </form>
-           </div>
+        </div> --}}
     </div>
 
 </div>
-
-
-
-

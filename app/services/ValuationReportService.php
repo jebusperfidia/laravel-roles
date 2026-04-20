@@ -15,7 +15,7 @@ use App\Models\Forms\Homologation\HomologationValuationFactorModel;
 use App\Models\Forms\LandDetails\LandDetailsModel;
 use App\Models\Forms\MarketFocus\MarketFocusModel;
 use App\Models\Forms\PhotoReport\PhotoReportModel;
-
+use App\Models\Forms\AppraisalConsideration\AppraisalConsiderationModel;
 use App\Models\Forms\PropertyDescription\PropertyDescriptionModel;
 use App\Models\Forms\PropertyLocation\PropertyLocationModel;
 use App\Models\Forms\UrbanEquipment\UrbanEquipmentModel;
@@ -1089,9 +1089,19 @@ class ValuationReportService
         // --- LÓGICA HOMOLOGACIÓN: CONSTRUCCIONES (BUILDINGS) ---
         // =========================================================================
 
+
+        // 1. Obtenemos la bandera real desde AppraisalConsiderationModel
+        $appraisalConsideration = AppraisalConsiderationModel::where('valuation_id', $id)->first();
+
+        // Lo casteamos a (bool) por seguridad. Si no existe el registro, por defecto será false.
+        $applyFic = $appraisalConsideration ? (bool) $appraisalConsideration->apply_fic : false;
+
         // 1. Headers del Sujeto
         $orderedBuildingHeaders = HomologationValuationFactorModel::where('valuation_id', $id)
             ->where('homologation_type', 'building')
+            ->when(!$applyFic, function ($query) {
+                return $query->where('acronym', '!=', 'FIC');
+            })
             ->get()
             ->sortBy(function ($f) {
                 $acr = strtoupper(trim($f->acronym));

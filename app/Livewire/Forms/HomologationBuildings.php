@@ -24,6 +24,7 @@ use App\Models\Forms\ApplicableSurface\ApplicableSurfaceModel;
 use App\Models\Forms\Homologation\HomologationBuildingAttributeModel;
 use App\Models\Forms\Homologation\HomologationLandAttributeModel;
 use App\Models\Forms\PropertyDescription\PropertyDescriptionModel;
+use App\Models\Forms\AppraisalConsideration\AppraisalConsiderationModel;
 use App\Traits\ValuationLockTrait;
 
 
@@ -124,6 +125,9 @@ class HomologationBuildings extends Component
 
     // Nueva propiedad para estado de conservación
     public $subject_conservation_description = '';
+
+    //Bandera nueva para saber si se usará FIC como parte de la homologación
+    public $applyFIC = false;
 
     // Reemplaza la antigua const EQUIPMENT_MAP por esto:
     protected const EQUIPMENT_VALUES_BY_CLASS = [
@@ -413,7 +417,6 @@ class HomologationBuildings extends Component
         'Normal' => 1.00,
         'Nuevo' => 1.00,
         'Malo' => 0.80,
-        'Malo' => 0.80,
         'Muy bueno' => 1.10,
         'Recientemente remodelado' => 1.10,
         'Ruinoso' => 0.00
@@ -505,6 +508,10 @@ class HomologationBuildings extends Component
         $this->recalculateConclusions();
 
         $this->checkReadOnlyStatus($this->valuation);
+
+        //Obtener valor de applyFIC
+        $considerations = AppraisalConsiderationModel::where('valuation_id', $this->idValuation)->first();
+        $this->applyFIC = $considerations ? $considerations->apply_fic : false;
     }
 
     // Detecta la clase del primer edificio y devuelve el mapa de precios correspondiente
@@ -1540,41 +1547,43 @@ class HomologationBuildings extends Component
                 $aplicable = $compRating;
                 $rating_to_save = $compRating;
             } elseif ($sigla === 'FIC') {
-                if ($isCalculated) {
+                if ($this->applyFIC) {
+                    if ($isCalculated) {
 
-                    $VUS = (float)$this->subject_vus;
-                    $SCiv = (float)$this->subject_surface_construction;
-                    $STiv = (float)$this->subject_surface_land;
-                    $sujetoRating = 1.00;
-                    $Pp  = (float)$comparableModel->comparable_offers;
-                    $SCc = (float)($comparableModel->comparable_built_area ?? 0);
-                    $STc = (float)($comparableModel->comparable_land_area ?? 0);
+                        $VUS = (float)$this->subject_vus;
+                        $SCiv = (float)$this->subject_surface_construction;
+                        $STiv = (float)$this->subject_surface_land;
+                        $sujetoRating = 1.00;
+                        $Pp  = (float)$comparableModel->comparable_offers;
+                        $SCc = (float)($comparableModel->comparable_built_area ?? 0);
+                        $STc = (float)($comparableModel->comparable_land_area ?? 0);
 
-                    if ($SCiv > 0 && $STiv > 0 && $SCc > 0 && $Pp > 0) {
-                        $intensidadSujeto = $SCiv / $STiv;
-                        $terrenoTeorico = $SCc / $intensidadSujeto;
-                        $diferenciaTerreno = $terrenoTeorico - $STc;
-                        $ajustePesos = $diferenciaTerreno * $VUS;
-                        $VUa = ($Pp + $ajustePesos) / $SCc;
-                        $VU = $Pp / $SCc;
-                        $FIC_Raw = $VUa / $VU;
-                    } else {
-                        $FIC_Raw = 1.0;
-                    }
+                        if ($SCiv > 0 && $STiv > 0 && $SCc > 0 && $Pp > 0) {
+                            $intensidadSujeto = $SCiv / $STiv;
+                            $terrenoTeorico = $SCc / $intensidadSujeto;
+                            $diferenciaTerreno = $terrenoTeorico - $STc;
+                            $ajustePesos = $diferenciaTerreno * $VUS;
+                            $VUa = ($Pp + $ajustePesos) / $SCc;
+                            $VU = $Pp / $SCc;
+                            $FIC_Raw = $VUa / $VU;
+                        } else {
+                            $FIC_Raw = 1.0;
+                        }
 
-                    $compRating = floor($FIC_Raw * 10000) / 10000;
+                        $compRating = floor($FIC_Raw * 10000) / 10000;
 
-                    $compRating = max(0.6, $compRating);
-                    if ($FIC_Raw != 0) {
-                        $diferencia_raw = 1.0 - ($sujetoRating / $FIC_Raw);
-                    } else {
-                        $diferencia_raw = 0.0;
+                        $compRating = max(0.6, $compRating);
+                        if ($FIC_Raw != 0) {
+                            $diferencia_raw = 1.0 - ($sujetoRating / $FIC_Raw);
+                        } else {
+                            $diferencia_raw = 0.0;
+                        }
                     }
                     $diferencia_math = floor($diferencia_raw * 10000) / 10000;
                 } else {
-
-                    $compRating = (float)($factorData['calificacion'] ?? 1.0);
-                    $diferencia_math = $sujetoRating - $compRating;
+                    // SI LA BANDERA ESTÁ APAGADA, EL FACTOR ES NEUTRO (1.0)
+                    $compRating = 1.0000;
+                    $diferencia_math = 0.0000;
                 }
 
                 $aplicable = 1.0 + $diferencia_math;

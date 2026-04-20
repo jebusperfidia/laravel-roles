@@ -148,7 +148,8 @@ class CopomexService
         $cached = Cache::get($cacheKey);
         if ($cached !== null) return $cached;
 
-        $json = $this->request('get_municipio_por_estado/' . urlencode($estado));
+        // CAMBIO CLAVE: rawurlencode en lugar de urlencode
+        $json = $this->request('get_municipio_por_estado/' . rawurlencode($estado));
 
         if ($json === false) return false;
         if (empty($json) || !isset($json['response']['municipios'])) return [];
@@ -162,7 +163,6 @@ class CopomexService
 
         return $municipios;
     }
-
     public function getColoniasPorMunicipio(string $estado, string $municipio): array|false
     {
         $estado    = trim($estado);
@@ -175,7 +175,8 @@ class CopomexService
         $cached = Cache::get($cacheKey);
         if ($cached !== null) return $cached;
 
-        $json = $this->request('get_colonia_por_municipio/' . urlencode($municipio));
+        // CAMBIO CLAVE: rawurlencode en lugar de urlencode
+        $json = $this->request('get_colonia_por_municipio/' . rawurlencode($municipio));
 
         if ($json === false) return false;
         if (empty($json) || !isset($json['response']['colonia'])) return [];

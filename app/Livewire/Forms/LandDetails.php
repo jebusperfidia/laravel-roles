@@ -51,7 +51,7 @@ class LandDetails extends Component
     //Variable para guardar el id del landSurface seleccionado para editar o eliminar
     public $landSurfaceId;
 
-    public float $landSurfaceTotal;
+    public float $landSurfaceTotal = 0.00;
 
     //Cargamos la lista de archivos ligados al land_details
     public $measureBoundaries = [];
@@ -93,18 +93,21 @@ class LandDetails extends Component
 
 
     //CUARTO CONTENEDOR
-    public bool $ls_useExcessCalculation;
+    public bool $ls_useExcessCalculation = false;
 
-    public float $ls_surfacePrivateLot, $ls_surfacePrivateLotType, $ls_undividedOnlyCondominium, $ls_undividedSurfaceLand, $ls_surplusLandArea;
+    public float $ls_surfacePrivateLot = 0.00, $ls_surfacePrivateLotType = 0.00, $ls_undividedOnlyCondominium = 0.00, $ls_undividedSurfaceLand = 0.00, $ls_surplusLandArea = 0.00;
 
     //Elementos del modal de superficie del terreno
-    public float $modalSurface;
+    public float $modalSurface = 0.00;
+
+
 
 
     public $latitude, $longitude, $altitude;
 
 
-        public function mount(){
+    public function mount()
+    {
 
 
         $valuationId = session('valuation_id');
@@ -125,7 +128,6 @@ class LandDetails extends Component
             $this->latitude  = $propertyLocation->latitude;
             $this->longitude = $propertyLocation->longitude;
             $this->altitude  = $propertyLocation->altitude;
-
         } else {
             // **CORRECCIÓN:** Inicializa con coordenadas numéricas válidas si no hay datos.
             // Los mapas no pueden funcionar con valores nulos o vacíos para latitud/longitud.
@@ -135,6 +137,9 @@ class LandDetails extends Component
         }
 
 
+        if ($this->valuation) {
+            $this->checkReadOnlyStatus($this->valuation);
+        }
 
         // Asignar el modelo solo si valuationId existe para evitar errores
         $this->landDetail = LandDetailsModel::where('valuation_id', $valuationId)->first();
@@ -237,10 +242,6 @@ class LandDetails extends Component
                 $this->ls_undividedOnlyCondominium = 0;
                 $this->ls_undividedSurfaceLand = 0;
             } */
-
-            if ($this->valuation) {
-                $this->checkReadOnlyStatus($this->valuation);
-            }
         }
 
 
@@ -344,7 +345,7 @@ class LandDetails extends Component
 
         //dd($data);
 
-            LandDetailsModel::updateOrCreate(
+        LandDetailsModel::updateOrCreate(
             ['valuation_id' => $this->valuation_id],
             $data
         );
@@ -355,8 +356,6 @@ class LandDetails extends Component
         //y a la vez enviar un toaster
         Toaster::success('Formulario guardado con éxito');
         return redirect()->route('form.index', ['section' => 'property-description']);
-
-
     }
 
 
@@ -370,7 +369,7 @@ class LandDetails extends Component
     {
 
         $this->ensureNotReadOnly();
-/*
+        /*
         if(!$this->landDetail){
             Toaster::error('Primero debes guardar los datos principales');
             return;
@@ -378,7 +377,6 @@ class LandDetails extends Component
 
         $this->resetValidation();
         Flux::modal('add-group')->show();
-
     }
 
 
@@ -406,16 +404,16 @@ class LandDetails extends Component
         $this->extent = $detail->extent;
         $this->adjacent = $detail->adjacent;
 
-       /*  $this->$groupDetailId = $groupDetailId; */
+        /*  $this->$groupDetailId = $groupDetailId; */
         //$this->resetValidation();
         Flux::modal('edit-element')->show();
-
     }
 
 
 
     //Función para crear grupo
-    public function addGroup(){
+    public function addGroup()
+    {
 
         $this->ensureNotReadOnly();
 
@@ -449,7 +447,8 @@ class LandDetails extends Component
 
 
     //Función para eliminar un grupo
-    public function deleteGroup($groupId){
+    public function deleteGroup($groupId)
+    {
 
         // Buscar el grupo por ID
         $group = GroupsNeighborsModel::findOrFail($groupId);
@@ -464,7 +463,6 @@ class LandDetails extends Component
             ->get();
 
         Toaster::error('Grupo eliminado con éxito');
-
     }
 
     //Función para crear elemento
@@ -535,7 +533,8 @@ class LandDetails extends Component
     }
 
     //Función para editar un elemento
-    public function deleteElement($groupDetailId){
+    public function deleteElement($groupDetailId)
+    {
 
         // Buscar el registro y eliminarlo
         $detail = GroupNeighborDetailsModel::findOrFail($groupDetailId);
@@ -585,7 +584,6 @@ class LandDetails extends Component
 
         //$this->resetValidation();
         Flux::modal('edit-LandSurface')->show();
-
     }
 
 
@@ -726,18 +724,19 @@ class LandDetails extends Component
 
 
     //Watchers de variables publicas
-    public function updatedLsUndividedOnlyCondominium($value){
+    public function updatedLsUndividedOnlyCondominium($value)
+    {
         $this->ls_undividedOnlyCondominium = $this->sanitizeFloat($value);
 
-        if($this->ls_undividedOnlyCondominium > 100){
+        if ($this->ls_undividedOnlyCondominium > 100) {
             $this->ls_undividedOnlyCondominium = 100.00;
-        } elseif($this->ls_undividedOnlyCondominium < 0){
+        } elseif ($this->ls_undividedOnlyCondominium < 0) {
             $this->ls_undividedOnlyCondominium = 0.00;
         }
 
         //$this->ls_undividedSurfaceLand = $this->sanitizeFloat(($this->ls_undividedOnlyCondominium / 100) * $this->landSurfaceTotal);
         $this->ls_undividedSurfaceLand = ($this->ls_undividedOnlyCondominium / 100) * $this->landSurfaceTotal;
-        if($this->ls_undividedSurfaceLand < 0){
+        if ($this->ls_undividedSurfaceLand < 0) {
             $this->ls_undividedSurfaceLand = 0.00;
         }
     }
@@ -746,30 +745,32 @@ class LandDetails extends Component
 
 
 
-    public function updatedLsSurfacePrivateLot($value){
+    public function updatedLsSurfacePrivateLot($value)
+    {
         $this->ls_surfacePrivateLot = $this->sanitizeFloat($value);
 
-        if($this->ls_surfacePrivateLot < 0){
+        if ($this->ls_surfacePrivateLot < 0) {
             $this->ls_surfacePrivateLot = 0.00;
         }
 
         $this->ls_surplusLandArea = $this->ls_surfacePrivateLot - $this->ls_surfacePrivateLotType;
 
-        if($this->ls_surplusLandArea < 0){
+        if ($this->ls_surplusLandArea < 0) {
             $this->ls_surplusLandArea = 0.00;
         }
     }
 
-    public function updatedLsSurfacePrivateLotType($value){
+    public function updatedLsSurfacePrivateLotType($value)
+    {
         $this->ls_surfacePrivateLotType = $this->sanitizeFloat($value);
 
-        if($this->ls_surfacePrivateLotType < 0){
+        if ($this->ls_surfacePrivateLotType < 0) {
             $this->ls_surfacePrivateLotType = 0.00;
         }
 
         $this->ls_surplusLandArea = $this->ls_surfacePrivateLot - $this->ls_surfacePrivateLotType;
 
-        if($this->ls_surplusLandArea < 0){
+        if ($this->ls_surplusLandArea < 0) {
             $this->ls_surplusLandArea = 0.00;
         }
     }
@@ -898,7 +899,7 @@ class LandDetails extends Component
         }
 
 
-        if (stripos($this->valuation->property_type, 'condominio') !== false) {
+        if (stripos($this->valuation->property_type ?? '', 'condominio') !== false) {
             $container4 = array_merge($container4, [
                 'ls_undividedOnlyCondominium'  => 'required|numeric|min:0',
                 'ls_undividedSurfaceLand' => 'required|numeric|min:0'
@@ -916,7 +917,6 @@ class LandDetails extends Component
             [],
             $this->validationAttributes()
         );
-
     }
 
     protected function validationAttributes(): array
@@ -1066,7 +1066,7 @@ class LandDetails extends Component
             // Guarda el archivo
             $path = $photo->store('/', 'land_details_public');
 
-               if (!$path) {
+            if (!$path) {
                 dd("Fallo al guardar el archivo.");
             }
 
